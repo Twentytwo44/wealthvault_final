@@ -43,6 +43,11 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
 
+            implementation(project(":functional:api"))
+            implementation(project(":functional:data-store"))
+
+
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
