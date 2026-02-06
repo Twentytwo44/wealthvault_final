@@ -1,4 +1,5 @@
-package com.example.config
+package com.example.core
+
 object KoinConst {
     object KotlinSerialization {
         const val DEFAULT = "default-kotlin-serialization"
@@ -10,5 +11,8 @@ object KoinConst {
 
     object DataStore {
         const val DEFAULT = "default-data-store"
+        const val APP_SETTING = "default-data-setting"
     }
+
+
 }

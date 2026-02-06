@@ -21,6 +21,10 @@ ktorfit = "2.7.2"
 coroutines = "1.10.2"
 koin = "4.1.1"
 dataStore = "1.2.0"
+jetbrainKotlinGradlePlugin = "2.3.0"
+androidBuildGradle = "8.11.2"
+mokkery = "3.1.1"
+
 
 
 [libraries]
@@ -65,6 +69,9 @@ coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 dataStore = { group = "androidx.datastore", name = "datastore", version.ref = "dataStore" }
 dataStore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStore" }
 
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "jetbrainKotlinGradlePlugin" }
+android-build-gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "androidBuildGradle" }
+mokkery-gradle = { group = "dev.mokkery", name = "mokkery-gradle", version.ref = "mokkery" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -75,3 +82,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 androidLint = { id = "com.android.lint", version.ref = "agp" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
+mokkery = { id = "dev.mokkery", version.ref = "mokkery" }

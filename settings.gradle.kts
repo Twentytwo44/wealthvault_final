@@ -2,7 +2,7 @@ rootProject.name = "Wealthvault_final"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
-    includeBuild("build-logic")
+//    includeBuild("build-logic")
     repositories {
         google {
             mavenContent {
@@ -30,10 +30,15 @@ dependencyResolutionManagement {
 }
 
 include(":composeApp")
+
 include(":functional:api")
 include(":functional:data-store")
+include(":functional:setting-app")
+
 include(":features:auth:login")
 
 include(":config")
+
 include(":base:core")
 include(":base:config")
+//include(":build-logic")

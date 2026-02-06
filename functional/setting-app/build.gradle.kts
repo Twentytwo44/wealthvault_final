@@ -10,7 +10,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.core"
+        namespace = "com.example.setting_app"
         compileSdk = 36
         minSdk = 31
 
@@ -31,7 +31,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "coreKit"
+    val xcfName = "setting-appKit"
 
     iosX64 {
         binaries.framework {
@@ -60,8 +60,6 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
-                implementation(libs.coroutines)
-
                 // Add KMP dependencies here
             }
         }

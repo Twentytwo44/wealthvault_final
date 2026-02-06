@@ -1,4 +1,4 @@
-package com.example.build_logic
+package com.example.setting_app
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
