@@ -57,11 +57,15 @@ kotlin {
     // common to share sources between related targets.
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation(libs.kotlin.stdlib)
-                // Add KMP dependencies here
-            }
+        dependencies {
+            implementation(libs.kotlin.stdlib)
+            implementation(libs.dataStore)
+            // Add KMP dependencies here
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.dataStore.preferences)
+
+            implementation(project(":base:core"))
         }
 
         commonTest {
