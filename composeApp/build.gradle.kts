@@ -43,8 +43,20 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
 
+            val voyagerVersion = "1.0.0"
+            implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+            implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+            implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
+            implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+            implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
+
+
             implementation(project(":functional:api"))
             implementation(project(":functional:data-store"))
+            implementation(project(":navigation"))
+            implementation(project(":base:core"))
+
+
 
 
 
@@ -84,5 +96,12 @@ android {
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
+}
+
+compose {
+    resources {
+        // เพื่อให้โมดูลหลักรู้จักคลาส Res จากโมดูลอื่น
+        publicResClass = true
+    }
 }
 

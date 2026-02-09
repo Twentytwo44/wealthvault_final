@@ -1,3 +1,3 @@
-package com.example.core
+package com.example.profile
 
 actual fun platform() = "Android"

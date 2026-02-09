@@ -2,17 +2,22 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
+
 }
 
 kotlin {
+
 
     // Target declarations - add or remove as needed below. These define
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.setting_app"
+        namespace = "com.example.navigation"
         compileSdk = 36
         minSdk = 24
+
 
         withHostTestBuilder {
         }
@@ -24,6 +29,7 @@ kotlin {
         }
     }
 
+
     // For iOS targets, this is also where you should
     // configure native binary output. For more information, see:
     // https://kotlinlang.org/docs/multiplatform-build-native-binaries.html#build-xcframeworks
@@ -31,7 +37,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "setting-appKit"
+    val xcfName = "navigationKit"
 
     iosX64 {
         binaries.framework {
@@ -57,15 +63,33 @@ kotlin {
     // common to share sources between related targets.
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
-        dependencies {
-            implementation(libs.kotlin.stdlib)
-            implementation(libs.dataStore)
-            // Add KMP dependencies here
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.dataStore.preferences)
+        commonMain {
 
-            implementation(project(":base:core"))
+            dependencies {
+                implementation(libs.kotlin.stdlib)
+                // Add KMP dependencies here
+                implementation(libs.compose.components.resources)
+                implementation(libs.compose.ui)
+                implementation(libs.compose.foundation)
+                implementation(libs.compose.material3) // เรียกใช้ Material3 ได้แล้ว
+
+
+
+
+
+                val voyagerVersion = "1.0.0"
+                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
+
+                implementation(project(":base:core"))
+
+
+
+
+            }
         }
 
         commonTest {
@@ -101,4 +125,10 @@ kotlin {
         }
     }
 
+}
+
+compose {
+    resources {
+        publicResClass = true
+    }
 }

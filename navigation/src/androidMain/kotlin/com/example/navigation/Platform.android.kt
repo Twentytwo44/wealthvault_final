@@ -1,3 +1,3 @@
-package com.example.config
+package com.example.navigation
 
 actual fun platform() = "Android"

@@ -12,7 +12,7 @@ kotlin {
     androidLibrary {
         namespace = "com.example.functional.api"
         compileSdk = 36
-        minSdk = 31
+        minSdk = 24
 
         withHostTestBuilder {
         }

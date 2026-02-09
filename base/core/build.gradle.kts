@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
+
+
 }
 
 kotlin {
@@ -12,7 +16,7 @@ kotlin {
     androidLibrary {
         namespace = "com.example.core"
         compileSdk = 36
-        minSdk = 31
+        minSdk = 24
 
         withHostTestBuilder {
         }
@@ -58,9 +62,13 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
         commonMain {
+            resources.srcDir("src/commonMain/composeResources")
+
             dependencies {
+                implementation(libs.compose.runtime)
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.coroutines)
+                implementation(libs.compose.components.resources)
 
                 // Add KMP dependencies here
             }
@@ -99,4 +107,11 @@ kotlin {
         }
     }
 
+}
+
+compose {
+    resources {
+        publicResClass = true
+        packageOfResClass = "com.example.core.generated.resources"
+    }
 }

@@ -10,7 +10,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.setting_app"
+        namespace = "com.example.profile"
         compileSdk = 36
         minSdk = 24
 
@@ -31,7 +31,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "setting-appKit"
+    val xcfName = "profileKit"
 
     iosX64 {
         binaries.framework {
@@ -57,15 +57,11 @@ kotlin {
     // common to share sources between related targets.
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
-        dependencies {
-            implementation(libs.kotlin.stdlib)
-            implementation(libs.dataStore)
-            // Add KMP dependencies here
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.dataStore.preferences)
-
-            implementation(project(":base:core"))
+        commonMain {
+            dependencies {
+                implementation(libs.kotlin.stdlib)
+                // Add KMP dependencies here
+            }
         }
 
         commonTest {
