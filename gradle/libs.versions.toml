@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.0"
+agp = "8.11.2"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
@@ -84,4 +84,7 @@ androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.lib
 androidLint = { id = "com.android.lint", version.ref = "agp" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
-
+wealth-vault-lib = { id = "com.wealthvault.build_logic.library"}
+wealth-vault-compose = { id = "com.wealthvault.build_logic.compose"}
+wealth-vault-app = {id = "com.wealthvault.build_logic.application"}
+wealth-vault-test = { id = "com.wealthvault.build_logic.test"}

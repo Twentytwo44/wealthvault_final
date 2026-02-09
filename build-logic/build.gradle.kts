@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl` // สำคัญมาก: เพื่อให้เขียน Gradle ด้วย Kotlin ในโฟลเดอร์นี้ได้
 }
 
-group = "com.wealthvault.buildlogic"
+group = "com.wealthvault.build_logic"
 
 dependencies {
     compileOnly(libs.kotlin.gradle.plugin)
@@ -13,23 +13,23 @@ dependencies {
 gradlePlugin {
     plugins {
         register("kmpLibraryPlugin") {
-            id = "me.orbitalno11.kmptemplate.library"
-            implementationClass = "com.wealthvault.buildlogic.plugin.KmpLibraryConventionPlugin"
+            id = "com.wealthvault.build_logic.library"
+            implementationClass = "com.wealthvault.build_logic.plugin.KmpLibraryConventionPlugin"
         }
 
         register("kmpComposePlugin") {
-            id = "me.orbitalno11.kmptemplate.compose"
-            implementationClass = "com.wealthvault.buildlogic.plugin.KmpComposeConventionPlugin"
+            id = "com.wealthvault.build_logic.compose"
+            implementationClass = "com.wealthvault.build_logic.plugin.KmpComposeConventionPlugin"
         }
-//
-//        register("kmpTestPlugin") {
-//            id = "me.orbitalno11.kmptemplate.test"
-//            implementationClass = "me.orbitalno11.buildLogic.plugin.KmpTestConventionPlugin"
-//        }
-//
-//        register("kmpApplicationPlugin") {
-//            id = "me.orbitalno11.kmptemplate.application"
-//            implementationClass = "me.orbitalno11.buildLogic.plugin.KmpApplicationConventionPlugin"
-//        }
+
+        register("kmpTestPlugin") {
+            id = "com.wealthvault.build_logic.test"
+            implementationClass = "com.wealthvault.build_logic.plugin.KmpTestConventionPlugin"
+        }
+
+        register("kmpApplicationPlugin") {
+            id = "com.wealthvault.build_logic.application"
+            implementationClass = "com.wealthvault.build_logic.plugin.KmpApplicationConventionPlugin"
+        }
     }
 }

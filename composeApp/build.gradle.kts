@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -68,11 +67,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.example.wealthvault_final"
+    namespace = "com.wealthvault.wealthvault_final"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.example.wealthvault_final"
+        applicationId = "com.wealthvault.wealthvault_final"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
