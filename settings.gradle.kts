@@ -37,8 +37,6 @@ include(":functional:setting-app")
 
 include(":features:auth:login")
 
-include(":config")
-
 include(":base:core")
 include(":base:config")
 //include(":build-logic")
