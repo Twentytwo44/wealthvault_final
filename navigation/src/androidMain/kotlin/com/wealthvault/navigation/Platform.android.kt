@@ -1,3 +1,3 @@
-package com.wealthvault.navigation
-
-actual fun platform() = "Android"
+//package com.wealthvault.navigation
+//
+//actual fun platform() = "Android"
