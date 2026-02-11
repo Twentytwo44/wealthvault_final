@@ -1,7 +1,7 @@
 package com.wealthvault.wealthvault_final.di
 
+import com.wealthvault.`auth-api`.di.ApiModule
 import com.wealthvault.data_store.di.DataStoreModule
-import com.wealthvault.functional.api.di.ApiModule
 import org.koin.core.module.Module
 
 

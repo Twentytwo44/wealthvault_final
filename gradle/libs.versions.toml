@@ -18,6 +18,7 @@ runner = "1.5.2"
 core = "1.5.0"
 ktor = "3.4.0"
 ktorfit = "2.7.2"
+ksp = "2.3.4"
 coroutines = "1.10.2"
 koin = "4.1.1"
 dataStore = "1.2.0"
@@ -83,7 +84,10 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 androidLint = { id = "com.android.lint", version.ref = "agp" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
 wealth-vault-lib = { id = "com.wealthvault.build_logic.library"}
 wealth-vault-compose = { id = "com.wealthvault.build_logic.compose"}
 wealth-vault-app = {id = "com.wealthvault.build_logic.application"}

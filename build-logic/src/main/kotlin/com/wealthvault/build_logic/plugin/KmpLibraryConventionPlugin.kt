@@ -61,6 +61,8 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
                             implementation(versionCatalogLibrary("kotlin-stdlib"))
                             implementation(versionCatalogLibrary("coroutines"))
                             implementation(versionCatalogLibrary("koin-core"))
+                            implementation(versionCatalogLibrary("koin-compose"))
+
                         }
                     }
 
