@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import okio.Path.Companion.toPath
 
-internal class DataStoreBuilder {
+class DataStoreBuilder {
 
     companion object {
         private const val DEFAULT_DATA_STORE_PATH = "default.preferences_pb"

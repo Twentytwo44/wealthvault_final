@@ -54,6 +54,7 @@ kotlin {
             implementation(project(":functional:data-store"))
             implementation(project(":navigation"))
             implementation(project(":base:core"))
+            implementation(project(":features:auth:login"))
 
 
 

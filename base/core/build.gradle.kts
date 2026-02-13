@@ -41,7 +41,15 @@ kotlin {
     sourceSets {
         commonMain {
             resources.srcDir("src/commonMain/composeResources")
+            dependencies {
+                val voyagerVersion = "1.0.0"
+                implementation("cafe.adriel.voyager:voyager-navigator:${voyagerVersion}")
+                implementation("cafe.adriel.voyager:voyager-tab-navigator:${voyagerVersion}")
+                implementation("cafe.adriel.voyager:voyager-transitions:${voyagerVersion}")
+                implementation("cafe.adriel.voyager:voyager-navigator:${voyagerVersion}")
+                implementation("cafe.adriel.voyager:voyager-screenmodel:${voyagerVersion}")
 
+            }
         }
     }
 
