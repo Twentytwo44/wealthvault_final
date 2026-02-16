@@ -10,6 +10,8 @@ plugins {
 
 
 
+
+
 }
 
 kotlin {
@@ -74,10 +76,12 @@ kotlin {
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.serialization.json)
 
+
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
                 implementation(libs.ktorfit.lib)
 
+                implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.3.4")
 
 
                 implementation(project(":base:core"))

@@ -4,6 +4,8 @@ import com.wealthvault.data_store.TokenStore
 import com.wealthvault.login.data.AuthNetworkDataSource
 import com.wealthvault.login.data.AuthRepositoryImpl
 import com.wealthvault.login.usecase.LoginUseCase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import org.koin.dsl.module
 
 object LoginModule {
@@ -28,10 +30,10 @@ object LoginModule {
                 localDataSource = get()
             )
         }
-
+        single { Dispatchers.IO }
         // 4. UseCases
         // สำหรับหน้า Login และการเช็คสถานะ Auth
-        factory { LoginUseCase(get()) }
+        factory { LoginUseCase(get(),get(),get() )}
 //        factory { ObserveAuthStateUseCase(get()) }
 //
 //        // 5. ScreenModels (สำหรับ Voyager)

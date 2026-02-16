@@ -2,8 +2,6 @@ package com.wealthvault.login.data
 
 import com.wealthvault.`auth-api`.model.LoginRequest
 import com.wealthvault.data_store.TokenStore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 class AuthRepositoryImpl(
     private val networkDataSource: AuthNetworkDataSource,
@@ -16,9 +14,5 @@ class AuthRepositoryImpl(
     }
 
     // สร้าง Flow เพื่อตรวจสอบสถานะล็อกอิน (เลียนแบบ Flow ใน UseCase เดิม)
-    fun observeAuthState(): Flow<Boolean> {
-        return localDataSource.authToken.map { token ->
-            !token.isNullOrEmpty()
-        }
-    }
+
 }
