@@ -33,9 +33,38 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 
+                implementation(project(":functional:api:auth-api"))
+                implementation(project(":functional:data-store"))
+                implementation(project(":base:core"))
+
+                implementation("androidx.datastore:datastore-preferences-core:1.1.1")
 
 
 
+
+            }
+        }
+        commonTest {
+            dependencies {
+                dependencies {
+                    // 1. ตัวหลักสำหรับรัน Test ใน Kotlin
+                    implementation(kotlin("test"))
+
+                    // 2. สำหรับทดสอบ Coroutines (พวก suspend fun และ Flow)
+                    // สำคัญมากสำหรับการใช้ runTest และคำสั่ง .first() ใน Flow
+                    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+
+                    // 3. หากคุณใช้ Ktor สำหรับ LoginApi (ถ้าใช้ Retrofit จะอยู่อีกส่วน)
+                    implementation("io.ktor:ktor-client-mock:3.4.0")
+
+                    // 4. (ทางเลือก) หากต้องการทำ Mocking
+                    implementation("io.mockative:mockative:2.1.0")
+                    implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.7.2")
+
+
+                    implementation(project(":functional:api:auth-api"))
+                    implementation(project(":functional:data-store"))
+                }
             }
         }
     }

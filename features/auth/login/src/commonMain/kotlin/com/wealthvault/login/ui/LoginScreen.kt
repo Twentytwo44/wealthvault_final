@@ -1,119 +1,144 @@
 package com.wealthvault.login.ui
 
-//
-//class LoginScreen : Screen {
-//
-//    @Composable
-//    override fun Content() {
-//        // 1. ดึง ViewModel มาใช้ (Koin จะจัดการ Injection ให้เอง)
-//        val viewModel = koinInject<LoginViewModel>()
-//
-//        // 2. ดึง State ปัจจุบันมาวาดหน้าจอ
-//        val state = viewModel.state
-//
-//        // 3. State สำหรับปุ่มรูปตา (เปิด/ปิด รหัสผ่าน) - เฉพาะ UI ไม่ต้องเก็บใน ViewModel ก็ได้
-//        var isPasswordVisible by remember { mutableStateOf(false) }
-//
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(24.dp), // เว้นขอบสวยๆ
-//            verticalArrangement = Arrangement.Center,
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Text(
-//                text = "Welcome Back",
-//                style = MaterialTheme.typography.headlineMedium,
-//                color = MaterialTheme.colorScheme.primary
-//            )
-//
-//            Spacer(modifier = Modifier.height(32.dp))
-//
-//            // --- ช่องกรอก Username ---
-//            OutlinedTextField(
-//                value = state.username,
-//                onValueChange = { viewModel.onUsernameChange(it) }, // ส่งค่าไปอัปเดต
-//                label = { Text("Username") },
-//                singleLine = true,
-//                modifier = Modifier.fillMaxWidth(),
-//                enabled = !state.isLoading // ห้ามพิมพ์ตอนโหลด
-//            )
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // --- ช่องกรอก Password (มีปุ่มตา) ---
-//            OutlinedTextField(
-//                value = state.password,
-//                onValueChange = { viewModel.onPasswordChange(it) },
-//                label = { Text("Password") },
-//                singleLine = true,
-//                modifier = Modifier.fillMaxWidth(),
-//                enabled = !state.isLoading,
-//                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-//                trailingIcon = {
-//                    val image = if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-//                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-//                        Icon(imageVector = image, contentDescription = "Toggle Password")
-//
-//                    }
-//                }
-//            )
-//
-//            Spacer(modifier = Modifier.height(24.dp))
-//
-//            // --- ส่วนแสดงผล Error / Success ---
-//            if (state.error != null) {
-//                Text(
-//                    text = state.error,
-//                    color = MaterialTheme.colorScheme.error,
-//                    style = MaterialTheme.typography.bodyMedium
-//                )
-//                Spacer(modifier = Modifier.height(16.dp))
-//            }
-//
-//            if (state.isLoggedIn) {
-//                Text(
-//                    text = "Login Successful! 🎉",
-//                    color = Color(0xFF4CAF50), // สีเขียว
-//                    style = MaterialTheme.typography.titleMedium
-//                )
-//                // TODO: ตรงนี้สั่ง navigator.push(HomeScreen()) ได้เลย
-//                Spacer(modifier = Modifier.height(16.dp))
-//            }
-//
-//            // --- ปุ่ม Login ---
-//            Button(
-//                onClick = { viewModel.login() },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(50.dp),
-//                enabled = !state.isLoading // ปิดปุ่มตอนโหลด กันกดเบิ้ล
-//            ) {
-//                if (state.isLoading) {
-//                    CircularProgressIndicator(
-//                        color = Color.White,
-//                        modifier = Modifier.size(24.dp),
-//                        strokeWidth = 2.dp
-//                    )
-//                } else {
-//                    Text("LOGIN")
-//                }
-//            }
-//            Box(
-//                modifier = Modifier.fillMaxSize(),
-//                contentAlignment = Alignment.BottomCenter
-//            ) {
-////                GoogleButtonUiContainer(
-////                    onGoogleSignInResult = { googleUser ->
-////                        val tokenId = googleUser?.
-////                        println("Google ID Token: $tokenId")
-////                    }
-////                )  {
-////                    GoogleSignInButton {
-////                        onClick( )
-////                    }
-////                }
-//            }
-//        }
-//    }
-//}
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.example.login.ui.LoginScreenModel
+import com.wealthvault.core.utils.getScreenModel
+
+
+class LoginScreen : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val screenModel = getScreenModel<LoginScreenModel>()
+
+        // เรียกใช้ UI และส่ง State/Event เข้าไป
+        LoginUI(
+            username = screenModel.username,
+            password = screenModel.password,
+            isLoading = screenModel.isLoading,
+            onUsernameChange = { screenModel.username = it },
+            onPasswordChange = { screenModel.password = it },
+            onLoginClick = {
+                screenModel.onLoginClick {
+                    // navigator.replaceAll(MainScreen())
+                    println("success")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun LoginUI(
+    username: String,
+    password: String,
+    isLoading: Boolean,
+    onUsernameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onLoginClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Wealth &    ",
+            style = MaterialTheme.typography.headlineLarge // เพิ่มสไตล์ให้สวยงาม
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        TextField(
+            value = username,
+            onValueChange = onUsernameChange,
+            label = { Text("Username") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextField(
+            value = password,
+            onValueChange = onPasswordChange,
+            label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = onLoginClick,
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            enabled = !isLoading
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("Login")
+            }
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun LoginScreenPreview() {
+    MaterialTheme {
+        // สามารถจำลองสถานะต่างๆ ได้ทันทีใน Preview
+        LoginUI(
+            username = "Natchapon",
+            password = "password123",
+            isLoading = false,
+            onUsernameChange = {},
+            onPasswordChange = {},
+            onLoginClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun LoginLoadingPreview() {
+    MaterialTheme {
+        // ลองดูว่าตอนโหลด (Loading) หน้าตาเป็นยังไง
+        LoginUI(
+            username = "admin",
+            password = "123",
+            isLoading = true,
+            onUsernameChange = {},
+            onPasswordChange = {},
+            onLoginClick = {}
+        )
+    }
+}

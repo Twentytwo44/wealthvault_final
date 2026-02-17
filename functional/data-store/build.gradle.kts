@@ -67,6 +67,17 @@ kotlin {
                 implementation(libs.dataStore.preferences)
 
                 implementation(project(":base:core"))
+                implementation("androidx.datastore:datastore-preferences:1.2.0")
+
+                // Coroutines
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+
+                // Koin
+
+                // Okio (จำเป็นสำหรับ iOS createWithPath)
+                implementation("com.squareup.okio:okio:3.9.0")
+
+
             }
         }
 
@@ -78,6 +89,9 @@ kotlin {
 
         androidMain {
             dependencies {
+                implementation("androidx.datastore:datastore-preferences:1.2.0")
+
+                implementation("io.insert-koin:koin-android:4.1.1")
                 // Add Android-specific dependencies here. Note that this source set depends on
                 // commonMain by default and will correctly pull the Android artifacts of any KMP
                 // dependencies declared in commonMain.
@@ -94,6 +108,9 @@ kotlin {
 
         iosMain {
             dependencies {
+                implementation("androidx.datastore:datastore-preferences:1.2.0")
+
+                implementation("com.squareup.okio:okio:3.9.0")
                 // Add iOS-specific dependencies here. This a source set created by Kotlin Gradle
                 // Plugin (KGP) that each specific iOS target (e.g., iosX64) depends on as
                 // part of KMP’s default source set hierarchy. Note that this source set depends

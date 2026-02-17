@@ -30,6 +30,7 @@ object ApiModule {
 
         single<Ktorfit> {
             val httpClient: HttpClient = get(named(KoinConst.HttpClient.DEFAULT))
+            println("🔥 ACTUAL BASE URL = ${Config.localhost_android}")
             Ktorfit.Builder()
                 .baseUrl(Config.localhost_android)
                 .httpClient(httpClient)
