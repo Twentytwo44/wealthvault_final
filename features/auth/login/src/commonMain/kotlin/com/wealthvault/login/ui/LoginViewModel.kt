@@ -6,14 +6,15 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.wealthvault.`auth-api`.model.LoginRequest
-import com.wealthvault.login.data.AuthRepositoryImpl
+import com.wealthvault.core.FlowResult
+import com.wealthvault.login.usecase.LoginUseCase
 import kotlinx.coroutines.launch
 
 class LoginScreenModel(
-    private val repository: AuthRepositoryImpl
+    private val loginUseCase: LoginUseCase
 ) : ScreenModel {
 
-    // State สำหรับจัดการ UI
+    // UI State
     var username by mutableStateOf("")
     var password by mutableStateOf("")
     var isLoading by mutableStateOf(false)
@@ -21,6 +22,8 @@ class LoginScreenModel(
 
 
     fun onLoginClick(onSuccess: () -> Unit) {
+        println("🚀 [LoginScreenModel] onLoginClick triggered")
+
         if (username.isBlank() || password.isBlank()) {
             errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"
             return
@@ -31,14 +34,41 @@ class LoginScreenModel(
             errorMessage = null
 
             val request = LoginRequest(username, password)
-            val result = repository.login(request)
 
-            isLoading = false
+            // ✅ แก้ไข: เรียกใช้ loginUseCase โดยส่ง request เข้าไปตรงๆ
+            // การเรียก loginUseCase(request) จะไปเรียก invoke operator ที่ส่งต่อไปยัง execute ให้อัตโนมัติ
+            loginUseCase(request).collect { flowResult ->
+                when (flowResult) {
+                    // 1. จัดการเมื่อเริ่มทำงาน (Loading)
+                    is FlowResult.Start -> {
+                        println("⏳ [LoginScreenModel] UseCase Started...")
+                        isLoading = true
+                        errorMessage = null
+                    }
 
-            result.onSuccess {
-                onSuccess() // เปลี่ยนหน้าเมื่อสำเร็จ
-            }.onFailure {
-                errorMessage = it.message ?: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ"
+                    // 2. จัดการเมื่อทำงานสำเร็จ
+                    is FlowResult.Continue -> {
+                        if (flowResult.data) {
+                            println("🎉 [LoginScreenModel] Login Success!")
+                            isLoading = false
+                            onSuccess()
+                        }
+                    }
+
+                    // 3. จัดการเมื่อเกิด Error
+                    is FlowResult.Failure -> {
+                        println("❌ [LoginScreenModel] UseCase Error: ${flowResult.cause?.message}")
+                        isLoading = false
+                        errorMessage = flowResult.cause?.message ?: "การเข้าสู่ระบบล้มเหลว"
+                    }
+
+                    // 4. จัดการเมื่อจบการทำงาน (ไม่ว่าจะสำเร็จหรือพัง)
+                    is FlowResult.Ended -> {
+                        println("🏁 [LoginScreenModel] UseCase Finished.")
+                        // ปกติเรามักจะเช็ค isLoading = false ที่นี่เพื่อความชัวร์
+                        isLoading = false
+                    }
+                }
             }
         }
     }

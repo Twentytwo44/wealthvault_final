@@ -12,7 +12,6 @@ object AllModules {
         add(DataStoreModule.allModules)
         add(LoginModule.allModules)
 
-
     }
 }
 //

@@ -6,6 +6,6 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 
 interface LoginApi {
-    @POST("/auth/login")
+    @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): LoginResponse
 }
