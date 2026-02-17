@@ -14,7 +14,7 @@ object SocialTab : Tab {
         get() = TabOptions(
             index = 3u,
             title = "Social",
-            icon = painterResource(Res.drawable.social)
+//            icon = painterResource(Res.drawable.social)
         )
 
     @Composable
