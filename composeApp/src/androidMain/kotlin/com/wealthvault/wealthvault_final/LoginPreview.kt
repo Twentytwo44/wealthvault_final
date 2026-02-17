@@ -3,7 +3,6 @@ package com.wealthvault.wealthvault_final // แก้ package ให้ตร�
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.wealthvault.login.ui.LoginContent // เรียกใช้ UI จาก Module login
-import com.wealthvault.navigation.MainScreen
 
 @Preview(showBackground = true, name = "Preview")
 @Composable

@@ -36,10 +36,12 @@ include(":functional:data-store")
 include(":functional:setting-app")
 
 include(":features:auth:login")
+include(":features:auth:register")
 
 include(":base:core")
 include(":base:config")
 //include(":build-logic")
 include(":features:profile")
 include(":navigation")
+
 
