@@ -22,15 +22,6 @@ data class RegisterResponse(
 
 @Serializable
 data class RegisterData(
-    @SerialName("success")
-    val success: Boolean,
-
-    @SerialName("access_token")
-    val accessToken: String,
-
-    @SerialName("refresh_token")
-    val refreshToken: String,
-
     @SerialName("user_id")
-    val userId: String
+    val userId: String,
 )

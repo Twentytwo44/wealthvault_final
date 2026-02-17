@@ -1,6 +1,6 @@
 package com.wealthvault.wealthvault_final.di
 
-import IntroModule
+import LoginModule
 import com.wealthvault.`auth-api`.di.ApiModule
 import com.wealthvault.data_store.di.DataStoreModule
 import org.koin.core.module.Module
@@ -10,7 +10,8 @@ object AllModules {
     val modules = arrayListOf<Module>().apply {
         add(ApiModule.allModules)
         add(DataStoreModule.allModules)
-        add(IntroModule.allModules)
+        add(LoginModule.allModules)
+
 
     }
 }
