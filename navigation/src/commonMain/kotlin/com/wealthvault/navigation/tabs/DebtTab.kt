@@ -15,7 +15,7 @@ object DebtTab : Tab {
         get() = TabOptions(
             index = 2u,
             title = "Debt",
-            icon = painterResource(Res.drawable.debt)
+//            icon = painterResource(Res.drawable.debt)
         )
 
     @Composable

@@ -19,7 +19,7 @@ object AssetTab : Tab {
         get() = TabOptions(
             index = 3u,
             title = "Social",
-            icon = painterResource(Res.drawable.asset)
+//            icon = painterResource(Res.drawable.asset)
         )
 
     @Composable

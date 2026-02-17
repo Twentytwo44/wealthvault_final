@@ -14,7 +14,7 @@ object ProfileTab : Tab {
         get() = TabOptions(
             index = 3u,
             title = "Social",
-            icon = painterResource(Res.drawable.profile)
+//            icon = painterResource(Res.drawable.profile)
         )
 
     @Composable

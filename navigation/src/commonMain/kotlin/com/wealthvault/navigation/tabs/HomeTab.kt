@@ -15,7 +15,7 @@ object HomeTab : Tab {
         get() = TabOptions(
             index = 0u,
             title = "Home",
-            icon = painterResource(Res.drawable.home)
+//            icon = painterResource(Res.drawable.home)
         )
 
     @Composable

@@ -1,5 +1,6 @@
 package com.wealthvault.login.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +26,33 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.login.ui.LoginScreenModel
 import com.wealthvault.core.utils.getScreenModel
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.sp
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_eye_closed
+import com.wealthvault.core.generated.resources.ic_eye_open
+import org.jetbrains.compose.resources.painterResource
 
 
 class LoginScreen : Screen {
@@ -33,17 +61,16 @@ class LoginScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LoginScreenModel>()
 
-        // เรียกใช้ UI และส่ง State/Event เข้าไป
-        LoginUI(
+        // เรียกใช้ Stateless UI ที่เราแยกไว้
+        LoginContent(
             username = screenModel.username,
-            password = screenModel.password,
-            isLoading = screenModel.isLoading,
             onUsernameChange = { screenModel.username = it },
+            password = screenModel.password,
             onPasswordChange = { screenModel.password = it },
+            isLoading = screenModel.isLoading,
             onLoginClick = {
                 screenModel.onLoginClick {
-                    // navigator.replaceAll(MainScreen())
-                    println("success")
+                    // จัดการการเปลี่ยนหน้าตรงนี้
                 }
             }
         )
@@ -51,94 +78,181 @@ class LoginScreen : Screen {
 }
 
 @Composable
-fun LoginUI(
+fun LoginContent(
     username: String,
-    password: String,
-    isLoading: Boolean,
     onUsernameChange: (String) -> Unit,
+    password: String,
     onPasswordChange: (String) -> Unit,
+    isLoading: Boolean,
     onLoginClick: () -> Unit
 ) {
+    val primaryColor = Color(0xFFC47B5D) // สีน้ำตาลอมส้ม
+    val inputBgColor = Color.White
+    val borderColor = primaryColor.copy(alpha = 0.3f)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFFFF8F3),
+                        Color(0xFFFFF0E5)
+                    )
+                )
+            )
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Wealth &    ",
-            style = MaterialTheme.typography.headlineLarge // เพิ่มสไตล์ให้สวยงาม
+            text = "Wealth & Vault",
+            color = primaryColor,
+            fontSize = 28.sp,
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(200.dp))
 
-        TextField(
-            value = username,
-            onValueChange = onUsernameChange,
-            label = { Text("Username") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = password,
-            onValueChange = onPasswordChange,
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = onLoginClick,
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            enabled = !isLoading
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp
+            // 1. กล่อง Input 2 ช่อง
+            // --- ช่องอีเมล ---
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "อีเมล",
+                    color = primaryColor,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
                 )
-            } else {
-                Text("Login")
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = onUsernameChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(percent = 30), // ขอบโค้งมนแบบในดีไซน์
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = inputBgColor,
+                        unfocusedContainerColor = inputBgColor,
+                        focusedBorderColor = primaryColor,
+                        unfocusedBorderColor = borderColor,
+                    )
+                )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- ช่องรหัสผ่าน ---
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "รหัสผ่าน",
+                    color = primaryColor,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = onPasswordChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(percent = 30),
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = inputBgColor,
+                        unfocusedContainerColor = inputBgColor,
+                        focusedBorderColor = primaryColor,
+                        unfocusedBorderColor = borderColor,
+                    )
+                )
+            }
+
+            // 2. ปุ่มลืมรหัสผ่าน (ดันไปชิดขวา)
+            Text(
+                text = "ลืมรหัสผ่าน",
+                color = primaryColor.copy(alpha = 0.8f),
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, end = 16.dp)
+                    .clickable { /* TODO: นำทางไปหน้าลืมรหัส */ },
+                textAlign = androidx.compose.ui.text.style.TextAlign.End
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // 3. ปุ่มเข้าสู่ระบบ
+            Button(
+                onClick = onLoginClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(percent = 30),
+                colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+            ) {
+                Text("เข้าสู่ระบบ", fontSize = 18.sp, color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 4. ยังไม่มีบัญชี สร้างบัญชี?
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "ยังไม่มีบัญชี ", color = primaryColor.copy(alpha = 0.8f), fontSize = 14.sp)
+                Text(
+                    text = "สร้างบัญชี?",
+                    color = primaryColor,
+                    fontSize = 14.sp,
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable { /* TODO: นำทางไปหน้าสมัคร */ }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 5. เส้นคั่น "หรือ"
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f),
+                    color = borderColor,
+                    thickness = 2.dp)
+                Text(
+                    text = " หรือ ",
+                    color = primaryColor.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                HorizontalDivider(modifier = Modifier.weight(1f),
+                    color = borderColor,
+                    thickness = 2.dp)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 6. ปุ่ม Google (ปุ่มโปร่งใสขอบสีส้ม)
+            OutlinedButton(
+                onClick = { /* TODO: Google Login */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(horizontal = 48.dp), // บีบให้ปุ่มแคบลงนิดนึงตามดีไซน์
+                shape = RoundedCornerShape(percent = 30),
+                border = androidx.compose.foundation.BorderStroke(1.dp, borderColor),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+            ) {
+                Text("Google", color = primaryColor, fontSize = 16.sp)
+            }
+            
         }
-    }
-}
-
-
-@Preview
-@Composable
-fun LoginScreenPreview() {
-    MaterialTheme {
-        // สามารถจำลองสถานะต่างๆ ได้ทันทีใน Preview
-        LoginUI(
-            username = "Natchapon",
-            password = "password123",
-            isLoading = false,
-            onUsernameChange = {},
-            onPasswordChange = {},
-            onLoginClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-fun LoginLoadingPreview() {
-    MaterialTheme {
-        // ลองดูว่าตอนโหลด (Loading) หน้าตาเป็นยังไง
-        LoginUI(
-            username = "admin",
-            password = "123",
-            isLoading = true,
-            onUsernameChange = {},
-            onPasswordChange = {},
-            onLoginClick = {}
-        )
     }
 }
