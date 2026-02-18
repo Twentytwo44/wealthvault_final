@@ -14,7 +14,7 @@ class LoginApiImpl(private val ktorfit: Ktorfit) : LoginApi {
         val client = ktorfit.httpClient
 
         // ยิงเองตรงๆ แบบไม่ง้อ Generator
-        return client.post("${Config.localhost_android}auth/login") {
+        return client.post("${Config.localhost_ios}auth/login") {
             setBody(request)
         }.body()
     }

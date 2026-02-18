@@ -1,10 +1,18 @@
 package com.wealthvault.`auth-api`.di
 
 import com.wealthvault.`auth-api`.HttpClientBuilder
+import com.wealthvault.`auth-api`.fgpassword.ForgetApi
+import com.wealthvault.`auth-api`.fgpassword.ForgetApiImpl
 import com.wealthvault.`auth-api`.login.LoginApi
 import com.wealthvault.`auth-api`.login.LoginApiImpl
+import com.wealthvault.`auth-api`.otp.OTPApi
+import com.wealthvault.`auth-api`.otp.OTPApiImpl
+import com.wealthvault.`auth-api`.refreshtoken.RefreshTokenApi
+import com.wealthvault.`auth-api`.refreshtoken.RefreshTokenImpl
 import com.wealthvault.`auth-api`.register.RegisterApi
 import com.wealthvault.`auth-api`.register.RegisterApiImpl
+import com.wealthvault.`auth-api`.rspassword.ResetApi
+import com.wealthvault.`auth-api`.rspassword.ResetApiImpl
 import com.wealthvault.config.Config
 import com.wealthvault.core.KoinConst
 import de.jensklingenberg.ktorfit.Ktorfit
@@ -30,7 +38,6 @@ object ApiModule {
 
         single<Ktorfit> {
             val httpClient: HttpClient = get(named(KoinConst.HttpClient.DEFAULT))
-            println("🔥 ACTUAL BASE URL = ${Config.localhost_android}")
             Ktorfit.Builder()
                 .baseUrl(Config.localhost_android)
                 .httpClient(httpClient)
@@ -38,6 +45,11 @@ object ApiModule {
         }
         single<LoginApi> { LoginApiImpl(get()) }
         single<RegisterApi> { RegisterApiImpl(get()) }
+        single<RefreshTokenApi> { RefreshTokenImpl(get()) }
+        single<ForgetApi> { ForgetApiImpl(get()) }
+        single<ResetApi> { ResetApiImpl(get()) }
+        single<OTPApi> { OTPApiImpl(get()) }
+
     }
 
 
