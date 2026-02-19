@@ -34,9 +34,12 @@ include(":composeApp")
 include(":functional:api:auth-api")
 include(":functional:data-store")
 include(":functional:setting-app")
+include(":functional:api:google-auth")
 
 include(":features:auth:login")
 include(":features:auth:register")
+
+
 
 include(":base:core")
 include(":base:config")

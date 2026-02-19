@@ -13,7 +13,8 @@ fun LoginScreenPreview() {
         password = "",
         onPasswordChange = {},
         isLoading = false,
-        onLoginClick = {}
+        onLoginClick = {},
+        onGoogleClick = {}
     )
 }
 //fun MainScreenPreview(){

@@ -13,7 +13,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -56,6 +56,9 @@ kotlin {
             implementation(project(":navigation"))
             implementation(project(":base:core"))
             implementation(project(":features:auth:login"))
+            implementation(project(":functional:api:google-auth"))
+
+
 
 
 

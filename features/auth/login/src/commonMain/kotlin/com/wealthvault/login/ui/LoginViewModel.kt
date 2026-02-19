@@ -5,13 +5,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.example.google_auth.GoogleAuthRepository
 import com.wealthvault.`auth-api`.model.LoginRequest
 import com.wealthvault.core.FlowResult
 import com.wealthvault.login.usecase.LoginUseCase
 import kotlinx.coroutines.launch
 
 class LoginScreenModel(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val googelRepository: GoogleAuthRepository
 ) : ScreenModel {
 
     // UI State
@@ -70,6 +72,23 @@ class LoginScreenModel(
                     }
                 }
             }
+        }
+    }
+
+    fun onGoogleClick(onSuccess: () -> Unit) {
+        screenModelScope.launch {
+            isLoading = true
+            errorMessage = null
+
+            val user = googelRepository.login()
+
+            if (user != null) {
+                onSuccess()
+            } else {
+                errorMessage = "Google login failed"
+            }
+
+            isLoading = false
         }
     }
 }

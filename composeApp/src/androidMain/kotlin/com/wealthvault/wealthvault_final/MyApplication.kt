@@ -1,6 +1,7 @@
 package com.wealthvault.wealthvault_final
 
 import android.app.Application
+import com.example.google_auth.di.GoogleAuthAndroidModule
 import com.wealthvault.data_store.androidDataStoreModule
 import com.wealthvault.wealthvault_final.di.AllModules
 import org.koin.android.ext.koin.androidContext
@@ -14,7 +15,7 @@ class MyApplication : Application() {
             androidContext(this@MyApplication)
             androidLogger()
 
-            modules(AllModules.modules+ androidDataStoreModule.allModules)
+            modules(AllModules.modules+ androidDataStoreModule.allModules + GoogleAuthAndroidModule.allModules)
         }
     }
 }

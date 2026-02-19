@@ -26,6 +26,6 @@ object LoginModule {
 
         factory { LoginUseCase(get(),get(),get() )}
 
-        factory { LoginScreenModel(get()) }
+        factory { LoginScreenModel(get(),get()) }
     }
 }
