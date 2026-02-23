@@ -35,6 +35,8 @@ include(":functional:api:auth-api")
 include(":functional:data-store")
 include(":functional:setting-app")
 include(":functional:api:google-auth")
+include(":functional:api:user-api")
+
 
 include(":features:auth:login")
 include(":features:auth:register")
@@ -46,5 +48,4 @@ include(":base:config")
 //include(":build-logic")
 include(":features:profile")
 include(":navigation")
-
 
