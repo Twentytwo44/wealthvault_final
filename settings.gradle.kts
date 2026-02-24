@@ -36,6 +36,8 @@ include(":functional:data-store")
 include(":functional:setting-app")
 include(":functional:api:google-auth")
 include(":functional:api:user-api")
+include(":functional:api:account-api")
+include(":functional:api:cash-api")
 
 
 include(":features:auth:login")
