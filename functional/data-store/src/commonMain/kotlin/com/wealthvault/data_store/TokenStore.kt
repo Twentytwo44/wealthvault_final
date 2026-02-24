@@ -13,17 +13,23 @@ class TokenStore(
 ) {
 
     companion object {
-        val KEY_TOKEN = stringPreferencesKey("auth_token")
+        private val KEY_ACCESS_TOKEN = stringPreferencesKey("access_token")
+        private val KEY_REFRESH_TOKEN = stringPreferencesKey("refresh_token")
     }
 
-    val authToken: Flow<String?> = dataStore.data
-        .map { preferences ->
-            preferences[KEY_TOKEN]
-        }
+    // ดึง Access Token
+    val accessToken: Flow<String?> = dataStore.data
+        .map { preferences -> preferences[KEY_ACCESS_TOKEN] }
 
-    suspend fun saveToken(token: String) {
+    // ดึง Refresh Token
+    val refreshToken: Flow<String?> = dataStore.data
+        .map { preferences -> preferences[KEY_REFRESH_TOKEN] }
+
+    // ฟังก์ชันบันทึกทั้งคู่พร้อมกัน (สะดวกตอน Login และ Refresh)
+    suspend fun saveTokens(access: String, refresh: String) {
         dataStore.edit { preferences ->
-            preferences[KEY_TOKEN] = token
+            preferences[KEY_ACCESS_TOKEN] = access
+            preferences[KEY_REFRESH_TOKEN] = refresh
         }
     }
 

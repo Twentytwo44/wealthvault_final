@@ -8,11 +8,13 @@ class AuthRepositoryImpl(
     private val localDataSource: TokenStore // สำหรับเซฟ Token ลงเครื่อง
 ) {
     suspend fun login(request: LoginRequest): Result<Unit> {
-        return networkDataSource.login(request).map { token ->
-            localDataSource.saveToken(token) // บันทึกเก็บไว้ใช้ตรวจสอบสถานะ
+        return networkDataSource.login(request).map { data ->
+            // เซฟทั้ง Access Token และ Refresh Token ลงเครื่องพร้อมกัน
+            localDataSource.saveTokens(
+                access = data.accessToken,
+                refresh = data.refreshToken
+            )
         }
     }
-
-    // สร้าง Flow เพื่อตรวจสอบสถานะล็อกอิน (เลียนแบบ Flow ใน UseCase เดิม)
 
 }
