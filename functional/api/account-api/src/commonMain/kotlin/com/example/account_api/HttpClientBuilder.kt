@@ -1,4 +1,4 @@
-package com.example.`user-api`
+package com.example.account_api
 
 import com.wealthvault.`auth-api`.model.RefreshRequest
 import com.wealthvault.`auth-api`.model.RefreshResponse

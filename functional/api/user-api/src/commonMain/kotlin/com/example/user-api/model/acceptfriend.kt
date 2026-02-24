@@ -9,7 +9,7 @@ data class AcceptFriendRequest(
     @SerialName("requester_id")
     val requesterId: String,
 
-    @SerialName("actine")
+    @SerialName("action")
     val action: String
 )
 

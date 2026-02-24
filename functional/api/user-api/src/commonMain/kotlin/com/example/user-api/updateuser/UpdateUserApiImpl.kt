@@ -9,7 +9,7 @@ import io.ktor.client.request.patch
 import io.ktor.client.request.setBody
 
 class UpdateUserApiImpl(private val ktorfit: Ktorfit) : UpdateUserApi {
-    override suspend fun updateuser(request: UpdateUserDataRequest): UpdateUserDataResponse {
+    override suspend fun updateUser(request: UpdateUserDataRequest): UpdateUserDataResponse {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 

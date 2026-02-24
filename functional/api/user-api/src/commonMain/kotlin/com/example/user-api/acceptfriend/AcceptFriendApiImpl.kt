@@ -9,7 +9,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 
 class AcceptFriendApiImpl(private val ktorfit: Ktorfit) : AcceptFriendApi {
-    override suspend fun acceptfriend(request: AcceptFriendRequest): AcceptFriendResponse {
+    override suspend fun acceptFriend(request: AcceptFriendRequest): AcceptFriendResponse {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
@@ -19,3 +19,4 @@ class AcceptFriendApiImpl(private val ktorfit: Ktorfit) : AcceptFriendApi {
         }.body()
     }
 }
+

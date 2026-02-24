@@ -7,5 +7,5 @@ import de.jensklingenberg.ktorfit.http.PATCH
 
 interface UpdateUserApi {
     @PATCH("user")
-    suspend fun updateuser(@Body request: UpdateUserDataRequest): UpdateUserDataResponse
+    suspend fun updateUser(@Body request: UpdateUserDataRequest): UpdateUserDataResponse
 }

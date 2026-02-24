@@ -5,5 +5,5 @@ import de.jensklingenberg.ktorfit.http.GET
 
 interface UserApi {
     @GET("user")
-    suspend fun getuser(): UserDataResponse
+    suspend fun getUser(): UserDataResponse
 }

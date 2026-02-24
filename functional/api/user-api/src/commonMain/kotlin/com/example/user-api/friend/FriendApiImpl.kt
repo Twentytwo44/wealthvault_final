@@ -7,7 +7,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 
 class FriendApiImpl(private val ktorfit: Ktorfit) : FriendApi {
-    override suspend fun getfriend(): FriendResponse {
+    override suspend fun getFriend(): FriendResponse {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 

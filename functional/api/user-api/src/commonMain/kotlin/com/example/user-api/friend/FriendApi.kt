@@ -5,5 +5,5 @@ import de.jensklingenberg.ktorfit.http.GET
 
 interface FriendApi {
     @GET("friend")
-    suspend fun getfriend(): FriendResponse
+    suspend fun getFriend(): FriendResponse
 }

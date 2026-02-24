@@ -7,5 +7,5 @@ import de.jensklingenberg.ktorfit.http.POST
 
 interface AddFriendApi {
     @POST("friend")
-    suspend fun addfriend(@Body request: AcceptFriendRequest): AcceptFriendResponse
+    suspend fun addFriend(@Body request: AcceptFriendRequest): AcceptFriendResponse
 }
