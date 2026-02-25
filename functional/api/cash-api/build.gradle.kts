@@ -10,7 +10,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.cash_api"
+        namespace = "com.example.account_api"
         compileSdk = 36
         minSdk = 31
 
@@ -31,7 +31,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "cash-apiKit"
+    val xcfName = "account-apiKit"
 
     iosX64 {
         binaries.framework {
@@ -58,15 +58,43 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
         commonMain {
+
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.json)
+                implementation(libs.ktor.client.auth)
+                implementation(libs.ktor.client.cio)
+
+
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose)
+                implementation(libs.ktorfit.lib)
+
+                implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.3.4")
+
+
+                implementation(project(":base:core"))
+                implementation(project(":base:config"))
+                implementation(project(":functional:data-store"))
+                implementation(project(":functional:api:auth-api"))
+
+
+
+
+
+
+
             }
         }
 
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.coroutines.get()}")
+                implementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
             }
         }
 
@@ -78,13 +106,6 @@ kotlin {
             }
         }
 
-//        getByName("androidDeviceTest") {
-//            dependencies {
-//                implementation(libs.androidx.runner)
-//                implementation(libs.androidx.core)
-//                implementation(libs.androidx.testExt.junit)
-//            }
-//        }
 
         iosMain {
             dependencies {
@@ -93,7 +114,9 @@ kotlin {
                 // part of KMP’s default source set hierarchy. Note that this source set depends
                 // on common by default and will correctly pull the iOS artifacts of any
                 // KMP dependencies declared in commonMain.
+                implementation("io.ktor:ktor-client-darwin:${libs.versions.ktor.get()}")
             }
+
         }
     }
 

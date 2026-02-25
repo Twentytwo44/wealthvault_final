@@ -1,7 +1,5 @@
 package com.wealthvault.core
 
-package com.wealthvault.core
-
 object KoinConst {
     object KotlinSerialization {
         const val AUTH = "auth-kotlin-serialization"
