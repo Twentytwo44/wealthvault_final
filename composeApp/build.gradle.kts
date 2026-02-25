@@ -57,6 +57,8 @@ kotlin {
             implementation(project(":base:core"))
             implementation(project(":features:auth:login"))
             implementation(project(":functional:api:google-auth"))
+            implementation(project(":features:auth:register"))
+//            implementation(project(":features:auth:introduction"))
 
 
 

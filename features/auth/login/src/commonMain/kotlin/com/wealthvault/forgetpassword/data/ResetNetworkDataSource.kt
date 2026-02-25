@@ -1,4 +1,4 @@
-package com.wealthvault.fogetpassword.data
+package com.wealthvault.forgetpassword.data
 
 import com.wealthvault.`auth-api`.model.ResetPasswordRequest
 import com.wealthvault.`auth-api`.rspassword.ResetApi

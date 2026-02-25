@@ -1,9 +1,9 @@
-package com.wealthvault.fogetpassword.usecase
+package com.wealthvault.forgetpassword.usecase
 
 import com.wealthvault.`auth-api`.model.ForgetPasswordRequest
 import com.wealthvault.core.FlowResult
 import com.wealthvault.core.FlowUseCase
-import com.wealthvault.fogetpassword.data.ForgetRepositoryImpl
+import com.wealthvault.forgetpassword.data.ForgetRepositoryImpl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

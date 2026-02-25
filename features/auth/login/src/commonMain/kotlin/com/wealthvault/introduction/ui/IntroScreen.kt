@@ -1,239 +1,348 @@
-package com.wealthvault.introduction.ui
+package com.wealthvault.introduction.ui // ปรับ package ให้ตรงกับโปรเจค
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
+//import androidx.compose.material.icons.Icons
+//import androidx.compose.material.icons.automirrored.filled.ArrowBack
+//import androidx.compose.material.icons.automirrored.filled.ArrowForward
+//import androidx.compose.material.icons.filled.DateRange
+//import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import com.example.login.ui.LoginScreenModel
-import com.wealthvault.core.utils.getScreenModel
-
-
-class LoginScreen : Screen {
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val screenModel = getScreenModel<LoginScreenModel>()
-
-        // เรียกใช้ Stateless UI ที่เราแยกไว้
-        LoginContent(
-            username = screenModel.username,
-            onUsernameChange = { screenModel.username = it },
-            password = screenModel.password,
-            onPasswordChange = { screenModel.password = it },
-            isLoading = screenModel.isLoading,
-            onLoginClick = {
-                screenModel.onLoginClick {
-                    // จัดการการเปลี่ยนหน้าตรงนี้
-                }
-            }
-        )
-    }
-}
+import com.wealthvault.core.theme.WvBgGradientEnd
+import com.wealthvault.core.theme.WvBgGradientStart
+import com.wealthvault.core.theme.WvWaveGradientEnd
+import com.wealthvault.core.theme.WvWaveGradientStart
+import kotlinx.coroutines.launch
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSurface
+import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightMuted
+import com.wealthvault.core.theme.WvBgGradientStart
+import com.wealthvault.core.theme.WvBgGradientEnd
 
 @Composable
-fun LoginContent(
-    username: String,
-    onUsernameChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    isLoading: Boolean,
-    onLoginClick: () -> Unit
+fun IntroContent(
+    firstName: String,
+    onFirstNameChange: (String) -> Unit,
+    lastName: String,
+    onLastNameChange: (String) -> Unit,
+    phoneNum: String,
+    onPhoneNumChange: (String) -> Unit,
+    dob: String, // Date of Birth (วันเกิด)
+    onDobChange: (String) -> Unit,
+    onFinish: () -> Unit // เมื่อกดปุ่ม ต่อไป ในหน้าสุดท้าย
 ) {
-    val primaryColor = Color(0xFFC47B5D) // สีน้ำตาลอมส้ม
-    val inputBgColor = Color.White
-    val borderColor = primaryColor.copy(alpha = 0.3f)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFFFF8F3),
-                        Color(0xFFFFF0E5)
-                    )
-                )
-            )
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Wealth & Vault",
-            color = primaryColor,
-            fontSize = 28.sp,
-            modifier = Modifier.padding(horizontal = 8.dp)
+    // ข้อมูลสำหรับ 4 หน้าแรก
+    val introPages = listOf(
+        IntroPageData("ทรัพย์สิน", "บันทึกทรัพย์สินที่คุณมีได้หลากหลายประเภท"),
+        IntroPageData("รวบรวม", "รวบรวมทรัพย์สินและหนี้สิน\nของคุณไว้ในที่เดียวกัน"),
+        IntroPageData("จัดการ", "ดูภาพรวมของทรัพย์สินเพื่อจัดการ\nทรัพย์สินและผู้ที่เกี่ยวข้อง"),
+        IntroPageData(
+            "แบ่งปัน & ส่งต่อ",
+            "แบ่งปันทรัพย์สินของคุณให้ครอบครัว\nและคนที่คุณรักได้ทราบ"
         )
+    )
 
-        Spacer(modifier = Modifier.height(200.dp))
+    // ตัวจัดการหน้า (มีทั้งหมด 5 หน้า: Info 4 + Form 1)
+    val pagerState = rememberPagerState(pageCount = { 5 })
+    val coroutineScope = rememberCoroutineScope()
 
+    WavyBackground{
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 24.dp),
         ) {
-            // 1. กล่อง Input 2 ช่อง
-            // --- ช่องอีเมล ---
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "อีเมล",
-                    color = primaryColor,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
-                )
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = onUsernameChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(percent = 30), // ขอบโค้งมนแบบในดีไซน์
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = inputBgColor,
-                        unfocusedContainerColor = inputBgColor,
-                        focusedBorderColor = primaryColor,
-                        unfocusedBorderColor = borderColor,
-                    )
-                )
+            // --- แถบบนสุด: ปุ่มย้อนกลับ ---
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                //            Icon(
+                //                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                //                contentDescription = "Back",
+                //                tint = primaryColor,
+                //                modifier = Modifier
+                //                    .size(28.dp)
+                //                    .clickable {
+                //                        // ถ้าไม่ได้อยู่หน้าแรก ให้กดย้อนกลับได้
+                //                        if (pagerState.currentPage > 0) {
+                //                            coroutineScope.launch {
+                //                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                //                            }
+                //                        }
+                //                    }
+                //            )
+                // พื้นที่ว่างเพื่อให้ไอคอนอยู่ซ้ายสุด
+                Spacer(modifier = Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- ช่องรหัสผ่าน ---
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "รหัสผ่าน",
-                    color = primaryColor,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
-                )
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = onPasswordChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(percent = 30),
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = inputBgColor,
-                        unfocusedContainerColor = inputBgColor,
-                        focusedBorderColor = primaryColor,
-                        unfocusedBorderColor = borderColor,
+            // --- ส่วนเนื้อหาแบบเลื่อนได้ (Pager) ---
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f) // กินพื้นที่ตรงกลางทั้งหมด
+            ) { page ->
+                if (page < 4) {
+                    // หน้า 1-4: แสดงข้อมูลและรูปภาพ
+                    IntroPageScreen(pageData = introPages[page], primaryColor = LightPrimary)
+                } else {
+                    // หน้า 5: แบบฟอร์มข้อมูลส่วนตัว
+                    ProfileFormScreen(
+                        firstName = firstName,
+                        onFirstNameChange = onFirstNameChange,
+                        lastName = lastName,
+                        onLastNameChange = onLastNameChange,
+                        dob = dob,
+                        onDobChange = onDobChange,
+                        phoneNum = phoneNum,
+                        onPhoneNumChange = onPhoneNumChange,
+                        primaryColor = LightPrimary,
+                        inputBgColor = LightSurface,
+                        borderColor = LightBorder
                     )
-                )
+                }
             }
 
-            // 2. ปุ่มลืมรหัสผ่าน (ดันไปชิดขวา)
-            Text(
-                text = "ลืมรหัสผ่าน",
-                color = primaryColor.copy(alpha = 0.8f),
-                fontSize = 16.sp,
+            // --- จุดบอกตำแหน่งหน้า (Indicators) ---
+            if (pagerState.currentPage < 4) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(4) { iteration ->
+                        val color =
+                            if (pagerState.currentPage == iteration) LightPrimary else Color.LightGray
+                        Box(
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                        )
+                    }
+                }
+            } else {
+                // หน้าฟอร์มไม่มีจุด ให้เว้นที่ว่างไว้
+                Spacer(modifier = Modifier.height(40.dp))
+            }
+
+            // --- ปุ่ม ต่อไป ---
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp, end = 16.dp)
-                    .clickable { /* TODO: นำทางไปหน้าลืมรหัส */ },
-                textAlign = TextAlign.End
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 3. ปุ่มเข้าสู่ระบบ
-            Button(
-                onClick = onLoginClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(percent = 30),
-                colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+                    .padding(24.dp),
             ) {
-                Text("เข้าสู่ระบบ", fontSize = 18.sp, color = Color.White)
+                Button(
+                    onClick = {
+                        if (pagerState.currentPage < 4) {
+                            // เลื่อนไปหน้าถัดไป
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            }
+                        } else {
+                            // หน้าสุดท้ายแล้ว ทำงานคำสั่ง onFinish
+                            onFinish()
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.End) // 👈 ดันปุ่มไปชิดขวาสุดของหน้าจอ
+                        .width(140.dp) // 👈 กำหนดความกว้างให้สั้นลง (ปรับตัวเลขให้ยาว/สั้นได้ตามใจชอบครับ)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(percent = 30),
+                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
+                ) {
+                    Text("ต่อไป", fontSize = 18.sp, color = Color.White)
+                    // Spacer(modifier = Modifier.width(8.dp))
+                    // Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", tint = Color.White, modifier = Modifier.size(20.dp))
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // 4. ยังไม่มีบัญชี สร้างบัญชี?
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "ยังไม่มีบัญชี ", color = primaryColor.copy(alpha = 0.8f), fontSize = 14.sp)
-                Text(
-                    text = "สร้างบัญชี?",
-                    color = primaryColor,
-                    fontSize = 14.sp,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable { /* TODO: นำทางไปหน้าสมัคร */ }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 5. เส้นคั่น "หรือ"
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
-            ) {
-                HorizontalDivider(modifier = Modifier.weight(1f),
-                    color = borderColor,
-                    thickness = 2.dp)
-                Text(
-                    text = " หรือ ",
-                    color = primaryColor.copy(alpha = 0.8f),
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-                HorizontalDivider(modifier = Modifier.weight(1f),
-                    color = borderColor,
-                    thickness = 2.dp)
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 6. ปุ่ม Google (ปุ่มโปร่งใสขอบสีส้ม)
-            OutlinedButton(
-                onClick = { /* TODO: Google Login */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 48.dp), // บีบให้ปุ่มแคบลงนิดนึงตามดีไซน์
-                shape = RoundedCornerShape(percent = 30),
-                border = BorderStroke(1.dp, borderColor),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
-            ) {
-                Text("Google", color = primaryColor, fontSize = 16.sp)
-            }
-            
         }
+    }
+}
+
+// Data Class สำหรับเก็บข้อความหน้า Intro
+data class IntroPageData(val title: String, val description: String)
+
+// Composable สำหรับหน้าให้ข้อมูล 1-4
+@Composable
+fun IntroPageScreen(pageData: IntroPageData, primaryColor: Color) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+
+    ) {
+        Text(text = pageData.title, fontSize = 28.sp, fontWeight = FontWeight.Medium, color = primaryColor)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = pageData.description, fontSize = 14.sp, color = primaryColor.copy(alpha = 0.8f), textAlign = TextAlign.Center)
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        // TODO: เปลี่ยน Box นี้เป็นรูปภาพ Illustration ของจริง
+        Box(
+            modifier = Modifier
+                .size(width = 250.dp, height = 450.dp)
+                .background(Color(0xFFFEE0BB), shape = RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+
+        }
+    }
+}
+
+// Composable สำหรับหน้า 5 (แบบฟอร์มข้อมูลส่วนตัว)
+@Composable
+fun ProfileFormScreen(
+    firstName: String, onFirstNameChange: (String) -> Unit,
+    lastName: String, onLastNameChange: (String) -> Unit,
+    dob: String, onDobChange: (String) -> Unit,
+    phoneNum: String, onPhoneNumChange: (String) -> Unit,
+    primaryColor: Color, inputBgColor: Color, borderColor: Color
+) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "ข้อมูลส่วนตัว", fontSize = 28.sp, fontWeight = FontWeight.Medium, color = primaryColor)
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // รูปโปรไฟล์
+        Box(contentAlignment = Alignment.BottomEnd) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .border(2.dp, primaryColor, CircleShape)
+                    .background(WvBgGradientStart),
+                contentAlignment = Alignment.Center
+            ) {
+                // TODO: ใส่รูปโปรไฟล์ หรือไอคอนคน
+//                Icon(imageVector = Icons.Default.Edit, contentDescription = "Profile", tint = primaryColor.copy(alpha = 0.3f), modifier = Modifier.size(40.dp))
+            }
+            // ไอคอนแก้ไขรูปโปรไฟล์
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(primaryColor)
+                    .clickable { /* TODO: เลือกรูป */ },
+                contentAlignment = Alignment.Center
+            ) {
+//                Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color.White, modifier = Modifier.size(16.dp))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        // ช่องกรอก ชื่อจริง
+        InputField(label = "ชื่อจริง", value = firstName, onValueChange = onFirstNameChange, primaryColor = primaryColor, inputBgColor = inputBgColor, borderColor = borderColor)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ช่องกรอก นามสกุล
+        InputField(label = "นามสกุล", value = lastName, onValueChange = onLastNameChange, primaryColor = primaryColor, inputBgColor = inputBgColor, borderColor = borderColor)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ช่องกรอก วันเกิด
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(text = "วันเกิด", color = primaryColor, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp, start = 8.dp))
+            OutlinedTextField(
+                value = dob,
+                onValueChange = onDobChange,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(percent = 30),
+                singleLine = true,
+                trailingIcon = {
+//                    Icon(imageVector = Icons.Default.DateRange, contentDescription = "Calendar", tint = primaryColor)
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = inputBgColor, unfocusedContainerColor = inputBgColor,
+                    focusedBorderColor = primaryColor, unfocusedBorderColor = borderColor,
+                )
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        InputField(label = "เบอร์โทร", value = phoneNum, onValueChange = onPhoneNumChange, primaryColor = primaryColor, inputBgColor = inputBgColor, borderColor = borderColor)
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+// Widget ช่วยสร้างช่องกรอกข้อความ (จะได้โค้ดไม่ซ้ำซ้อน)
+@Composable
+fun InputField(label: String, value: String, onValueChange: (String) -> Unit, primaryColor: Color, inputBgColor: Color, borderColor: Color) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(text = label, color = primaryColor, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp, start = 8.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(percent = 30),
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = inputBgColor, unfocusedContainerColor = inputBgColor,
+                focusedBorderColor = primaryColor, unfocusedBorderColor = borderColor,
+            )
+        )
+    }
+}
+
+
+@Composable
+fun WavyBackground(
+    // เปลี่ยนมารับค่าเป็น Brush (การไล่สี) แทน Color
+    topWaveBrush: Brush = Brush.verticalGradient(
+        colors = listOf(WvWaveGradientStart, WvWaveGradientEnd)
+    ),
+    bottomBgBrush: Brush = Brush.verticalGradient(
+        colors = listOf(WvBgGradientStart, WvBgGradientEnd)
+    ),
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(bottomBgBrush) // ระบายสีพื้นหลังด้วย Gradient
+            .drawBehind {
+                val path = Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(0f, size.height * 0.25f)
+                    cubicTo(
+                        x1 = size.width * 0.4f, y1 = size.height * 0.10f,
+                        x2 = size.width * 0.6f, y2 = size.height * 0.45f,
+                        x3 = size.width, y3 = size.height * 0.35f
+                    )
+                    lineTo(size.width, 0f)
+                    close()
+                }
+                // วาดเส้นคลื่นแล้วระบายด้วย Gradient
+                drawPath(path = path, brush = topWaveBrush)
+            }
+    ) {
+        content()
     }
 }

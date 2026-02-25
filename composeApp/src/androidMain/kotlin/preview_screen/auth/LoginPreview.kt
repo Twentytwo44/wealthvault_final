@@ -1,8 +1,8 @@
-package com.wealthvault.wealthvault_final // แก้ package ให้ตรงกับไฟล์
+package preview_screen.auth // แก้ package ให้ตรงกับไฟล์
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.wealthvault.login.ui.LoginContent // เรียกใช้ UI จาก Module login
+import com.wealthvault.login.ui.LoginContent
 
 @Preview(showBackground = true, name = "Preview")
 @Composable
@@ -20,3 +20,5 @@ fun LoginScreenPreview() {
 //fun MainScreenPreview(){
 //    MainScreen()
 //}
+
+
