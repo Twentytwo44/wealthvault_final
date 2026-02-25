@@ -38,6 +38,8 @@ include(":functional:api:google-auth")
 include(":functional:api:user-api")
 include(":functional:api:account-api")
 include(":functional:api:cash-api")
+include(":functional:api:insurance-api")
+
 
 
 include(":features:auth:login")
