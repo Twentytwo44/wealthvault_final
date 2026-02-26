@@ -15,7 +15,7 @@ class UpdateInvestmentApiImpl(private val ktorfit: Ktorfit) : UpdateInvestmentAp
 
         return client.patch("${Config.localhost_android}/asset/invest/${id}") {
 
-            
+
         }.body()
     }
 }
