@@ -1,4 +1,4 @@
-package com.example.cash_api.createcash
+package com.example.insurance_api.createcash
 
 import com.example.insurance_api.model.InsuranceRequest
 import com.example.insurance_api.model.InsuranceResponse

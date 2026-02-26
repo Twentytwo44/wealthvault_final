@@ -10,7 +10,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.land_api"
+        namespace = "com.example.investment_api"
         compileSdk = 36
         minSdk = 31
 
@@ -31,7 +31,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "land-apiKit"
+    val xcfName = "invesment-apiKit"
 
     iosX64 {
         binaries.framework {
