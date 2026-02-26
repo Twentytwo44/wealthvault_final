@@ -31,7 +31,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "account-apiKit"
+    val xcfName = "cash-apiKit"
 
     iosX64 {
         binaries.framework {
