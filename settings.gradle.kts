@@ -39,6 +39,11 @@ include(":functional:api:user-api")
 include(":functional:api:account-api")
 include(":functional:api:cash-api")
 include(":functional:api:insurance-api")
+include(":functional:api:invesment-api")
+include(":functional:api:building-api")
+include(":functional:api:land-api")
+include(":functional:api:liability-api")
+
 
 
 
