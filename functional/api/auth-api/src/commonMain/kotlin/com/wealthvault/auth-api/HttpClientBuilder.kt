@@ -9,7 +9,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-internal class HttpClientBuilder(
+class HttpClientBuilder(
     private val json: Json,
 ) {
     fun buildDefaultHttpClient(): HttpClient {

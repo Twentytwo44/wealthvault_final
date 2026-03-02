@@ -24,31 +24,31 @@ import org.koin.dsl.module
 
 object ApiModule {
     val allModules = module {
-        single<Json>(named(KoinConst.KotlinSerialization.DEFAULT)) {
+        single<Json>(named(KoinConst.KotlinSerialization.AUTH)) {
             Json {
                 ignoreUnknownKeys = true
             }
         }
 
-        single<HttpClient>(named(KoinConst.HttpClient.DEFAULT)) {
+        single<HttpClient>(named(KoinConst.HttpClient.AUTH)) {
             HttpClientBuilder(
-                get(named(KoinConst.KotlinSerialization.DEFAULT)),
+                get(named(KoinConst.KotlinSerialization.AUTH)),
             ).buildDefaultHttpClient()
         }
 
-        single<Ktorfit> {
-            val httpClient: HttpClient = get(named(KoinConst.HttpClient.DEFAULT))
+        single<Ktorfit>(named(KoinConst.Ktor.AUTH)) {
+            val httpClient: HttpClient = get(named(KoinConst.HttpClient.AUTH))
             Ktorfit.Builder()
                 .baseUrl(Config.localhost_android)
                 .httpClient(httpClient)
                 .build()
         }
-        single<LoginApi> { LoginApiImpl(get()) }
-        single<RegisterApi> { RegisterApiImpl(get()) }
-        single<RefreshTokenApi> { RefreshTokenImpl(get()) }
-        single<ForgetApi> { ForgetApiImpl(get()) }
-        single<ResetApi> { ResetApiImpl(get()) }
-        single<OTPApi> { OTPApiImpl(get()) }
+        single<LoginApi> { LoginApiImpl(get(named(KoinConst.Ktor.AUTH))) }
+        single<RegisterApi> { RegisterApiImpl(get(named(KoinConst.Ktor.AUTH))) }
+        single<RefreshTokenApi> { RefreshTokenImpl(get(named(KoinConst.Ktor.AUTH))) }
+        single<ForgetApi> { ForgetApiImpl(get(named(KoinConst.Ktor.AUTH))) }
+        single<ResetApi> { ResetApiImpl(get(named(KoinConst.Ktor.AUTH))) }
+        single<OTPApi> { OTPApiImpl(get(named(KoinConst.Ktor.AUTH))) }
 
     }
 

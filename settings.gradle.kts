@@ -35,6 +35,17 @@ include(":functional:api:auth-api")
 include(":functional:data-store")
 include(":functional:setting-app")
 include(":functional:api:google-auth")
+include(":functional:api:user-api")
+include(":functional:api:account-api")
+include(":functional:api:cash-api")
+include(":functional:api:insurance-api")
+include(":functional:api:investment-api")
+include(":functional:api:building-api")
+include(":functional:api:land-api")
+include(":functional:api:liability-api")
+
+
+
 
 include(":features:auth:login")
 include(":features:auth:register")
@@ -46,5 +57,4 @@ include(":base:config")
 //include(":build-logic")
 include(":features:profile")
 include(":navigation")
-
 
