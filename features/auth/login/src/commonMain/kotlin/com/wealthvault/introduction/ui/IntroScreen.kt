@@ -1,18 +1,12 @@
-package com.wealthvault.introduction.ui // ปรับ package ให้ตรงกับโปรเจค
+package com.wealthvault.introduction.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.automirrored.filled.ArrowBack
-//import androidx.compose.material.icons.automirrored.filled.ArrowForward
-//import androidx.compose.material.icons.filled.DateRange
-//import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,23 +27,11 @@ import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientStart
 import kotlinx.coroutines.launch
 import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSurface
-import com.wealthvault.core.theme.LightBorder
-import com.wealthvault.core.theme.LightMuted
-import com.wealthvault.core.theme.WvBgGradientStart
-import com.wealthvault.core.theme.WvBgGradientEnd
 
 @Composable
 fun IntroContent(
-    firstName: String,
-    onFirstNameChange: (String) -> Unit,
-    lastName: String,
-    onLastNameChange: (String) -> Unit,
-    phoneNum: String,
-    onPhoneNumChange: (String) -> Unit,
-    dob: String, // Date of Birth (วันเกิด)
-    onDobChange: (String) -> Unit,
-    onFinish: () -> Unit // เมื่อกดปุ่ม ต่อไป ในหน้าสุดท้าย
+    onBackClick: () -> Unit, // เพิ่มปุ่มย้อนกลับให้เผื่อใช้
+    onFinish: () -> Unit // เมื่อกดปุ่ม ต่อไป ในหน้าสุดท้าย (หน้า 4)
 ) {
 
     // ข้อมูลสำหรับ 4 หน้าแรก
@@ -63,11 +45,11 @@ fun IntroContent(
         )
     )
 
-    // ตัวจัดการหน้า (มีทั้งหมด 5 หน้า: Info 4 + Form 1)
-    val pagerState = rememberPagerState(pageCount = { 5 })
+    // ตัวจัดการหน้า (เหลือ 4 หน้าถ้วน)
+    val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
 
-    WavyBackground{
+    WavyBackground {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -75,25 +57,20 @@ fun IntroContent(
         ) {
             // --- แถบบนสุด: ปุ่มย้อนกลับ ---
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                //            Icon(
-                //                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                //                contentDescription = "Back",
-                //                tint = primaryColor,
-                //                modifier = Modifier
-                //                    .size(28.dp)
-                //                    .clickable {
-                //                        // ถ้าไม่ได้อยู่หน้าแรก ให้กดย้อนกลับได้
-                //                        if (pagerState.currentPage > 0) {
-                //                            coroutineScope.launch {
-                //                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                //                            }
-                //                        }
-                //                    }
-                //            )
-                // พื้นที่ว่างเพื่อให้ไอคอนอยู่ซ้ายสุด
+                // ถ้ามี Icon ย้อนกลับ สามารถเปิดคอมเมนต์มาใช้ได้เลยครับ
+                // Icon(
+                //     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                //     contentDescription = "Back",
+                //     tint = LightPrimary,
+                //     modifier = Modifier
+                //         .size(28.dp)
+                //         .clickable { onBackClick() }
+                // )
                 Spacer(modifier = Modifier.weight(1f))
             }
 
@@ -104,48 +81,28 @@ fun IntroContent(
                 state = pagerState,
                 modifier = Modifier.weight(1f) // กินพื้นที่ตรงกลางทั้งหมด
             ) { page ->
-                if (page < 4) {
-                    // หน้า 1-4: แสดงข้อมูลและรูปภาพ
-                    IntroPageScreen(pageData = introPages[page], primaryColor = LightPrimary)
-                } else {
-                    // หน้า 5: แบบฟอร์มข้อมูลส่วนตัว
-                    ProfileFormScreen(
-                        firstName = firstName,
-                        onFirstNameChange = onFirstNameChange,
-                        lastName = lastName,
-                        onLastNameChange = onLastNameChange,
-                        dob = dob,
-                        onDobChange = onDobChange,
-                        phoneNum = phoneNum,
-                        onPhoneNumChange = onPhoneNumChange,
-                        primaryColor = LightPrimary,
-                        inputBgColor = LightSurface,
-                        borderColor = LightBorder
-                    )
-                }
+                // หน้า 1-4: แสดงข้อมูลและรูปภาพ
+                IntroPageScreen(pageData = introPages[page], primaryColor = LightPrimary)
             }
 
             // --- จุดบอกตำแหน่งหน้า (Indicators) ---
-            if (pagerState.currentPage < 4) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    repeat(4) { iteration ->
-                        val color =
-                            if (pagerState.currentPage == iteration) LightPrimary else Color.LightGray
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 4.dp)
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(color)
-                        )
-                    }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(4) { iteration ->
+                    val color =
+                        if (pagerState.currentPage == iteration) LightPrimary else Color.LightGray
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(color)
+                    )
                 }
-            } else {
-                // หน้าฟอร์มไม่มีจุด ให้เว้นที่ว่างไว้
-                Spacer(modifier = Modifier.height(40.dp))
             }
 
             // --- ปุ่ม ต่อไป ---
@@ -156,26 +113,24 @@ fun IntroContent(
             ) {
                 Button(
                     onClick = {
-                        if (pagerState.currentPage < 4) {
-                            // เลื่อนไปหน้าถัดไป
+                        if (pagerState.currentPage < 3) {
+                            // ถ้ายังไม่ถึงหน้าสุดท้าย เลื่อนไปหน้าถัดไป
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
                         } else {
-                            // หน้าสุดท้ายแล้ว ทำงานคำสั่ง onFinish
+                            // หน้าสุดท้ายแล้ว (หน้า 4) ทำงานคำสั่ง onFinish ไปยังหน้าต่อไป
                             onFinish()
                         }
                     },
                     modifier = Modifier
-                        .align(Alignment.End) // 👈 ดันปุ่มไปชิดขวาสุดของหน้าจอ
-                        .width(140.dp) // 👈 กำหนดความกว้างให้สั้นลง (ปรับตัวเลขให้ยาว/สั้นได้ตามใจชอบครับ)
+                        .align(Alignment.End) // ชิดขวาสุดของหน้าจอ
+                        .width(140.dp)
                         .height(50.dp),
                     shape = RoundedCornerShape(percent = 30),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
                 ) {
                     Text("ต่อไป", fontSize = 18.sp, color = Color.White)
-                    // Spacer(modifier = Modifier.width(8.dp))
-                    // Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", tint = Color.White, modifier = Modifier.size(20.dp))
                 }
             }
 
@@ -191,7 +146,8 @@ data class IntroPageData(val title: String, val description: String)
 @Composable
 fun IntroPageScreen(pageData: IntroPageData, primaryColor: Color) {
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
 
@@ -202,119 +158,20 @@ fun IntroPageScreen(pageData: IntroPageData, primaryColor: Color) {
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        // TODO: เปลี่ยน Box นี้เป็นรูปภาพ Illustration ของจริง
+        // Box รูปภาพประกอบ
         Box(
             modifier = Modifier
                 .size(width = 250.dp, height = 450.dp)
                 .background(Color(0xFFFEE0BB), shape = RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
-
+            // ใส่ภาพ Illustration ตรงนี้
         }
     }
 }
-
-// Composable สำหรับหน้า 5 (แบบฟอร์มข้อมูลส่วนตัว)
-@Composable
-fun ProfileFormScreen(
-    firstName: String, onFirstNameChange: (String) -> Unit,
-    lastName: String, onLastNameChange: (String) -> Unit,
-    dob: String, onDobChange: (String) -> Unit,
-    phoneNum: String, onPhoneNumChange: (String) -> Unit,
-    primaryColor: Color, inputBgColor: Color, borderColor: Color
-) {
-    Column(
-        modifier = Modifier.fillMaxSize()
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "ข้อมูลส่วนตัว", fontSize = 28.sp, fontWeight = FontWeight.Medium, color = primaryColor)
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // รูปโปรไฟล์
-        Box(contentAlignment = Alignment.BottomEnd) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, primaryColor, CircleShape)
-                    .background(WvBgGradientStart),
-                contentAlignment = Alignment.Center
-            ) {
-                // TODO: ใส่รูปโปรไฟล์ หรือไอคอนคน
-//                Icon(imageVector = Icons.Default.Edit, contentDescription = "Profile", tint = primaryColor.copy(alpha = 0.3f), modifier = Modifier.size(40.dp))
-            }
-            // ไอคอนแก้ไขรูปโปรไฟล์
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(primaryColor)
-                    .clickable { /* TODO: เลือกรูป */ },
-                contentAlignment = Alignment.Center
-            ) {
-//                Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color.White, modifier = Modifier.size(16.dp))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        // ช่องกรอก ชื่อจริง
-        InputField(label = "ชื่อจริง", value = firstName, onValueChange = onFirstNameChange, primaryColor = primaryColor, inputBgColor = inputBgColor, borderColor = borderColor)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // ช่องกรอก นามสกุล
-        InputField(label = "นามสกุล", value = lastName, onValueChange = onLastNameChange, primaryColor = primaryColor, inputBgColor = inputBgColor, borderColor = borderColor)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // ช่องกรอก วันเกิด
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(text = "วันเกิด", color = primaryColor, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp, start = 8.dp))
-            OutlinedTextField(
-                value = dob,
-                onValueChange = onDobChange,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(percent = 30),
-                singleLine = true,
-                trailingIcon = {
-//                    Icon(imageVector = Icons.Default.DateRange, contentDescription = "Calendar", tint = primaryColor)
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = inputBgColor, unfocusedContainerColor = inputBgColor,
-                    focusedBorderColor = primaryColor, unfocusedBorderColor = borderColor,
-                )
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        InputField(label = "เบอร์โทร", value = phoneNum, onValueChange = onPhoneNumChange, primaryColor = primaryColor, inputBgColor = inputBgColor, borderColor = borderColor)
-        Spacer(modifier = Modifier.height(16.dp))
-    }
-}
-
-// Widget ช่วยสร้างช่องกรอกข้อความ (จะได้โค้ดไม่ซ้ำซ้อน)
-@Composable
-fun InputField(label: String, value: String, onValueChange: (String) -> Unit, primaryColor: Color, inputBgColor: Color, borderColor: Color) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = label, color = primaryColor, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp, start = 8.dp))
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(percent = 30),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = inputBgColor, unfocusedContainerColor = inputBgColor,
-                focusedBorderColor = primaryColor, unfocusedBorderColor = borderColor,
-            )
-        )
-    }
-}
-
 
 @Composable
 fun WavyBackground(
-    // เปลี่ยนมารับค่าเป็น Brush (การไล่สี) แทน Color
     topWaveBrush: Brush = Brush.verticalGradient(
         colors = listOf(WvWaveGradientStart, WvWaveGradientEnd)
     ),
@@ -326,7 +183,7 @@ fun WavyBackground(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(bottomBgBrush) // ระบายสีพื้นหลังด้วย Gradient
+            .background(bottomBgBrush)
             .drawBehind {
                 val path = Path().apply {
                     moveTo(0f, 0f)
@@ -339,7 +196,6 @@ fun WavyBackground(
                     lineTo(size.width, 0f)
                     close()
                 }
-                // วาดเส้นคลื่นแล้วระบายด้วย Gradient
                 drawPath(path = path, brush = topWaveBrush)
             }
     ) {
