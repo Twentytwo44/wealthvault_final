@@ -51,12 +51,25 @@ kotlin {
             implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 
 
-            implementation(project(":functional:api:auth-api"))
             implementation(project(":functional:data-store"))
             implementation(project(":navigation"))
             implementation(project(":base:core"))
             implementation(project(":features:auth:login"))
+
+            implementation(project(":functional:api:account-api"))
+            implementation(project(":functional:api:auth-api"))
+            implementation(project(":functional:api:building-api"))
+            implementation(project(":functional:api:cash-api"))
             implementation(project(":functional:api:google-auth"))
+            implementation(project(":functional:api:insurance-api"))
+            implementation(project(":functional:api:investment-api"))
+            implementation(project(":functional:api:land-api"))
+            implementation(project(":functional:api:liability-api"))
+            implementation(project(":functional:api:user-api"))
+
+
+
+
 
 
 
