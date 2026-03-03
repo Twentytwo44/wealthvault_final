@@ -1,6 +1,7 @@
 package com.wealthvault.dashboard.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,13 +10,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 //import androidx.compose.material.icons.Icons
 //import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -41,6 +46,8 @@ fun DashboardScreen() {
     // ข้อมูลจำลอง (Mock Data)
     val mockAssets = listOf(
         FinancialItem("บัญชีให้ลูก", "ธนาคาร", "SCB", "มูลค่าทรัพย์สิน", "30,000 บาท"),
+        FinancialItem("กองทุนรวม", "บลจ.", "K-Asset", "มูลค่าทรัพย์สิน", "150,000 บาท"),
+        FinancialItem("เงินสด", "ประเภท", "กระเป๋าตังค์", "มูลค่าทรัพย์สิน", "20,000 บาท"),
         FinancialItem("กองทุนรวม", "บลจ.", "K-Asset", "มูลค่าทรัพย์สิน", "150,000 บาท"),
         FinancialItem("เงินสด", "ประเภท", "กระเป๋าตังค์", "มูลค่าทรัพย์สิน", "20,000 บาท")
     )
@@ -70,7 +77,8 @@ fun DashboardScreen() {
             // 2. Grid Cards (4 กล่องด้านบน)
             DashboardGridCards(
                 onAssetClick = { selectedTab = DashboardTab.ASSET },
-                onDebtClick = { selectedTab = DashboardTab.DEBT }
+                onDebtClick = { selectedTab = DashboardTab.DEBT },
+                selectedTab
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -79,15 +87,15 @@ fun DashboardScreen() {
             val isAsset = selectedTab == DashboardTab.ASSET
             val headerTitle = if (isAsset) "มูลค่าทรัพย์สิน≈" else "มูลค่าหนี้สิน≈"
             val headerAmount = if (isAsset) "200,000 บาท" else "30,000 บาท"
-            val headerColor = if (isAsset) Color(0xFF4CB37E) else Color(0xFFD3554A)
+            val headerColor = if (isAsset) Color(0xFF398A1E) else Color(0xFFDC4A3C)
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = headerTitle, fontSize = 20.sp, color = headerColor, fontWeight = FontWeight.SemiBold)
-                Text(text = headerAmount, fontSize = 20.sp, color = headerColor, fontWeight = FontWeight.Bold)
+                Text(text = headerTitle, fontSize = 20.sp, color = Color(0xFFC27A5A))
+                Text(text = headerAmount, fontSize = 20.sp, color = headerColor)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -115,9 +123,9 @@ fun DashboardTopBar() {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             // TODO: แทนที่ด้วย Icon หรือ Image Logo ของจริง
-            Text("W", fontSize = 32.sp, color = Color(0xFFC47B5D), fontWeight = FontWeight.Bold)
+            Text("W", fontSize = 32.sp, color = Color(0xFFC27A5A), fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Wealth & Vault", fontSize = 24.sp, color = Color(0xFFC47B5D), fontWeight = FontWeight.Medium)
+            Text("Wealth & Vault", fontSize = 24.sp, color = Color(0xFFC27A5A), fontWeight = FontWeight.Medium)
         }
 //        Icon(
 //            imageVector = Icons.Default.Notifications,
@@ -129,7 +137,7 @@ fun DashboardTopBar() {
 }
 
 @Composable
-fun DashboardGridCards(onAssetClick: () -> Unit, onDebtClick: () -> Unit) {
+fun DashboardGridCards(onAssetClick: () -> Unit, onDebtClick: () -> Unit, selectedTab: DashboardTab) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // แถวที่ 1
         Row(
@@ -139,10 +147,17 @@ fun DashboardGridCards(onAssetClick: () -> Unit, onDebtClick: () -> Unit) {
             // กล่องเขียว (ทรัพย์สิน) -> กดแล้วแสดงข้อมูลทรัพย์สิน
             MainCard(
                 modifier = Modifier.weight(1f).clickable { onAssetClick() },
-                bgColor = Color(0xFF4CB37E),
-//                icon = Icons.Default.AttachMoney,
+                // 👇 ใช้ Brush.linearGradient แทนการกำหนดสีเดียว
+                bgBrush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFF6BC591), // สีเริ่มต้น (ซ้ายบน)
+                        Color(0xFF26A65B)  // สีสิ้นสุด (ขวาล่าง)
+                    )
+                ),
+            //  icon = Icons.Default.AttachMoney,
                 title = "200,000",
-                subtitle = "มูลค่าทรัพย์สิน≈"
+                subtitle = "มูลค่าทรัพย์สิน≈",
+                isSelected = selectedTab == DashboardTab.ASSET
             )
             // กล่องเหลือง (ตู้เซฟ)
             SafeCard(modifier = Modifier.weight(1f))
@@ -156,22 +171,50 @@ fun DashboardGridCards(onAssetClick: () -> Unit, onDebtClick: () -> Unit) {
             // กล่องแดง (หนี้สิน) -> กดแล้วแสดงข้อมูลหนี้สิน
             MainCard(
                 modifier = Modifier.weight(1f).clickable { onDebtClick() },
-                bgColor = Color(0xFFD3554A),
+                bgBrush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFFD15E51), // สีเริ่มต้น (ซ้ายบน)
+                        Color(0xFFC63A2C)  // สีสิ้นสุด (ขวาล่าง)
+                    )
+                ),
 //                icon = Icons.Default.AccountBalance,
                 title = "30,000",
-                subtitle = "มูลค่าหนี้สิน≈"
+                subtitle = "มูลค่าหนี้สิน≈",
+                isSelected = selectedTab == DashboardTab.DEBT
             )
             // กล่องเล็ก 2 กล่อง (เพื่อน, แชร์)
             Row(
                 modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                SmallCard(modifier = Modifier.weight(1f), bgColor = Color(0xFFF3AD8E),
-//                    icon = Icons.Default.Group,
-                    count = "6", label = "เพื่อน")
-                SmallCard(modifier = Modifier.weight(1f), bgColor = Color(0xFF7E9DF9),
-//                    icon = Icons.Default.Share,
-                    count = "6", label = "แชร์\n(ทรัพย์สิน)")
+                // กล่องส้ม (เพื่อน)
+                SmallCard(
+                    modifier = Modifier.weight(1f),
+                    bgBrush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFFF9BDA6), // สีเริ่มต้น (ซ้ายบน)
+                            Color(0xFFF6A88A)  // สีสิ้นสุด (ขวาล่าง)
+                        )
+                    ), // 👈 ลบวงเล็บปิด ) ที่เคยเกินออกตรงนี้ครับ
+//  icon = Icons.Default.Group,
+                    count = "6",
+                    label = "เพื่อน"
+                )
+
+// กล่องฟ้า (แชร์)
+                SmallCard(
+                    modifier = Modifier.weight(1f),
+                    bgBrush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF8BAAFB),
+                            Color(0xFF7195F9)
+                        )
+                    ),
+//  icon = Icons.Default.Share,
+                    count = "6",
+                    label = "แชร์",
+                    label2 = "(ทรัพย์สิน)"
+                )
             }
         }
     }
@@ -179,23 +222,47 @@ fun DashboardGridCards(onAssetClick: () -> Unit, onDebtClick: () -> Unit) {
 
 // คอมโพเนนต์ย่อยสำหรับวาดกล่องสีต่างๆ
 @Composable
-fun MainCard(modifier: Modifier = Modifier, bgColor: Color,
-//             icon: ImageVector,
-             title: String, subtitle: String) {
+fun MainCard(
+    modifier: Modifier = Modifier,
+    bgBrush: Brush,
+//  icon: ImageVector,
+    title: String,
+    subtitle: String,
+    isSelected: Boolean = false // 👈 1. เพิ่ม Parameter รับสถานะการเลือก (Default เป็น false)
+) {
+    // 💡 2. กำหนด Shape ไว้ที่ตัวแปรเดียวเพื่อใช้ร่วมกันทั้ง shadow, border และ background
+    val cardShape = RoundedCornerShape(16.dp)
+
     Box(
         modifier = modifier
-            .height(90.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(bgColor)
+            .height(80.dp)
+            // 👇 3. ใส่ shadow เสมอ (ปรับ elevation ตามความเหมาะสม)
+            .shadow(
+                elevation = if (isSelected) 8.dp else 4.dp, // เลือกแล้วให้ลอยเด่นขึ้นนิดนึง
+                shape = cardShape
+            )
+            // 👇 4. ใช้ Modifier.then เพื่อใส่ border ตามเงื่อนไข isSelected
+            .then(
+                if (isSelected) {
+                    Modifier.border(
+                        width = 3.dp, // ความหนาของขอบ
+                        color = Color.White, // สีของขอบ (หรือสี Theme Primary)
+                        shape = cardShape
+                    )
+                } else {
+                    Modifier // ถ้าไม่เลือก ไม่ต้องใส่ border
+                }
+            )
+            .background(bgBrush, cardShape) // ใส่ shape ให้ background ด้วยเพื่อความเป๊ะ
             .padding(12.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
 //            Icon(imageVector = icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(36.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(text = title, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                Text(text = subtitle, color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text(text = title, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(text = subtitle, color = Color.White.copy(alpha = 0.9f), fontSize = 16.sp)
             }
         }
     }
@@ -205,74 +272,121 @@ fun MainCard(modifier: Modifier = Modifier, bgColor: Color,
 fun SafeCard(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .height(90.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFF1A837))
-            .padding(12.dp),
+            .height(80.dp)
+            .shadow(
+                elevation = 4.dp, // ปรับตัวเลขตรงนี้เพื่อเพิ่ม/ลดความฟุ้งของเงา (เช่น 4.dp, 8.dp)
+                shape = RoundedCornerShape(16.dp)
+            )
+            .background(Brush.linearGradient(
+                colors = listOf(
+                    Color(0xFFFDAE36), // สีเริ่มต้น (ซ้ายบน)
+                    Color(0xFFF3A227)  // สีสิ้นสุด (ขวาล่าง)
+                )
+            ))
+            .padding(10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
 //            Icon(imageVector = Icons.Default.Lock, contentDescription = null, tint = Color.White, modifier = Modifier.size(36.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(text = "7", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "7", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "ทรัพย์สิน", color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(bottom = 3.dp))
+                    Text(text = "ทรัพย์สิน", color = Color.White, fontSize = 16.sp, modifier = Modifier.padding(bottom = 3.dp))
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 // ปุ่ม "เพิ่ม" สีขาว
                 Box(
-                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color.White).padding(vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White)
+                        .padding(vertical = 4.dp)
+                        .height(30.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("เพิ่ม", color = Color(0xFFF1A837), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text("เพิ่ม", color = Color(0xFFF1A837), fontSize = 12.sp)
                 }
             }
         }
     }
 }
 
+
 @Composable
-fun SmallCard(modifier: Modifier = Modifier, bgColor: Color,
-//              icon: ImageVector,
-              count: String, label: String) {
+fun SmallCard(
+    modifier: Modifier = Modifier,
+    bgBrush: Brush, // 👈 1. เปลี่ยนจาก bgColor: Color เป็น bgBrush: Brush
+    count: String,
+    label: String,
+    label2: String = ""
+) {
     Column(
         modifier = modifier
-            .height(90.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(bgColor)
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .height(80.dp)
+            .shadow(
+                elevation = 4.dp, // ปรับตัวเลขตรงนี้เพื่อเพิ่ม/ลดความฟุ้งของเงา (เช่น 4.dp, 8.dp)
+                shape = RoundedCornerShape(16.dp)
+            )
+            .background(bgBrush), // 👈 2. ระบายสีพื้นหลังด้วย Brush
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-//            Icon(imageVector = icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(text = count, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        // --- ครึ่งบน: พื้นที่สำหรับตัวเลข ---
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Text(text = count, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
-        Text(text = label, color = Color.White, fontSize = 11.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center, lineHeight = 12.sp)
+
+        // --- ครึ่งล่าง: พื้นที่สำหรับข้อความ ---
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = label, color = Color.White, fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                if (label2.isNotEmpty()) {
+                    Text(text = label2, color = Color.White, fontSize = 11.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                }
+            }
+        }
     }
 }
-
 @Composable
 fun FinancialItemCard(item: FinancialItem) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth()
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = Color(0xFFF3E5D8), // สีพาสเทลตามที่คุณกำหนด
+                shape = RoundedCornerShape(16.dp) // สำคัญ! ต้องใส่ shape ให้ตรงกับของ Card
+            )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
             Text(text = item.title, fontSize = 16.sp, color = Color.Black, fontWeight = FontWeight.Medium)
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = item.typeLabel, fontSize = 14.sp, color = Color.Gray)
-                Text(text = item.typeValue, fontSize = 14.sp, color = Color.Black)
-            }
             Spacer(modifier = Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = item.valueLabel, fontSize = 14.sp, color = Color.Gray)
-                Text(text = item.amountStr, fontSize = 14.sp, color = Color.Black)
+                Text(text = item.typeLabel, fontSize = 14.sp, color = Color(0xFF3A2F2A))
+                Text(text = item.typeValue, fontSize = 14.sp, color = Color(0xFF7A6A62))
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = item.valueLabel, fontSize = 14.sp, color = Color(0xFF3A2F2A))
+                Text(text = item.amountStr, fontSize = 14.sp, color = Color(0xFF7A6A62))
             }
         }
     }
