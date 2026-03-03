@@ -70,6 +70,8 @@ kotlin {
 
 
 
+            implementation(project(":features:auth:register"))
+//            implementation(project(":features:auth:introduction"))
 
 
 
