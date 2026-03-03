@@ -6,7 +6,7 @@ plugins {
 kotlin {
 
     androidLibrary {
-        namespace = "com.example.dashboard"
+        namespace = "com.example.register"
 
     }
 

@@ -2,8 +2,9 @@ package com.example.insurance_api.di
 
 
 
-import com.example.cash_api.createcash.CreateInsuranceApi
-import com.example.cash_api.createcash.CreateInsuranceApiImpl
+
+import com.example.insurance_api.createcash.CreateInsuranceApi
+import com.example.insurance_api.createcash.CreateInsuranceApiImpl
 import com.example.insurance_api.deleteinsurance.DeleteInsuranceApi
 import com.example.insurance_api.deleteinsurance.DeleteInsuranceApiImpl
 import com.example.insurance_api.getinsurance.GetInsuranceApi

@@ -12,7 +12,7 @@ kotlin {
     androidLibrary {
         namespace = "com.example.liability_api"
         compileSdk = 36
-        minSdk = 31
+        minSdk = 24
 
 //        withHostTestBuilder {
 //        }
