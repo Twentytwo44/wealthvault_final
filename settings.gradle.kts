@@ -50,6 +50,8 @@ include(":functional:api:liability-api")
 include(":features:auth:login")
 include(":features:auth:register")
 
+include(":features:dashboard")
+
 
 
 include(":base:core")

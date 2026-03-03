@@ -60,6 +60,7 @@ kotlin {
             implementation(project(":functional:api:auth-api"))
             implementation(project(":functional:api:building-api"))
             implementation(project(":functional:api:cash-api"))
+            implementation(project(":features:dashboard"))
             implementation(project(":functional:api:google-auth"))
             implementation(project(":functional:api:insurance-api"))
             implementation(project(":functional:api:investment-api"))
