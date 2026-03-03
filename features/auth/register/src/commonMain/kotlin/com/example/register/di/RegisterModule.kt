@@ -1,7 +1,7 @@
 
-import com.example.dashboard.data.RegisterDataSource
-import com.example.dashboard.data.RegisterRepositoryImpl
-import com.example.dashboard.usecase.RegisterUseCase
+import com.example.register.data.RegisterDataSource
+import com.example.register.data.RegisterRepositoryImpl
+import com.example.register.usecase.RegisterUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import org.koin.dsl.module

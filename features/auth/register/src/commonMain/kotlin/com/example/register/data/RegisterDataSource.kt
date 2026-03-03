@@ -1,4 +1,4 @@
-package com.example.dashboard.data
+package com.example.register.data
 
 import com.wealthvault.`auth-api`.model.RegisterRequest
 import com.wealthvault.`auth-api`.register.RegisterApi

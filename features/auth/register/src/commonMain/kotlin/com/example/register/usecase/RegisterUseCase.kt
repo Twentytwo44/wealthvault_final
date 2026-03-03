@@ -1,6 +1,6 @@
-package com.example.dashboard.usecase
+package com.example.register.usecase
 
-import com.example.dashboard.data.RegisterRepositoryImpl
+import com.example.register.data.RegisterRepositoryImpl
 import com.wealthvault.`auth-api`.model.RegisterRequest
 import com.wealthvault.core.FlowResult
 import com.wealthvault.core.FlowUseCase

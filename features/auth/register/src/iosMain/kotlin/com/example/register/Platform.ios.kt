@@ -1,3 +1,3 @@
-package com.example.dashboard
+package com.example.register
 
 actual fun platform() = "iOS"

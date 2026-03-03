@@ -1,4 +1,4 @@
-package com.example.dashboard
+package com.example.register
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

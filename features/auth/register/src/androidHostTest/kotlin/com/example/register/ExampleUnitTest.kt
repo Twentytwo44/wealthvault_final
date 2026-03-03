@@ -1,4 +1,4 @@
-package com.example.dashboard
+package com.example.register
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
