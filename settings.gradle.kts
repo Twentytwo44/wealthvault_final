@@ -58,3 +58,5 @@ include(":base:config")
 include(":features:profile")
 include(":navigation")
 
+include(":features:manage:financial-asset")
+include(":features:manage:financial-obligations")
