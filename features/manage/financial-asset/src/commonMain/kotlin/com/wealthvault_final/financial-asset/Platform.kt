@@ -1,3 +1,3 @@
 package com.wealthvault_final.`financial-asset`
 
-expect fun platform(): String
+//expect fun platform(): String

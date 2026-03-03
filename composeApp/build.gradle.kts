@@ -72,6 +72,8 @@ kotlin {
 
 
             implementation(project(":features:auth:register"))
+            implementation(project(":features:manage:financial-asset"))
+
 //            implementation(project(":features:auth:introduction"))
 
 

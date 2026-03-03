@@ -25,6 +25,7 @@ dataStore = "1.2.0"
 jetbrainKotlinGradlePlugin = "2.3.0"
 androidBuildGradle = "8.11.2"
 mokkery = "3.1.1"
+compose-plugin = "1.7.0"
 
 
 
@@ -79,6 +80,8 @@ dataStore-preferences = { group = "androidx.datastore", name = "datastore-prefer
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "jetbrainKotlinGradlePlugin" }
 android-build-gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "androidBuildGradle" }
 mokkery-gradle = { group = "dev.mokkery", name = "mokkery-gradle", version.ref = "mokkery" }
+
+compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "compose-plugin" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

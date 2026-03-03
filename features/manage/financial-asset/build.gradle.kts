@@ -14,7 +14,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.wealthvault.financial-asset"
+        namespace = "com.wealthvault.financial_asset"
 
     }
 
@@ -40,6 +40,8 @@ kotlin {
                 implementation(project(":base:core"))
 
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
+
+                implementation(libs.compose.material)
 
 
             }

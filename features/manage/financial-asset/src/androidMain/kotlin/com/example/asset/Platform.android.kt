@@ -1,3 +1,3 @@
 package com.example.asset
 
-actual fun platform() = "Android"
+//actual fun platform() = "Android"
