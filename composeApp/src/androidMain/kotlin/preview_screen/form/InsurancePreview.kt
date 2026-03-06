@@ -1,15 +1,12 @@
-package com.wealthvault.wealthvault_final
+package preview_screen.form
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.wealthvault_final.`financial-asset`.ui.insurance.InsuranceInputForm
 
+@Preview(showBackground = true, name = "Preview")
 @Composable
-@Preview
-fun App() {
-    MaterialTheme {
-//        MainScreen()
-        InsuranceInputForm()
-    }
+fun InsuranceFormScreenPreview() {
+    InsuranceInputForm()
 }
+

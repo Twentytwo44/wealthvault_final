@@ -1,4 +1,4 @@
-package com.wealthvault_final.`financial-asset`.ui.stock
+package com.wealthvault_final.`financial-asset`.ui.cash
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -37,7 +37,7 @@ import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicke
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssetInputForm(
+fun CashInputForm(
     onBackClick: () -> Unit = {},
     onNextClick: () -> Unit = {}
 ) {
@@ -58,7 +58,7 @@ fun AssetInputForm(
                 ),
                 title = {
                     Text(
-                        "ข้อมูลหุ้น กองทุน",
+                        "ข้อมูลเงินสด ทองคำ",
                         color = Color(0xFF8D6E63),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
@@ -81,10 +81,14 @@ fun AssetInputForm(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ส่วนกรอกข้อมูลหลัก
-            AssetTextField(label = "ชื่อหุ้น กองทุน*", placeholder = "กรอกชื่อ")
-            AssetTextField(label = "จำนวนหุ้น กองทุน*", placeholder = "0.00")
-            AssetTextField(label = "ราคาที่ซื้อ*", placeholder = "0.00")
-            AssetTextField(label = "คำอธิบาย", placeholder = "รายละเอียดเพิ่มเติม", isMultiLine = true)
+            AssetTextField(label = "ประเภทประกัน*", placeholder = "")
+            AssetTextField(label = "เลขกรมธรรม์*", placeholder = "")
+            AssetTextField(label = "บริษัทประกัน*", placeholder = "")
+            AssetTextField(label = "ระยะเวลาคุ้มครอง", placeholder = "")
+            AssetTextField(label = "วงเงินคุ้มครอง", placeholder = "")
+            AssetTextField(label = "วันหมดอายุความคุ้มครอง", placeholder = "")
+            AssetTextField(label = "วันที่เริ่มสัญญา", placeholder = "")
+            AssetTextField(label = "คำอธิบาย", placeholder = "", isMultiLine = true)
 
             Spacer(modifier = Modifier.height(24.dp))
 

@@ -14,6 +14,9 @@
             <array>
                 <string>com.googleusercontent.apps.130348752829-7jmmd7hsc8tcngdmjcvj51r5af1g4np8</string>
             </array>
+
+            <key>NSPhotoLibraryUsageDescription</key>
+            <string>WealthVault ต้องการเข้าถึงรูปภาพเพื่อแนบหลักฐานสินทรัพย์</string>
         </dict>
     </array>
 </dict>

@@ -1,9 +1,12 @@
 plugins {
-    alias(libs.plugins.wealth.vault.lib)
-    alias(libs.plugins.wealth.vault.compose)
-//    alias(libs.plugins.composeCompiler)
-//    alias(libs.plugins.composeMultiplatform)
-//    alias(libs.plugins.wealth.vault.test)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.androidLint)
+    alias(libs.plugins.composeCompiler)
+
+
+
+
 
 
 }
@@ -14,8 +17,45 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.wealthvault.financial_asset"
+        namespace = "com.wealthvault_final.financial_asset"
+        compileSdk = 36
+        minSdk = 24
 
+//        withHostTestBuilder {
+//        }
+//
+//        withDeviceTestBuilder {
+//            sourceSetTreeName = "test"
+//        }.configure {
+//            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//        }
+    }
+
+    // For iOS targets, this is also where you should
+    // configure native binary output. For more information, see:
+    // https://kotlinlang.org/docs/multiplatform-build-native-binaries.html#build-xcframeworks
+
+    // A step-by-step guide on how to include this library in an XCode
+    // project can be found here:
+    // https://developer.android.com/kotlin/multiplatform/migrate
+    val xcfName = "financial-assetKit"
+
+    iosX64 {
+        binaries.framework {
+            baseName = xcfName
+        }
+    }
+
+    iosArm64 {
+        binaries.framework {
+            baseName = xcfName
+        }
+    }
+
+    iosSimulatorArm64 {
+        binaries.framework {
+            baseName = xcfName
+        }
     }
 
     sourceSets {
@@ -42,10 +82,22 @@ kotlin {
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
 
                 implementation(libs.compose.material)
+                implementation(libs.compose.material3)
+
+                implementation(libs.compose.runtime)
+                implementation(libs.compose.foundation)
+                implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")
 
 
             }
+
         }
+        androidMain {
+            dependencies {
+                implementation("androidx.activity:activity-compose:1.9.0")
+            }
+        }
+
 
     }
 

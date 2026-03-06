@@ -26,7 +26,8 @@ jetbrainKotlinGradlePlugin = "2.3.0"
 androidBuildGradle = "8.11.2"
 mokkery = "3.1.1"
 compose-plugin = "1.7.0"
-
+imagepicker-kmp = "1.0.8"
+filekit = "0.8.2"
 
 
 
@@ -82,6 +83,10 @@ android-build-gradle = { group = "com.android.tools.build", name = "gradle", ver
 mokkery-gradle = { group = "dev.mokkery", name = "mokkery-gradle", version.ref = "mokkery" }
 
 compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "compose-plugin" }
+# image and file
+#imagepicker-kmp = { module = "io.github.ismoy:imagepickerkmp", version.ref = "imagepicker-kmp" }
+filekit-compose = { module = "io.github.vinceglb.filekit:filekit-compose", version.ref = "filekit" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
