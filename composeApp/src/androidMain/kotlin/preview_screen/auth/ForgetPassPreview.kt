@@ -1,15 +1,15 @@
-package preview_screen.auth // แก้ package ให้ตรงกับไฟล์
+package preview_screen.auth
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+// สังเกตว่า package ของคุณมีทั้ง fogetpassword และ forgetpassword ระวังพิมพ์ผิดตอนสร้างไฟล์จริงนะครับ
 import com.wealthvault.fogetpassword.ui.ConfirmOTPContent
 import com.wealthvault.fogetpassword.ui.ResetPasswordContent
 import com.wealthvault.forgetpassword.ui.ForgetPasswordContent
 
-
-@Preview(showBackground = true, name = "Preview")
+// หน้าที่ 1
+@Preview(showBackground = true, name = "1. Forget Password Screen")
 @Composable
-
 fun ForgetPasswordScreenPreview() {
     ForgetPasswordContent(
         email = "",
@@ -17,14 +17,26 @@ fun ForgetPasswordScreenPreview() {
         onBackClick = {},
         onSendOtpClick = {}
     )
+}
+
+// หน้าที่ 2
+@Preview(showBackground = true, name = "2. Confirm OTP Screen")
+@Composable
+fun ConfirmOTPScreenPreview() {
     ConfirmOTPContent(
-        emailSentTo = "",
+        emailSentTo = "example@email.com", // แอบใส่ข้อมูลจำลองให้ Preview ดูสวยขึ้นครับ
         otpCode = "",
         onOtpChange = {},
         onBackClick = {},
         onVerifyClick = {},
         onResendClick = {},
     )
+}
+
+// หน้าที่ 3
+@Preview(showBackground = true, name = "3. Reset Password Screen")
+@Composable
+fun ResetPasswordScreenPreview() {
     ResetPasswordContent(
         newPassword = "",
         onNewPasswordChange = {},
@@ -33,9 +45,4 @@ fun ForgetPasswordScreenPreview() {
         onBackClick = {},
         onSubmitClick = {},
     )
-
 }
-
-
-
-

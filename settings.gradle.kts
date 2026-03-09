@@ -63,5 +63,6 @@ include(":navigation")
 
 include(":features:manage:financial-asset")
 include(":features:manage:financial-obligations")
+include(":features:manage:financialList")
 
-
+include(":features:social")

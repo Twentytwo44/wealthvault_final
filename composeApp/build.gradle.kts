@@ -58,6 +58,8 @@ kotlin {
             implementation(project(":features:auth:register"))
             implementation(project(":features:dashboard"))
             implementation(project(":features:notification"))
+            implementation(project(":features:manage:financialList"))
+            implementation(project(":features:social"))
 
             implementation(project(":functional:api:account-api"))
             implementation(project(":functional:api:auth-api"))
