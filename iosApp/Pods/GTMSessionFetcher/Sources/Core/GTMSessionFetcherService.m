@@ -1262,7 +1262,7 @@ static id<GTMUserAgentProvider> SharedStandardUserAgentProvider(void) {
     }
   }];
 
-  // Our tests rely on this notification to know the session discard timer fired.
+  // Our tests rely on this com.wealthvault.com.wealthvault.notification to know the session discard timer fired.
   NSDictionary *userInfo = @{kGTMSessionFetcherServiceSessionKey : session};
   NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
   [nc postNotificationName:kGTMSessionFetcherServiceSessionBecameInvalidNotification

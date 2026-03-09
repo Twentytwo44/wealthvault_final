@@ -52,7 +52,7 @@ include(":features:auth:login")
 include(":features:auth:register")
 
 include(":features:dashboard")
-
+include(":features:notification")
 
 
 include(":base:core")
@@ -63,3 +63,5 @@ include(":navigation")
 
 include(":features:manage:financial-asset")
 include(":features:manage:financial-obligations")
+
+

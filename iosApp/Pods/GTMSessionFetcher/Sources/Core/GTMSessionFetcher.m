@@ -223,7 +223,7 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
   int64_t _downloadedLength;
   NSURLCredential *_credential;       // username & password
   NSURLCredential *_proxyCredential;  // credential supplied to proxy servers
-  BOOL _isStopNotificationNeeded;     // set when start notification has been sent
+  BOOL _isStopNotificationNeeded;     // set when start com.wealthvault.com.wealthvault.notification has been sent
   BOOL _isUsingTestBlock;  // set when a test block was provided (remains set when the block is
                            // released)
   id _userData;            // retained, if set by caller
@@ -437,7 +437,7 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
 }
 
 - (void)dealloc {
-  GTMSESSION_ASSERT_DEBUG(!_isStopNotificationNeeded, @"unbalanced fetcher notification for %@",
+  GTMSESSION_ASSERT_DEBUG(!_isStopNotificationNeeded, @"unbalanced fetcher com.wealthvault.com.wealthvault.notification for %@",
                           _request.URL);
   [self forgetSessionIdentifierForFetcherWithoutSyncCheck];
 
@@ -928,9 +928,9 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
     _initialRequestDate = [[NSDate alloc] init];
   }
 
-  // We don't expect to reach here even on retry or auth until a stop notification has been sent
+  // We don't expect to reach here even on retry or auth until a stop com.wealthvault.com.wealthvault.notification has been sent
   // for the previous task, but we should ensure that we don't unbalance that.
-  GTMSESSION_ASSERT_DEBUG(!_isStopNotificationNeeded, @"Start notification without a prior stop");
+  GTMSESSION_ASSERT_DEBUG(!_isStopNotificationNeeded, @"Start com.wealthvault.com.wealthvault.notification without a prior stop");
   [self sendStopNotificationIfNeeded];
 
   [self addPersistedBackgroundSessionToDefaults];
@@ -949,10 +949,10 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
     [self simulateFetchForTestBlock];
 #endif
   } else {
-    // We resume the session task after posting the notification since the
+    // We resume the session task after posting the com.wealthvault.com.wealthvault.notification since the
     // delegate callbacks may happen immediately if the fetch is started off
     // the main thread or the session delegate queue is on a background thread,
-    // and we don't want to post a start notification after a premature finish
+    // and we don't want to post a start com.wealthvault.com.wealthvault.notification after a premature finish
     // of the session task.
     [newSessionTask resume];
   }
@@ -2140,7 +2140,7 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
   }  // @synchronized(self)
 
   // If the NSURLSession needs to be invalidated, but needs to wait until the delegate method
-  // URLSession:task:didCompleteWithError: is called, delay sending the fetch stopped notification
+  // URLSession:task:didCompleteWithError: is called, delay sending the fetch stopped com.wealthvault.com.wealthvault.notification
   // until then; otherwise send it now.
   if (sendStopNotification) {
     [self sendStopNotificationIfNeeded];
@@ -2751,7 +2751,7 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
                           block:^{
                             handler(data, error);
 
-                            // Post a notification, primarily to allow code to collect responses for
+                            // Post a com.wealthvault.com.wealthvault.notification, primarily to allow code to collect responses for
                             // testing.
                             //
                             // The observing code is not likely on the fetcher's callback
@@ -3295,7 +3295,7 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
     [self beginRetryTimer];
   }
 
-  // We want to send the stop notification before calling the delegate's
+  // We want to send the stop com.wealthvault.com.wealthvault.notification before calling the delegate's
   // callback selector, since the callback selector may release all of
   // the fetcher properties that the client is using to track the fetches.
   //

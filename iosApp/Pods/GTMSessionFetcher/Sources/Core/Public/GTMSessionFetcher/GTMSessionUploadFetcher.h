@@ -29,7 +29,7 @@
 //
 // Chunk fetchers are discarded as soon as they have completed.
 //
-// The protocol also allows for a cancellation notification request to be sent to the
+// The protocol also allows for a cancellation com.wealthvault.com.wealthvault.notification request to be sent to the
 // server to allow discarding of the currently uploaded data and this will be sent
 // automatically upon calling stopFetching if the upload has already started.
 //

@@ -358,7 +358,7 @@ extern "C" {
 // performance impacts.
 //
 // To avoid launch performance impacts, on iPhone/iPad with iOS 13+ the
-// GTMSessionFetcher class will register for the app launch notification and
+// GTMSessionFetcher class will register for the app launch com.wealthvault.com.wealthvault.notification and
 // perform the reconnect then.
 //
 // Apps targeting Mac or older iOS SDKs can opt into the new behavior by defining
@@ -385,12 +385,12 @@ extern NSString *const kGTMSessionFetcherStoppedNotification;
 extern NSString *const kGTMSessionFetcherRetryDelayStartedNotification;
 extern NSString *const kGTMSessionFetcherRetryDelayStoppedNotification;
 
-// Completion handler notification. This is intended for use by code capturing
+// Completion handler com.wealthvault.com.wealthvault.notification. This is intended for use by code capturing
 // and replaying fetch requests and results for testing. For fetches where
 // destinationFileURL or accumulateDataBlock is set for the fetcher, the data
 // will be nil for successful fetches.
 //
-// This notification is posted on the main thread.
+// This com.wealthvault.com.wealthvault.notification is posted on the main thread.
 extern NSString *const kGTMSessionFetcherCompletionInvokedNotification;
 extern NSString *const kGTMSessionFetcherCompletionDataKey;
 extern NSString *const kGTMSessionFetcherCompletionErrorKey;
