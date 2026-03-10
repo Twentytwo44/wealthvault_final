@@ -10,7 +10,6 @@ class LineAuthAndroid(
     private val context: Context,
     private val launchIntent: (Intent) -> Unit // รับฟังก์ชันสำหรับยิง Intent
 ) : LineAuth {
-
     // ⚠️ อย่าลืมใส่ Channel ID ของคุณ
     private val channelId = "2009343103"
 
