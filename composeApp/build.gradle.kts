@@ -21,6 +21,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            export(project(":functional:api:line-auth"))
+            export(project(":features:auth:login"))
         }
     }
     
@@ -54,7 +56,7 @@ kotlin {
             implementation(project(":functional:data-store"))
             implementation(project(":navigation"))
             implementation(project(":base:core"))
-            implementation(project(":features:auth:login"))
+            api(project(":features:auth:login"))
 
             implementation(project(":functional:api:account-api"))
             implementation(project(":functional:api:auth-api"))
@@ -67,6 +69,9 @@ kotlin {
             implementation(project(":functional:api:land-api"))
             implementation(project(":functional:api:liability-api"))
             implementation(project(":functional:api:user-api"))
+            api(project(":functional:api:line-auth"))
+
+
 
 
 

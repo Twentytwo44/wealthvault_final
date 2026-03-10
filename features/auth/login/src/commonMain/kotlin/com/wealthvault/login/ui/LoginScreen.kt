@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,8 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -33,28 +35,35 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.example.login.ui.LoginScreenModel
-import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSurface
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightMuted
-import com.wealthvault.core.theme.WvBgGradientStart
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSurface
 import com.wealthvault.core.theme.WvBgGradientEnd
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Path
-import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.WvBgGradientStart
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientStart
+import com.wealthvault.core.utils.getScreenModel
 
 class LoginScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LoginScreenModel>()
+//
+//        val lineAuth = rememberLineAuth(
+//            onSuccess = { user ->
+//                // เมื่อสำเร็จ โยนกลับไปให้ ScreenModel คิดต่อ
+//                screenModel.onLineSuccess(user) {
+//                    println("ไปหน้าต่อไปได้เลย!")
+//                    // navigator.push(HomeScreen())
+//                }
+//            },
+//            onError = { error ->
+//                // เมื่อพัง โยนกลับไปให้ ScreenModel โชว์ Error
+//                screenModel.onLineError(error)
+//            }
+//        )
 
         // เรียกใช้ Stateless UI ที่เราแยกไว้
         LoginContent(
@@ -71,7 +80,10 @@ class LoginScreen : Screen {
             onGoogleClick = {
                 screenModel.onGoogleClick {
                 }
-            }
+            },
+            onLineClick = {
+//                screenModel.onLineClick(lineAuth)
+            },
         )
     }
 }
@@ -84,6 +96,7 @@ fun LoginContent(
     isLoading: Boolean,
     onLoginClick: () -> Unit,
     onGoogleClick: () -> Unit,
+    onLineClick:() -> Unit,
 ) {
 
     WavyBackground{
@@ -250,6 +263,22 @@ fun LoginContent(
                     colors = ButtonDefaults.outlinedButtonColors(containerColor = LightSurface)
                 ) {
                     Text("Google", color = LightPrimary, fontSize = 16.sp)
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // 7. ปุ่ม Google
+                OutlinedButton(
+                    onClick = onLineClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(horizontal = 48.dp),
+                    shape = RoundedCornerShape(percent = 30),
+                    border = BorderStroke(1.dp, LightBorder),
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = LightSurface)
+                ) {
+                    Text("Line login", color = LightPrimary, fontSize = 16.sp)
                 }
             } // ปิด Column กล่อง Input
         } // ปิด Column หลัก

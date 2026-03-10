@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class LoginScreenModel(
     private val loginUseCase: LoginUseCase,
-    private val googelRepository: GoogleAuthRepository
+    private val googelRepository: GoogleAuthRepository,
 ) : ScreenModel {
 
     // UI State
@@ -91,4 +91,31 @@ class LoginScreenModel(
             isLoading = false
         }
     }
+
+//    fun onLineClick(lineAuth: LineAuth) {
+//        println("🚀 [LoginScreenModel] onLineClick triggered")
+//        isLoading = true
+//        errorMessage = null
+//
+//        // สั่งให้ตัวจัดการ LINE ที่หน้าจอส่งมา เริ่มทำงาน
+//        lineAuth.login()
+//    }
+//
+//    // 🟢 2. รับผลลัพธ์กลับมาเมื่อ LINE ล็อกอินสำเร็จ
+//    fun onLineSuccess(user: LineUser, onSuccess: () -> Unit) {
+//        println("🎉 [LoginScreenModel] LINE Success: ${user.displayName} (${user.userId})")
+//        isLoading = false
+//
+//        // 💡 ตรงนี้คุณสามารถเอา user.userId ไปยิงเข้า API Backend ของ WealthVault ได้เลย
+//        // เช่น loginUseCase(LoginRequest(user.userId, ...))
+//
+//        onSuccess() // สั่งให้หน้าจอทำคำสั่งต่อไป (เช่น เด้งไปหน้า Home)
+//    }
+//
+//    // 🟢 3. รับผลลัพธ์กลับมาเมื่อพัง หรือกดยกเลิก
+//    fun onLineError(error: String) {
+//        println("❌ [LoginScreenModel] LINE Error: $error")
+//        isLoading = false
+//        errorMessage = error
+//    }
 }

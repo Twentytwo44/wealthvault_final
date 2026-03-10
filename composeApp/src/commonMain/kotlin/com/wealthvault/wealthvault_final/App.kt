@@ -3,13 +3,15 @@ package com.wealthvault.wealthvault_final
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.wealthvault_final.`financial-asset`.ui.insurance.InsuranceInputForm
+import cafe.adriel.voyager.navigator.Navigator
+import com.wealthvault.login.ui.LoginScreen
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-//        MainScreen()
-        InsuranceInputForm()
+       //MainScreen()
+        Navigator(LoginScreen())
+
     }
 }
