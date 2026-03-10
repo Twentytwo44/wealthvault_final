@@ -9,6 +9,9 @@ import com.wealthvault.social.ui.space.FriendSpaceScreen
 import com.wealthvault.social.ui.space.GroupSpaceScreen
 import com.wealthvault.social.ui.share.AssetShareScreen
 import com.wealthvault.social.ui.manage_shared.SharedAssetManageScreen
+// Import หน้าโปรไฟล์ที่เพิ่งสร้างใหม่
+import com.wealthvault.social.ui.profile.FriendProfileScreen
+import com.wealthvault.social.ui.profile.GroupProfileScreen
 
 // 1. พรีวิวหน้า Social หลัก (สลับแท็บเพื่อน/กลุ่ม)
 @Preview(showBackground = true, name = "1. Social Main Screen", device = "id:pixel_7")
@@ -59,5 +62,27 @@ fun SharedAssetManageScreenPreview() {
     SharedAssetManageScreen(
         targetName = "Twentytwo", // ลองเปลี่ยนชื่อตรงนี้ดู ข้อความในหน้าจอจะเปลี่ยนตามครับ
         onBackClick = {}
+    )
+}
+
+// 6. พรีวิวหน้าโปรไฟล์เพื่อน
+@Preview(showBackground = true, name = "6. Friend Profile Screen", device = "id:pixel_7")
+@Composable
+fun FriendProfileScreenPreview() {
+    FriendProfileScreen(
+        onBackClick = {},
+        onRemoveFriendClick = {}
+    )
+}
+
+// 7. พรีวิวหน้าโปรไฟล์กลุ่ม
+@Preview(showBackground = true, name = "7. Group Profile Screen", device = "id:pixel_7")
+@Composable
+fun GroupProfileScreenPreview() {
+    GroupProfileScreen(
+        onBackClick = {},
+        onLeaveGroupClick = {},
+        onMembersClick = {},
+        onAddMemberClick = {}
     )
 }
