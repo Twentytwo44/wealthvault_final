@@ -60,6 +60,7 @@ kotlin {
             implementation(project(":features:notification"))
             implementation(project(":features:manage:financialList"))
             implementation(project(":features:social"))
+            implementation(project(":features:profile"))
 
             implementation(project(":functional:api:account-api"))
             implementation(project(":functional:api:auth-api"))
