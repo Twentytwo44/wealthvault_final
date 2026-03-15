@@ -29,101 +29,124 @@ fun ProfileScreen(
     val bgColor = Color(0xFFFFF8F3)
     var expandedMenu by remember { mutableStateOf(false) }
 
-    Scaffold(containerColor = bgColor) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+            .padding(top = 20.dp)
+    ) {
+
+        // --- Header & Settings Menu ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Text(
+                text = "โปรไฟล์",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Medium,
+                color = themeColor
+            )
 
-            // --- Header & Settings Menu ---
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "โปรไฟล์", fontSize = 24.sp, fontWeight = FontWeight.Medium, color = themeColor)
+            Box {
+                //                    Icon(
+                //                        imageVector = Icons.Default.Settings,
+                //                        contentDescription = "Settings",
+                //                        tint = themeColor,
+                //                        modifier = Modifier
+                //                            .size(28.dp)
+                //                            .clickable { expandedMenu = true }
+                //                    )
 
-                Box {
-//                    Icon(
-//                        imageVector = Icons.Default.Settings,
-//                        contentDescription = "Settings",
-//                        tint = themeColor,
-//                        modifier = Modifier
-//                            .size(28.dp)
-//                            .clickable { expandedMenu = true }
-//                    )
-
-                    // Popup Menu (แก้ไขข้อมูล / ออกจากระบบ)
-                    DropdownMenu(
-                        expanded = expandedMenu,
-                        onDismissRequest = { expandedMenu = false },
-                        offset = DpOffset(x = (-16).dp, y = 8.dp),
-                        modifier = Modifier.background(Color.White, RoundedCornerShape(16.dp))
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("แก้ไขข้อมูล", color = Color(0xFF3A2F2A)) },
-                            onClick = {
-                                expandedMenu = false
-                                onEditProfileClick()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("ออกจากระบบ", color = Color(0xFFE74C3C)) },
-                            onClick = {
-                                expandedMenu = false
-                                onLogoutClick()
-                            }
-                        )
-                    }
+                // Popup Menu (แก้ไขข้อมูล / ออกจากระบบ)
+                DropdownMenu(
+                    expanded = expandedMenu,
+                    onDismissRequest = { expandedMenu = false },
+                    offset = DpOffset(x = (-16).dp, y = 8.dp),
+                    modifier = Modifier.background(Color.White, RoundedCornerShape(16.dp))
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("แก้ไขข้อมูล", color = Color(0xFF3A2F2A)) },
+                        onClick = {
+                            expandedMenu = false
+                            onEditProfileClick()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("ออกจากระบบ", color = Color(0xFFE74C3C)) },
+                        onClick = {
+                            expandedMenu = false
+                            onLogoutClick()
+                        }
+                    )
                 }
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // --- Profile Info ---
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // รูปโปรไฟล์ (จำลองเป็นกล่องสีเทา)
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFE0DCDA))
-                )
-
-                Spacer(modifier = Modifier.width(24.dp))
-
-                Column {
-                    Text(text = "Twentytwo01", fontSize = 16.sp, color = Color(0xFF3A2F2A), fontWeight = FontWeight.Medium)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "nptwosudinw@gmail.com", fontSize = 12.sp, color = Color.Gray)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = "13/08/2549", fontSize = 14.sp, color = Color(0xFF3A2F2A))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-            HorizontalDivider(color = themeColor.copy(alpha = 0.3f))
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // --- Settings Summary ---
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "เปิดให้เห็นสินทรัพย์ทั้งหมดให้คนใกล้ชิดเมื่ออายุ", fontSize = 12.sp, color = Color(0xFF3A2F2A), modifier = Modifier.weight(1f))
-                Text(text = "80 ปี", fontSize = 14.sp, color = Color.Gray)
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // --- Close People List ---
-            Text(text = "คนใกล้ชิด", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ClosePersonItem(name = "Nai", showDelete = false)
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // --- Profile Info ---
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // รูปโปรไฟล์ (จำลองเป็นกล่องสีเทา)
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE0DCDA))
+            )
+
+            Spacer(modifier = Modifier.width(24.dp))
+
+            Column {
+                Text(
+                    text = "Twentytwo01",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color(0xFF3A2F2A),
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "nptwosudinw@gmail.com",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "13/08/2549",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF3A2F2A))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+        HorizontalDivider(color = themeColor.copy(alpha = 0.3f))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- Settings Summary ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "เปิดให้เห็นสินทรัพย์ทั้งหมดให้คนใกล้ชิดเมื่ออายุ",
+                fontSize = 12.sp,
+                color = Color(0xFF3A2F2A),
+                modifier = Modifier.weight(1f)
+            )
+            Text(text = "80 ปี", fontSize = 14.sp, color = Color.Gray)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- Close People List ---
+        Text(
+            text = "คนใกล้ชิด",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF3A2F2A)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ClosePersonItem(name = "Nai", showDelete = false)
     }
+
 }

@@ -38,30 +38,14 @@ fun EditProfileScreen(
     var birthDate by remember { mutableStateOf("13/08/2549") }
     var isShareEnabled by remember { mutableStateOf(true) }
 
-    Scaffold(
-        containerColor = bgColor,
-        bottomBar = {
-            // ปุ่มบันทึกด้านล่างสุด
-            Box(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
-                Button(
-                    onClick = onSaveClick,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(percent = 30),
-                    colors = ButtonDefaults.buttonColors(containerColor = themeColor)
-                ) {
-                    Text("บันทึก", fontSize = 16.sp, color = Color.White)
-                }
-            }
-        }
-    ) { paddingValues ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 20.dp)
+                .padding(top = 20.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(24.dp))
                 // --- Top Bar ---
                 Row(verticalAlignment = Alignment.CenterVertically) {
 //                    Icon(
@@ -71,7 +55,9 @@ fun EditProfileScreen(
 //                        modifier = Modifier.size(24.dp).clickable { onBackClick() }
 //                    )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(text = "ตั้งค่าโปรไฟล์", fontSize = 20.sp, fontWeight = FontWeight.Medium, color = themeColor)
+                    Text(text = "ตั้งค่าโปรไฟล์",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Medium, color = themeColor)
                 }
                 Spacer(modifier = Modifier.height(32.dp))
             }
@@ -163,7 +149,7 @@ fun EditProfileScreen(
                 Spacer(modifier = Modifier.height(80.dp)) // ดันหนีปุ่ม Save
             }
         }
-    }
+
 }
 
 // ----------------------------------------------------

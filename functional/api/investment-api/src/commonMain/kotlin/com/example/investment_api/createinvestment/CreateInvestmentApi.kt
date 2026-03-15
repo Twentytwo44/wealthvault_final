@@ -6,6 +6,6 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 
 interface CreateInvestmentApi {
-    @POST("asset/invest")
+    @POST("ic_nav_asset/invest")
     suspend fun create(@Body request: InvestmentRequest): InvestmentResponse
 }

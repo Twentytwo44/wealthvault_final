@@ -9,6 +9,6 @@ import de.jensklingenberg.ktorfit.http.PATCH
 import de.jensklingenberg.ktorfit.http.Path
 
 interface UpdateLiabilityApi {
-    @PATCH("asset/lia/{id}")
+    @PATCH("ic_nav_asset/lia/{id}")
     suspend fun updateLiability(@Path("id") id: String, @Body request: LiabilityRequest): LiabilityResponse
 }

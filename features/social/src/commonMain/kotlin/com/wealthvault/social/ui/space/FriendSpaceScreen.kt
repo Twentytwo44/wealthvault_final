@@ -21,45 +21,40 @@ fun FriendSpaceScreen(
 ) {
     val themeColor = Color(0xFFC27A5A)
 
-    Scaffold(
-        containerColor = Color(0xFFFFF8F3),
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 20.dp)
+    ) {
+        SpaceTopBar(title = friendName, onBackClick = onBackClick, showMoreOption = true)
 
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+        HorizontalDivider(color = themeColor.copy(alpha = 0.3f), thickness = 1.dp)
+        Spacer(modifier = Modifier.height(16.dp))
 
-        ) {
-            SpaceTopBar(title = friendName, onBackClick = onBackClick, showMoreOption = true)
-
-            HorizontalDivider(color = themeColor.copy(alpha = 0.2f))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // รายการความเคลื่อนไหว (Activity Feed)
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                item {
-                    // เรียกใช้การ์ดจากไฟล์ที่แยกไว้
-                    ActivityBubbleCard(
-                        title = "$friendName ได้แชร์ทรัพย์สินนี้กับคุณ",
-                        assetName = "บัญชีเงินเก็บเพื่อเกษียณ...",
-                        assetType = "บัญชีเงินฝาก",
-                        showAvatar = true,
-                        themeColor = themeColor
-                    )
-                }
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    ActivityBubbleCard(
-                        title = "คุณได้แชร์ทรัพย์สินนี้กับ $friendName",
-                        assetName = "เก็บเงินซื้อเกม",
-                        assetType = "บัญชีเงินฝาก",
-                        showAvatar = false,
-                        themeColor = themeColor
-                    )
-                    Spacer(modifier = Modifier.height(100.dp)) // ดันหนีปุ่ม FAB
-                }
+        // รายการความเคลื่อนไหว (Activity Feed)
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            item {
+                // เรียกใช้การ์ดจากไฟล์ที่แยกไว้
+                ActivityBubbleCard(
+                    title = "$friendName ได้แชร์ทรัพย์สินนี้กับคุณ",
+                    assetName = "บัญชีเงินเก็บเพื่อเกษียณ...",
+                    assetType = "บัญชีเงินฝาก",
+                    showAvatar = true,
+                    themeColor = themeColor
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                ActivityBubbleCard(
+                    title = "คุณได้แชร์ทรัพย์สินนี้กับ $friendName",
+                    assetName = "เก็บเงินซื้อเกม",
+                    assetType = "บัญชีเงินฝาก",
+                    showAvatar = false,
+                    themeColor = themeColor
+                )
+                Spacer(modifier = Modifier.height(100.dp)) // ดันหนีปุ่ม FAB
             }
         }
     }
+
 }

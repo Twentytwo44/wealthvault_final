@@ -1,11 +1,11 @@
 package com.wealthvault.navigation.tabs
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.debt
+import com.wealthvault.core.generated.resources.ic_nav_debt
+import com.wealthvault.financiallist.ui.debt.DebtScreen
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -14,12 +14,12 @@ object DebtTab : Tab {
         @Composable
         get() = TabOptions(
             index = 2u,
-            title = "Debt",
-//            icon = painterResource(Res.drawable.debt)
+            title = "หนี้สิน",
+            icon = painterResource(Res.drawable.ic_nav_debt)
         )
 
     @Composable
     override fun Content() {
-        Text("debt Screen")
+        DebtScreen(onAddClick = {})
     }
 }

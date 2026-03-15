@@ -4,6 +4,6 @@ import com.example.account_api.model.BankAccountResponse
 import de.jensklingenberg.ktorfit.http.GET
 
 interface GetAccountApi {
-    @GET("asset/account")
+    @GET("ic_nav_asset/account")
     suspend fun getAccount(): BankAccountResponse
 }

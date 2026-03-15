@@ -14,7 +14,7 @@ class UpdateLandApiImpl(private val ktorfit: Ktorfit) : UpdateLandApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.patch("${Config.localhost_android}/asset/land/${id}") {
+        return client.patch("${Config.localhost_android}/ic_nav_asset/land/${id}") {
 
 
         }.body()

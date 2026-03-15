@@ -14,7 +14,7 @@ class UpdateBuildingApiImpl(private val ktorfit: Ktorfit) : UpdateBuildingApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.patch("${Config.localhost_android}/asset/building/${id}") {
+        return client.patch("${Config.localhost_android}/ic_nav_asset/building/${id}") {
 
 
         }.body()

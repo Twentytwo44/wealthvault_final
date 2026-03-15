@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 
 interface GetLandByIdApi {
-    @GET("asset/land/{id}")
+    @GET("ic_nav_asset/land/{id}")
     suspend fun getLandById(@Path("id") id: String): LandIdResponse
 }

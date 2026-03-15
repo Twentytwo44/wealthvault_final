@@ -7,6 +7,6 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 
 interface CreateLandApi {
-    @POST("asset/land")
+    @POST("ic_nav_asset/land")
     suspend fun create(@Body request: LandRequest): LandResponse
 }

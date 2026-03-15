@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.Path
 
 interface DeleteBuildingApi {
-    @DELETE("asset/building/{id}")
+    @DELETE("ic_nav_asset/building/{id}")
     suspend fun deleteBuilding(@Path("id") id: String): DeleteBuildingResponse
 }

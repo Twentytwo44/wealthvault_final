@@ -14,7 +14,7 @@ class CreateBuildingApiImpl(private val ktorfit: Ktorfit) : CreateBuildingApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.post("${Config.localhost_android}/asset/building") {
+        return client.post("${Config.localhost_android}/ic_nav_asset/building") {
 
         }.body()
     }

@@ -36,7 +36,7 @@ data class UserData(
     @SerialName("phone_number")
     val phoneNumber: String,
 
-    @SerialName("profile")
+    @SerialName("ic_nav_profile")
     val profile: String,
 
     @SerialName("birthday")

@@ -15,7 +15,7 @@ class CreateLandApiImpl(private val ktorfit: Ktorfit) : CreateLandApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.post("${Config.localhost_android}/asset/land") {
+        return client.post("${Config.localhost_android}/ic_nav_asset/land") {
 
         }.body()
     }

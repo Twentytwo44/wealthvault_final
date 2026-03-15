@@ -6,6 +6,6 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 
 interface CreateCashApi {
-    @POST("asset/cash")
+    @POST("ic_nav_asset/cash")
     suspend fun create(@Body request: CashRequest): CashResponse
 }

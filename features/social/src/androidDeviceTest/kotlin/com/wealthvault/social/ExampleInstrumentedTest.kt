@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.wealthvault.social.test", appContext.packageName)
+        assertEquals("com.wealthvault.ic_nav_social.test", appContext.packageName)
     }
 }

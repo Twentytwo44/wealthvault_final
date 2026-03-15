@@ -26,63 +26,48 @@ fun GroupProfileScreen(
     val themeColor = Color(0xFFC27A5A)
     val bgColor = Color(0xFFFFF8F3)
 
-    Scaffold(
-        containerColor = bgColor,
-        bottomBar = {
-            // ปุ่มออกจากกลุ่มด้านล่างสุด
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                TextButton(onClick = onLeaveGroupClick) {
-                    Text(text = "ออกจากกลุ่ม", color = Color(0xFFE74C3C), fontSize = 14.sp)
-                }
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 20.dp)
+    ) {
+        SpaceTopBar(title = "โปรไฟล์กลุ่ม", onBackClick = onBackClick)
+        HorizontalDivider(color = themeColor.copy(alpha = 0.3f), thickness = 1.dp)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // เนื่องจากไม่มีอีเมล จึงไม่ใส่ subtitle
+        ProfileHeader(name = "Family", subtitle = "")
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // เมนูไอคอน (สมาชิก / เพิ่ม)
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.Center
         ) {
-            SpaceTopBar(title = "โปรไฟล์กลุ่ม", onBackClick = onBackClick)
-            HorizontalDivider(color = themeColor.copy(alpha = 0.2f))
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // เนื่องจากไม่มีอีเมล จึงไม่ใส่ subtitle
-            ProfileHeader(name = "Family", subtitle = "")
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // เมนูไอคอน (สมาชิก / เพิ่ม)
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                GroupActionItem(
+            GroupActionItem(
 //                    icon = Icons.Default.Group,
-                    label = "สมาชิก",
-                    onClick = onMembersClick
-                )
-                Spacer(modifier = Modifier.width(64.dp)) // ระยะห่างระหว่าง 2 ปุ่ม
-                GroupActionItem(
+                label = "สมาชิก",
+                onClick = onMembersClick
+            )
+            Spacer(modifier = Modifier.width(64.dp)) // ระยะห่างระหว่าง 2 ปุ่ม
+            GroupActionItem(
 //                    icon = Icons.Default.PersonAdd,
-                    label = "เพิ่ม",
-                    onClick = onAddMemberClick
-                )
-            }
+                label = "เพิ่ม",
+                onClick = onAddMemberClick
+            )
         }
     }
+
 }
 
 // ชิ้นส่วนไอคอนเมนูในหน้ากลุ่ม
 @Composable
 private fun GroupActionItem(
 //    icon: ImageVector,
-    label: String, onClick: () -> Unit) {
+    label: String, onClick: () -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

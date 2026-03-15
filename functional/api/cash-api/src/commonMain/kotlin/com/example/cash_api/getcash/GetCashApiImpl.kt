@@ -11,7 +11,7 @@ class GetCashApiImpl(private val ktorfit: Ktorfit) : GetCashApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.get("${Config.localhost_android}/asset/cash") {
+        return client.get("${Config.localhost_android}/ic_nav_asset/cash") {
 
         }.body()
     }

@@ -14,7 +14,7 @@ class CreateLiabilityApiImpl(private val ktorfit: Ktorfit) : CreateLiabilityApi 
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.post("${Config.localhost_android}/asset/lia") {
+        return client.post("${Config.localhost_android}/ic_nav_asset/lia") {
 
         }.body()
     }

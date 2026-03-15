@@ -13,7 +13,7 @@ class UpdateInvestmentApiImpl(private val ktorfit: Ktorfit) : UpdateInvestmentAp
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.patch("${Config.localhost_android}/asset/invest/${id}") {
+        return client.patch("${Config.localhost_android}/ic_nav_asset/invest/${id}") {
 
 
         }.body()

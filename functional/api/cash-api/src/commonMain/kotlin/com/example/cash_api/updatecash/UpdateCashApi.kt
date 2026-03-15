@@ -7,6 +7,6 @@ import de.jensklingenberg.ktorfit.http.PATCH
 import de.jensklingenberg.ktorfit.http.Path
 
 interface UpdateCashApi {
-    @PATCH("asset/cash/{id}")
+    @PATCH("ic_nav_asset/cash/{id}")
     suspend fun updateCash(@Path("id") id: String, @Body request: CashRequest): CashResponse
 }

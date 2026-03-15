@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.Path
 
 interface DeleteCashApi {
-    @DELETE("asset/cash/{id}")
+    @DELETE("ic_nav_asset/cash/{id}")
     suspend fun deleteCash(@Path("id") id: String): DeleteCashResponse
 }

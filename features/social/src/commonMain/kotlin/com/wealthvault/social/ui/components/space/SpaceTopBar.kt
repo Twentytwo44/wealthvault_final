@@ -24,8 +24,7 @@ fun SpaceTopBar(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
 //        Icon(
@@ -43,7 +42,8 @@ fun SpaceTopBar(
             fontWeight = FontWeight.Medium,
             color = themeColor,
             modifier = Modifier.weight(1f)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp).padding(bottom = 12.dp)
+
         )
         if (showMoreOption) {
 //            Icon(

@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.Path
 
 interface DeleteInvestmentApi {
-    @DELETE("asset/invest/{id}")
+    @DELETE("ic_nav_asset/invest/{id}")
     suspend fun deleteInvestment(@Path("id") id: String): DeleteInvestmentResponse
 }

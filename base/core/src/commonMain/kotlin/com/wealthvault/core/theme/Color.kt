@@ -21,5 +21,8 @@ val LightSurface = Color(0xFFFFFFFF)
 val LightText = Color(0xFF3A2F2A)
 val LightMuted = Color(0xFF7A6A62)
 
+val LightBGNavbar = Color(0xFFFFF0E5)
+
+val UnselectedColor = Color(0xFFBDBDBD)
 // --- Status / System Colors ---
 val RedErr = Color(0xFFDC4A3C)

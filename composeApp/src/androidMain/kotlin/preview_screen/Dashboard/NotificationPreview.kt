@@ -1,4 +1,4 @@
-package preview_screen.notification
+package preview_screen.Dashboard
 
 
 import androidx.compose.runtime.Composable

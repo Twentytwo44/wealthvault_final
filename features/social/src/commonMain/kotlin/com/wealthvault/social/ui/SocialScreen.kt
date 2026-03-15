@@ -20,7 +20,8 @@ fun SocialScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFFF8F3)) // สีพื้นหลัง (LightBg)
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .padding(horizontal = 20.dp)
+            .padding(top = 20.dp)
     ) {
 
         // 1. แถบ Header (เมนู Dropdown และปุ่มเพิ่ม)

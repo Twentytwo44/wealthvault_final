@@ -4,6 +4,6 @@ import com.example.liability_api.model.GetLiabilityResponse
 import de.jensklingenberg.ktorfit.http.GET
 
 interface GetLiabilityApi {
-    @GET("asset/lia")
+    @GET("ic_nav_asset/lia")
     suspend fun getLiability(): GetLiabilityResponse
 }

@@ -12,7 +12,7 @@ class CreateAccountApiImpl(private val ktorfit: Ktorfit) : CreateAccountApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.post("${Config.localhost_android}/asset/account") {
+        return client.post("${Config.localhost_android}/ic_nav_asset/account") {
 
         }.body()
     }

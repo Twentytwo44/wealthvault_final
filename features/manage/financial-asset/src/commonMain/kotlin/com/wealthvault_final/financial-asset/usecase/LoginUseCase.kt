@@ -1,4 +1,4 @@
-//package com.wealthvault_final.`financial-asset`.usecase
+//package com.wealthvault_final.`financial-ic_nav_asset`.usecase
 //
 //import com.wealthvault.`auth-api`.model.LoginRequest
 //import com.wealthvault.core.FlowResult
