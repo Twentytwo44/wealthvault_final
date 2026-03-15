@@ -13,4 +13,8 @@ target 'iosApp' do
   # Pods for Line
   pod 'LineSDKSwift'
 
+  # Pods for firebase notification
+  pod 'Firebase/Core'
+  pod 'Firebase/Messaging'
+
 end

@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    id("com.google.gms.google-services")
+
 }
 
 kotlin {
@@ -31,6 +33,10 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(project(":base:core"))
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.messaging)
+            implementation("com.google.firebase:firebase-common-ktx")
+
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -70,6 +76,7 @@ kotlin {
             implementation(project(":functional:api:liability-api"))
             implementation(project(":functional:api:user-api"))
             api(project(":functional:api:line-auth"))
+            implementation(project(":functional:notification"))
 
 
 

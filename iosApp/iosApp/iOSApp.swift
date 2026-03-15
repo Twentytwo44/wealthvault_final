@@ -12,6 +12,7 @@ struct iOSApp: App {
         LoginManager.shared.setup(channelID: "2009343103", universalLinkURL: nil)
     }
 
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var body: some Scene {
         WindowGroup {
             // ส่ง Helper เข้าไปใน ContentView

@@ -11,7 +11,7 @@ import com.wealthvault.login.ui.LoginScreen
 fun App() {
     MaterialTheme {
        //MainScreen()
-        Navigator(LoginScreen())
+       Navigator(LoginScreen())
 
     }
 }

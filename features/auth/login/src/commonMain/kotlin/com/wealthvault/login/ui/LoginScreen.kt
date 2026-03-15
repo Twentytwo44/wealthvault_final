@@ -44,26 +44,27 @@ import com.wealthvault.core.theme.WvBgGradientStart
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientStart
 import com.wealthvault.core.utils.getScreenModel
+import com.wealthvault_final.line_auth.rememberLineAuth
 
 class LoginScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LoginScreenModel>()
-//
-//        val lineAuth = rememberLineAuth(
-//            onSuccess = { user ->
-//                // เมื่อสำเร็จ โยนกลับไปให้ ScreenModel คิดต่อ
-//                screenModel.onLineSuccess(user) {
-//                    println("ไปหน้าต่อไปได้เลย!")
-//                    // navigator.push(HomeScreen())
-//                }
-//            },
-//            onError = { error ->
-//                // เมื่อพัง โยนกลับไปให้ ScreenModel โชว์ Error
-//                screenModel.onLineError(error)
-//            }
-//        )
+
+        val lineAuth = rememberLineAuth(
+            onSuccess = { user ->
+                // เมื่อสำเร็จ โยนกลับไปให้ ScreenModel คิดต่อ
+                screenModel.onLineSuccess(user) {
+                    println("ไปหน้าต่อไปได้เลย!")
+                    // navigator.push(HomeScreen())
+                }
+            },
+            onError = { error ->
+                // เมื่อพัง โยนกลับไปให้ ScreenModel โชว์ Error
+                screenModel.onLineError(error)
+            }
+        )
 
         // เรียกใช้ Stateless UI ที่เราแยกไว้
         LoginContent(
@@ -82,7 +83,7 @@ class LoginScreen : Screen {
                 }
             },
             onLineClick = {
-//                screenModel.onLineClick(lineAuth)
+                screenModel.onLineClick(lineAuth)
             },
         )
     }
