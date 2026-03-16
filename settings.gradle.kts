@@ -33,8 +33,8 @@ include(":functional:api:building-api")
 include(":functional:api:land-api")
 include(":functional:api:liability-api")
 include(":functional:api:line-auth")
-
 include(":functional:notification")
+include(":functional:api:setup-api")
 
 
 

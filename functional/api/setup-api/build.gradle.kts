@@ -2,14 +2,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.kotlin.serialization)
-
-
-
-
-
 }
 
 kotlin {
@@ -18,18 +10,10 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.functional.api"
+        namespace = "com.wealthvault_final.setup_api"
         compileSdk = 36
         minSdk = 24
 
-        withHostTestBuilder {
-        }
-
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }.configure {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
     }
 
     // For iOS targets, this is also where you should
@@ -39,25 +23,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "apiKit"
 
-    iosX64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
-
-    iosArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
-
-    iosSimulatorArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
 
     // Source set declarations.
     // Declaring a target automatically creates a source set with the same name. By default, the
@@ -66,7 +32,6 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
         commonMain {
-
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
@@ -88,45 +53,10 @@ kotlin {
                 implementation(project(":base:config"))
                 implementation(project(":functional:data-store"))
                 implementation(project(":functional:api:auth-api"))
-                implementation(project(":functional:api:setup-api"))
-
-
-
-
-
-
-
-            }
-        }
-
-        commonTest {
-            dependencies {
-                implementation(libs.kotlin.test)
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.coroutines.get()}")
-                implementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
-            }
-        }
-
-        androidMain {
-            dependencies {
-                // Add Android-specific dependencies here. Note that this source set depends on
-                // commonMain by default and will correctly pull the Android artifacts of any KMP
-                // dependencies declared in commonMain.
             }
         }
 
 
-        iosMain {
-            dependencies {
-                // Add iOS-specific dependencies here. This a source set created by Kotlin Gradle
-                // Plugin (KGP) that each specific iOS target (e.g., iosX64) depends on as
-                // part of KMP’s default source set hierarchy. Note that this source set depends
-                // on common by default and will correctly pull the iOS artifacts of any
-                // KMP dependencies declared in commonMain.
-                implementation("io.ktor:ktor-client-darwin:${libs.versions.ktor.get()}")
-            }
-
-        }
     }
 
 }

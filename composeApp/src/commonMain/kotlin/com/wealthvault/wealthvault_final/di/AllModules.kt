@@ -12,6 +12,7 @@ import com.example.liability_api.di.LiabilityApiModule
 import com.example.`user-api`.di.UserApiModule
 import com.wealthvault.`auth-api`.di.ApiModule
 import com.wealthvault.data_store.di.DataStoreModule
+import com.wealthvault_final.setup_api.di.GlobalApiModule
 import org.koin.core.module.Module
 
 
@@ -21,6 +22,8 @@ object AllModules {
         add(DataStoreModule.allModules)
         add(LoginModule.allModules)
 
+        // setup httpclientbuilder
+        add(GlobalApiModule.allModules)
         // function:api
         add(GoogleAuthMainModule.allModules)
         add(AccountApiModule.allModules)
@@ -32,6 +35,7 @@ object AllModules {
         add(LandApiModule.allModules)
         add(LiabilityApiModule.allModules)
         add(UserApiModule.allModules)
+        add(GlobalApiModule.allModules)
 
 
 

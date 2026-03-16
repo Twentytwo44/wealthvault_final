@@ -3,6 +3,7 @@ package com.example.account_api
 import com.wealthvault.`auth-api`.model.RefreshRequest
 import com.wealthvault.`auth-api`.model.RefreshResponse
 import com.wealthvault.config.Config
+import com.wealthvault.data_store.AuthToken
 import com.wealthvault.data_store.TokenStore
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -21,7 +22,6 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
-
 internal class HttpClientBuilder(
     private val json: Json,
     private val tokenStore: TokenStore
@@ -35,8 +35,10 @@ internal class HttpClientBuilder(
                 bearer {
                     // ดึง Access Token และ Refresh Token มาจาก Store
                     loadTokens {
-                        val accessToken = tokenStore.accessToken.first() ?: ""
-                        val refreshToken = tokenStore.refreshToken.first() ?: ""
+                        val authData = tokenStore.authData.first()
+
+                        val accessToken = authData.accessToken ?: ""
+                        val refreshToken = authData.refreshToken ?: ""
                         BearerTokens(accessToken, refreshToken)
                     }
 
@@ -58,14 +60,20 @@ internal class HttpClientBuilder(
                                 contentType(ContentType.Application.Json)
                             }.body()
 
-                            // บันทึก Token ใหม่ลงใน Store
-//                            tokenStore.saveToken(response.accessToken, response.refreshToken)
+                            val newAccess = response.data?.accessToken ?: ""
+                            val newRefresh = response.data?.refreshToken ?: ""
 
-                            // ส่ง Token ใหม่กลับไปให้ Ktor เพื่อยิง API เดิมซ้ำอีกครั้ง
-                            BearerTokens(
-                                response.data?.accessToken ?: "",
-                                response.data?.refreshToken ?: ""
-                            )                        } catch (e: Exception) {
+                            if (newAccess.isNotBlank()) {
+                                // บันทึกเข้า DataStore ผ่านโครงสร้างใหม่
+                                tokenStore.saveAuthToken(AuthToken(newAccess, newRefresh))
+
+                                // ส่ง Token ใหม่กลับไปให้ Ktor ทำการ Retry Request เดิม
+                                BearerTokens(newAccess, newRefresh)
+                            } else {
+                                null
+                            }
+                        }
+                        catch (e: Exception) {
                             println("❌ Refresh Token failed: ${e.message}")
                             null // ถ้า Refresh ไม่ผ่าน (เช่น Refresh Token หมดอายุด้วย) จะส่ง null เพื่อให้แอป Logout
                         } finally {

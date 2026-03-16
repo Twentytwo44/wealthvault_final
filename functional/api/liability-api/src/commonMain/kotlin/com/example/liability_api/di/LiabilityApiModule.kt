@@ -12,6 +12,7 @@ import com.example.liability_api.getliabilitybyid.GetLiabilityByIdApiImpl
 import com.example.liability_api.updateliability.UpdateLiabilityApi
 import com.example.liability_api.updateliability.UpdateLiabilityApiImpl
 import com.wealthvault.core.KoinConst
+import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -19,12 +20,17 @@ import org.koin.dsl.module
 
 object LiabilityApiModule {
     val allModules = module {
+        single<Json>(named(KoinConst.KotlinSerialization.GLOBAL)) {
+            Json {
+                ignoreUnknownKeys = true
+            }
+        }
 
-        single<CreateLiabilityApi> { CreateLiabilityApiImpl(get(named(KoinConst.Ktor.USER))) }
-        single<GetLiabilityApi> { GetLiabilityApiImpl(get(named(KoinConst.Ktor.USER))) }
-        single<GetLiabilityByIdApi> { GetLiabilityByIdApiImpl(get(named(KoinConst.Ktor.USER))) }
-        single<UpdateLiabilityApi> { UpdateLiabilityApiImpl(get(named(KoinConst.Ktor.USER))) }
-        single<DeleteLiabilityApi> { DeleteLiabilityApiImpl(get(named(KoinConst.Ktor.USER))) }
+        single<CreateLiabilityApi> { CreateLiabilityApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<GetLiabilityApi> { GetLiabilityApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<GetLiabilityByIdApi> { GetLiabilityByIdApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<UpdateLiabilityApi> { UpdateLiabilityApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<DeleteLiabilityApi> { DeleteLiabilityApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
 
 
 

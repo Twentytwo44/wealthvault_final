@@ -77,6 +77,8 @@ kotlin {
             implementation(project(":functional:api:user-api"))
             api(project(":functional:api:line-auth"))
             implementation(project(":functional:notification"))
+            implementation(project(":functional:api:setup-api"))
+
 
 
 
