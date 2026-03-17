@@ -1,27 +1,22 @@
 package com.wealthvault.profile.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.automirrored.filled.ArrowBack
-//import androidx.compose.material.icons.filled.Add
-//import androidx.compose.material.icons.filled.CalendarMonth
-//import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.wealthvault.profile.ui.components.ClosePersonItem
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
+import com.wealthvault.core.generated.resources.ic_common_calendar
+import com.wealthvault.core.generated.resources.ic_common_pen // 🌟 ดึงไอคอนดินสอมาใช้
+import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,155 +25,129 @@ fun EditProfileScreen(
     onSaveClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
-    val bgColor = Color(0xFFFFF8F3)
 
-    // State สำหรับเก็บข้อมูลที่กรอก
-    var username by remember { mutableStateOf("Twentytwo01") }
-    var email by remember { mutableStateOf("nptwosudinw@gmail.com") }
+    // State สำหรับเก็บข้อมูลที่พิมพ์
+    var firstName by remember { mutableStateOf("Twentytwo01") }
+    var lastName by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("13/08/2549") }
-    var isShareEnabled by remember { mutableStateOf(true) }
+    var phone by remember { mutableStateOf("") }
 
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp)
-                .padding(top = 20.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(horizontal = 24.dp, vertical = 24.dp)
+    ) {
+        // --- Header ---
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 32.dp)
         ) {
-            item {
-                // --- Top Bar ---
-                Row(verticalAlignment = Alignment.CenterVertically) {
-//                    Icon(
-//                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                        contentDescription = "Back",
-//                        tint = themeColor,
-//                        modifier = Modifier.size(24.dp).clickable { onBackClick() }
-//                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(text = "ตั้งค่าโปรไฟล์",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Medium, color = themeColor)
-                }
-                Spacer(modifier = Modifier.height(32.dp))
-            }
-
-            item {
-                // --- Edit Profile Info ---
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // รูปโปรไฟล์ + ไอคอน Edit
-                    Box(modifier = Modifier.size(100.dp)) {
-                        Box(modifier = Modifier.fillMaxSize().clip(CircleShape).background(Color(0xFFE0DCDA)))
-                        // ปุ่มแก้ไขรูป มุมขวาล่าง
-                        Surface(
-                            shape = CircleShape,
-                            color = themeColor,
-                            modifier = Modifier.align(Alignment.BottomEnd).size(28.dp).offset(x = (-4).dp, y = (-4).dp)
-                        ) {
-//                            Icon(Icons.Default.Edit, contentDescription = "Edit Image", tint = Color.White, modifier = Modifier.padding(6.dp))
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(24.dp))
-
-                    // TextField สำหรับกรอกข้อมูล (ทำแบบมีแค่เส้นใต้)
-                    Column(modifier = Modifier.weight(1f)) {
-                        UnderlinedTextField(value = username, onValueChange = { username = it })
-                        Spacer(modifier = Modifier.height(12.dp))
-                        UnderlinedTextField(value = email, onValueChange = { email = it })
-                        Spacer(modifier = Modifier.height(12.dp))
-                        UnderlinedTextField(
-                            value = birthDate,
-                            onValueChange = { birthDate = it },
-//                            trailingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = "Calendar", tint = themeColor, modifier = Modifier.size(16.dp)) }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-                HorizontalDivider(color = themeColor.copy(alpha = 0.3f))
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-
-            item {
-                // --- Toggle Switch ---
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "แชร์สินทรัพย์ทั้งหมดให้คนใกล้ชิดตามกำหนด", fontSize = 12.sp, color = Color(0xFF3A2F2A), modifier = Modifier.weight(1f))
-                    Switch(
-                        checked = isShareEnabled,
-                        onCheckedChange = { isShareEnabled = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = themeColor,
-                            checkedTrackColor = themeColor.copy(alpha = 0.3f)
-                        )
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // --- Age Limit ---
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "เปิดให้เห็นสินทรัพย์เมื่อถึงอายุ", fontSize = 12.sp, color = Color(0xFF3A2F2A))
-                    Text(text = "80 ปี", fontSize = 14.sp, color = themeColor) // ในอนาคตสามารถกดแก้ได้
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-            }
-
-            item {
-                // --- Close People List (Editable) ---
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "คนใกล้ชิด", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
-//                    Icon(Icons.Default.Add, contentDescription = "Add Person", tint = themeColor, modifier = Modifier.clickable { /* TODO */ })
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-
-                ClosePersonItem(name = "Nai", showDelete = true, onDeleteClick = { /* TODO */ })
-
-                Spacer(modifier = Modifier.height(80.dp)) // ดันหนีปุ่ม Save
-            }
+            Icon(
+                painter = painterResource(Res.drawable.ic_common_back),
+                contentDescription = "Back",
+                tint = themeColor,
+                modifier = Modifier.size(24.dp).clickable { onBackClick() }
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(text = "แก้ไขโปรไฟล์", style = MaterialTheme.typography.titleLarge, color = themeColor)
         }
 
+        // --- Profile Picture Edit ---
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(contentAlignment = Alignment.BottomEnd) {
+                // รูปโปรไฟล์
+                Box(modifier = Modifier.size(100.dp).clip(CircleShape).background(Color(0xFFE0DCDA)))
+                // ไอคอนดินสอ
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .offset(x = (-4).dp, y = (-4).dp)
+                        .clip(CircleShape)
+                        .background(themeColor)
+                        .clickable { /* TODO: เลือกรูปใหม่ */ },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_pen),
+                        contentDescription = "Edit",
+                        tint = Color.White,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(text = "nptwosudinw@gmail.com", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // --- Forms ---
+        ProfileTextField(label = "ชื่อจริง", value = firstName, onValueChange = { firstName = it })
+        Spacer(modifier = Modifier.height(16.dp))
+        ProfileTextField(label = "นามสกุล", value = lastName, onValueChange = { lastName = it })
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 🌟 ช่องวันเกิด สมมติว่ามีไอคอนปฏิทินต่อท้าย
+        ProfileTextField(
+            label = "วันเกิด",
+            value = birthDate,
+            onValueChange = { birthDate = it },
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_common_calendar), // 🌟 ดึงไอคอนปฏิทิน
+                    contentDescription = "Calendar",
+                    tint = themeColor,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        ProfileTextField(label = "เบอร์โทร", value = phone, onValueChange = { phone = it })
+
+        Spacer(modifier = Modifier.weight(1f)) // ดันปุ่มเซฟลงไปล่างสุด
+
+        // --- Save Button ---
+        Button(
+            onClick = onSaveClick,
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = themeColor)
+        ) {
+            Text("บันทึก", color = Color.White, style = MaterialTheme.typography.titleMedium)
+        }
+    }
 }
 
-// ----------------------------------------------------
-// Helper Component สำหรับช่องกรอกข้อมูลแบบมีแค่เส้นใต้
-// ----------------------------------------------------
+// 🌟 Component ย่อยสำหรับช่องกรอกข้อมูล
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UnderlinedTextField(
+fun ProfileTextField(
+    label: String,
     value: String,
     onValueChange: (String) -> Unit,
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
-    BasicTextFieldWithUnderline(value, onValueChange, trailingIcon)
-}
-
-@Composable
-private fun BasicTextFieldWithUnderline(
-    value: String,
-    onValueChange: (String) -> Unit,
-    trailingIcon: @Composable (() -> Unit)?
-) {
     Column {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = value, fontSize = 14.sp, color = Color(0xFF3A2F2A))
-            if (trailingIcon != null) trailingIcon()
-        }
-        HorizontalDivider(color = Color(0xFFC27A5A).copy(alpha = 0.5f))
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFC27A5A))
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            // 🌟 แก้ชื่อเป็น TextFieldDefaults.colors() และใช้ focused/unfocused ContainerColor ครับ
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            trailingIcon = trailingIcon
+        )
     }
 }

@@ -19,24 +19,28 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wealthvault.profile.ui.components.ClosePersonItem
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_profile_setting
+import org.jetbrains.compose.resources.painterResource
+
 
 @Composable
 fun ProfileScreen(
-    onEditProfileClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    // 🌟 เปลี่ยน parameter เป็น onSettingsClick แทน
+    onSettingsClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
     val bgColor = Color(0xFFFFF8F3)
-    var expandedMenu by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp)
-            .padding(top = 20.dp)
+            // ถ้ามีพื้นหลังสีครีม ใส่ .background(bgColor) ตรงนี้ได้ครับ
+            .padding(horizontal = 24.dp)
+            .padding(top = 24.dp)
     ) {
 
-        // --- Header & Settings Menu ---
+        // --- Header ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -49,70 +53,49 @@ fun ProfileScreen(
                 color = themeColor
             )
 
-            Box {
-                //                    Icon(
-                //                        imageVector = Icons.Default.Settings,
-                //                        contentDescription = "Settings",
-                //                        tint = themeColor,
-                //                        modifier = Modifier
-                //                            .size(28.dp)
-                //                            .clickable { expandedMenu = true }
-                //                    )
-
-                // Popup Menu (แก้ไขข้อมูล / ออกจากระบบ)
-                DropdownMenu(
-                    expanded = expandedMenu,
-                    onDismissRequest = { expandedMenu = false },
-                    offset = DpOffset(x = (-16).dp, y = 8.dp),
-                    modifier = Modifier.background(Color.White, RoundedCornerShape(16.dp))
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("แก้ไขข้อมูล", color = Color(0xFF3A2F2A)) },
-                        onClick = {
-                            expandedMenu = false
-                            onEditProfileClick()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("ออกจากระบบ", color = Color(0xFFE74C3C)) },
-                        onClick = {
-                            expandedMenu = false
-                            onLogoutClick()
-                        }
-                    )
-                }
-            }
+            // 🌟 ไอคอนฟันเฟือง กดแล้วไปหน้า Settings
+            Icon(
+                painter = painterResource(Res.drawable.ic_profile_setting),
+                contentDescription = "Settings",
+                tint = Color(0xFFC47B5D),
+                modifier = Modifier
+                    .size(28.dp)
+                    .clickable { onSettingsClick() } // กดแล้วเรียกคำสั่งเปลี่ยนหน้า
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
         // --- Profile Info ---
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // รูปโปรไฟล์ (จำลองเป็นกล่องสีเทา)
+            // รูปโปรไฟล์
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(90.dp)
                     .clip(CircleShape)
                     .background(Color(0xFFE0DCDA))
             )
 
-            Spacer(modifier = Modifier.width(24.dp))
+            Spacer(modifier = Modifier.width(20.dp))
 
             Column {
                 Text(
                     text = "Twentytwo01",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFF3A2F2A),
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFF3A2F2A)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "nptwosudinw@gmail.com",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "nptwosudinw@gmail.com",
+                Text(
+                    text = "13/08/2549",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "13/08/2549",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF3A2F2A))
+                    color = Color(0xFF3A2F2A)
+                )
             }
         }
 
@@ -128,25 +111,29 @@ fun ProfileScreen(
         ) {
             Text(
                 text = "เปิดให้เห็นสินทรัพย์ทั้งหมดให้คนใกล้ชิดเมื่ออายุ",
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.labelMedium,
                 color = Color(0xFF3A2F2A),
                 modifier = Modifier.weight(1f)
             )
-            Text(text = "80 ปี", fontSize = 14.sp, color = Color.Gray)
+            Text(
+                text = "80 ปี",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         // --- Close People List ---
         Text(
             text = "คนใกล้ชิด",
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = Color(0xFF3A2F2A)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        ClosePersonItem(name = "Nai", showDelete = false)
+        // สมมติว่ามี Component ClosePersonItem อยู่แล้ว
+         ClosePersonItem(name = "Nai")
     }
-
 }

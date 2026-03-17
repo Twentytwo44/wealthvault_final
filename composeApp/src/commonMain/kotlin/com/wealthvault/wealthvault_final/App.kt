@@ -3,13 +3,14 @@ package com.wealthvault.wealthvault_final
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.wealthvault.navigation.MainScreen
-import com.wealthvault_final.`financial-asset`.ui.insurance.InsuranceInputForm
+import cafe.adriel.voyager.navigator.Navigator // 🌟 Import Navigator
+import com.wealthvault.navigation.MainAppDestination // 🌟 Import หน้าจอที่เราเพิ่งสร้าง
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        MainScreen()
+        // 🌟 ครอบ Navigator ใหญ่สุดไว้ที่นี่ และเรียกใช้ MainAppDestination!
+        Navigator(MainAppDestination())
     }
 }
