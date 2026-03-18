@@ -1,6 +1,7 @@
 
 import com.wealthvault.register.data.RegisterDataSource
 import com.wealthvault.register.data.RegisterRepositoryImpl
+import com.wealthvault.register.ui.RegisterScreenModel
 import com.wealthvault.register.usecase.RegisterUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -19,6 +20,6 @@ object RegisterModule {
 
         factory { RegisterUseCase(get(), get()) }
 
-//        factory { RegisterScreenModel(get()) }
+        factory { RegisterScreenModel() }
     }
 }

@@ -32,6 +32,7 @@ object AllModules {
         add(LandApiModule.allModules)
         add(LiabilityApiModule.allModules)
         add(UserApiModule.allModules)
+        add(RegisterModule.allModules)
 
 
     }

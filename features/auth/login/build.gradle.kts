@@ -37,6 +37,9 @@ kotlin {
                 implementation(project(":functional:data-store"))
                 implementation(project(":functional:api:google-auth"))
 
+                implementation(project(":features:auth:register"))
+
+
                 implementation(project(":base:core"))
 
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
