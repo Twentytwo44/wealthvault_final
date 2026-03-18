@@ -15,6 +15,25 @@ kotlin {
         minSdk = 24
 
     }
+    val xcfName = "apiKit"
+
+    iosX64 {
+        binaries.framework {
+            baseName = xcfName
+        }
+    }
+
+    iosArm64 {
+        binaries.framework {
+            baseName = xcfName
+        }
+    }
+
+    iosSimulatorArm64 {
+        binaries.framework {
+            baseName = xcfName
+        }
+    }
 
     // For iOS targets, this is also where you should
     // configure native binary output. For more information, see:

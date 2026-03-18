@@ -80,13 +80,11 @@ kotlin {
             implementation(project(":functional:api:setup-api"))
 
 
-
-
-
-
-
             implementation(project(":features:auth:register"))
             implementation(project(":features:manage:financial-asset"))
+            implementation(project(":features:manage:financial-obligations"))
+
+
 
 //            implementation(project(":features:auth:introduction"))
 

@@ -1,3 +1,3 @@
 package com.example.financial_obligations
 
-actual fun platform() = "iOS"
+//actual fun platform() = "iOS"
