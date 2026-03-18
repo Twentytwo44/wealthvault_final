@@ -1,4 +1,4 @@
-package com.example.financiallist
+package com.wealthvault.financiallist
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

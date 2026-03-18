@@ -1,4 +1,4 @@
-package com.example.login.ui
+package com.wealthvault.login.ui
 
 //class LoginScreenModel(
 //    private val loginUseCase: LoginUseCase

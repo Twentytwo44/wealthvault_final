@@ -1,11 +1,9 @@
 package com.wealthvault.social.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.filled.ArrowDropDown
-//import androidx.compose.material.icons.filled.GroupAdd
-//import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,7 +11,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+
+// 🌟 Import Res และไอคอนที่เราจำไว้
+import org.jetbrains.compose.resources.painterResource
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_solid_down
+import com.wealthvault.core.generated.resources.ic_social_plus
+import com.wealthvault.core.generated.resources.ic_nav_profile
+import com.wealthvault.core.generated.resources.ic_nav_social
+
+// 🌟 Import สีจาก Theme ของเรา
+import com.wealthvault.core.theme.LightPrimary
 
 @Composable
 fun SocialHeader(
@@ -21,7 +29,8 @@ fun SocialHeader(
     onTabSelected: (String) -> Unit, // เมื่อกดเลือกแท็บจาก Dropdown
     onAddFriendClick: () -> Unit,
     onAddGroupClick: () -> Unit,
-    themeColor: Color = Color(0xFFC27A5A)
+    // 🌟 เรียกใช้สี LightPrimary จาก Theme เป็นค่า Default
+    themeColor: Color = LightPrimary
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -33,7 +42,7 @@ fun SocialHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ฝั่งซ้าย: ชื่อแท็บ + Dropdown
+            // --- ฝั่งซ้าย: ชื่อแท็บ + Dropdown ---
             Box {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -41,21 +50,26 @@ fun SocialHeader(
                 ) {
                     Text(
                         text = currentTabName,
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.titleLarge, // 🌟 ใช้ Typography ของแอป
                         fontWeight = FontWeight.Medium,
                         color = themeColor
                     )
-//                    Icon(
-//                        imageVector = Icons.Default.ArrowDropDown,
-//                        contentDescription = "Select Tab",
-//                        tint = themeColor
-//                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        // 🌟 ไอคอนลูกศรชี้ลง
+                        painter = painterResource(Res.drawable.ic_common_solid_down),
+                        contentDescription = "Select Tab",
+                        tint = themeColor,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
 
                 // เมนู Dropdown
                 DropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.background(Color.White),
+                    shape = RoundedCornerShape(12.dp),
                 ) {
                     DropdownMenuItem(
                         text = { Text("เพื่อน", color = themeColor) },
@@ -74,25 +88,61 @@ fun SocialHeader(
                 }
             }
 
-            // ฝั่งขวา: ไอคอนเพิ่มเพื่อน และ เพิ่มกลุ่ม
-            Row {
-//                Icon(
-//                    imageVector = Icons.Default.PersonAdd,
-//                    contentDescription = "Add Friend",
-//                    tint = themeColor,
-//                    modifier = Modifier
-//                        .size(28.dp)
-//                        .clickable { onAddFriendClick() }
-//                )
-                Spacer(modifier = Modifier.width(16.dp))
-//                Icon(
-//                    imageVector = Icons.Default.GroupAdd,
-//                    contentDescription = "Add Group",
-//                    tint = themeColor,
-//                    modifier = Modifier
-//                        .size(28.dp)
-//                        .clickable { onAddGroupClick() }
-//                )
+            // --- ฝั่งขวา: ไอคอนเพิ่มเพื่อน และ เพิ่มกลุ่ม ---
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                // 🌟 1. ปุ่มเพิ่มเพื่อน (ไอคอนคน + เครื่องหมายบวกมุมขวาบน)
+                Box(
+                    modifier = Modifier
+                        .clickable { onAddFriendClick() }
+                        .padding(4.dp),
+                    contentAlignment = Alignment.TopEnd // 🌟 สั่งให้ของในกล่องนี้ ไปกองรวมกันที่มุมขวาบน
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_nav_profile),
+                        contentDescription = "Add Friend",
+                        tint = themeColor,
+                        modifier = Modifier
+                            .padding(end = 8.dp, top = 4.dp) // ดันไอคอนหลักลงและไปซ้ายนิดนึง เพื่อเว้นที่ให้เครื่องหมายบวก
+                            .size(24.dp)
+                    )
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_social_plus),
+                        contentDescription = null,
+                        tint = themeColor,
+                        modifier = Modifier
+                            .padding(start = 8.dp, top = 8.dp)
+                            .size(14.dp)
+
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                // 🌟 2. ปุ่มเพิ่มกลุ่ม (ไอคอนกลุ่มเพื่อน + เครื่องหมายบวกมุมขวาบน)
+                Box(
+                    modifier = Modifier
+                        .clickable { onAddGroupClick() }
+                        .padding(4.dp),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_nav_social),
+                        contentDescription = "Add Group",
+                        tint = themeColor,
+                        modifier = Modifier
+                            .padding(end = 8.dp, top = 4.dp)
+                            .size(27.dp) // ไอคอนกลุ่มปรับให้ใหญ่กว่าไอคอนคนเดี่ยวนิดนึง
+                    )
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_social_plus),
+                        contentDescription = null,
+                        tint = themeColor,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .size(14.dp)
+                    )
+                }
             }
         }
 

@@ -1,3 +1,3 @@
-package com.example.financiallist
+package com.wealthvault.financiallist
 
 actual fun platform() = "Android"

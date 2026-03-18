@@ -1,4 +1,4 @@
-package com.example.financiallist
+package com.wealthvault.financiallist
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

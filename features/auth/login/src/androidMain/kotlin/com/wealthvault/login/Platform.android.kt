@@ -1,3 +1,3 @@
-package com.example.login
+package com.wealthvault.login
 
 actual fun platform() = "Android"

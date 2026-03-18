@@ -1,4 +1,4 @@
-package com.example.navigation
+package com.wealthvault.navigation
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

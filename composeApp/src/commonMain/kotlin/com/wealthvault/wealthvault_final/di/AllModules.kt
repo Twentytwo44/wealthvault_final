@@ -1,15 +1,15 @@
 package com.wealthvault.wealthvault_final.di
 
 import LoginModule
-import com.example.account_api.di.AccountApiModule
-import com.example.building_api.di.BuildingApiModule
-import com.example.cash_api.di.CashApiModule
-import com.example.google_auth.di.GoogleAuthMainModule
-import com.example.insurance_api.di.InsuranceApiModule
-import com.example.investment_api.di.InvestmentApiModule
-import com.example.land_api.di.LandApiModule
-import com.example.liability_api.di.LiabilityApiModule
-import com.example.`user-api`.di.UserApiModule
+import com.wealthvault.account_api.di.AccountApiModule
+import com.wealthvault.building_api.di.BuildingApiModule
+import com.wealthvault.cash_api.di.CashApiModule
+import com.wealthvault.google_auth.di.GoogleAuthMainModule
+import com.wealthvault.insurance_api.di.InsuranceApiModule
+import com.wealthvault.investment_api.di.InvestmentApiModule
+import com.wealthvault.land_api.di.LandApiModule
+import com.wealthvault.liability_api.di.LiabilityApiModule
+import com.wealthvault.`user-api`.di.UserApiModule
 import com.wealthvault.`auth-api`.di.ApiModule
 import com.wealthvault.data_store.di.DataStoreModule
 import org.koin.core.module.Module

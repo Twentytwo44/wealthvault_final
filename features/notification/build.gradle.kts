@@ -6,7 +6,7 @@ plugins {
 kotlin {
 
     androidLibrary {
-        namespace = "com.example.notification"
+        namespace = "com.wealthvault.notification"
 
     }
 

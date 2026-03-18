@@ -9,6 +9,8 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_nav_profile
+import com.wealthvault.login.ui.LoginScreen
+import com.wealthvault.navigation.MainAppDestination
 import org.jetbrains.compose.resources.painterResource
 
 // Import หน้า UI ทั้ง 4 หน้าของเรา
@@ -61,7 +63,10 @@ class MenuProfileSettingDestination(private val rootNavigator: Navigator) : Scre
             onBackClick = { rootNavigator.pop() }, // กดย้อนกลับ
             onEditProfileClick = { rootNavigator.push(EditProfileDestination(rootNavigator)) },
             onShareSettingClick = { rootNavigator.push(ShareSettingDestination(rootNavigator)) },
-            onLogoutClick = { /* TODO */ }
+            onLogoutClick = {
+                // 🌟 สั่งให้มันรู้ว่า ถ้าล็อคอินรอบหน้าเสร็จ ให้กลับมาที่ MainAppDestination นะ!
+                rootNavigator.replaceAll(LoginScreen(navigateToScreen = MainAppDestination()))
+            }
         )
     }
 }

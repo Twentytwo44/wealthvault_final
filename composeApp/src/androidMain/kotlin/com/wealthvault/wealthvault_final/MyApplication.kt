@@ -1,7 +1,7 @@
 package com.wealthvault.wealthvault_final
 
 import android.app.Application
-import com.example.google_auth.di.GoogleAuthAndroidModule
+import com.wealthvault.google_auth.di.GoogleAuthAndroidModule
 import com.wealthvault.data_store.androidDataStoreModule
 import com.wealthvault.wealthvault_final.di.AllModules
 import org.koin.android.ext.koin.androidContext

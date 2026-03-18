@@ -1,4 +1,4 @@
-package com.example.wealthvault_final.di
+package com.wealthvault.wealthvault_final.di
 
 import org.koin.dsl.module
 

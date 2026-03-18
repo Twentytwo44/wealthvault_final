@@ -3,7 +3,7 @@ package preview_screen.Dashboard
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.notification.ui.NotificationScreen
+import com.wealthvault.notification.ui.NotificationScreen
 
 @Preview(showBackground = true, name = "Preview")
 @Composable

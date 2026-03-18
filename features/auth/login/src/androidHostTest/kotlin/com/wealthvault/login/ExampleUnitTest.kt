@@ -1,4 +1,4 @@
-package com.example.login
+package com.wealthvault.login
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

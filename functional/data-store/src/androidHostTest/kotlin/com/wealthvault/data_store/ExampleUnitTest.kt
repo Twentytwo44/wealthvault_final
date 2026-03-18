@@ -1,4 +1,4 @@
-package com.example.data_store
+package com.wealthvault.data_store
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

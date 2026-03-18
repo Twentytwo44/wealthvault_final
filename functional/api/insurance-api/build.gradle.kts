@@ -10,7 +10,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.insurance_api"
+        namespace = "com.wealthvault.insurance_api"
         compileSdk = 36
         minSdk = 24
 

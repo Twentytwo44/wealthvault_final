@@ -1,3 +1,3 @@
-package com.example.setting_app
+package com.wealthvault.setting_app
 
 actual fun platform() = "iOS"

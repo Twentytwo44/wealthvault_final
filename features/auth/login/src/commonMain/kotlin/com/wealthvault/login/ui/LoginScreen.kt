@@ -3,27 +3,15 @@ package com.wealthvault.login.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -32,31 +20,17 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.example.login.ui.LoginScreenModel
+
+// 🌟 Import ของที่เราต้องใช้
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSurface
-import com.wealthvault.core.theme.LightBorder
-import com.wealthvault.core.theme.LightMuted
-import com.wealthvault.core.theme.WvBgGradientStart
-import com.wealthvault.core.theme.WvBgGradientEnd
+import com.wealthvault.core.theme.*
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Path
-import com.wealthvault.core.theme.LightBg
-import com.wealthvault.core.theme.WvWaveGradientEnd
-import com.wealthvault.core.theme.WvWaveGradientStart
-
-class LoginScreen : Screen {
+class LoginScreen(private val navigateToScreen: Screen) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LoginScreenModel>()
 
-        // เรียกใช้ Stateless UI ที่เราแยกไว้
         LoginContent(
             username = screenModel.username,
             onUsernameChange = { screenModel.username = it },
@@ -65,16 +39,15 @@ class LoginScreen : Screen {
             isLoading = screenModel.isLoading,
             onLoginClick = {
                 screenModel.onLoginClick {
-                    // จัดการการเปลี่ยนหน้าตรงนี้
+                    // 🌟 2. สลับไปหน้าที่ถูกส่งมา แทนการเรียกชื่อ MainApp ตรงๆ
+                    navigator.replaceAll(navigateToScreen)
                 }
             },
-            onGoogleClick = {
-                screenModel.onGoogleClick {
-                }
-            }
+            onGoogleClick = { screenModel.onGoogleClick { /* TODO */ } }
         )
     }
 }
+
 @Composable
 fun LoginContent(
     username: String,
@@ -85,18 +58,14 @@ fun LoginContent(
     onLoginClick: () -> Unit,
     onGoogleClick: () -> Unit,
 ) {
-
-    WavyBackground{
-        // 👇 เอา Column หลักกลับมาใส่ตรงนี้ครับ 👇
+    WavyBackground {
         Column(
             modifier = Modifier
-                .fillMaxSize() // ขยายเต็มหน้าจอ
-                .padding(24.dp), // เว้นขอบซ้ายขวา
-            horizontalAlignment = Alignment.CenterHorizontally, // จัดให้อยู่ตรงกลางแนวนอน
-            verticalArrangement = Arrangement.Center // จัดให้อยู่ตรงกลางแนวตั้ง
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-
-            // ชื่อแอป
             Text(
                 text = "Wealth & Vault",
                 color = LightPrimary,
@@ -104,10 +73,8 @@ fun LoginContent(
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
 
-            // 💡 แนะนำ: ลด Spacer ลงเหลือสัก 80.dp - 100.dp ครับ เพราะ 200.dp อาจจะดันของตกขอบจอล่างได้
             Spacer(modifier = Modifier.height(150.dp))
 
-            // กล่องที่รวม Input และปุ่มต่างๆ
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -165,8 +132,6 @@ fun LoginContent(
                     )
                 }
 
-                // ... โค้ดส่วนที่เหลือ (ปุ่มลืมรหัสผ่าน, ปุ่มเข้าสู่ระบบ, ปุ่ม Google) เหมือนเดิมเป๊ะเลยครับ ...
-
                 // 3. ปุ่มลืมรหัสผ่าน
                 Text(
                     text = "ลืมรหัสผ่าน",
@@ -218,22 +183,9 @@ fun LoginContent(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
                 ) {
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = LightBorder,
-                        thickness = 2.dp
-                    )
-                    Text(
-                        text = " หรือ ",
-                        color = LightMuted,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = LightBorder,
-                        thickness = 2.dp
-                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
+                    Text(text = " หรือ ", color = LightMuted, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 8.dp))
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -251,27 +203,21 @@ fun LoginContent(
                 ) {
                     Text("Google", color = LightPrimary, fontSize = 16.sp)
                 }
-            } // ปิด Column กล่อง Input
-        } // ปิด Column หลัก
-    } // ปิด WavyBackground
+            }
+        }
+    }
 }
-
 
 @Composable
 fun WavyBackground(
-    // เปลี่ยนมารับค่าเป็น Brush (การไล่สี) แทน Color
-    topWaveBrush: Brush = Brush.verticalGradient(
-        colors = listOf(WvWaveGradientStart, WvWaveGradientEnd)
-    ),
-    bottomBgBrush: Brush = Brush.verticalGradient(
-        colors = listOf(WvBgGradientStart, WvBgGradientEnd)
-    ),
+    topWaveBrush: Brush = Brush.verticalGradient(colors = listOf(WvWaveGradientStart, WvWaveGradientEnd)),
+    bottomBgBrush: Brush = Brush.verticalGradient(colors = listOf(WvBgGradientStart, WvBgGradientEnd)),
     content: @Composable () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(bottomBgBrush) // ระบายสีพื้นหลังด้วย Gradient
+            .background(bottomBgBrush)
             .drawBehind {
                 val path = Path().apply {
                     moveTo(0f, 0f)
@@ -284,7 +230,6 @@ fun WavyBackground(
                     lineTo(size.width, 0f)
                     close()
                 }
-                // วาดเส้นคลื่นแล้วระบายด้วย Gradient
                 drawPath(path = path, brush = topWaveBrush)
             }
     ) {
