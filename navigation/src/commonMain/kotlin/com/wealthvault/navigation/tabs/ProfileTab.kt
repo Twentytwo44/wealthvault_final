@@ -1,5 +1,6 @@
 package com.wealthvault.navigation.tabs
 
+// Import หน้า UI ทั้ง 4 หน้าของเรา
 import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -11,13 +12,11 @@ import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.login.ui.LoginScreen
 import com.wealthvault.navigation.MainAppDestination
-import org.jetbrains.compose.resources.painterResource
-
-// Import หน้า UI ทั้ง 4 หน้าของเรา
-import com.wealthvault.profile.ui.ProfileScreen
-import com.wealthvault.profile.ui.MenuProfileSettingScreen
 import com.wealthvault.profile.ui.EditProfileScreen
+import com.wealthvault.profile.ui.MenuProfileSettingScreen
+import com.wealthvault.profile.ui.ProfileScreen
 import com.wealthvault.profile.ui.ShareSettingScreen
+import org.jetbrains.compose.resources.painterResource
 
 object ProfileTab : Tab {
     override val options: TabOptions
@@ -47,10 +46,10 @@ class ProfileScreenDestination(private val rootNavigator: Navigator) : Screen {
     @Composable
     override fun Content() {
         ProfileScreen(
-            onSettingsClick = {
-                // กดแล้วผลักหน้ารวมเมนูขึ้นมาผ่าน Root Navigator (ทับ Navbar มิดแน่นอน)
-                rootNavigator.push(MenuProfileSettingDestination(rootNavigator))
-            }
+//            onSettingsClick = {
+//                // กดแล้วผลักหน้ารวมเมนูขึ้นมาผ่าน Root Navigator (ทับ Navbar มิดแน่นอน)
+//                rootNavigator.push(MenuProfileSettingDestination(rootNavigator))
+//            }
         )
     }
 }

@@ -1,20 +1,14 @@
 package com.wealthvault.profile.ui
 
+// 🌟 Import หน้าจอทั้งหมดในหมวด Profile
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-
-// 🌟 Import หน้าจอทั้งหมดในหมวด Profile
-import com.wealthvault.profile.ui.ProfileScreen
-import com.wealthvault.profile.ui.MenuProfileSettingScreen
-import com.wealthvault.profile.ui.EditProfileScreen
-import com.wealthvault.profile.ui.ShareSettingScreen
 
 // 1. พรีวิวหน้า Profile หลัก
 @Preview(showBackground = true, name = "1. Profile Screen", device = "id:pixel_7")
 @Composable
 fun ProfileScreenPreview() {
     ProfileScreen(
-        onSettingsClick = {}
     )
 }
 
