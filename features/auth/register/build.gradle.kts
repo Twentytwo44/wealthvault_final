@@ -6,7 +6,7 @@ plugins {
 kotlin {
 
     androidLibrary {
-        namespace = "com.example.register"
+        namespace = "com.wealthvault.register"
 
     }
 

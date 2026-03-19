@@ -10,7 +10,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.land_api"
+        namespace = "com.wealthvault.land_api"
         compileSdk = 36
         minSdk = 24
 

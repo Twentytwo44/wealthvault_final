@@ -1,4 +1,4 @@
-package com.wealthvault.introduction.ui // ถ้าอยากย้าย package ไปโฟลเดอร์ profile ก็เปลี่ยนตรงนี้ได้นะครับ
+package com.wealthvault.introduction.ui // ถ้าอยากย้าย package ไปโฟลเดอร์ ic_nav_profile ก็เปลี่ยนตรงนี้ได้นะครับ
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

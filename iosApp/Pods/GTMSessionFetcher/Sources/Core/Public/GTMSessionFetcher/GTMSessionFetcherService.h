@@ -26,10 +26,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Notifications.
 
-// This notification indicates a reusable session has become invalid. It is intended mainly for the
+// This com.wealthvault.com.wealthvault.notification indicates a reusable session has become invalid. It is intended mainly for the
 // service's unit tests.
 //
-// The notification object is the fetcher service.
+// The com.wealthvault.com.wealthvault.notification object is the fetcher service.
 // The invalid session is provided via the userInfo kGTMSessionFetcherServiceSessionKey key.
 extern NSString *const kGTMSessionFetcherServiceSessionBecameInvalidNotification;
 extern NSString *const kGTMSessionFetcherServiceSessionKey;

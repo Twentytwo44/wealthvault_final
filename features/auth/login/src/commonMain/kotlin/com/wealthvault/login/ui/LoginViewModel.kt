@@ -1,11 +1,11 @@
-package com.example.login.ui
+package com.wealthvault.login.ui
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.example.google_auth.GoogleAuthRepository
+import com.wealthvault.google_auth.GoogleAuthRepository
 import com.wealthvault.`auth-api`.model.LoginRequest
 import com.wealthvault.core.FlowResult
 import com.wealthvault.login.usecase.LoginUseCase

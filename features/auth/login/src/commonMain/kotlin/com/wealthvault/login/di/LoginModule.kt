@@ -1,5 +1,5 @@
 
-import com.example.login.ui.LoginScreenModel
+import com.wealthvault.login.ui.LoginScreenModel
 import com.wealthvault.data_store.TokenStore
 import com.wealthvault.login.data.AuthNetworkDataSource
 import com.wealthvault.login.data.AuthRepositoryImpl

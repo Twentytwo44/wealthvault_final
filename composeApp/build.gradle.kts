@@ -63,12 +63,19 @@ kotlin {
             implementation(project(":navigation"))
             implementation(project(":base:core"))
             api(project(":features:auth:login"))
+            implementation(project(":features:auth:login"))
+            implementation(project(":features:auth:register"))
+            implementation(project(":features:dashboard"))
+            implementation(project(":features:notification"))
+            implementation(project(":features:manage:financialList"))
+            implementation(project(":features:social"))
+            implementation(project(":features:profile"))
 
             implementation(project(":functional:api:account-api"))
             implementation(project(":functional:api:auth-api"))
             implementation(project(":functional:api:building-api"))
             implementation(project(":functional:api:cash-api"))
-            implementation(project(":features:dashboard"))
+
             implementation(project(":functional:api:google-auth"))
             implementation(project(":functional:api:insurance-api"))
             implementation(project(":functional:api:investment-api"))
@@ -80,9 +87,16 @@ kotlin {
             implementation(project(":functional:api:setup-api"))
 
 
-            implementation(project(":features:auth:register"))
+
             implementation(project(":features:manage:financial-asset"))
             implementation(project(":features:manage:financial-obligations"))
+
+            implementation(project(":features:auth:register"))
+            implementation(project(":features:dashboard"))
+            implementation(project(":features:notification"))
+            implementation(project(":features:manage:financialList"))
+            implementation(project(":features:social"))
+            implementation(project(":features:profile"))
 
 
 

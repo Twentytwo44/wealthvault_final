@@ -1,0 +1,12 @@
+package com.wealthvault.account_api.updateaccount
+
+import com.wealthvault.account_api.model.BankAccountRequest
+import com.wealthvault.account_api.model.BankAccountResponse
+import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.PATCH
+import de.jensklingenberg.ktorfit.http.Path
+
+interface UpdateAccountApi {
+    @PATCH("ic_nav_asset/account/{id}")
+    suspend fun updateAccount(@Path("id") id: String, @Body request: BankAccountRequest): BankAccountResponse
+}

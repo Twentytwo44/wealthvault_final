@@ -1,3 +1,3 @@
-package com.example.data_store
+package com.wealthvault.data_store
 
 actual fun platform() = "iOS"

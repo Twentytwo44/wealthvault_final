@@ -171,7 +171,7 @@ static const int64_t kObtainKeychainInfoWaitTime = 3 * NSEC_PER_SEC;
 }
 
 /**
- * Handles the notification for the application entering background.
+ * Handles the com.wealthvault.com.wealthvault.notification for the application entering background.
  */
 - (void)applicationDidEnterBackground:(NSNotification *)notification {
   _hasEnteredBackground = YES;

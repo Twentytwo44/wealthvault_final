@@ -1,4 +1,4 @@
-package com.example.wealthvault_final
+package com.wealthvault.wealthvault_final
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -1,11 +1,11 @@
 package com.wealthvault.navigation.tabs
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.social
+import com.wealthvault.core.generated.resources.ic_nav_social
+import com.wealthvault.social.ui.SocialScreen
 import org.jetbrains.compose.resources.painterResource
 
 object SocialTab : Tab {
@@ -13,12 +13,13 @@ object SocialTab : Tab {
         @Composable
         get() = TabOptions(
             index = 3u,
-            title = "Social",
-//            icon = painterResource(Res.drawable.social)
+            title = "โซเชียล",
+            icon = painterResource(Res.drawable.ic_nav_social)
         )
 
     @Composable
     override fun Content() {
-        Text("Social Screen")
+        SocialScreen()
+
     }
 }

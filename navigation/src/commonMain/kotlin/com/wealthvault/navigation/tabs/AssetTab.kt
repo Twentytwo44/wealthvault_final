@@ -1,13 +1,12 @@
 package com.wealthvault.navigation.tabs
 
-//import com.example.navigation.generated.resources.asset
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.asset
+import com.wealthvault.core.generated.resources.ic_nav_asset
+import com.wealthvault.financiallist.ui.asset.AssetScreen
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -18,12 +17,12 @@ object AssetTab : Tab {
         @Composable
         get() = TabOptions(
             index = 3u,
-            title = "Social",
-//            icon = painterResource(Res.drawable.asset)
+            title = "ทรัพย์สิน",
+            icon = painterResource(Res.drawable.ic_nav_asset)
         )
 
     @Composable
     override fun Content() {
-        Text("aset Screen")
+        AssetScreen(onAddClick = {})
     }
 }

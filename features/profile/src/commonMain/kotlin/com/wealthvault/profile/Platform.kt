@@ -1,3 +1,3 @@
-package com.example.profile
+package com.wealthvault.profile
 
 expect fun platform(): String

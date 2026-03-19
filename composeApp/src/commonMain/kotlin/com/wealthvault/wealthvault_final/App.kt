@@ -3,18 +3,17 @@ package com.wealthvault.wealthvault_final
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.wealthvault_final.`financial-asset`.ui.stock.AssetInputForm
+import cafe.adriel.voyager.navigator.Navigator // 🌟 Import Navigator
+import com.wealthvault.login.ui.LoginScreen
+import com.wealthvault.navigation.MainAppDestination // 🌟 Import หน้าจอที่เราเพิ่งสร้าง
 
 @Composable
 @Preview
 fun App() {
 
     MaterialTheme {
-       //MainScreen()
-        AssetInputForm()
-//        Navigator(ShareAsset())
+        // 🌟 ครอบ Navigator ใหญ่สุดไว้ที่นี่ และเรียกใช้ MainAppDestination!
+//        Navigator(MainAppDestination())
+        Navigator(LoginScreen(navigateToScreen = MainAppDestination()))
     }
-
-
-
 }

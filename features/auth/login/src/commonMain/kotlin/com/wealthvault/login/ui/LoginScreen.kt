@@ -3,28 +3,17 @@ package com.wealthvault.login.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -34,39 +23,29 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.example.login.ui.LoginScreenModel
-import com.wealthvault.core.theme.LightBorder
-import com.wealthvault.core.theme.LightMuted
-import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSurface
-import com.wealthvault.core.theme.WvBgGradientEnd
-import com.wealthvault.core.theme.WvBgGradientStart
-import com.wealthvault.core.theme.WvWaveGradientEnd
-import com.wealthvault.core.theme.WvWaveGradientStart
+// 🌟 Import ของที่เราต้องใช้
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault_final.line_auth.rememberLineAuth
+import com.wealthvault.core.theme.*
+// 🌟 Import Resource สำหรับรูปภาพ
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_pen
+import org.jetbrains.compose.resources.painterResource
+import com.wealthvault.core.generated.resources.ic_auth_email
+import com.wealthvault.core.generated.resources.ic_auth_google
+import com.wealthvault.core.generated.resources.ic_auth_eye
+import com.wealthvault.core.generated.resources.ic_auth_eye_slash
+import com.wealthvault.core.generated.resources.ic_auth_lock
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.wealthvault.forgetpassword.ui.ForgetPasswordScreen
+import com.wealthvault.register.ui.RegisterScreen
 
-class LoginScreen : Screen {
+class LoginScreen(private val navigateToScreen: Screen) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LoginScreenModel>()
 
-        val lineAuth = rememberLineAuth(
-            onSuccess = { user ->
-                // เมื่อสำเร็จ โยนกลับไปให้ ScreenModel คิดต่อ
-                screenModel.onLineSuccess(user) {
-                    println("ไปหน้าต่อไปได้เลย!")
-                    // navigator.push(HomeScreen())
-                }
-            },
-            onError = { error ->
-                // เมื่อพัง โยนกลับไปให้ ScreenModel โชว์ Error
-                screenModel.onLineError(error)
-            }
-        )
-
-        // เรียกใช้ Stateless UI ที่เราแยกไว้
         LoginContent(
             username = screenModel.username,
             onUsernameChange = { screenModel.username = it },
@@ -75,19 +54,20 @@ class LoginScreen : Screen {
             isLoading = screenModel.isLoading,
             onLoginClick = {
                 screenModel.onLoginClick {
-                    // จัดการการเปลี่ยนหน้าตรงนี้
+                    navigator.replaceAll(navigateToScreen)
                 }
             },
-            onGoogleClick = {
-                screenModel.onGoogleClick {
-                }
+            onGoogleClick = { screenModel.onGoogleClick { /* TODO */ } } ,
+            onForgotPasswordClick = {
+                 navigator.push(ForgetPasswordScreen())
             },
-            onLineClick = {
-                screenModel.onLineClick(lineAuth)
-            },
+            onRegisterClick = {
+                navigator.push(RegisterScreen())
+            }
         )
     }
 }
+
 @Composable
 fun LoginContent(
     username: String,
@@ -97,31 +77,26 @@ fun LoginContent(
     isLoading: Boolean,
     onLoginClick: () -> Unit,
     onGoogleClick: () -> Unit,
-    onLineClick:() -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    onRegisterClick: () -> Unit
 ) {
-
-    WavyBackground{
-        // 👇 เอา Column หลักกลับมาใส่ตรงนี้ครับ 👇
+    WavyBackground {
         Column(
             modifier = Modifier
-                .fillMaxSize() // ขยายเต็มหน้าจอ
-                .padding(24.dp), // เว้นขอบซ้ายขวา
-            horizontalAlignment = Alignment.CenterHorizontally, // จัดให้อยู่ตรงกลางแนวนอน
-            verticalArrangement = Arrangement.Center // จัดให้อยู่ตรงกลางแนวตั้ง
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-
-            // ชื่อแอป
             Text(
                 text = "Wealth & Vault",
                 color = LightPrimary,
-                fontSize = 28.sp,
+                style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
 
-            // 💡 แนะนำ: ลด Spacer ลงเหลือสัก 80.dp - 100.dp ครับ เพราะ 200.dp อาจจะดันของตกขอบจอล่างได้
             Spacer(modifier = Modifier.height(150.dp))
 
-            // กล่องที่รวม Input และปุ่มต่างๆ
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -131,7 +106,7 @@ fun LoginContent(
                     Text(
                         text = "อีเมล",
                         color = LightPrimary,
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
                     )
                     OutlinedTextField(
@@ -142,6 +117,15 @@ fun LoginContent(
                             .height(56.dp),
                         shape = RoundedCornerShape(percent = 30),
                         singleLine = true,
+                        // 🌟 เพิ่มไอคอนจดหมายด้านหน้า
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_auth_email),
+                                contentDescription = "email",
+                                tint = LightPrimary,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = LightSurface,
                             unfocusedContainerColor = LightSurface,
@@ -153,12 +137,14 @@ fun LoginContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                var isPasswordVisible by remember { mutableStateOf(false) }
+
                 // 2. ช่องรหัสผ่าน
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = "รหัสผ่าน",
                         color = LightPrimary,
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
                     )
                     OutlinedTextField(
@@ -169,7 +155,36 @@ fun LoginContent(
                             .height(56.dp),
                         shape = RoundedCornerShape(percent = 30),
                         singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
+                        // 🌟 เปลี่ยนการแสดงผลรหัสผ่านตามสถานะ isPasswordVisible
+                        visualTransformation = if (isPasswordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+                        // 🌟 เพิ่มไอคอนแม่กุญแจด้านหน้า
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_auth_lock),
+                                contentDescription = "lock",
+                                tint = LightPrimary,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        },
+                        // 🌟 พระเอกของเรา! ไอคอนเปิด-ปิดตาด้านหลัง
+                        trailingIcon = {
+                            // สลับรูปไอคอนตามสถานะ
+                            val icon = if (isPasswordVisible) {
+                                painterResource(Res.drawable.ic_auth_eye)
+                            } else {
+                                painterResource(Res.drawable.ic_auth_eye_slash)
+                            }
+
+                            // กดที่ไอคอนเพื่อสลับสถานะ
+                            IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                                Icon(
+                                    painter = icon,
+                                    contentDescription = "Toggle Password Visibility",
+                                    tint = LightPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = LightSurface,
                             unfocusedContainerColor = LightSurface,
@@ -179,19 +194,22 @@ fun LoginContent(
                     )
                 }
 
-                // ... โค้ดส่วนที่เหลือ (ปุ่มลืมรหัสผ่าน, ปุ่มเข้าสู่ระบบ, ปุ่ม Google) เหมือนเดิมเป๊ะเลยครับ ...
-
                 // 3. ปุ่มลืมรหัสผ่าน
-                Text(
-                    text = "ลืมรหัสผ่าน",
-                    color = LightMuted,
-                    fontSize = 16.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp, end = 16.dp)
-                        .clickable { /* TODO: นำทางไปหน้าลืมรหัส */ },
-                    textAlign = TextAlign.End
-                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = "ลืมรหัสผ่าน",
+                        color = LightMuted,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .clickable { onForgotPasswordClick() }
+                            .padding(vertical = 2.dp, horizontal = 6.dp)
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -200,11 +218,11 @@ fun LoginContent(
                     onClick = onLoginClick,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(50.dp),
                     shape = RoundedCornerShape(percent = 30),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
                 ) {
-                    Text("เข้าสู่ระบบ", fontSize = 18.sp, color = LightSurface)
+                    Text("เข้าสู่ระบบ", style = MaterialTheme.typography.titleMedium, color = LightSurface)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -215,13 +233,13 @@ fun LoginContent(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "ยังไม่มีบัญชี ", color = LightMuted, fontSize = 14.sp)
+                    Text(text = "ยังไม่มีบัญชี ", color = LightMuted, style = MaterialTheme.typography.bodyMedium)
                     Text(
                         text = "สร้างบัญชี?",
                         color = LightPrimary,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         textDecoration = TextDecoration.Underline,
-                        modifier = Modifier.clickable { /* TODO: นำทางไปหน้าสมัคร */ }
+                        modifier = Modifier.clickable { onRegisterClick() }
                     )
                 }
 
@@ -232,22 +250,9 @@ fun LoginContent(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
                 ) {
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = LightBorder,
-                        thickness = 2.dp
-                    )
-                    Text(
-                        text = " หรือ ",
-                        color = LightMuted,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = LightBorder,
-                        thickness = 2.dp
-                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
+                    Text(text = " หรือ ", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -263,45 +268,33 @@ fun LoginContent(
                     border = BorderStroke(1.dp, LightBorder),
                     colors = ButtonDefaults.outlinedButtonColors(containerColor = LightSurface)
                 ) {
-                    Text("Google", color = LightPrimary, fontSize = 16.sp)
+                    // 🌟 เพิ่มไอคอน Google ด้านหน้าข้อความ
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                         Icon(
+                             painter = painterResource(Res.drawable.ic_auth_google),
+                             contentDescription = "Google Logo",
+                             modifier = Modifier.size(36.dp),
+                             tint = Color.Unspecified // ให้แสดงสีดั้งเดิมของโลโก้ Google
+                         )
+                         Spacer(modifier = Modifier.width(8.dp))
+                        Text("Google", color = LightPrimary, style = MaterialTheme.typography.bodyLarge,)
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // 7. ปุ่ม Google
-                OutlinedButton(
-                    onClick = onLineClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(horizontal = 48.dp),
-                    shape = RoundedCornerShape(percent = 30),
-                    border = BorderStroke(1.dp, LightBorder),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = LightSurface)
-                ) {
-                    Text("Line login", color = LightPrimary, fontSize = 16.sp)
-                }
-            } // ปิด Column กล่อง Input
-        } // ปิด Column หลัก
-    } // ปิด WavyBackground
+            }
+        }
+    }
 }
-
 
 @Composable
 fun WavyBackground(
-    // เปลี่ยนมารับค่าเป็น Brush (การไล่สี) แทน Color
-    topWaveBrush: Brush = Brush.verticalGradient(
-        colors = listOf(WvWaveGradientStart, WvWaveGradientEnd)
-    ),
-    bottomBgBrush: Brush = Brush.verticalGradient(
-        colors = listOf(WvBgGradientStart, WvBgGradientEnd)
-    ),
+    topWaveBrush: Brush = Brush.verticalGradient(colors = listOf(WvWaveGradientStart, WvWaveGradientEnd)),
+    bottomBgBrush: Brush = Brush.verticalGradient(colors = listOf(WvBgGradientStart, WvBgGradientEnd)),
     content: @Composable () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(bottomBgBrush) // ระบายสีพื้นหลังด้วย Gradient
+            .background(bottomBgBrush)
             .drawBehind {
                 val path = Path().apply {
                     moveTo(0f, 0f)
@@ -314,7 +307,6 @@ fun WavyBackground(
                     lineTo(size.width, 0f)
                     close()
                 }
-                // วาดเส้นคลื่นแล้วระบายด้วย Gradient
                 drawPath(path = path, brush = topWaveBrush)
             }
     ) {

@@ -1,4 +1,4 @@
-package com.example.setting_app
+package com.wealthvault.setting_app
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

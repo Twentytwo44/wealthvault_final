@@ -40,6 +40,9 @@ kotlin {
                 implementation(project(":functional:notification"))
 
 
+                implementation(project(":features:auth:register"))
+
+
                 implementation(project(":base:core"))
 
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
