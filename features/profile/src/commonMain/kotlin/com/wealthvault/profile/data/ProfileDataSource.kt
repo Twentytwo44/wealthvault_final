@@ -1,15 +1,15 @@
 package com.wealthvault.profile.data
 
-import com.wealthvault.`auth-api`.model.RegisterRequest
-import com.wealthvault.`auth-api`.register.RegisterApi
+import com.wealthvault.`user-api`.model.UserData
+import com.wealthvault.`user-api`.user.UserApi
 
 class ProfileDataSource(
-    private val registerApi: RegisterApi,
+    private val userApi: UserApi,
 ) {
-    suspend fun register(request: RegisterRequest): Result<String> {
+    suspend fun getUser(): Result<UserData> {
         return runCatching {
-            val result = registerApi.register(request)
-            result.data?.userId ?: throw IllegalArgumentException("User is null, Cannot create user")
+            val result = userApi.getUser()
+            result.data ?: throw IllegalArgumentException("User is null, Cannot create user")
         }
     }
 }

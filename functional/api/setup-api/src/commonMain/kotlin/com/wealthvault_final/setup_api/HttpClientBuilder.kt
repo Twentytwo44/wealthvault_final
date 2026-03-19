@@ -21,7 +21,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 
 class HttpClientBuilder(
@@ -40,13 +39,14 @@ class HttpClientBuilder(
                     bearer {
                         loadTokens {
                             // เรียกผ่าน Namespace 'token' ตามที่คุณแบ่งไว้
-                            val authData = tokenStore.authData.first()
-
-                            if (authData.accessToken.isNullOrBlank()) return@loadTokens null
+//                            val authData = tokenStore.authData.first()
+//
+//                            if (authData.accessToken.isNullOrBlank()) return@loadTokens null
 
                             BearerTokens(
-                                accessToken = authData.accessToken ?: "",
-                                refreshToken = authData.refreshToken ?: ""
+                                accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzczOTE1ODY2LCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjI2OGVjMjJmLTI4ZDktNDNmZi1iODk5LTg4N2IwMjUzNmI3ZCJ9.C4rtORbHvK1hEFdKrNWNMUcARdohw_mbpLkay7FtaFM",
+                                refreshToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzc0NTE5NzY2LCJ0eXBlIjoicmVmcmVzaCIsInVzZXJfaWQiOiIyNjhlYzIyZi0yOGQ5LTQzZmYtYjg5OS04ODdiMDI1MzZiN2QifQ.cVdNvwpAOMb8aHWcXr5IK1cyS1u9E4l_GyFJAidjSqI"
+
                             )
                         }
 
@@ -59,12 +59,12 @@ class HttpClientBuilder(
 
                             try {
                                 val response: RefreshResponse = client.post("${Config.localhost_android}auth/refresh") {
-                                    setBody(RefreshRequest(oldTokens?.refreshToken ?: ""))
+                                    setBody(RefreshRequest(oldTokens?.refreshToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzczOTE1ODY2LCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjI2OGVjMjJmLTI4ZDktNDNmZi1iODk5LTg4N2IwMjUzNmI3ZCJ9.C4rtORbHvK1hEFdKrNWNMUcARdohw_mbpLkay7FtaFM"))
                                     contentType(ContentType.Application.Json)
                                 }.body()
 
-                                val newAccess = response.data?.accessToken ?: ""
-                                val newRefresh = response.data?.refreshToken ?: ""
+                                val newAccess = response.data?.accessToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwidHlwZSI6ImFjY2VzcyIsInVzZXJfaWQiOiIyNjhlYzIyZi0yOGQ5LTQzZmYtYjg5OS04ODdiMDI1MzZiN2QifQ.jYNvi8QcWjCHit2SYMdi6bMWbb96l8_NAgt4OBVx11I"
+                                val newRefresh = response.data?.refreshToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJ1c2VyX2lkIjoiMjY4ZWMyMmYtMjhkOS00M2ZmLWI4OTktODg3YjAyNTM2YjdkIn0.P8QeHyBn1HAzjP9_WJFBVkwVDYhBiT8DabaJKjAs1y0"
 
                                 if (newAccess.isNotBlank()) {
                                     // บันทึกผ่าน Namespace 'token'
