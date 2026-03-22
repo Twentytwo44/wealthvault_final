@@ -28,6 +28,8 @@ kotlin {
                 implementation(project(":functional:api:auth-api"))
                 implementation(project(":functional:data-store"))
                 implementation(project(":base:core"))
+                implementation(project(":functional:api:user-api"))
+
 
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
 

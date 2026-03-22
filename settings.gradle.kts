@@ -4,13 +4,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     includeBuild("build-logic")
     repositories {
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
-        }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -18,13 +12,7 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
-        }
+        google()
         mavenCentral()
         maven("https://jitpack.io")
     }
@@ -44,6 +32,13 @@ include(":functional:api:investment-api")
 include(":functional:api:building-api")
 include(":functional:api:land-api")
 include(":functional:api:liability-api")
+include(":functional:api:line-auth")
+include(":functional:notification")
+include(":functional:api:setup-api")
+
+
+
+
 
 
 

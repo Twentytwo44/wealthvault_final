@@ -3,8 +3,8 @@ package com.wealthvault.setting_app.di
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import com.example.core.KoinConst
-import com.example.setting_app.SettingsManager
+import com.wealthvault.core.KoinConst
+import com.wealthvault.setting_app.SettingsManager
 import okio.Path.Companion.toPath
 import org.koin.core.qualifier.named
 import org.koin.dsl.module

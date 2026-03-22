@@ -9,11 +9,15 @@ import com.wealthvault.google_auth.GoogleAuthRepository
 import com.wealthvault.`auth-api`.model.LoginRequest
 import com.wealthvault.core.FlowResult
 import com.wealthvault.login.usecase.LoginUseCase
+import com.wealthvault_final.line_auth.LineAuth
+import com.wealthvault_final.line_auth.model.LineUser
+import com.wealthvault_final.notification.PushNotificationHelper
 import kotlinx.coroutines.launch
 
 class LoginScreenModel(
     private val loginUseCase: LoginUseCase,
-    private val googelRepository: GoogleAuthRepository
+    private val googelRepository: GoogleAuthRepository,
+    private val pushHelper: PushNotificationHelper
 ) : ScreenModel {
 
     // UI State
@@ -90,5 +94,61 @@ class LoginScreenModel(
 
             isLoading = false
         }
+    }
+
+    fun onLineClick(lineAuth: LineAuth) {
+        println("🚀 [LoginScreenModel] onLineClick triggered")
+        isLoading = true
+        errorMessage = null
+
+        // สั่งให้ตัวจัดการ LINE ที่หน้าจอส่งมา เริ่มทำงาน
+
+
+        pushHelper.getDeviceTokenInfo(
+            onSuccess = { deviceInfo ->
+
+                println("============================================================")
+                println("Test FCM Token: ${deviceInfo.fcmToken}")
+                println("Platform: ${deviceInfo.platform}")
+                println("Device Name: ${deviceInfo.deviceName}")
+                println("============================================================")
+                // 3. 🟢 นำข้อมูลที่ดึงได้ ประกอบร่างยิง API ไปเก็บที่ Django
+//                coroutineScope.launch {
+//                    try {
+//                        val request = DeviceTokenRequest(
+//                            fcmToken = deviceInfo.fcmToken,
+//                            platform = deviceInfo.platform,
+//                            deviceName = deviceInfo.deviceName
+//                        )
+//                        notificationApi.registerDevice(request)
+//                        println("✅ ส่ง Device Token ขึ้น Server สำเร็จ!")
+//                    } catch (e: Exception) {
+//                        println("❌ ส่ง Device Token ไม่สำเร็จ: ${e.message}")
+//                    }
+//                }
+            },
+            onError = { error ->
+                println("❌ ไม่สามารถดึง FCM Token จากเครื่องได้: $error")
+            }
+        )
+//        lineAuth.login()
+    }
+
+    // 🟢 2. รับผลลัพธ์กลับมาเมื่อ LINE ล็อกอินสำเร็จ
+    fun onLineSuccess(user: LineUser, onSuccess: () -> Unit) {
+        println("🎉 [LoginScreenModel] LINE Success: ${user.displayName} (${user.userId})")
+        isLoading = false
+
+        // 💡 ตรงนี้คุณสามารถเอา user.userId ไปยิงเข้า API Backend ของ WealthVault ได้เลย
+        // เช่น loginUseCase(LoginRequest(user.userId, ...))
+
+        onSuccess() // สั่งให้หน้าจอทำคำสั่งต่อไป (เช่น เด้งไปหน้า Home)
+    }
+
+    // 🟢 3. รับผลลัพธ์กลับมาเมื่อพัง หรือกดยกเลิก
+    fun onLineError(error: String) {
+        println("❌ [LoginScreenModel] LINE Error: $error")
+        isLoading = false
+        errorMessage = error
     }
 }

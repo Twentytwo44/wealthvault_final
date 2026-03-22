@@ -1,24 +1,31 @@
-package com.wealthvault.profile.di//
-//import com.example.dashboard.data.RegisterDataSource
-//import com.example.dashboard.data.RegisterRepositoryImpl
-//import com.example.dashboard.usecase.RegisterUseCase
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.IO
-//import org.koin.dsl.module
+package com.wealthvault.profile.di
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.wealthvault.data_store.TokenStore
+import com.wealthvault.profile.data.ProfileDataSource
+import com.wealthvault.profile.data.ProfileRepositoryImpl
+import com.wealthvault.profile.ui.ProfileScreenModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import org.koin.dsl.module
+
 //
-//object DashboardModule {
-//    val allModules = module {
-//        factory { RegisterDataSource(get()) }
-//
-//        single<RegisterRepositoryImpl> {
-//            RegisterRepositoryImpl(
-//                networkDataSource = get(),
-//            )
-//        }
-//        single { Dispatchers.IO }
-//
-//        factory { RegisterUseCase(get(), get()) }
-//
-////        factory { RegisterScreenModel(get()) }
-//    }
-//}
+
+object ProfileModule {
+    val allModules = module {
+
+        factory { ProfileDataSource(get()) }
+
+        single<TokenStore> { TokenStore(get<DataStore<Preferences>>()) }
+
+        single<ProfileRepositoryImpl> {
+            ProfileRepositoryImpl(
+                networkDataSource = get(),
+            )
+        }
+        single { Dispatchers.IO }
+
+        factory { ProfileScreenModel(get()) }
+    }
+}

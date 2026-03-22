@@ -1,21 +1,30 @@
 package com.wealthvault.wealthvault_final
 
 import android.app.Application
-import com.wealthvault.google_auth.di.GoogleAuthAndroidModule
+import com.google.firebase.FirebaseApp
 import com.wealthvault.data_store.androidDataStoreModule
+import com.wealthvault.google_auth.di.GoogleAuthAndroidModule
 import com.wealthvault.wealthvault_final.di.AllModules
+import com.wealthvault_final.notification.di.NotificationModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
 class MyApplication : Application() {
     override fun onCreate() {
+        try {
+            FirebaseApp.initializeApp(this)
+            println("✅ Firebase Initialized from MainActivity")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         super.onCreate()
+
         startKoin {
             androidContext(this@MyApplication)
             androidLogger()
 
-            modules(AllModules.modules+ androidDataStoreModule.allModules + GoogleAuthAndroidModule.allModules)
+            modules(AllModules.modules+ androidDataStoreModule.allModules + GoogleAuthAndroidModule.allModules + NotificationModule.allModules)
         }
     }
 }

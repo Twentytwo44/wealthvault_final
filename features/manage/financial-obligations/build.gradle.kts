@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
+    alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
@@ -14,14 +15,7 @@ kotlin {
         compileSdk = 36
         minSdk = 24
 
-        withHostTestBuilder {
-        }
 
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }.configure {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
     }
 
     // For iOS targets, this is also where you should
@@ -61,14 +55,37 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
+
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose)
+                val voyagerVersion = "1.0.0"
+                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
+
+                implementation(project(":functional:api:auth-api"))
+                implementation(project(":functional:data-store"))
+                implementation(project(":functional:api:google-auth"))
+
+                implementation(project(":base:core"))
+
+                implementation("androidx.datastore:datastore-preferences-core:1.1.1")
+
+                implementation(libs.compose.material)
+                implementation(libs.compose.material3)
+
+                implementation(libs.compose.runtime)
+                implementation(libs.compose.foundation)
+                implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")
+                implementation(libs.compose.components.resources)
+
+
             }
         }
 
-        commonTest {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
-        }
+
 
         androidMain {
             dependencies {
@@ -78,13 +95,6 @@ kotlin {
             }
         }
 
-        getByName("androidDeviceTest") {
-            dependencies {
-                implementation(libs.androidx.runner)
-                implementation(libs.androidx.core)
-                implementation(libs.androidx.testExt.junit)
-            }
-        }
 
         iosMain {
             dependencies {

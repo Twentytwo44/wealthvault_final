@@ -1,5 +1,5 @@
 [versions]
-agp = "9.1.0"
+agp = "9.0.0"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
@@ -28,7 +28,6 @@ mokkery = "3.1.1"
 compose-plugin = "1.7.0"
 imagepicker-kmp = "1.0.8"
 filekit = "0.8.2"
-
 
 
 [libraries]
@@ -83,9 +82,10 @@ android-build-gradle = { group = "com.android.tools.build", name = "gradle", ver
 mokkery-gradle = { group = "dev.mokkery", name = "mokkery-gradle", version.ref = "mokkery" }
 
 compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "compose-plugin" }
-# image and file
-#imagepicker-kmp = { module = "io.github.ismoy:imagepickerkmp", version.ref = "imagepicker-kmp" }
-filekit-compose = { module = "io.github.vinceglb.filekit:filekit-compose", version.ref = "filekit" }
+
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.7.0" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx" }
+
 
 
 [plugins]

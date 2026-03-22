@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    id("com.google.gms.google-services")
+
 }
 
 kotlin {
@@ -21,6 +23,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            export(project(":functional:api:line-auth"))
+            export(project(":features:auth:login"))
         }
     }
     
@@ -29,6 +33,10 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(project(":base:core"))
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.messaging)
+            implementation("com.google.firebase:firebase-common-ktx")
+
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -54,6 +62,7 @@ kotlin {
             implementation(project(":functional:data-store"))
             implementation(project(":navigation"))
             implementation(project(":base:core"))
+            api(project(":features:auth:login"))
             implementation(project(":features:auth:login"))
             implementation(project(":features:auth:register"))
             implementation(project(":features:dashboard"))
@@ -73,12 +82,24 @@ kotlin {
             implementation(project(":functional:api:land-api"))
             implementation(project(":functional:api:liability-api"))
             implementation(project(":functional:api:user-api"))
-
-
+            api(project(":functional:api:line-auth"))
+            implementation(project(":functional:notification"))
+            implementation(project(":functional:api:setup-api"))
 
 
 
             implementation(project(":features:manage:financial-asset"))
+            implementation(project(":features:manage:financial-obligations"))
+
+            implementation(project(":features:auth:register"))
+            implementation(project(":features:dashboard"))
+            implementation(project(":features:notification"))
+            implementation(project(":features:manage:financialList"))
+            implementation(project(":features:social"))
+            implementation(project(":features:profile"))
+
+
+
 
 //            implementation(project(":features:auth:introduction"))
 

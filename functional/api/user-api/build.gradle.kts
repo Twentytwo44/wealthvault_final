@@ -88,6 +88,7 @@ kotlin {
                 implementation(project(":base:config"))
                 implementation(project(":functional:data-store"))
                 implementation(project(":functional:api:auth-api"))
+                implementation(project(":functional:api:setup-api"))
 
 
 

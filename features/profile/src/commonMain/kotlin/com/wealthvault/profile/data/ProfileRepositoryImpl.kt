@@ -1,16 +1,19 @@
 package com.wealthvault.profile.data
 
+import com.wealthvault.`user-api`.model.UserData
 
 
-//class DashboardRepositoryImpl(
-//    private val networkDataSource: RegisterDataSource,
-//) {
-//    suspend fun register(request: RegisterRequest): Result<Unit> {
-//        return networkDataSource.register(request).map { userId ->
-//           println("userId: $userId")
-//        }
-//    }
-//
-//    // สร้าง Flow เพื่อตรวจสอบสถานะล็อกอิน (เลียนแบบ Flow ใน UseCase เดิม)
-//
-//}
+class ProfileRepositoryImpl(
+    private val networkDataSource: ProfileDataSource,
+) {
+    suspend fun getUser(): Result<UserData> {
+
+
+        return networkDataSource.getUser().onSuccess { user ->
+            println("✅ Fetched User: $user")
+        }.onFailure { error ->
+            println("🚨 Get User Failed: ${error.message}")
+        }
+
+    }
+}

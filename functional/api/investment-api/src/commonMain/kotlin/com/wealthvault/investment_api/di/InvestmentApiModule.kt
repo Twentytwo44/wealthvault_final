@@ -1,5 +1,6 @@
 package com.wealthvault.investment_api.di
 
+import com.wealthvault.core.KoinConst
 import com.wealthvault.investment_api.createcash.CreateInvestmentApi
 import com.wealthvault.investment_api.createcash.CreateInvestmentApiImpl
 import com.wealthvault.investment_api.deleteinvestment.DeleteInvestmentApi
@@ -10,19 +11,23 @@ import com.wealthvault.investment_api.getinvestmentbyid.GetInvestmentByIdApi
 import com.wealthvault.investment_api.getinvestmentbyid.GetInvestmentByIdApiImpl
 import com.wealthvault.investment_api.updateinvestment.UpdateInvestmentApi
 import com.wealthvault.investment_api.updateinvestment.UpdateInvestmentApiImpl
-import com.wealthvault.core.KoinConst
+import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-
 object InvestmentApiModule {
     val allModules = module {
+        single<Json>(named(KoinConst.KotlinSerialization.GLOBAL)) {
+            Json {
+                ignoreUnknownKeys = true
+            }
+        }
 
-        single<CreateInvestmentApi> { CreateInvestmentApiImpl(get(named(KoinConst.Ktor.USER))) }
-        single<GetInvestmentApi> { GetInvestmentApiImpl(get(named(KoinConst.Ktor.USER))) }
-        single<GetInvestmentByIdApi> { GetInvestmentByIdApiImpl(get(named(KoinConst.Ktor.USER))) }
-        single<UpdateInvestmentApi> { UpdateInvestmentApiImpl(get(named(KoinConst.Ktor.USER))) }
-        single<DeleteInvestmentApi> { DeleteInvestmentApiImpl(get(named(KoinConst.Ktor.USER))) }
+        single<CreateInvestmentApi> { CreateInvestmentApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<GetInvestmentApi> { GetInvestmentApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<GetInvestmentByIdApi> { GetInvestmentByIdApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<UpdateInvestmentApi> { UpdateInvestmentApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<DeleteInvestmentApi> { DeleteInvestmentApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
 
 
 

@@ -87,6 +87,7 @@ kotlin {
                 implementation(libs.compose.runtime)
                 implementation(libs.compose.foundation)
                 implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")
+                implementation(libs.compose.components.resources)
 
 
             }
