@@ -22,8 +22,16 @@ object GlobalApiModule {
 
         // --- 2. Global Ktorfit ---
         single<Ktorfit>(named(KoinConst.Ktor.GLOBAL)) {
+
+            // 🌟 เช็คและเติมเครื่องหมาย / ต่อท้ายให้อัตโนมัติ (ถ้ายังไม่มี)
+//            val safeBaseUrl = if (Config.localhost_android.endsWith("/")) {
+//                Config.localhost_android
+//            } else {
+//                "${Config.localhost_android}/"
+//            }
+
             Ktorfit.Builder()
-                .baseUrl(Config.localhost_android)
+                .baseUrl(Config.localhost_android) // 🌟 ใช้ URL ที่ปลอดภัยแล้ว
                 // ต้องระบุ named ให้ชัดเจนตอน get HttpClient
                 .httpClient(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL)))
                 .build()

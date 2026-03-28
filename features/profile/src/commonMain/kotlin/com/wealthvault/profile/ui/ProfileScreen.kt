@@ -1,7 +1,5 @@
 package com.wealthvault.profile.ui
 
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.filled.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,11 +14,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator // 🌟 เพิ่ม Loading
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState // 🌟 เพิ่ม import นี้
+import androidx.compose.runtime.getValue // 🌟 เพิ่ม import นี้
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,39 +29,39 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_profile_setting
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.profile.ui.components.ClosePersonItem
+import com.wealthvault.`user-api`.model.UserData // 🌟 นำเข้าโมเดล UserData
 import org.jetbrains.compose.resources.painterResource
 
-
-
-class ProfileScreen() : Screen {
+class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
     @Composable
     override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<ProfileScreenModel>()
-        ProfileContent(screenModel)
 
+        // 🌟 1. ดักฟังข้อมูลจาก ScreenModel (ถ้ายังโหลดไม่เสร็จจะเป็น null)
+        val userData by screenModel.userState.collectAsState()
+
+        ProfileContent(
+            userData = userData, // 🌟 2. โยนข้อมูลไปให้ UI
+            onSettingsClick = onSettingsClick
+        )
     }
 }
+
 @Composable
 fun ProfileContent(
-    screenModel: ProfileScreenModel,
-
+    userData: UserData?, // 🌟 รับข้อมูลมาใช้งาน (อาจจะ null ได้)
+    onSettingsClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
     val bgColor = Color(0xFFFFF8F3)
-    println(screenModel)
-
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            // ถ้ามีพื้นหลังสีครีม ใส่ .background(bgColor) ตรงนี้ได้ครับ
             .padding(horizontal = 24.dp)
             .padding(top = 24.dp)
     ) {
@@ -78,49 +79,54 @@ fun ProfileContent(
                 color = themeColor
             )
 
-            // 🌟 ไอคอนฟันเฟือง กดแล้วไปหน้า Settings
             Icon(
                 painter = painterResource(Res.drawable.ic_profile_setting),
                 contentDescription = "Settings",
                 tint = Color(0xFFC47B5D),
                 modifier = Modifier
                     .size(28.dp)
-                    .clickable { } // กดแล้วเรียกคำสั่งเปลี่ยนหน้า
+                    .clickable { onSettingsClick() }
             )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
         // --- Profile Info ---
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            // รูปโปรไฟล์
-            Box(
-                modifier = Modifier
-                    .size(90.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE0DCDA))
-            )
-
-            Spacer(modifier = Modifier.width(20.dp))
-
-            Column {
-                Text(
-                    text = "Twentytwo01",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color(0xFF3A2F2A)
+        // 🌟 3. เช็คว่าโหลดข้อมูลเสร็จหรือยัง ถ้ายังให้โชว์หมุนๆ
+        if (userData == null) {
+            Box(modifier = Modifier.fillMaxWidth().height(90.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = themeColor)
+            }
+        } else {
+            // 🌟 4. โหลดเสร็จแล้ว! เอาข้อมูลมาแปะเลย
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(90.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE0DCDA))
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "nptwosudinw@gmail.com",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "13/08/2549",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF3A2F2A)
-                )
+                Spacer(modifier = Modifier.width(20.dp))
+                Column {
+                    Text(
+                        text = userData.username, // 👈 ใช้ชื่อจาก API
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color(0xFF3A2F2A)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = userData.email, // 👈 ใช้อีเมลจาก API
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        // ตัดเอาแค่วันที่ (ตัวอย่าง: 1970-01-01) หรือจะใช้ตัวจัดรูปแบบวันที่เพิ่มเติมก็ได้ครับ
+                        text = userData.birthday.take(10),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF3A2F2A)
+                    )
+                }
             }
         }
 
@@ -129,6 +135,7 @@ fun ProfileContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         // --- Settings Summary ---
+        // ซ่อนส่วนนี้ไว้ก่อนถ้ายกเลิกการแชร์ หรือจะโชว์ตลอดก็ได้ครับ
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -141,7 +148,8 @@ fun ProfileContent(
                 modifier = Modifier.weight(1f)
             )
             Text(
-                text = "80 ปี",
+                // 🌟 โชว์อายุที่แชร์จาก API หรือถ้าไม่แชร์ก็บอกว่า "ไม่ได้เปิดใช้งาน"
+                text = if (userData?.shareEnabled == true) "${userData.sharedAge} ปี" else "ไม่ได้เปิดใช้งาน",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
@@ -158,7 +166,7 @@ fun ProfileContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // สมมติว่ามี Component ClosePersonItem อยู่แล้ว
-         ClosePersonItem(name = "Nai")
+        // สมมติว่ามี Component ClosePersonItem อยู่แล้ว (รอ API คนสนิทในอนาคต)
+        ClosePersonItem(name = "Nai")
     }
 }

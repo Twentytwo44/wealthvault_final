@@ -9,6 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun ProfileScreenPreview() {
     ProfileScreen(
+        onSettingsClick = {},
     )
 }
 

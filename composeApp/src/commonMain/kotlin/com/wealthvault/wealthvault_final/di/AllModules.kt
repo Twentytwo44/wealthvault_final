@@ -22,7 +22,7 @@ object AllModules {
     val modules = arrayListOf<Module>().apply {
 
         add(DataStoreModule.allModules)
-        add(LoginModule.allModules)
+
 
         // setup httpclientbuilder
         add(GlobalApiModule.allModules)
@@ -37,8 +37,8 @@ object AllModules {
         add(LandApiModule.allModules)
         add(LiabilityApiModule.allModules)
         add(UserApiModule.allModules)
-        add(GlobalApiModule.allModules)
 
+        add(LoginModule.allModules)
         add(RegisterModule.allModules)
         add(ProfileModule.allModules)
 
