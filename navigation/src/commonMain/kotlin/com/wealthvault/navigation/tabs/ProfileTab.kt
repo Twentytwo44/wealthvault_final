@@ -16,6 +16,8 @@ import com.wealthvault.profile.ui.MenuProfileSettingScreen
 import com.wealthvault.profile.ui.ProfileScreen
 import com.wealthvault.profile.ui.ShareSettingScreen
 import org.jetbrains.compose.resources.painterResource
+import com.wealthvault.core.utils.getScreenModel
+import com.wealthvault.profile.ui.EditProfileScreenModel
 
 object ProfileTab : Tab {
     override val options: TabOptions
@@ -69,8 +71,11 @@ class EditProfileDestination(private val rootNavigator: Navigator) : Screen {
     override fun Content() {
         EditProfileScreen(
             onBackClick = { rootNavigator.pop() },
-            onSaveClick = { rootNavigator.pop() }
-        )
+            onSaveClick = {
+                rootNavigator.pop()
+                rootNavigator.pop()
+            }
+        ).Content()
     }
 }
 

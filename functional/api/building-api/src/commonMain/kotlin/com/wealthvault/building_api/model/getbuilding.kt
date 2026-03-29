@@ -46,7 +46,7 @@ data class GetBuildingData(
     val location: LocationDataAll,
 
     @SerialName("ins")
-    val ins: List<InsDataAll>,
+    val ins: List<InsDataAll>? = null,
 
     @SerialName("created_at")
     val createdAt: String,

@@ -1,28 +1,23 @@
-package com.wealthvault.financiallistusecase
+package com.wealthvault.financiallist.usecase
 
+import com.wealthvault.financiallist.data.FinanciallistRepositoryImpl
+import com.wealthvault.account_api.model.AccountData
+import com.wealthvault.cash_api.model.GetCashData
+import com.wealthvault.investment_api.model.GetInvestmentData
+import com.wealthvault.insurance_api.model.GetInsuranceData
+import com.wealthvault.building_api.model.GetBuildingData
+import com.wealthvault.land_api.model.GetLandData
+import com.wealthvault.liability_api.model.GetLiabilityData
 
-
-//class DashboardUseCase(
-//    private val registerRepository: RegisterRepositoryImpl,
-//    // 1. รับ dispatcher เพิ่มเข้ามา
-//    dispatcher: CoroutineDispatcher,
-//): FlowUseCase<RegisterRequest, Boolean>(dispatcher) { // 2. ส่งต่อให้คลาสแม่
-//
-//    override fun execute(parameters: RegisterRequest): Flow<FlowResult<Boolean>> = flow {
-//        println("🚀 [RegisterUseCase] Starting Register Action for: ${parameters.email}")
-//
-//        val result = registerRepository.register(parameters)
-//
-//        result.onSuccess {
-//            println("✅ [RegisterUseCase] Register Success")
-//
-//            emit(FlowResult.Continue(true))
-//        }.onFailure { exception ->
-//            println("❌ [RegisterUseCase] Register Failed: ${exception.message}")
-//            emit(FlowResult.Failure(exception))
-//        }
-//    }.catch { cause ->
-//        println("🚨 [RegisterUseCase] Unexpected Error: ${cause.message}")
-//        emit(FlowResult.Failure(cause))
-//    }
-//}
+class FinanciallistUseCase(
+    private val repository: FinanciallistRepositoryImpl
+) {
+    // 🌟 ต้องมี Result<List<...>> ต่อท้ายทุกบรรทัด
+    suspend fun getAccounts(): Result<List<AccountData>> = repository.getAccounts()
+    suspend fun getCashes(): Result<List<GetCashData>> = repository.getCashes()
+    suspend fun getInvestments(): Result<List<GetInvestmentData>> = repository.getInvestments()
+    suspend fun getInsurances(): Result<List<GetInsuranceData>> = repository.getInsurances()
+    suspend fun getBuildings(): Result<List<GetBuildingData>> = repository.getBuildings()
+    suspend fun getLands(): Result<List<GetLandData>> = repository.getLands()
+    suspend fun getLiabilities(): Result<List<GetLiabilityData>> = repository.getLiabilities()
+}

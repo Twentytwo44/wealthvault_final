@@ -30,7 +30,7 @@ data class CashIdData(
     val name: String,
 
     @SerialName("amount")
-    val ammount: Int,
+    val amount: Int,
 
     @SerialName("description")
     val description: String,

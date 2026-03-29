@@ -13,6 +13,7 @@ import com.wealthvault.`user-api`.updateuser.UpdateUserApi
 import com.wealthvault.`user-api`.updateuser.UpdateUserApiImpl
 import com.wealthvault.`user-api`.user.UserApi
 import com.wealthvault.`user-api`.user.UserApiImpl
+import de.jensklingenberg.ktorfit.Ktorfit
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -31,7 +32,7 @@ object UserApiModule {
         single<FriendApi> { FriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<UserApi> { UserApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<PendingFriendApi> { PendingFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UpdateUserApi> { UpdateUserApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<UpdateUserApi> {UpdateUserApiImpl(ktorfit = get(named(KoinConst.Ktor.AUTH)), tokenStore = get())}
 
     }
 

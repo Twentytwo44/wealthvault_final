@@ -6,8 +6,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UpdateUserDataRequest(
-    @SerialName("status")
-    val status: String? = null
+    @SerialName("username") val username: String,
+    @SerialName("first_name") val firstName: String,
+    @SerialName("last_name") val lastName: String,
+    @SerialName("birthday") val birthday: String,
+    @SerialName("phone_number") val phoneNumber: String,
+    @SerialName("profile") val profileImage: ByteArray? = null
 )
 
 @Serializable
@@ -42,7 +46,7 @@ data class UpdateUserData(
     @SerialName("phone_number")
     val phoneNumber: String,
 
-    @SerialName("ic_nav_profile")
+    @SerialName("profile")
     val profile: String,
 
     @SerialName("birthday")
@@ -58,6 +62,9 @@ data class UpdateUserData(
     val createdAt: String,
 
     @SerialName("updated_at")
-    val updatedAt: String
+    val updatedAt: String,
+
+    @SerialName("is_close")
+    val isClose: Boolean? = null,
 
 )

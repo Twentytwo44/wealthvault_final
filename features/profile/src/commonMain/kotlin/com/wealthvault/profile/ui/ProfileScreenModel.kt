@@ -9,30 +9,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ProfileScreenModel(
-private val repository: ProfileRepositoryImpl
+    private val repository: ProfileRepositoryImpl
 ) : ScreenModel {
 
-    // 1. สร้าง State ไว้รอรับข้อมูล (เริ่มต้นเป็น null ไปก่อน)
     private val _userState = MutableStateFlow<UserData?>(null)
     val userState = _userState.asStateFlow()
 
     init {
         fetchUser()
     }
-    private fun fetchUser() {
-        // 2. เรียกใช้งานฟังก์ชันที่ทำงานแบบ suspend ต้องทำใน Coroutine
+
+    // 🌟 เอาคำว่า private ออกเพื่อให้ UI สั่ง refresh ได้
+    fun fetchUser() {
         screenModelScope.launch {
-
             val result = repository.getUser()
-
-            // 3. แกะกล่อง Result เพื่อเอาค่าไปใช้งานต่อ!
             result.onSuccess { userData ->
-                // ✅ ได้ค่ามาแล้ว! เอาไปยัดใส่ State เพื่อให้ UI อัปเดต
                 _userState.value = userData
-
-
             }.onFailure { error ->
-                // 🚨 ถ้าพัง ก็จัดการโชว์ Error ตรงนี้
                 println("Failed to get user: ${error.message}")
             }
         }

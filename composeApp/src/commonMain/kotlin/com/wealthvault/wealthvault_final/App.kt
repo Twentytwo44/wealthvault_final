@@ -14,8 +14,8 @@ fun App() {
 
     MaterialTheme {
         // 🌟 ครอบ Navigator ใหญ่สุดไว้ที่นี่ และเรียกใช้ MainAppDestination!
-//        Navigator(MainAppDestination())
-        Navigator(LoginScreen(navigateToScreen = MainAppDestination()))
+        Navigator(MainAppDestination())
+//        Navigator(LoginScreen(navigateToScreen = MainAppDestination()))
 //        Navigator(ProfileScreen())
     }
 }

@@ -12,7 +12,7 @@ class UpdateAccountApiImpl(private val ktorfit: Ktorfit) : UpdateAccountApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.patch("${Config.localhost_android}/ic_nav_asset/account/${id}") {
+        return client.patch("${Config.localhost_android}/asset/account/${id}") {
 
         }.body()
     }

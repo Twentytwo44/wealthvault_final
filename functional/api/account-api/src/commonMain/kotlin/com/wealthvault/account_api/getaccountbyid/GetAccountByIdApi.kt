@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 
 interface GetAccountByIdApi {
-    @GET("ic_nav_asset/account/{id}")
+    @GET("asset/account/{id}")
     suspend fun getAccountById(@Path("id") id: String): BankAccountResponse
 }

@@ -1,91 +1,109 @@
 package com.wealthvault.financiallist.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.filled.KeyboardArrowDown
-//import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_down_line
+import com.wealthvault.core.generated.resources.ic_common_up_line
+import com.wealthvault.core.generated.resources.ic_common_bin  // 🌟 ต้องมี resource นี้
+import com.wealthvault.core.generated.resources.ic_common_pen    // 🌟 ต้องมี resource นี้
+import com.wealthvault.core.generated.resources.ic_dashboard_share   // 🌟 ต้องมี resource นี้
+import com.wealthvault.core.theme.LightAsset
+import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightDebt
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSecondary
+import com.wealthvault.core.theme.WvBgGradientStart
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun ExpandableCategoryCard(
     title: String,
     itemCount: Int,
-    themeColor: Color,
-    initiallyExpanded: Boolean = false,
-    content: @Composable () -> Unit // ใส่การ์ดข้อมูลข้างในตรงนี้
+    themeColor: String, // "asset" หรือ "debt"
+    initiallyExpanded: Boolean = true,
+    content: @Composable () -> Unit
 ) {
     var expanded by remember { mutableStateOf(initiallyExpanded) }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
+            .padding(bottom = 4.dp)
     ) {
-        // --- ส่วนหัว (กดกาง/หุบได้) ---
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { expanded = !expanded }
-                .padding(vertical = 8.dp)
+                .padding(vertical = 4.dp)
         ) {
-            // แถบสีแนวตั้งด้านซ้าย
             Box(
                 modifier = Modifier
                     .width(4.dp)
                     .height(20.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(themeColor)
+                    .background(
+                        if (themeColor == "asset") {
+                            Brush.linearGradient(colors = listOf(LightAsset, LightSecondary))
+                        } else {
+                            Brush.linearGradient(colors = listOf(LightDebt, LightSecondary))
+                        }
+                    )
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // ชื่อหมวดหมู่
             Text(
                 text = title,
-                fontSize = 16.sp,
-                color = themeColor,
+                style = MaterialTheme.typography.bodyMedium,
+                color = LightPrimary,
                 fontWeight = FontWeight.Medium
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // จำนวนรายการ และ ไอคอนลูกศร
             Text(
                 text = "$itemCount รายการ",
-                fontSize = 14.sp,
-                color = themeColor.copy(alpha = 0.8f)
+                style = MaterialTheme.typography.bodyMedium,
+                color = LightPrimary
             )
             Spacer(modifier = Modifier.width(4.dp))
-//            Icon(
-//                imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-//                contentDescription = null,
-//                tint = themeColor.copy(alpha = 0.8f),
-//                modifier = Modifier.size(20.dp)
-//            )
+
+            Icon(
+                painter = if (expanded) painterResource(Res.drawable.ic_common_up_line) else painterResource(Res.drawable.ic_common_down_line),
+                contentDescription = null,
+                tint = LightPrimary.copy(alpha = 0.8f),
+                modifier = Modifier.size(20.dp)
+            )
         }
 
-        // เส้นคั่นแนวนอน
-        HorizontalDivider(color = themeColor.copy(alpha = 0.3f), thickness = 1.dp)
+        HorizontalDivider(color = LightPrimary.copy(alpha = 0.3f), thickness = 1.dp)
 
-        // --- ส่วนเนื้อหา (กาง/หุบ) ---
         AnimatedVisibility(visible = expanded) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .padding(top = 12.dp)
             ) {
                 content()
             }
@@ -93,46 +111,38 @@ fun ExpandableCategoryCard(
     }
 }
 
-// Widget กล่องข้อมูลจำลอง (สีขาวขอบมน ตามรูปดีไซน์)
 @Composable
-fun MockItemCard() {
+fun RealItemCard(
+    title: String,
+    subtitleLabel: String,
+    subtitleValue: String,
+    amountLabel: String,
+    amountValue: String,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp)
-            .padding(bottom = 12.dp),
+            .padding(bottom = 10.dp)
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF3E5D8)),
+        border = BorderStroke(1.dp, Color(0xFFF3E5D8)),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        // พื้นที่ว่างสีขาว สำหรับใส่ข้อมูลจริงในอนาคต
-    }
-}
-
-// Widget กล่องข้อมูลที่มีตัวหนังสือ (สำหรับหมวด "บัญชีให้ลูก")
-@Composable
-fun RealItemCard(title: String, bank: String, amount: String) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF3E5D8)),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "ธนาคาร", fontSize = 14.sp, color = Color.Gray)
-                Text(text = bank, fontSize = 14.sp, color = Color(0xFF3A2F2A))
-            }
             Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "มูลค่าทรัพย์สิน", fontSize = 14.sp, color = Color.Gray)
-                Text(text = amount, fontSize = 14.sp, color = Color(0xFF3A2F2A))
+                Text(text = subtitleLabel, fontSize = 14.sp, color = Color.Gray)
+                Text(text = subtitleValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = amountLabel, fontSize = 14.sp, color = Color.Gray)
+                Text(text = amountValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
             }
         }
     }
 }
+

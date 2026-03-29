@@ -16,7 +16,7 @@ data class CashRequest(
     val name: String,
 
     @SerialName("amount")
-    val ammount: Int,
+    val amount: Int,
 
     @SerialName("description")
     val description: String,
@@ -47,7 +47,7 @@ data class CashData(
     val name: String,
 
     @SerialName("amount")
-    val ammount: Int,
+    val amount: Int,
 
     @SerialName("description")
     val description: String,

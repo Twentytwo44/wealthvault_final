@@ -6,6 +6,6 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 
 interface CreateAccountApi {
-    @POST("ic_nav_asset/account")
+    @POST("asset/account")
     suspend fun create(@Body request: BankAccountRequest): BankAccountResponse
 }
