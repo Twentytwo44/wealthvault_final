@@ -5,6 +5,7 @@ import com.wealthvault.`user-api`.acceptfriend.AcceptFriendApi
 import com.wealthvault.`user-api`.acceptfriend.AcceptFriendApiImpl
 import com.wealthvault.`user-api`.addfriend.AddFriendApi
 import com.wealthvault.`user-api`.addfriend.AddFriendApiImpl
+import com.wealthvault.`user-api`.closefriend.CloseFriendApi
 import com.wealthvault.`user-api`.friend.FriendApi
 import com.wealthvault.`user-api`.friend.FriendApiImpl
 import com.wealthvault.`user-api`.pendingfriend.PendingFriendApi
@@ -13,7 +14,7 @@ import com.wealthvault.`user-api`.updateuser.UpdateUserApi
 import com.wealthvault.`user-api`.updateuser.UpdateUserApiImpl
 import com.wealthvault.`user-api`.user.UserApi
 import com.wealthvault.`user-api`.user.UserApiImpl
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.user_api.closefriend.CloseFriendApiImpl
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -33,7 +34,7 @@ object UserApiModule {
         single<UserApi> { UserApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<PendingFriendApi> { PendingFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<UpdateUserApi> {UpdateUserApiImpl(ktorfit = get(named(KoinConst.Ktor.AUTH)), tokenStore = get())}
-
+        single<CloseFriendApi> { CloseFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
     }
 
 

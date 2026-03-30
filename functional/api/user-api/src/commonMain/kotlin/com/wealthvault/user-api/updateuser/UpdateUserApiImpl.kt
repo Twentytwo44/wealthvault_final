@@ -29,8 +29,6 @@ class UpdateUserApiImpl(
         profileImage: ByteArray?
     ): UpdateUserDataResponse {
 
-        // 🌟 3. สร้าง Client ใหม่ที่ติดอาวุธ (Token) เรียบร้อยแล้ว!
-        // ใช้ HttpClientBuilder ของเพื่อนที่ตั้งค่าระบบดึง Token อัตโนมัติไว้แล้ว
         val clientWithAuth = HttpClientBuilder(Json, tokenStore).build(withAuth = true)
 
         try {

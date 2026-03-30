@@ -13,8 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -36,13 +37,13 @@ import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_profile_setting
-import com.wealthvault.core.generated.resources.ic_nav_profile // 🌟 1. นำเข้าไอคอนโปรไฟล์เริ่มต้น
+import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.theme.LightBg
-import com.wealthvault.core.theme.LightSecondary
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.profile.ui.components.ClosePersonItem
 import com.wealthvault.`user-api`.model.UserData
+import com.wealthvault.`user-api`.model.CloseFriendData // 🌟 นำเข้า Model เพื่อนสนิท
 import org.jetbrains.compose.resources.painterResource
 
 class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
@@ -52,12 +53,16 @@ class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
 
         LaunchedEffect(Unit) {
             screenModel.fetchUser()
+             screenModel.fetchCloseFriends()
         }
 
         val userData by screenModel.userState.collectAsState()
+        // 🌟 ดึงข้อมูลจาก State ใน ScreenModel มาใช้งาน
+        val closeFriends by screenModel.closeFriends.collectAsState()
 
         ProfileContent(
             userData = userData,
+            closeFriends = closeFriends,
             onSettingsClick = onSettingsClick
         )
     }
@@ -76,149 +81,171 @@ private fun formatBirthday(rawDate: String): String {
 @Composable
 fun ProfileContent(
     userData: UserData?,
+    closeFriends: List<CloseFriendData>, // 🌟 รับ List เพื่อนเข้ามา
     onSettingsClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
 
-    Column(
+    // 🌟 เปลี่ยนเป็น LazyColumn เพื่อให้เลื่อนหน้าจอได้กรณีที่ข้อมูลเพื่อนมีเยอะ
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp)
             .padding(top = 24.dp)
     ) {
 
-        // --- Header ---
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "โปรไฟล์",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Medium,
-                color = themeColor
-            )
+        item {
+            // --- Header ---
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "โปรไฟล์",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = themeColor
+                )
 
-            Icon(
-                painter = painterResource(Res.drawable.ic_profile_setting),
-                contentDescription = "Settings",
-                tint = Color(0xFFC47B5D),
-                modifier = Modifier
-                    .size(28.dp)
-                    .clickable { onSettingsClick() }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // --- Profile Info ---
-        if (userData == null) {
-            Box(modifier = Modifier.fillMaxWidth().height(110.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = themeColor)
-            }
-        } else {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-
-                // 🌟 2. เพิ่มการจัดการรูปโปรไฟล์ตอนที่ไม่มีรูป
-                Box(
+                Icon(
+                    painter = painterResource(Res.drawable.ic_profile_setting),
+                    contentDescription = "Settings",
+                    tint = Color(0xFFC47B5D),
                     modifier = Modifier
-                        .size(110.dp)
-                        .border(width = 2.dp, color = themeColor, shape = CircleShape)
-                        .padding(2.dp)
-                        .clip(CircleShape)
-                        .background(LightBg),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (userData.profile.isNotEmpty()) {
-                        AsyncImage(
-                            model = userData.profile,
-                            contentDescription = "Profile Picture",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        // 🌟 โชว์ไอคอนนี้ถ้า User ยังไม่มีรูปโปรไฟล์
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_nav_profile),
-                            contentDescription = "Default Profile",
-                            tint = WvWaveGradientEnd, // ให้สีกลืนไปกับขอบ
-                            modifier = Modifier.size(50.dp) // ปรับขนาดไอคอนให้อยู่ตรงกลางสวยๆ
-                        )
-                    }
+                        .size(28.dp)
+                        .clickable { onSettingsClick() }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // --- Profile Info ---
+            if (userData == null) {
+                Box(modifier = Modifier.fillMaxWidth().height(110.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = themeColor)
                 }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
 
-                Spacer(modifier = Modifier.width(20.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(110.dp)
+                            .border(width = 2.dp, color = themeColor, shape = CircleShape)
+                            .padding(2.dp)
+                            .clip(CircleShape)
+                            .background(LightBg),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (userData.profile.isNotEmpty()) {
+                            AsyncImage(
+                                model = userData.profile,
+                                contentDescription = "Profile Picture",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_nav_profile),
+                                contentDescription = "Default Profile",
+                                tint = WvWaveGradientEnd,
+                                modifier = Modifier.size(50.dp)
+                            )
+                        }
+                    }
 
-                Column {
-                    Text(
-                        text = userData.username,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3A2F2A)
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.width(20.dp))
 
-                    Row {
+                    Column {
                         Text(
-                            text = "${userData.firstName} ${userData.lastName}",
+                            text = userData.username,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF3A2F2A)
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Row {
+                            Text(
+                                text = "${userData.firstName} ${userData.lastName}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = userData.email,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = formatBirthday(userData.birthday),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray
+                        )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = userData.email,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "${formatBirthday(userData.birthday)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Gray
-                    )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            HorizontalDivider(color = themeColor.copy(alpha = 0.3f))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // --- Settings Summary ---
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "เปิดให้เห็นสินทรัพย์ทั้งหมดให้คนใกล้ชิดเมื่ออายุ",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF3A2F2A),
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = if (userData?.shareEnabled == true) "${userData.sharedAge} ปี" else "ไม่ได้เปิดใช้งาน",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // --- Close People List ---
+            Text(
+                text = "คนใกล้ชิด",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF3A2F2A)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // 🌟 วนลูปเพื่อแสดงรายการเพื่อนทั้งหมด
+        if (closeFriends.isEmpty()) {
+            item {
+                Text(
+                    text = "ยังไม่มีข้อมูลคนใกล้ชิด",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        } else {
+            items(closeFriends) { friend ->
+                ClosePersonItem(
+                    friend = friend,
+                    // 🌟 ส่งค่า shareEnabled เข้าไปเช็ค ถ้า null ให้ถือว่าเป็น false
+                    isEnabled = userData?.shareEnabled ?: false
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
-        HorizontalDivider(color = themeColor.copy(alpha = 0.3f))
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // --- Settings Summary ---
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "เปิดให้เห็นสินทรัพย์ทั้งหมดให้คนใกล้ชิดเมื่ออายุ",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF3A2F2A),
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = if (userData?.shareEnabled == true) "${userData.sharedAge} ปี" else "ไม่ได้เปิดใช้งาน",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // --- Close People List ---
-        Text(
-            text = "คนใกล้ชิด",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color = Color(0xFF3A2F2A)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ClosePersonItem(name = "Nai")
+        item { Spacer(modifier = Modifier.height(80.dp)) }
     }
 }

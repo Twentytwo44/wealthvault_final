@@ -16,8 +16,6 @@ import com.wealthvault.profile.ui.MenuProfileSettingScreen
 import com.wealthvault.profile.ui.ProfileScreen
 import com.wealthvault.profile.ui.ShareSettingScreen
 import org.jetbrains.compose.resources.painterResource
-import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.profile.ui.EditProfileScreenModel
 
 object ProfileTab : Tab {
     override val options: TabOptions
@@ -32,8 +30,6 @@ object ProfileTab : Tab {
     override fun Content() {
         val rootNavigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
-        // 🌟 1. ลบ ProfileScreenDestination ออก แล้วใช้ ProfileScreen ตรงๆ เลยครับ
-        // พร้อมโยนคำสั่งให้มันรู้ว่า "ถ้ามีคนกดปุ่มฟันเฟือง ให้ push หน้าเมนูขึ้นมาบังเลยนะ"
         Navigator(
             ProfileScreen(
                 onSettingsClick = {
@@ -48,9 +44,6 @@ object ProfileTab : Tab {
 // 🚀 โซนสร้าง Screen (เส้นทาง) สำหรับให้ Voyager รู้จัก
 // ==========================================
 
-// 🌟 2. หน้า ProfileScreenDestination ลบทิ้งได้เลยครับ ไม่ต้องใช้แล้ว!
-
-// 🌟 3. หน้ารวมเมนู (อันนี้ใช้ครอบเหมือนเดิม ถูกต้องแล้วครับ)
 class MenuProfileSettingDestination(private val rootNavigator: Navigator) : Screen {
     @Composable
     override fun Content() {
@@ -65,7 +58,6 @@ class MenuProfileSettingDestination(private val rootNavigator: Navigator) : Scre
     }
 }
 
-// 🌟 4. หน้าแก้โปรไฟล์
 class EditProfileDestination(private val rootNavigator: Navigator) : Screen {
     @Composable
     override fun Content() {
@@ -75,17 +67,16 @@ class EditProfileDestination(private val rootNavigator: Navigator) : Screen {
                 rootNavigator.pop()
                 rootNavigator.pop()
             }
-        ).Content()
+        ).Content() // 🌟 อันนี้ถูกต้องแล้ว
     }
 }
 
-// 🌟 5. หน้าตั้งค่าแชร์ทรัพย์สิน
 class ShareSettingDestination(private val rootNavigator: Navigator) : Screen {
     @Composable
     override fun Content() {
         ShareSettingScreen(
             onBackClick = { rootNavigator.pop() },
-            onSaveClick = { rootNavigator.pop() }
-        )
+//            onSaveClick = { rootNavigator.pop() }
+        ).Content() // 🌟 เติม .Content() ตรงนี้! ไม่งั้นมันจะไม่ยอมวาด UI ครับ
     }
 }

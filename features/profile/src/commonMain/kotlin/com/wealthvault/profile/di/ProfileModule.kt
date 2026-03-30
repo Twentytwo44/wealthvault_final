@@ -15,8 +15,7 @@ import org.koin.dsl.module
 
 object ProfileModule {
     val allModules = module {
-
-        factory { ProfileDataSource(userApi = get(), updateUserApi = get()) }
+        factory { ProfileDataSource(userApi = get(), updateUserApi = get(), closeFriendApi = get()) }
 
         single<TokenStore> { TokenStore(get<DataStore<Preferences>>()) }
 

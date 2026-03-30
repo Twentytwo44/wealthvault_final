@@ -32,6 +32,7 @@ import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightDebt
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSecondary
+import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.WvBgGradientStart
 import org.jetbrains.compose.resources.painterResource
 
@@ -125,8 +126,11 @@ fun RealItemCard(
             .fillMaxWidth()
             .padding(bottom = 10.dp)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(0xFFF3E5D8)),
+        colors = CardDefaults.cardColors(
+            // 🌟 เปลี่ยนมาใส่สี LightSoftWhite ตรงนี้แทนครับ!
+            containerColor = LightSoftWhite
+        ),
+        border = BorderStroke(1.dp, LightBorder),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {

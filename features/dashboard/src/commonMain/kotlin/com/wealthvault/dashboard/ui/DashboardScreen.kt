@@ -27,6 +27,7 @@ import com.wealthvault.core.generated.resources.ic_dashboard_share
 import com.wealthvault.core.generated.resources.ic_nav_asset
 import com.wealthvault.core.generated.resources.ic_nav_debt
 import com.wealthvault.core.generated.resources.ic_nav_social
+import com.wealthvault.core.theme.LightSoftWhite
 import org.jetbrains.compose.resources.painterResource
 
 // --- ตัวแปรสำหรับสลับหน้า (State) ---
@@ -412,6 +413,7 @@ fun FinancialItemCard(item: FinancialItem) {
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .background(LightSoftWhite)
             .border(
                 width = 1.dp,
                 color = Color(0xFFF3E5D8), // สีพาสเทลตามที่คุณกำหนด
