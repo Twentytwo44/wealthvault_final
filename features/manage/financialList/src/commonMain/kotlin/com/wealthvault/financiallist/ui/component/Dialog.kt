@@ -26,12 +26,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import com.wealthvault.core.theme.LightAsset
+import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightDebt
+import com.wealthvault.core.theme.LightSecondary
 import com.wealthvault.core.theme.LightSoftWhite
 
 @Composable
 fun DetailDialog(
     subtitle: String = "",
     title: String,
+    themeType: String,
     onDismiss: () -> Unit,
     onDelete: () -> Unit = {},
     onEdit: () -> Unit = {},
@@ -41,67 +48,82 @@ fun DetailDialog(
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
-            usePlatformDefaultWidth = false // เรายังจำเป็นต้องใช้เพื่อคุมขนาดเอง
+            usePlatformDefaultWidth = false
         )
     ) {
-        // 🌟 1. ใช้ Box ครอบให้เต็มจอ เพื่อทำหน้าที่เป็น "พื้นที่นอกกล่อง"
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null // ปิด Effect แสงเวลาคลิกพื้นหลัง
+                    indication = null
                 ) {
                     onDismiss()
                 },
             contentAlignment = Alignment.Center
         ) {
-            // 🌟 2. ใช้ Surface สำหรับตัวกล่องจริง
             Surface(
                 modifier = Modifier
                     .fillMaxWidth(0.88f)
                     .fillMaxHeight(0.8f)
                     .wrapContentHeight()
-                    // 🌟 สำคัญ: ต้องใส่ clickable ทับที่ตัวกล่องไว้ด้วย
-                    // เพื่อป้องกันไม่ให้การคลิก "ข้างในกล่อง" ทะลุไปหา Box ตัวนอกแล้วปิดตัวเอง
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
-                    ) {
-                        /* ไม่ต้องทำอะไร ป้องกันการคลิกทะลุ */
-                    },
+                    ) {},
                 shape = RoundedCornerShape(24.dp),
                 color = LightSoftWhite,
                 shadowElevation = 12.dp
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // ... (เนื้อหา Header, Content, Footer เดิมของคุณ Champ) ...
 
                     // --- 1. Fixed Header ---
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 24.dp, bottom = 16.dp)
+                            .background(LightBg)
+                            .padding(top = 24.dp, bottom = 16.dp, start = 24.dp, end = 24.dp)
                     ) {
-                        if (subtitle.isNotEmpty()) {
-                            Text(
-                                text = subtitle,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF9E918B),
-                                modifier = Modifier.padding(horizontal = 24.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .width(5.dp)
+                                    .height(if (subtitle.isNotEmpty()) 36.dp else 24.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(
+                                        if (themeType == "asset") {
+                                            Brush.linearGradient(colors = listOf(LightAsset, LightSecondary))
+                                        } else {
+                                            Brush.linearGradient(colors = listOf(LightDebt, LightSecondary))
+                                        }
+                                    )
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column {
+                                if (subtitle.isNotEmpty()) {
+                                    Text(
+                                        text = subtitle,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color(0xFF9E918B)
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF3A2F2A)
+                                )
+                            }
                         }
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = Color(0xFF3A2F2A),
-                            modifier = Modifier.padding(horizontal = 24.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        HorizontalDivider(color = LightBorder, thickness = 1.dp)
                     }
+
+                    // 🌟 ปรับเส้นกั้น: ใช้ .copy(alpha = 0.5f) เพื่อให้เส้นดูจางและละมุนขึ้น ไม่แข็งเกินไป
+                    HorizontalDivider(color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
 
                     // --- 2. Scrollable Content ---
                     val scrollState = rememberScrollState()
@@ -116,14 +138,17 @@ fun DetailDialog(
                     }
 
                     // --- 3. Fixed Footer ---
-                    Column {
-                        HorizontalDivider(color = LightBorder, thickness = 1.dp)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        HorizontalDivider(color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
                         Row(
                             modifier = Modifier.fillMaxWidth().height(70.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // ปุ่มลบ
+                            // 🌟 ซ้าย: ปุ่มลบ (อันตรายสุด ไว้ซ้ายสุด)
                             TextButton(
                                 onClick = { onDelete(); onDismiss() },
                                 modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -136,9 +161,24 @@ fun DetailDialog(
                                 }
                             }
 
-                            VerticalDivider(modifier = Modifier.fillMaxHeight(0.6f), color = LightBorder, thickness = 1.dp)
+                            VerticalDivider(modifier = Modifier.fillMaxHeight(0.5f), color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
 
-                            // ปุ่มแก้ไข
+                            // 🌟 กลาง: ปุ่มแชร์ (สลับมาไว้ตรงกลาง)
+                            TextButton(
+                                onClick = { onShare() },
+                                modifier = Modifier.weight(1f).fillMaxHeight(),
+                                shape = RoundedCornerShape(0.dp),
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                    Icon(painter = painterResource(Res.drawable.ic_dashboard_share), contentDescription = "แชร์", tint = LightPrimary, modifier = Modifier.size(20.dp))
+                                    Text(text = "แชร์", fontSize = 12.sp, color = LightPrimary, fontWeight = FontWeight.Medium)
+                                }
+                            }
+
+                            VerticalDivider(modifier = Modifier.fillMaxHeight(0.5f), color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
+
+                            // 🌟 ขวา: ปุ่มแก้ไข (ใช้บ่อยสุด ไว้ขวาสุดให้กดง่าย)
                             TextButton(
                                 onClick = { onEdit(); onDismiss() },
                                 modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -150,21 +190,6 @@ fun DetailDialog(
                                     Text(text = "แก้ไข", fontSize = 12.sp, color = LightPrimary, fontWeight = FontWeight.Medium)
                                 }
                             }
-
-                            VerticalDivider(modifier = Modifier.fillMaxHeight(0.6f), color = LightBorder, thickness = 1.dp)
-
-                            // ปุ่มแชร์
-                            TextButton(
-                                onClick = { onShare() },
-                                modifier = Modifier.weight(1f).fillMaxHeight(),
-                                shape = RoundedCornerShape(0.dp),
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    Icon(painter = painterResource(Res.drawable.ic_dashboard_share), contentDescription = "แชร์", tint = Color(0xFF8BAAFB), modifier = Modifier.size(20.dp))
-                                    Text(text = "แชร์", fontSize = 12.sp, color = Color(0xFF8BAAFB), fontWeight = FontWeight.Medium)
-                                }
-                            }
                         }
                     }
                 }
@@ -174,8 +199,6 @@ fun DetailDialog(
 }
 
 
-
-// 🌟 DetailRow คงไว้เหมือนเดิมได้เลยครับ สวยอยู่แล้ว!
 @Composable
 fun DetailRow(
     label: String,
@@ -186,7 +209,7 @@ fun DetailRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
+            .padding(vertical = 10.dp) // 🌟 ปรับช่องไฟ: เพิ่ม padding แนวตั้งจาก 6.dp เป็น 10.dp ให้มีพื้นที่หายใจ
     ) {
         Text(
             text = label,
@@ -194,7 +217,7 @@ fun DetailRow(
             color = Color(0xFF9E918B),
             letterSpacing = 0.4.sp
         )
-        Spacer(modifier = Modifier.height(3.dp))
+        Spacer(modifier = Modifier.height(6.dp)) // 🌟 ปรับช่องไฟ: เพิ่มระยะห่างระหว่าง Label กับ Value
         Text(
             text = value.ifEmpty { "-" },
             style = MaterialTheme.typography.bodyMedium,
@@ -203,8 +226,8 @@ fun DetailRow(
         )
         if (!isLast) {
             HorizontalDivider(
-                modifier = Modifier.padding(top = 10.dp),
-                color = LightBorder,
+                modifier = Modifier.padding(top = 14.dp), // 🌟 ปรับช่องไฟ: เพิ่มระยะห่างก่อนขีดเส้นกั้น
+                color = LightBorder.copy(alpha = 0.5f), // 🌟 ปรับเส้นกั้น: ให้จางลง
                 thickness = 0.8.dp
             )
         }

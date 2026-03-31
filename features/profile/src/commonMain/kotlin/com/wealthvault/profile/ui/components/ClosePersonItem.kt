@@ -48,7 +48,7 @@ fun ClosePersonItem(
             .padding(bottom = 12.dp)
             // 🌟 3. พระเอกของเรา! ถ้า isEnabled เป็น false ให้ภาพเบลอๆ จางๆ (50%)
             .alpha(if (isEnabled) 1f else 0.6f),
-        shadowElevation = if (showDelete && isEnabled) 2.dp else 0.dp, // ซ่อนเงาถ้า Disable
+        shadowElevation = if (showDelete || isEnabled) 1.dp else 0.dp, // ซ่อนเงาถ้า Disable
         border = BorderStroke(1.dp, LightBorder)
     ) {
         Row(

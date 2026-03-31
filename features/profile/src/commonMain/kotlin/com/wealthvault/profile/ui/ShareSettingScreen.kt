@@ -17,14 +17,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_plus
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightMuted
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.theme.LightText
+import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.profile.ui.components.ClosePersonItem
 import com.wealthvault.profile.ui.components.SelectPersonItem
@@ -75,7 +79,7 @@ class ShareSettingScreen(private val onBackClick: () -> Unit) : Screen {
 fun ShareSettingContent(
     userData: UserData?,
     closeFriends: List<CloseFriendData>,
-    allFriends: List<FriendData>, // 🌟 เปลี่ยน Type เป็น FriendData ให้ตรงกับ Model
+    allFriends: List<FriendData>,
     onBackClick: () -> Unit,
     onSettingsChanged: (Boolean, Int) -> Unit,
     onRemoveFriend: (String) -> Unit,
@@ -83,9 +87,14 @@ fun ShareSettingContent(
     onPlusClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
+
     var showSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val selectedFriendIds = remember { mutableStateListOf<String>() }
+
+    // 🌟 1. เพิ่ม State สำหรับ Dialog ยืนยันการลบ
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var friendToDelete by remember { mutableStateOf<CloseFriendData?>(null) }
 
     var isSharingEnabled by remember { mutableStateOf(false) }
     var sharedAgeText by remember { mutableStateOf("0") }
@@ -206,8 +215,8 @@ fun ShareSettingContent(
                 tint = themeColor,
                 modifier = Modifier.size(24.dp)
                     .clickable {
-                        onPlusClick() // 🌟 1. โหลดข้อมูลเพื่อน
-                        showSheet = true // 🌟 2. เปิด Popup
+                        onPlusClick()
+                        showSheet = true
                     }
             )
         }
@@ -230,17 +239,70 @@ fun ShareSettingContent(
                         friend = friend,
                         showDelete = true,
                         isEnabled = true,
-                        onDeleteClick = { onRemoveFriend(friend.id) }
+                        onDeleteClick = {
+                            // 🌟 2. เวลากดลบ ให้เก็บค่าคนนั้นไว้แล้วเปิด Dialog แทน
+                            friendToDelete = friend
+                            showDeleteDialog = true
+                        }
                     )
                 }
             }
         }
     }
 
-    // --- Popup เลือกคนใกล้ชิด ---
+    // --- 🌟 3. AlertDialog สำหรับยืนยันการลบ ---
+    if (showDeleteDialog && friendToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(20.dp), // 🌟 1. กำหนดความโค้งให้เข้ากับ Card ในหน้าอื่นๆ
+            title = {
+                Text(
+                    text = "ลบคนใกล้ชิด",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = LightText
+                )
+            },
+            text = {
+                Text(
+                    text = "คุณแน่ใจหรือไม่ว่าต้องการลบ '${friendToDelete?.username}' ออกจากรายชื่อคนใกล้ชิด?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LightMuted, // 🌟 2. ปรับให้เข้มกว่า Color.Gray เพื่อให้อ่านง่ายและดูแพงขึ้น
+                    lineHeight = 22.sp // เพิ่มระยะห่างบรรทัดนิดนึงให้อ่านสบายตา
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        friendToDelete?.let { onRemoveFriend(it.id) }
+                        showDeleteDialog = false
+                        friendToDelete = null
+                    }
+                ) {
+                    Text(
+                        text = "ลบ",
+                        color = RedErr, // 🌟 3. ใช้สีแดง (Material Red 700) ให้ดูเป็นปุ่มอันตรายชัดเจนขึ้น
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text(
+                        text = "ยกเลิก",
+                        color = LightMuted, // 🌟 4. ใช้สีเทาอมน้ำตาลให้รับกับธีม ไม่ดูเหมือนปุ่มโดน Disable
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        )
+    }
+
+    // --- Popup เลือกคนใกล้ชิด (ModalBottomSheet) ---
     if (showSheet) {
-        // 🌟 1. เพิ่ม LaunchedEffect ตรงนี้: คอยจับตาดูว่ามีคนถูกเลือกหรือยัง
-        // ถ้ามีอย่างน้อย 1 คน ให้สั่ง BottomSheet เลื่อนขึ้นจนสุด (Expand)
         LaunchedEffect(selectedFriendIds.size) {
             if (selectedFriendIds.isNotEmpty()) {
                 sheetState.expand()
@@ -259,15 +321,17 @@ fun ShareSettingContent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.75f) // สูง 75% ของจอ
+                    .fillMaxHeight(0.75f)
                     .padding(horizontal = 24.dp)
             ) {
-                // ... (Text Header "เลือกคนใกล้ชิดของคุณ" เหมือนเดิม) ...
+                Text(
+                    text = "เลือกคนใกล้ชิด",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = LightText,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
 
-                // 🌟 2. อธิบายเรื่องการเลื่อน (Scroll)
-                // ตรง Modifier.weight(1f) ที่เราใส่ไว้ให้ LazyColumn
-                // มันทำหน้าที่บังคับให้รายชื่อ "เลื่อน (Scroll) ได้" อยู่แล้วครับ!
-                // โดยที่ปุ่ม "เพิ่ม" จะถูกดันติดอยู่ขอบล่างเสมอ
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     val availableToAdd = allFriends.filter { friend ->
                         closeFriends.none { it.id == friend.id }
@@ -285,7 +349,7 @@ fun ShareSettingContent(
                     } else {
                         items(availableToAdd) { friend ->
                             SelectPersonItem(
-                                friend = friend, // 🌟 ตอนนี้ SelectPersonItem รับ FriendData ได้แล้ว
+                                friend = friend,
                                 isSelected = selectedFriendIds.contains(friend.id),
                                 onSelectedChange = { isSelected ->
                                     if (isSelected) selectedFriendIds.add(friend.id)

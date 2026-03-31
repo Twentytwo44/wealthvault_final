@@ -73,23 +73,7 @@ fun DebtContent(
         }
     ) {
         LazyColumn {
-            // 🌟 1. รายจ่ายระยะยาว
-            if (filteredExpenses.isNotEmpty()) {
-                item {
-                    ExpandableCategoryCard(title = "รายจ่ายระยะยาว", itemCount = filteredExpenses.size, themeColor = "debt", initiallyExpanded = true) {
-                        filteredExpenses.forEach { exp ->
-                            RealItemCard(
-                                title = exp.name,
-                                subtitleLabel = "เจ้าหนี้", subtitleValue = exp.creditor,
-                                amountLabel = "ยอดหนี้", amountValue = "${exp.principal} บาท",
-                                onClick = { selectedItem = exp } // 🌟 เพิ่ม onClick
-                            )
-                        }
-                    }
-                }
-            }
-
-            // 🌟 2. หนี้สิน
+            // 🌟 1. หนี้สิน
             if (filteredLoans.isNotEmpty()) {
                 item {
                     ExpandableCategoryCard(title = "หนี้สิน", itemCount = filteredLoans.size, themeColor = "debt", initiallyExpanded = true) {
@@ -105,6 +89,24 @@ fun DebtContent(
                 }
             }
 
+            // 🌟 2. รายจ่ายระยะยาว
+            if (filteredExpenses.isNotEmpty()) {
+                item {
+                    ExpandableCategoryCard(title = "รายจ่ายระยะยาว", itemCount = filteredExpenses.size, themeColor = "debt", initiallyExpanded = true) {
+                        filteredExpenses.forEach { exp ->
+                            RealItemCard(
+                                title = exp.name,
+                                subtitleLabel = "เจ้าหนี้", subtitleValue = exp.creditor,
+                                amountLabel = "ยอดหนี้", amountValue = "${exp.principal} บาท",
+                                onClick = { selectedItem = exp } // 🌟 เพิ่ม onClick
+                            )
+                        }
+                    }
+                }
+            }
+
+
+
             item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
@@ -114,6 +116,7 @@ fun DebtContent(
         DetailDialog(
             subtitle = if (item.type == "LIABILITY_TYPE_LOAN") "หนี้สิน · รายละเอียดหนี้สิน" else "หนี้สิน · รายละเอียดรายจ่าย",
             title = item.name,
+            themeType = "debt",
             onDismiss = { selectedItem = null }
         ) {
             DetailRow("เจ้าหนี้", item.creditor)

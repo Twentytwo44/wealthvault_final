@@ -30,6 +30,9 @@ kotlin {
                 implementation(project(":base:core"))
 
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
+                implementation(project(":functional:api:user-api"))
+
+
 
 
             }

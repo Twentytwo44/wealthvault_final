@@ -205,6 +205,7 @@ fun AssetContent(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · บัญชีเงินฝาก",
                     title = item.name,
+                    themeType = "asset",
                     onDismiss = { selectedItem = null }
                 ) {
                     DetailRow("ธนาคาร", item.bankName)
@@ -217,7 +218,8 @@ fun AssetContent(
             is GetCashData -> {
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · เงินสด ทองคำ",
-                    title = item.name,                                              // 🔧 แก้ "item.name" → item.name
+                    title = item.name,
+                    themeType = "asset",
                     onDismiss = { selectedItem = null }
                 ) {
                     DetailRow("มูลค่า", "${item.amount} บาท")  // 🌟
@@ -228,6 +230,7 @@ fun AssetContent(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · ลงทุน หุ้น กองทุน",
                     title = "${item.name} (${item.symbol})",
+                    themeType = "asset",
                     onDismiss = { selectedItem = null }
                 ) {
                     DetailRow("โบรกเกอร์", item.brokerName)
@@ -241,6 +244,7 @@ fun AssetContent(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · ประกัน",
                     title = item.name,
+                    themeType = "asset",
                     onDismiss = { selectedItem = null }
                 ) {
                     DetailRow("เลขกรมธรรม์", item.policyNumber)
@@ -254,7 +258,8 @@ fun AssetContent(
             is GetBuildingData -> {
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · บ้าน ตึก อาคาร",
-                    title = item.name,                                              // 🔧 แก้ itle → title
+                    title = item.name,
+                    themeType = "asset",
                     onDismiss = { selectedItem = null }
                 ) {
                     DetailRow("ประเภท", item.type)
@@ -268,6 +273,7 @@ fun AssetContent(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · ที่ดิน",
                     title = item.name,
+                    themeType = "asset",
                     onDismiss = { selectedItem = null }
                 ) {
                     DetailRow("เลขโฉนด", item.deedNum)

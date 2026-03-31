@@ -83,12 +83,11 @@ private fun formatBirthday(rawDate: String): String {
 @Composable
 fun ProfileContent(
     userData: UserData?,
-    closeFriends: List<CloseFriendData>, // 🌟 รับ List เพื่อนเข้ามา
+    closeFriends: List<CloseFriendData>,
     onSettingsClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
 
-    // 🌟 เปลี่ยนเป็น LazyColumn เพื่อให้เลื่อนหน้าจอได้กรณีที่ข้อมูลเพื่อนมีเยอะ
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -96,7 +95,6 @@ fun ProfileContent(
             .padding(horizontal = 24.dp)
             .padding(top = 24.dp)
     ) {
-
         item {
             // --- Header ---
             Row(
@@ -219,32 +217,38 @@ fun ProfileContent(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- Close People List ---
-            Text(
-                text = "คนใกล้ชิด",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF3A2F2A)
-            )
+            // --- Close People List Header ---
+            // 🌟 สร้าง Row คลุมเพื่อให้ข้อความ 2 อันอยู่บรรทัดเดียวกัน
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween, // 🌟 ดันให้อยู่ซ้ายสุด-ขวาสุด
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "คนใกล้ชิด",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF3A2F2A)
+                )
+
+                // 🌟 ถ้ารายชื่อเพื่อนว่างเปล่า ให้โชว์ข้อความนี้ที่ฝั่งขวา
+                if (closeFriends.isEmpty()) {
+                    Text(
+                        text = "ยังไม่มีคนใกล้ชิด",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // 🌟 วนลูปเพื่อแสดงรายการเพื่อนทั้งหมด
-        if (closeFriends.isEmpty()) {
-            item {
-                Text(
-                    text = "ยังไม่มีคนใกล้ชิด",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                )
-            }
-        } else {
+        // 🌟 ถ้ารายชื่อเพื่อนไม่ว่างเปล่า ถึงจะวาดรายการ
+        if (closeFriends.isNotEmpty()) {
             items(closeFriends) { friend ->
                 ClosePersonItem(
                     friend = friend,
-                    // 🌟 ส่งค่า sharedEnabled เข้าไปเช็ค ถ้า null ให้ถือว่าเป็น false
                     isEnabled = userData?.sharedEnabled ?: false
                 )
             }

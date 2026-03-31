@@ -1,24 +1,14 @@
-//
-//import com.example.dashboard.data.RegisterDataSource
-//import com.example.dashboard.data.RegisterRepositoryImpl
-//import com.example.dashboard.usecase.RegisterUseCase
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.IO
-//import org.koin.dsl.module
-//
-//object DashboardModule {
-//    val allModules = module {
-//        factory { RegisterDataSource(get()) }
-//
-//        single<RegisterRepositoryImpl> {
-//            RegisterRepositoryImpl(
-//                networkDataSource = get(),
-//            )
-//        }
-//        single { Dispatchers.IO }
-//
-//        factory { RegisterUseCase(get(), get()) }
-//
-////        factory { RegisterScreenModel(get()) }
-//    }
-//}
+package com.wealthvault.di // 🌟 เปลี่ยน package ให้ตรงกับที่เก็บไฟล์ Module ของคุณ Champ นะครับ
+
+import com.wealthvault.dashboard.data.DashboardDataSource
+import com.wealthvault.dashboard.data.DashboardRepositoryImpl
+import com.wealthvault.dashboard.ui.DashboardScreenModel
+import com.wealthvault.`user-api`.dashboard.DashboardApi
+import com.wealthvault.`user-api`.dashboard.DashboardApiImpl
+import org.koin.dsl.module
+
+val dashboardModule = module {
+    single { DashboardDataSource(dashboardApi = get()) }
+    single { DashboardRepositoryImpl(networkDataSource = get()) }
+    factory { DashboardScreenModel(repository = get()) }
+}
