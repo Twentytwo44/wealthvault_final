@@ -19,7 +19,7 @@ data class FriendResponse(
 
 @Serializable
 data class FriendArray(
-    @SerialName("friend")
+    @SerialName("friends")
     val status: ArrayList<FriendData>? = null
 )
 @Serializable
@@ -42,7 +42,7 @@ data class FriendData(
     @SerialName("phone_number")
     val phoneNumber: String,
 
-    @SerialName("ic_nav_profile")
+    @SerialName("profile")
     val profile: String,
 
     @SerialName("birthday")
@@ -51,8 +51,8 @@ data class FriendData(
     @SerialName("shared_age")
     val sharedAge: Int,
 
-    @SerialName("share_enabled")
-    val shareEnabled: Boolean,
+    @SerialName("shared_enabled")
+    val sharedEnabled: Boolean,
 
     @SerialName("created_at")
     val createdAt: String,

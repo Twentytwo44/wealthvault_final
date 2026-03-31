@@ -7,6 +7,7 @@ import com.wealthvault.profile.data.ProfileDataSource
 import com.wealthvault.profile.data.ProfileRepositoryImpl
 import com.wealthvault.profile.ui.EditProfileScreenModel
 import com.wealthvault.profile.ui.ProfileScreenModel
+import com.wealthvault.profile.ui.ShareSettingScreenModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import org.koin.dsl.module
@@ -15,7 +16,7 @@ import org.koin.dsl.module
 
 object ProfileModule {
     val allModules = module {
-        factory { ProfileDataSource(userApi = get(), updateUserApi = get(), closeFriendApi = get()) }
+        factory { ProfileDataSource(userApi = get(), updateUserApi = get(), closeFriendApi = get(), updateCloseFriendApi = get(), friendApi = get()) }
 
         single<TokenStore> { TokenStore(get<DataStore<Preferences>>()) }
 
@@ -28,5 +29,6 @@ object ProfileModule {
 
         factory { ProfileScreenModel(get()) }
         factory { EditProfileScreenModel(repository = get()) }
+        factory { ShareSettingScreenModel(repository = get()) }
     }
 }

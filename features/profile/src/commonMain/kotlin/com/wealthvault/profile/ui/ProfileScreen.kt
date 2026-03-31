@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,6 +40,7 @@ import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_profile_setting
 import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.profile.ui.components.ClosePersonItem
@@ -90,6 +92,7 @@ fun ProfileContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .padding(horizontal = 24.dp)
             .padding(top = 24.dp)
     ) {
@@ -111,7 +114,7 @@ fun ProfileContent(
                 Icon(
                     painter = painterResource(Res.drawable.ic_profile_setting),
                     contentDescription = "Settings",
-                    tint = Color(0xFFC47B5D),
+                    tint = LightPrimary,
                     modifier = Modifier
                         .size(28.dp)
                         .clickable { onSettingsClick() }
@@ -208,7 +211,7 @@ fun ProfileContent(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = if (userData?.shareEnabled == true) "${userData.sharedAge} ปี" else "ไม่ได้เปิดใช้งาน",
+                    text = if (userData?.sharedEnabled == true) "${userData.sharedAge} ปี" else "ไม่ได้เปิดใช้งาน",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -230,18 +233,19 @@ fun ProfileContent(
         if (closeFriends.isEmpty()) {
             item {
                 Text(
-                    text = "ยังไม่มีข้อมูลคนใกล้ชิด",
+                    text = "ยังไม่มีคนใกล้ชิด",
                     color = Color.Gray,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp)
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                 )
             }
         } else {
             items(closeFriends) { friend ->
                 ClosePersonItem(
                     friend = friend,
-                    // 🌟 ส่งค่า shareEnabled เข้าไปเช็ค ถ้า null ให้ถือว่าเป็น false
-                    isEnabled = userData?.shareEnabled ?: false
+                    // 🌟 ส่งค่า sharedEnabled เข้าไปเช็ค ถ้า null ให้ถือว่าเป็น false
+                    isEnabled = userData?.sharedEnabled ?: false
                 )
             }
         }

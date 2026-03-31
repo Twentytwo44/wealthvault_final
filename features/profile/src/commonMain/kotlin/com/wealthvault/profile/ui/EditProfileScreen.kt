@@ -32,6 +32,7 @@ import com.wealthvault.core.theme.LightBorder
 
 // 🌟 Import สีจาก Theme ของคุณ Champ
 import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.WvBgGradientStart
 import com.wealthvault.core.theme.WvBgGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientEnd
@@ -136,11 +137,7 @@ fun EditProfileContent(
         modifier = Modifier
             .fillMaxSize()
             // 🌟 1. ใส่สีพื้นหลังแบบ Gradient ตาม Theme
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(WvBgGradientStart, WvBgGradientEnd)
-                )
-            )
+            .background(LightBg)
             .statusBarsPadding()
             .padding(horizontal = 24.dp, vertical = 24.dp)
     ) {
@@ -324,20 +321,28 @@ fun ProfileTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
-                // 🌟 เพิ่มกรอบ (Border) ตรงนี้
                 .border(
-                    width = 1.dp, // กำหนดความหนาของเส้นขอบ (ปรับได้ตามต้องการ)
-                    color = LightBorder, // สีจาก Theme
-                    shape = RoundedCornerShape(12.dp) // ต้องกำหนด shape ให้ตรงกับ TextField ด้วย
+                    width = 1.dp,
+                    color = LightBorder.copy(alpha = 0.5f), // ปรับให้จางลงนิดนึงจะสวยมากครับ
+                    shape = RoundedCornerShape(12.dp)
                 ),
             shape = RoundedCornerShape(12.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
+                // 🌟 เปลี่ยนสีพื้นหลังช่อง Input เป็น LightSoftWhite
+                focusedContainerColor = LightSoftWhite,
+                unfocusedContainerColor = LightSoftWhite,
+
+                // ปิดเส้นขีดด้านล่าง (Indicator) เพราะเราใช้ Border แทนแล้ว
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+
+                // ปรับสีตัวหนังสือให้เข้ากับธีม
+                focusedTextColor = Color(0xFF3A2F2A),
+                unfocusedTextColor = Color(0xFF3A2F2A)
             ),
-            trailingIcon = trailingIcon
+            trailingIcon = trailingIcon,
+            singleLine = true
         )
     }
 }

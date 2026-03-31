@@ -11,7 +11,9 @@ data class UpdateUserDataRequest(
     @SerialName("last_name") val lastName: String,
     @SerialName("birthday") val birthday: String,
     @SerialName("phone_number") val phoneNumber: String,
-    @SerialName("profile") val profileImage: ByteArray? = null
+    @SerialName("profile") val profileImage: ByteArray? = null,
+    @SerialName("shared_enabled") val sharedEnabled: Boolean? = null,
+    @SerialName("shared_age") val sharedAge: Int? = null
 )
 
 @Serializable
@@ -55,8 +57,8 @@ data class UpdateUserData(
     @SerialName("shared_age")
     val sharedAge: Int,
 
-    @SerialName("share_enabled")
-    val shareEnabled: Boolean,
+    @SerialName("shared_enabled")
+    val sharedEnabled: Boolean,
 
     @SerialName("created_at")
     val createdAt: String,

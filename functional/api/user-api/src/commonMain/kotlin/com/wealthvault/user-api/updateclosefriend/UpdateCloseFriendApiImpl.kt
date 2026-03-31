@@ -1,20 +1,41 @@
-//package com.wealthvault.user_api.closefriend
-//
-//import com.wealthvault.config.Config // 🌟 นำเข้า Config (ถ้ามี)
-//import com.wealthvault.`user-api`.closefriend.CloseFriendApi
-//import com.wealthvault.`user-api`.model.CloseFriendResponse
-//import de.jensklingenberg.ktorfit.Ktorfit
-//import io.ktor.client.call.body
-//import io.ktor.client.request.get
-//// 🌟 อย่าลืม import UserDataResponse ด้วยนะครับ
-//
-//class UpdateCloseFriendApiImpl(private val ktorfit: Ktorfit) : CloseFriendApi {
-//    override suspend fun getCloseFriend(): CloseFriendResponse {
-//        val client = ktorfit.httpClient
-//
-//        // 🌟 เปลี่ยน URL ให้ตรงกับที่ Backend ของคุณ Champ ตั้งไว้
-//        return client.get("${Config.localhost_android}closefriend") {
-//            // ถ้าต้องแนบ Token ก็ใส่ headers ตรงนี้ครับ
-//        }.body()
-//    }
-//}
+package com.wealthvault.`user-api`.updateclosefriend
+
+import com.wealthvault.config.Config
+import com.wealthvault.data_store.TokenStore
+import com.wealthvault_final.setup_api.HttpClientBuilder
+import com.wealthvault.`user-api`.model.UpdateCloseFriendResponse
+import io.ktor.client.call.body
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.post // 🌟 ใช้ POST ตาม Postman
+import io.ktor.client.request.setBody
+import kotlinx.serialization.json.Json
+
+class UpdateCloseFriendApiImpl(
+    private val tokenStore: TokenStore
+) : UpdateCloseFriendApi {
+
+    override suspend fun updateCloseFriend(
+        friendId: String,
+        isClose: Boolean
+    ): UpdateCloseFriendResponse {
+
+        val clientWithAuth = HttpClientBuilder(Json, tokenStore).build(withAuth = true)
+
+        try {
+            // 🌟 ยิง POST ไปที่ /api/closefriend
+            return clientWithAuth.post("${Config.localhost_android}closefriend") {
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("friend_id", friendId)
+                            append("is_close", isClose.toString()) // ส่งเป็น "true" หรือ "false"
+                        }
+                    )
+                )
+            }.body()
+        } finally {
+            clientWithAuth.close() // คืนทรัพยากร
+        }
+    }
+}

@@ -19,6 +19,7 @@ import com.wealthvault.core.generated.resources.ic_common_search
 import com.wealthvault.core.generated.resources.ic_nav_asset
 import com.wealthvault.core.theme.LightAsset
 import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightSoftWhite
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -38,6 +39,7 @@ fun FinancialListTemplate(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .padding(horizontal = 20.dp)
             .padding(top = 20.dp)
     ) {
@@ -81,8 +83,8 @@ fun FinancialListTemplate(
             },
             shape = RoundedCornerShape(12.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
+                focusedContainerColor = LightSoftWhite,
+                unfocusedContainerColor = LightSoftWhite,
                 focusedIndicatorColor = LightBorder,
                 unfocusedIndicatorColor = LightBorder
             ),

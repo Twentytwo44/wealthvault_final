@@ -43,7 +43,7 @@ data class PendingFriendData(
     @SerialName("phone_number")
     val phoneNumber: String,
 
-    @SerialName("ic_nav_profile")
+    @SerialName("profile")
     val profile: String,
 
     @SerialName("birthday")
@@ -52,8 +52,8 @@ data class PendingFriendData(
     @SerialName("shared_age")
     val sharedAge: Int,
 
-    @SerialName("share_enabled")
-    val shareEnabled: Boolean,
+    @SerialName("shared_enabled")
+    val sharedEnabled: Boolean,
 
     @SerialName("created_at")
     val createdAt: String,

@@ -11,7 +11,7 @@ class FriendApiImpl(private val ktorfit: Ktorfit) : FriendApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.get("${Config.localhost_android}/friend") {
+        return client.get("${Config.localhost_android}friend") {
 
         }.body()
     }

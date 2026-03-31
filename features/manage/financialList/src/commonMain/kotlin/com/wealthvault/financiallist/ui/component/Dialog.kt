@@ -1,5 +1,6 @@
 package com.wealthvault.financiallist.ui.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -25,6 +26,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
+import com.wealthvault.core.theme.LightSoftWhite
+
 @Composable
 fun DetailDialog(
     subtitle: String = "",
@@ -45,7 +48,6 @@ fun DetailDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // เมื่อคลิกที่พื้นที่ว่างนอกกล่อง ให้เรียก onDismiss
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null // ปิด Effect แสงเวลาคลิกพื้นหลัง
@@ -69,7 +71,7 @@ fun DetailDialog(
                         /* ไม่ต้องทำอะไร ป้องกันการคลิกทะลุ */
                     },
                 shape = RoundedCornerShape(24.dp),
-                color = Color(0xFFFBFBFB),
+                color = LightSoftWhite,
                 shadowElevation = 12.dp
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {

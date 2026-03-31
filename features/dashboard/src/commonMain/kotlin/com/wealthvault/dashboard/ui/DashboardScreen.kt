@@ -67,6 +67,7 @@ fun DashboardScreen(onNotiClick: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .padding(horizontal = 20.dp)
             .padding(top = 20.dp)
     ) {
@@ -416,7 +417,7 @@ fun FinancialItemCard(item: FinancialItem) {
             .background(LightSoftWhite)
             .border(
                 width = 1.dp,
-                color = Color(0xFFF3E5D8), // สีพาสเทลตามที่คุณกำหนด
+                color = Color(0x00FF8417),
                 shape = RoundedCornerShape(16.dp) // สำคัญ! ต้องใส่ shape ให้ตรงกับของ Card
             )
     ) {

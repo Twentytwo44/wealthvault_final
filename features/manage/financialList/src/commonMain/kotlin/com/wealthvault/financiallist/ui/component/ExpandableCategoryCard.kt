@@ -127,7 +127,6 @@ fun RealItemCard(
             .padding(bottom = 10.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
-            // 🌟 เปลี่ยนมาใส่สี LightSoftWhite ตรงนี้แทนครับ!
             containerColor = LightSoftWhite
         ),
         border = BorderStroke(1.dp, LightBorder),

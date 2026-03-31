@@ -10,6 +10,8 @@ import com.wealthvault.`user-api`.friend.FriendApi
 import com.wealthvault.`user-api`.friend.FriendApiImpl
 import com.wealthvault.`user-api`.pendingfriend.PendingFriendApi
 import com.wealthvault.`user-api`.pendingfriend.PendingFriendApiImpl
+import com.wealthvault.`user-api`.updateclosefriend.UpdateCloseFriendApi
+import com.wealthvault.`user-api`.updateclosefriend.UpdateCloseFriendApiImpl
 import com.wealthvault.`user-api`.updateuser.UpdateUserApi
 import com.wealthvault.`user-api`.updateuser.UpdateUserApiImpl
 import com.wealthvault.`user-api`.user.UserApi
@@ -35,6 +37,7 @@ object UserApiModule {
         single<PendingFriendApi> { PendingFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<UpdateUserApi> {UpdateUserApiImpl(ktorfit = get(named(KoinConst.Ktor.AUTH)), tokenStore = get())}
         single<CloseFriendApi> { CloseFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<UpdateCloseFriendApi> { UpdateCloseFriendApiImpl(tokenStore = get()) }
     }
 
 

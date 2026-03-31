@@ -15,7 +15,7 @@ val WvBgGradientEnd = Color(0xFFFFF0E5)
 val LightPrimary = Color(0xFFC27A5A)
 val LightSecondary = Color(0xFFECA58C)
 val LightAccent = Color(0xFFF3E5D8)
-val LightSoftWhite = Color(0xFFFFFBFA)
+val LightSoftWhite = Color(0xFFFFFDFC)
 
 val LightAsset = Color(0xFFD78810)
 val LightDebt = Color(0xFFC63A2C)

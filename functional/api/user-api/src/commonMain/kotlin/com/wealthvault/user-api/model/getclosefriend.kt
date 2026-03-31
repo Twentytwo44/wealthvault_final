@@ -44,8 +44,8 @@ data class CloseFriendData(
     @SerialName("shared_age")
     val sharedAge: Int,
 
-    @SerialName("share_enabled")
-    val shareEnabled: Boolean,
+    @SerialName("shared_enabled")
+    val sharedEnabled: Boolean,
 
     @SerialName("created_at")
     val createdAt: String,
