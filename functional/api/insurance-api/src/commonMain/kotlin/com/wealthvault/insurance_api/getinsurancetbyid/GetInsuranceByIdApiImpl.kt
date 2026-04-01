@@ -11,7 +11,7 @@ class GetInsuranceByIdApiImpl(private val ktorfit: Ktorfit) : GetInsuranceByIdAp
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.get("${Config.localhost_android}/ic_nav_asset/insurance/${id}") {
+        return client.get("${Config.localhost_android}asset/insurance/${id}") {
 
         }.body()
     }

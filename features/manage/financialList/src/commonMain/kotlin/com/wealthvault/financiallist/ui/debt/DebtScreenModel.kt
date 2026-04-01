@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 
 // 🌟 Import Data Class
 import com.wealthvault.liability_api.model.GetLiabilityData
+import com.wealthvault.liability_api.model.LiabilityIdData
 
 class DebtScreenModel(
     private val useCase: FinanciallistUseCase
@@ -39,5 +40,11 @@ class DebtScreenModel(
                     println("❌ [API ERROR] Liabilities พังเพราะ: ${it.message}")
                 }
         }
+    }
+    suspend fun getLiabilityById(id: String): LiabilityIdData? {
+        return useCase.getLiabilityById(id)
+            .onSuccess { println("✅ โหลด Liability สำเร็จ: ${it.name}") }
+            .onFailure { println("🚨 โหลด Liability ล้มเหลว: ${it.message}") }
+            .getOrNull()
     }
 }

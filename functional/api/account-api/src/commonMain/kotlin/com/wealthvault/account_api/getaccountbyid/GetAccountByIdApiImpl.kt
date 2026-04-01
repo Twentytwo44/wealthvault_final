@@ -8,11 +8,8 @@ import io.ktor.client.request.get
 
 class GetAccountByIdApiImpl(private val ktorfit: Ktorfit) : GetAccountByIdApi {
     override suspend fun getAccountById(id: String): BankAccountResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
-
-        return client.get("${Config.localhost_android}/asset/account/${id}") {
-
-        }.body()
+        // 🌟 เอา / ออกหน้า asset เพื่อกันมันซ้อนกับ localhost_android ที่มี / ปิดท้าย
+        return client.get("${Config.localhost_android}asset/account/${id}").body()
     }
 }

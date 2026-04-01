@@ -1,10 +1,10 @@
 package com.wealthvault.building_api.getbuildingbyid
 
-import com.wealthvault.building_api.model.BuildingIdResponse
+import com.wealthvault.building_api.model.BuildingIdResponse // 🌟 ใช้ Model ของ GET by ID
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 
 interface GetBuildingByIdApi {
-    @GET("ic_nav_asset/building/{id}")
+    @GET("asset/building/{id}") // 🌟 เปลี่ยน path ให้ถูกต้อง
     suspend fun getBuildingById(@Path("id") id: String): BuildingIdResponse
 }

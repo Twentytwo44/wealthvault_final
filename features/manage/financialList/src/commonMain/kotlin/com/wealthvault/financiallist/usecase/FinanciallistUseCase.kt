@@ -20,4 +20,13 @@ class FinanciallistUseCase(
     suspend fun getBuildings(): Result<List<GetBuildingData>> = repository.getBuildings()
     suspend fun getLands(): Result<List<GetLandData>> = repository.getLands()
     suspend fun getLiabilities(): Result<List<GetLiabilityData>> = repository.getLiabilities()
+    suspend fun getAccountById(id: String) = repository.getAccountById(id)
+    suspend fun getBuildingById(id: String) = repository.getBuildingById(id)
+    suspend fun getCashById(id: String) = repository.getCashById(id)
+    suspend fun getInsuranceById(id: String) = repository.getInsuranceById(id)
+    suspend fun getInvestmentById(id: String) = repository.getInvestmentById(id)
+    suspend fun getLandById(id: String) = repository.getLandById(id)
+    suspend fun getLiabilityById(id: String) = repository.getLiabilityById(id)
+
+
 }

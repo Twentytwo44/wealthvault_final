@@ -38,7 +38,8 @@ kotlin {
                 implementation(project(":functional:api:building-api"))
                 implementation(project(":functional:api:land-api"))
                 implementation(project(":functional:api:liability-api"))
-
+                implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
+                implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
             }
         }
         commonTest {

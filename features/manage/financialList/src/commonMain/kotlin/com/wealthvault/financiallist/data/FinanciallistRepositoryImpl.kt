@@ -1,17 +1,31 @@
 package com.wealthvault.financiallist.data
 
 import com.wealthvault.account_api.model.AccountData
+import com.wealthvault.account_api.model.BankAccountData // 🌟 นำเข้า Model ที่เราเพิ่งแก้ไป
 import com.wealthvault.cash_api.model.GetCashData
 import com.wealthvault.investment_api.model.GetInvestmentData
 import com.wealthvault.insurance_api.model.GetInsuranceData
 import com.wealthvault.building_api.model.GetBuildingData
 import com.wealthvault.land_api.model.GetLandData
 import com.wealthvault.liability_api.model.GetLiabilityData
+import com.wealthvault.building_api.model.BuildingIdData
+import com.wealthvault.cash_api.model.CashIdData
+import com.wealthvault.insurance_api.model.InsuranceIdData
+import com.wealthvault.investment_api.model.InvestmentIdData
+import com.wealthvault.land_api.model.LandIdData
+import com.wealthvault.liability_api.model.LiabilityIdData
 
 class FinanciallistRepositoryImpl(
     private val dataSource: FinanciallistDataSource
 ) {
-    // 🌟 สังเกตตรง emptyList<...>() นะครับ ต้องใส่ให้ครบทุกบรรทัด
+    // --- 🌟 ดึงข้อมูลแบบรายตัว (Get By ID) ---
+    suspend fun getAccountById(id: String): Result<BankAccountData> = runCatching {
+        // เรียกใช้ DataSource แล้วเช็คว่ามี Data ไหม ถ้าไม่มีให้โยน Error
+        val response = dataSource.getAccountById(id)
+        response.data ?: throw Exception("ไม่พบข้อมูลบัญชีเงินฝาก")
+    }
+
+    // --- ดึงข้อมูลทั้งหมดแบบ List (ของเดิม) ---
     suspend fun getAccounts(): Result<List<AccountData>> = runCatching {
         dataSource.getAccount().data ?: emptyList<AccountData>()
     }
@@ -38,5 +52,27 @@ class FinanciallistRepositoryImpl(
 
     suspend fun getLiabilities(): Result<List<GetLiabilityData>> = runCatching {
         dataSource.getLiability().data ?: emptyList<GetLiabilityData>()
+    }
+    suspend fun getBuildingById(id: String): Result<BuildingIdData> = runCatching {
+        val response = dataSource.getBuildingById(id)
+        response.data ?: throw Exception("ไม่พบข้อมูลอาคาร/สิ่งปลูกสร้าง")
+
+    }
+    suspend fun getCashById(id: String): Result<CashIdData> = runCatching {
+        val response = dataSource.getCashById(id)
+        response.data ?: throw Exception("ไม่พบข้อมูลเงินสด/ทองคำ")
+    }
+    // 🌟 เพิ่มฟังก์ชันเหล่านี้เข้าไปครับ (สมมติชื่อ Model รอไว้เลย)
+    suspend fun getInsuranceById(id: String): Result<InsuranceIdData> = runCatching {
+        dataSource.getInsuranceById(id).data ?: throw Exception("ไม่พบข้อมูลประกัน")
+    }
+    suspend fun getInvestmentById(id: String): Result<InvestmentIdData> = runCatching {
+        dataSource.getInvestmentById(id).data ?: throw Exception("ไม่พบข้อมูลการลงทุน")
+    }
+    suspend fun getLandById(id: String): Result<LandIdData> = runCatching {
+        dataSource.getLandById(id).data ?: throw Exception("ไม่พบข้อมูลที่ดิน")
+    }
+    suspend fun getLiabilityById(id: String): Result<LiabilityIdData> = runCatching {
+        dataSource.getLiabilityById(id).data ?: throw Exception("ไม่พบข้อมูลหนี้สิน/รายจ่าย")
     }
 }

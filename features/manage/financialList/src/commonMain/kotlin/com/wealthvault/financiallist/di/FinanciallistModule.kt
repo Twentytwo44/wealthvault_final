@@ -9,7 +9,7 @@ import org.koin.dsl.module
 
 val financiallistModule = module {
     // 🌟 ใส่ get() ให้ครบ 7 ตัวตาม API ที่เรารับเข้ามา
-    single { FinanciallistDataSource(get(), get(), get(), get(), get(), get(), get()) }
+    single { FinanciallistDataSource(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     single { FinanciallistRepositoryImpl(get()) }
     factory { FinanciallistUseCase(get()) }
 

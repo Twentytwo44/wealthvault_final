@@ -23,6 +23,16 @@ import org.jetbrains.compose.resources.painterResource
 
 // 🌟 Import Data Class
 import com.wealthvault.liability_api.model.GetLiabilityData
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.wealthvault.financiallist.ui.component.DetailImageRow // 🌟 นำเข้าโชว์รูปภาพ
+import com.wealthvault.liability_api.model.LiabilityIdData
+
 
 class DebtScreen(private val onAddClick: () -> Unit) : Screen {
     @Composable
@@ -39,7 +49,8 @@ class DebtScreen(private val onAddClick: () -> Unit) : Screen {
         DebtContent(
             onAddClick = onAddClick,
             loans = loans,
-            expenses = expenses
+            expenses = expenses,
+            screenModel = screenModel
         )
     }
 }
@@ -48,14 +59,17 @@ class DebtScreen(private val onAddClick: () -> Unit) : Screen {
 fun DebtContent(
     onAddClick: () -> Unit,
     loans: List<GetLiabilityData>,
-    expenses: List<GetLiabilityData>
+    expenses: List<GetLiabilityData>,
+    screenModel: DebtScreenModel // 🌟 รับ Model เข้ามาเพื่อยิง API
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    // 🌟 State สำหรับเก็บข้อมูลรายการที่เลือกเพื่อเปิด Popup
-    var selectedItem by remember { mutableStateOf<GetLiabilityData?>(null) }
+
+    // 🌟 เปลี่ยนมาเก็บแค่ ID แบบหน้า Asset
+    var selectedLiabilityId by remember { mutableStateOf<String?>(null) }
 
     val filteredExpenses = expenses.filter { it.name.contains(searchQuery, ignoreCase = true) }
     val filteredLoans = loans.filter { it.name.contains(searchQuery, ignoreCase = true) }
+
 
     FinancialListTemplate(
         headerTitle = "หนี้สิน & รายจ่ายระยะยาว",
@@ -82,7 +96,7 @@ fun DebtContent(
                                 title = loan.name,
                                 subtitleLabel = "เจ้าหนี้", subtitleValue = loan.creditor,
                                 amountLabel = "ยอดหนี้", amountValue = "${loan.principal} บาท",
-                                onClick = { selectedItem = loan } // 🌟 เพิ่ม onClick
+                                onClick = { selectedLiabilityId = loan.id } // 🌟 เก็บแค่ ID
                             )
                         }
                     }
@@ -98,31 +112,76 @@ fun DebtContent(
                                 title = exp.name,
                                 subtitleLabel = "เจ้าหนี้", subtitleValue = exp.creditor,
                                 amountLabel = "ยอดหนี้", amountValue = "${exp.principal} บาท",
-                                onClick = { selectedItem = exp } // 🌟 เพิ่ม onClick
+                                onClick = { selectedLiabilityId = exp.id } // 🌟 เก็บแค่ ID
                             )
                         }
                     }
                 }
             }
-
-
-
             item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
 
-    // 🌟 แสดง Popup เมื่อมีการเลือก Item
-    selectedItem?.let { item ->
+    // 🌟 เรียกใช้ FetcherDialog เมื่อมีการกดการ์ด
+    if (selectedLiabilityId != null) {
+        DebtDetailFetcherDialog(
+            liabilityId = selectedLiabilityId!!,
+            screenModel = screenModel,
+            onDismiss = { selectedLiabilityId = null }
+        )
+    }
+}
+
+// 🌟 สร้าง Dialog แบบมี Loading เพื่อยิง API รายตัว
+@Composable
+fun DebtDetailFetcherDialog(
+    liabilityId: String,
+    screenModel: DebtScreenModel,
+    onDismiss: () -> Unit
+) {
+    var isLoading by remember { mutableStateOf(true) }
+    var detailData by remember { mutableStateOf<LiabilityIdData?>(null) }
+
+    LaunchedEffect(liabilityId) {
+        isLoading = true
+        detailData = screenModel.getLiabilityById(liabilityId)
+        isLoading = false
+    }
+
+    if (isLoading) {
+        Dialog(onDismissRequest = onDismiss) {
+            Box(
+                modifier = Modifier.size(100.dp).background(Color.White, RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = LightDebt) // 🌟 สีโหลดดิ่งของหมวดหนี้
+            }
+        }
+    } else if (detailData != null) {
+        val item = detailData!!
+        val isLoan = item.type == "LIABILITY_TYPE_LOAN"
+
         DetailDialog(
-            subtitle = if (item.type == "LIABILITY_TYPE_LOAN") "หนี้สิน · รายละเอียดหนี้สิน" else "หนี้สิน · รายละเอียดรายจ่าย",
+            subtitle = if (isLoan) "หนี้สิน · รายละเอียดหนี้สิน" else "หนี้สิน · รายละเอียดรายจ่าย",
             title = item.name,
-            themeType = "debt",
-            onDismiss = { selectedItem = null }
+            themeType = "debt", // 🌟 ใช้สีของหนี้สิน
+            onDismiss = onDismiss
         ) {
             DetailRow("เจ้าหนี้", item.creditor)
             DetailRow("ยอดหนี้คงเหลือ", "${item.principal} บาท")
             DetailRow("อัตราดอกเบี้ย", "${item.interestRate}%")
-            DetailRow("คำอธิบาย", item.description, isLast = true)
+
+            item.startedAt?.takeIf { it.isNotEmpty() }?.let { date ->
+                DetailRow("เริ่มทำสัญญา", date.take(10))
+            }
+            item.endedAt?.takeIf { it.isNotEmpty() }?.let { date ->
+                DetailRow("สิ้นสุดสัญญา", date.take(10))
+            }
+
+            DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
+
+            // 🌟 โชว์รูปภาพ (เช่น รูปสัญญากู้ยืม)
+            DetailImageRow(files = item.files)
         }
     }
 }
