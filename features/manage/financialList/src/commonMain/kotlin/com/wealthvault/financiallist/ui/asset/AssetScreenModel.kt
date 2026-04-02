@@ -83,4 +83,22 @@ class AssetScreenModel(
     suspend fun getLandById(id: String): LandIdData? {
         return useCase.getLandById(id).getOrNull()
     }
+    // ในไฟล์ AssetScreenModel.kt
+
+    fun deleteAsset(id: String, type: String) {
+        screenModelScope.launch {
+            // 1. สั่งลบผ่าน UseCase
+            val result = useCase.deleteAsset(id, type)
+
+            result.onSuccess {
+                println("✅ ลบ $type สำเร็จ!")
+
+                // 🌟 2. จุดสำคัญ: ต้องเรียกฟังก์ชันนี้เพื่อให้มันไปดึงข้อมูลใหม่จาก API มาใส่ StateFlow
+                fetchAllAssets()
+
+            }.onFailure { error ->
+                println("🚨 ลบ $type ล้มเหลว: ${error.message}")
+            }
+        }
+    }
 }

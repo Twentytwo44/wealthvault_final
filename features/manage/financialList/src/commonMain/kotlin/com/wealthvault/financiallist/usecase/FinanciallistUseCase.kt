@@ -12,7 +12,7 @@ import com.wealthvault.liability_api.model.GetLiabilityData
 class FinanciallistUseCase(
     private val repository: FinanciallistRepositoryImpl
 ) {
-    // 🌟 ต้องมี Result<List<...>> ต่อท้ายทุกบรรทัด
+    // --- Get All Lists ---
     suspend fun getAccounts(): Result<List<AccountData>> = repository.getAccounts()
     suspend fun getCashes(): Result<List<GetCashData>> = repository.getCashes()
     suspend fun getInvestments(): Result<List<GetInvestmentData>> = repository.getInvestments()
@@ -20,6 +20,8 @@ class FinanciallistUseCase(
     suspend fun getBuildings(): Result<List<GetBuildingData>> = repository.getBuildings()
     suspend fun getLands(): Result<List<GetLandData>> = repository.getLands()
     suspend fun getLiabilities(): Result<List<GetLiabilityData>> = repository.getLiabilities()
+
+    // --- Get By ID ---
     suspend fun getAccountById(id: String) = repository.getAccountById(id)
     suspend fun getBuildingById(id: String) = repository.getBuildingById(id)
     suspend fun getCashById(id: String) = repository.getCashById(id)
@@ -28,5 +30,8 @@ class FinanciallistUseCase(
     suspend fun getLandById(id: String) = repository.getLandById(id)
     suspend fun getLiabilityById(id: String) = repository.getLiabilityById(id)
 
-
+    // 🌟 --- Delete Asset (ตัวที่ขาดไปครับ!) ---
+    suspend fun deleteAsset(id: String, type: String): Result<Boolean> {
+        return repository.deleteAsset(id, type)
+    }
 }

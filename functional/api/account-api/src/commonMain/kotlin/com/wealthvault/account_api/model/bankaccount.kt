@@ -47,5 +47,5 @@ data class BankAccountData(
 data class FileData(
     @SerialName("id") val id: String = "",
     @SerialName("url") override val url: String = "", // 🌟 ใส่ override หน้า val
-    @SerialName("file_type") val fileType: String = ""
+    @SerialName("file_type") override val fileType: String = ""
 ) : HasImageUrl // 🌟 ตบเข้า Interface

@@ -36,6 +36,7 @@ import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.WvBgGradientStart
 import com.wealthvault.core.theme.WvBgGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientEnd
+import com.wealthvault.core.utils.formatThaiDate
 
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -62,24 +63,22 @@ class EditProfileScreen(
     }
 }
 
-fun formatToDisplayDate(apiDate: String): String {
-    if (apiDate.isBlank()) return ""
-    val parts = apiDate.split("-")
-    if (parts.size == 3) {
-        return "${parts[2]}/${parts[1]}/${parts[0]}"
-    }
-    return apiDate
-}
+
 
 fun formatToApiDate(displayDate: String): String {
-    if (displayDate.isBlank()) return ""
+    if (displayDate.isBlank() || !displayDate.contains("/")) return displayDate
+
     val parts = displayDate.split("/")
     if (parts.size == 3) {
-        return "${parts[2]}-${parts[1]}-${parts[0]}"
+        val day = parts[0].padStart(2, '0')
+        val month = parts[1].padStart(2, '0')
+        val thaiYear = parts[2].toIntOrNull() ?: return displayDate
+        val engYear = thaiYear - 543 // 🌟 แปลงกลับเป็น ค.ศ.
+
+        return "$engYear-$month-$day" // 🌟 ส่งให้ API ในรูปแบบ YYYY-MM-DD
     }
     return displayDate
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileContent(
@@ -120,7 +119,7 @@ fun EditProfileContent(
             firstName = user.firstName
             lastName = user.lastName
             val rawApiDate = user.birthday.take(10)
-            birthDate = formatToDisplayDate(rawApiDate)
+            birthDate = formatThaiDate(rawApiDate)
             phone = user.phoneNumber
             screenModel.setProfileImageByteArray(null)
         }
@@ -275,9 +274,11 @@ fun EditProfileContent(
 
                         val day = localDate.dayOfMonth.toString().padStart(2, '0')
                         val month = localDate.monthNumber.toString().padStart(2, '0')
-                        val year = localDate.year.toString()
 
-                        birthDate = "$day/$month/$year"
+                        // 🌟 เอาปี ค.ศ. ที่เลือก มาบวก 543 ให้เป็น พ.ศ. ตรงนี้เลย
+                        val thaiYear = (localDate.year + 543).toString()
+
+                        birthDate = "$day/$month/$thaiYear" // โชว์ในช่องกรอกเป็น พ.ศ.
                     }
                     showDatePicker = false
                 }) {

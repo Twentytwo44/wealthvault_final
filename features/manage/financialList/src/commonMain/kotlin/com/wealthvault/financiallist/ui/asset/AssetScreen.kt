@@ -25,6 +25,18 @@ import com.wealthvault.financiallist.ui.component.DetailRow
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
 
+// 🌟 Import เพิ่มเติมสำหรับปุ่มเพิ่มรายการ
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.generated.resources.ic_common_plus
+
 // Import Data Class
 import com.wealthvault.account_api.model.AccountData
 import com.wealthvault.account_api.model.BankAccountData
@@ -34,11 +46,17 @@ import com.wealthvault.investment_api.model.GetInvestmentData
 import com.wealthvault.insurance_api.model.GetInsuranceData
 import com.wealthvault.building_api.model.GetBuildingData
 import com.wealthvault.cash_api.model.CashIdData
+import com.wealthvault.core.generated.resources.ic_social_plus
+import com.wealthvault.core.theme.LightDebt
+import com.wealthvault.core.utils.formatAmount
+import com.wealthvault.core.utils.formatThaiDate
+import com.wealthvault.financiallist.ui.component.ConfirmDeleteDialog
 import com.wealthvault.financiallist.ui.component.DetailImageRow
 import com.wealthvault.insurance_api.model.InsuranceIdData
 import com.wealthvault.investment_api.model.InvestmentIdData
 import com.wealthvault.land_api.model.GetLandData
 import com.wealthvault.land_api.model.LandIdData
+import kotlinx.atomicfu.TraceBase.None.append
 
 class AssetScreen(private val onAddClick: () -> Unit) : Screen {
     @Composable
@@ -57,7 +75,7 @@ class AssetScreen(private val onAddClick: () -> Unit) : Screen {
         val lands by screenModel.lands.collectAsState()
 
         AssetContent(
-            screenModel = screenModel, // 🌟 ส่ง Model ลงไปเพื่อให้ FetcherDialog ใช้ยิง API
+            screenModel = screenModel,
             onAddClick = onAddClick,
             accounts = accounts,
             cashes = cashes,
@@ -82,7 +100,6 @@ fun AssetContent(
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
-    // 🌟 เก็บแค่ ID และ Type เพื่อเอาไปยิง API ตอนกด
     var selectedAssetId by remember { mutableStateOf<String?>(null) }
     var selectedAssetType by remember { mutableStateOf<String?>(null) }
 
@@ -93,119 +110,143 @@ fun AssetContent(
     val filteredBuildings = buildings.filter { it.name.contains(searchQuery, ignoreCase = true) }
     val filteredLands = lands.filter { it.name.contains(searchQuery, ignoreCase = true) }
 
-    FinancialListTemplate(
-        headerTitle = "ทรัพย์สิน",
-        themeColor = LightAsset,
-        searchQuery = searchQuery,
-        onSearchChange = { searchQuery = it },
-        onAddClick = onAddClick,
-        headerIcon = {
-            Icon(
-                painter = painterResource(Res.drawable.ic_nav_asset),
-                contentDescription = null,
-                tint = LightAsset,
-                modifier = Modifier.padding(horizontal = 4.dp).size(28.dp)
-            )
+    // 🌟 1. ใช้ Box ครอบทั้งหน้าจอเพื่อที่จะวางปุ่มไว้ด้านบนสุด (Overlay) ได้
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // เนื้อหาหลัก (รายการทรัพย์สิน)
+        FinancialListTemplate(
+            headerTitle = "ทรัพย์สิน",
+            themeColor = LightAsset,
+            searchQuery = searchQuery,
+            onSearchChange = { searchQuery = it },
+            onAddClick = onAddClick, // ถ้าใน FinancialListTemplate มีปุ่มเพิ่มของมันเองด้วย
+            headerIcon = {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_nav_asset),
+                    contentDescription = null,
+                    tint = LightAsset,
+                    modifier = Modifier.padding(horizontal = 4.dp).size(28.dp)
+                )
+            }
+        ) {
+            LazyColumn {
+                if (filteredAccounts.isNotEmpty()) {
+                    item {
+                        ExpandableCategoryCard(title = "บัญชีเงินฝาก", itemCount = filteredAccounts.size, themeColor = "asset", initiallyExpanded = true) {
+                            filteredAccounts.forEach { account ->
+                                RealItemCard(
+                                    title = account.name,
+                                    subtitleLabel = "ธนาคาร", subtitleValue = account.bankName,
+                                    amountLabel = "ยอดเงิน", amountValue = "${formatAmount(account.amount)} บาท",
+                                    onClick = { selectedAssetId = account.id; selectedAssetType = "account" }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (filteredCashes.isNotEmpty()) {
+                    item {
+                        ExpandableCategoryCard(title = "เงินสด ทองคำ", itemCount = filteredCashes.size, themeColor = "asset") {
+                            filteredCashes.forEach { cash ->
+                                RealItemCard(
+                                    title = cash.name,
+                                    subtitleLabel = "รายละเอียด", subtitleValue = cash.description.ifEmpty { "เงินสด" },
+                                    amountLabel = "มูลค่า", amountValue = "${formatAmount(cash.amount)} บาท",
+                                    onClick = { selectedAssetId = cash.id; selectedAssetType = "cash" }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (filteredInvestments.isNotEmpty()) {
+                    item {
+                        ExpandableCategoryCard(title = "ลงทุน หุ้น กองทุน", itemCount = filteredInvestments.size, themeColor = "asset") {
+                            filteredInvestments.forEach { invest ->
+                                val rawTotal = invest.quantity * invest.costPerPrice
+                                RealItemCard(
+                                    title = "${invest.name} (${invest.symbol})",
+                                    subtitleLabel = "โบรกเกอร์", subtitleValue = invest.brokerName,
+                                    amountLabel = "มูลค่ารวม", amountValue = "${formatAmount(rawTotal)} บาท",
+                                    onClick = { selectedAssetId = invest.id; selectedAssetType = "investment" }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (filteredInsurances.isNotEmpty()) {
+                    item {
+                        ExpandableCategoryCard(title = "ประกัน", itemCount = filteredInsurances.size, themeColor = "asset") {
+                            filteredInsurances.forEach { insurance ->
+                                RealItemCard(
+                                    title = insurance.name,
+                                    subtitleLabel = "บริษัท", subtitleValue = insurance.companyName,
+                                    amountLabel = "วงเงินคุ้มครอง", amountValue = "${formatAmount(insurance.coverageAmount)} บาท",
+                                    onClick = { selectedAssetId = insurance.id; selectedAssetType = "insurance" }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (filteredBuildings.isNotEmpty()) {
+                    item {
+                        ExpandableCategoryCard(title = "บ้าน ตึก อาคาร", itemCount = filteredBuildings.size, themeColor = "asset") {
+                            filteredBuildings.forEach { building ->
+                                RealItemCard(
+                                    title = building.name,
+                                    subtitleLabel = "พื้นที่", subtitleValue = "${formatAmount(building.area)} ตร.ม.",
+                                    amountLabel = "มูลค่าประเมิน", amountValue = "${formatAmount(building.amount)} บาท",
+                                    onClick = { selectedAssetId = building.id; selectedAssetType = "building" }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (filteredLands.isNotEmpty()) {
+                    item {
+                        ExpandableCategoryCard(title = "ที่ดิน", itemCount = filteredLands.size, themeColor = "asset") {
+                            filteredLands.forEach { land ->
+                                RealItemCard(
+                                    title = land.name,
+                                    subtitleLabel = "เลขโฉนด", subtitleValue = land.deedNum,
+                                    amountLabel = "มูลค่าประเมิน", amountValue = "${formatAmount(land.amount)} บาท",
+                                    onClick = { selectedAssetId = land.id; selectedAssetType = "land" }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(140.dp)) } // 🌟 เผื่อพื้นที่ด้านล่างไว้ไม่ให้โดนปุ่มบัง
+            }
         }
-    ) {
-        LazyColumn {
-            if (filteredAccounts.isNotEmpty()) {
-                item {
-                    ExpandableCategoryCard(title = "บัญชีเงินฝาก", itemCount = filteredAccounts.size, themeColor = "asset", initiallyExpanded = true) {
-                        filteredAccounts.forEach { account ->
-                            RealItemCard(
-                                title = account.name,
-                                subtitleLabel = "ธนาคาร", subtitleValue = account.bankName,
-                                amountLabel = "ยอดเงิน", amountValue = "${account.amount} บาท",
-                                onClick = { selectedAssetId = account.id; selectedAssetType = "account" }
-                            )
-                        }
-                    }
-                }
-            }
 
-            if (filteredCashes.isNotEmpty()) {
-                item {
-                    ExpandableCategoryCard(title = "เงินสด ทองคำ", itemCount = filteredCashes.size, themeColor = "asset") {
-                        filteredCashes.forEach { cash ->
-                            RealItemCard(
-                                title = cash.name,
-                                subtitleLabel = "รายละเอียด", subtitleValue = cash.description.ifEmpty { "เงินสด" },
-                                amountLabel = "มูลค่า", amountValue = "${cash.amount} บาท",
-                                onClick = { selectedAssetId = cash.id; selectedAssetType = "cash" }
-                            )
-                        }
-                    }
-                }
+        // 🌟 2. ปุ่มลอยมุมขวาล่าง (Floating Action Button)
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 40.dp, end = 25.dp)
+                .size(56.dp)
+                .clickable { onAddClick() },
+            shape = CircleShape,
+            color = LightAsset,
+            shadowElevation = 3.dp
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_common_plus),
+                    contentDescription = "เพิ่มทรัพย์สิน",
+                    tint = LightSoftWhite,
+                    modifier = Modifier.size(40.dp)
+                )
             }
-
-            if (filteredInvestments.isNotEmpty()) {
-                item {
-                    ExpandableCategoryCard(title = "ลงทุน หุ้น กองทุน", itemCount = filteredInvestments.size, themeColor = "asset") {
-                        filteredInvestments.forEach { invest ->
-                            val rawTotal = invest.quantity * invest.costPerPrice
-                            val totalVal = (rawTotal * 100.0).roundToInt() / 100.0
-                            RealItemCard(
-                                title = "${invest.name} (${invest.symbol})",
-                                subtitleLabel = "โบรกเกอร์", subtitleValue = invest.brokerName,
-                                amountLabel = "มูลค่ารวม", amountValue = "${totalVal} บาท",
-                                onClick = { selectedAssetId = invest.id; selectedAssetType = "investment" }
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (filteredInsurances.isNotEmpty()) {
-                item {
-                    ExpandableCategoryCard(title = "ประกัน", itemCount = filteredInsurances.size, themeColor = "asset") {
-                        filteredInsurances.forEach { insurance ->
-                            RealItemCard(
-                                title = insurance.name,
-                                subtitleLabel = "บริษัท", subtitleValue = insurance.companyName,
-                                amountLabel = "วงเงินคุ้มครอง", amountValue = "${insurance.coverageAmount} บาท",
-                                onClick = { selectedAssetId = insurance.id; selectedAssetType = "insurance" }
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (filteredBuildings.isNotEmpty()) {
-                item {
-                    ExpandableCategoryCard(title = "บ้าน ตึก อาคาร", itemCount = filteredBuildings.size, themeColor = "asset") {
-                        filteredBuildings.forEach { building ->
-                            RealItemCard(
-                                title = building.name,
-                                subtitleLabel = "พื้นที่", subtitleValue = "${building.area} ตร.ม.",
-                                amountLabel = "มูลค่าประเมิน", amountValue = "${building.amount} บาท",
-                                onClick = { selectedAssetId = building.id; selectedAssetType = "building" }
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (filteredLands.isNotEmpty()) {
-                item {
-                    ExpandableCategoryCard(title = "ที่ดิน", itemCount = filteredLands.size, themeColor = "asset") {
-                        filteredLands.forEach { land ->
-                            RealItemCard(
-                                title = land.name,
-                                subtitleLabel = "เลขโฉนด", subtitleValue = land.deedNum,
-                                amountLabel = "มูลค่าประเมิน", amountValue = "${land.amount} บาท",
-                                onClick = { selectedAssetId = land.id; selectedAssetType = "land" }
-                            )
-                        }
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
 
-    // 🌟 เรียกใช้ FetcherDialog เมื่อมีการกดเลือก Asset
     if (selectedAssetId != null && selectedAssetType != null) {
         AssetDetailFetcherDialog(
             assetId = selectedAssetId!!,
@@ -219,8 +260,6 @@ fun AssetContent(
     }
 }
 
-// 🌟 ตัวกลางสำหรับโชว์ Loading และยิง API ดึง Detail
-// 🌟 ตัวกลางสำหรับโชว์ Loading และยิง API ดึง Detail
 @Composable
 fun AssetDetailFetcherDialog(
     assetId: String,
@@ -231,17 +270,19 @@ fun AssetDetailFetcherDialog(
     var isLoading by remember { mutableStateOf(true) }
     var detailData by remember { mutableStateOf<Any?>(null) }
 
+    // 🌟 1. ปรับ State ให้เก็บชื่อของ Item ที่จะลบด้วย
+    var showConfirmDelete by remember { mutableStateOf(false) }
+    var itemNameToDelete by remember { mutableStateOf("") }
+
     LaunchedEffect(assetId, assetType) {
         isLoading = true
         detailData = when (assetType) {
             "account" -> screenModel.getAccountById(assetId)
             "cash" -> screenModel.getCashById(assetId)
-            "investment" -> screenModel.getInvestmentById(assetId) // 🌟 รันล่วงหน้า
-            "insurance" -> screenModel.getInsuranceById(assetId)   // 🌟 รันประกัน
+            "investment" -> screenModel.getInvestmentById(assetId)
+            "insurance" -> screenModel.getInsuranceById(assetId)
             "building" -> screenModel.getBuildingById(assetId)
             "land" -> screenModel.getLandById(assetId)
-
-
             else -> null
         }
         isLoading = false
@@ -259,60 +300,130 @@ fun AssetDetailFetcherDialog(
             }
         }
     } else if (detailData != null) {
-        when (val item = detailData) {
-            // 1. บัญชี
+        val item = detailData!!
+
+        // 🌟 2. Popup ยืนยันการลบที่ระบุชื่อชัดเจน
+        // 🌟 2. Popup ยืนยันการลบที่มีการเน้นสีชื่อไอเทม
+        if (showConfirmDelete) {
+            // สร้างข้อความแบบเน้นสีเฉพาะจุด (AnnotatedString)
+            val annotatedMessage = buildAnnotatedString {
+                append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
+                withStyle(style = SpanStyle(
+                    color = if (assetType == "debt") LightDebt else LightAsset, // 🌟 เลือกสีตามประเภท
+                    fontWeight = FontWeight.Bold
+                )
+                ) {
+                    append("'$itemNameToDelete'")
+                }
+                append(" ออกจากระบบ?")
+            }
+
+            ConfirmDeleteDialog(
+                title = "ลบทรัพย์สิน",
+                message = annotatedMessage, // 🌟 ส่งค่าที่เป็น AnnotatedString เข้าไป
+                onConfirm = {
+                    screenModel.deleteAsset(assetId, assetType)
+                    showConfirmDelete = false
+                    onDismiss()
+                },
+                onDismiss = { showConfirmDelete = false }
+            )
+        }
+
+        when (item) {
             is BankAccountData -> {
-                DetailDialog(subtitle = "ทรัพย์สิน · บัญชีเงินฝาก", title = item.name, themeType = "asset", onDismiss = onDismiss) {
+                DetailDialog(
+                    subtitle = "ทรัพย์สิน · บัญชีเงินฝาก",
+                    title = item.name,
+                    themeType = "asset",
+                    onDismiss = onDismiss,
+                    onDelete = {
+                        itemNameToDelete = item.name // 🌟 เก็บชื่อก่อนเปิด Dialog
+                        showConfirmDelete = true
+                    }
+                ) {
                     DetailRow("ธนาคาร", item.bankName)
                     DetailRow("เลขบัญชี", item.bankAccount)
                     DetailRow("ประเภท", item.type)
-                    DetailRow("ยอดเงิน", "${item.amount} บาท")
+                    DetailRow("ยอดเงิน", "${formatAmount(item.amount)} บาท")
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
                     DetailImageRow(files = item.files)
                 }
             }
 
-            // 2. เงินสด
             is CashIdData -> {
-                DetailDialog(subtitle = "ทรัพย์สิน · เงินสด ทองคำ", title = item.name, themeType = "asset", onDismiss = onDismiss) {
-                    DetailRow("มูลค่า", "${item.amount} บาท")
+                DetailDialog(
+                    subtitle = "ทรัพย์สิน · เงินสด ทองคำ",
+                    title = item.name,
+                    themeType = "asset",
+                    onDismiss = onDismiss,
+                    onDelete = {
+                        itemNameToDelete = item.name
+                        showConfirmDelete = true
+                    }
+                ) {
+                    DetailRow("มูลค่า", "${formatAmount(item.amount)} บาท")
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
                     DetailImageRow(files = item.files)
                 }
             }
 
-            // 3. การลงทุน (สมมติ Model ล่วงหน้า)
             is InvestmentIdData -> {
-                DetailDialog(subtitle = "ทรัพย์สิน · ลงทุน หุ้น กองทุน", title = "${item.name} (${item.symbol})", themeType = "asset", onDismiss = onDismiss) {
+                DetailDialog(
+                    subtitle = "ทรัพย์สิน · ลงทุน หุ้น กองทุน",
+                    title = "${item.name} (${item.symbol})",
+                    themeType = "asset",
+                    onDismiss = onDismiss,
+                    onDelete = {
+                        itemNameToDelete = "${item.name} (${item.symbol})"
+                        showConfirmDelete = true
+                    }
+                ) {
                     DetailRow("โบรกเกอร์", item.brokerName)
-                    DetailRow("จำนวน", "${item.quantity}")
-                    DetailRow("ราคาทุนต่อหน่วย", "${item.costPerPrice} บาท")
+                    DetailRow("จำนวน", "${formatAmount(item.quantity)}")
+                    DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(item.costPerPrice)} บาท")
                     DetailRow("ประเภท", item.type)
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
                     DetailImageRow(files = item.files)
                 }
             }
 
-            // 4. ประกัน (ของจริง มาแล้ว!)
             is InsuranceIdData -> {
-                DetailDialog(subtitle = "ทรัพย์สิน · ประกัน", title = item.name, themeType = "asset", onDismiss = onDismiss) {
+                DetailDialog(
+                    subtitle = "ทรัพย์สิน · ประกัน",
+                    title = item.name,
+                    themeType = "asset",
+                    onDismiss = onDismiss,
+                    onDelete = {
+                        itemNameToDelete = item.name
+                        showConfirmDelete = true
+                    }
+                ) {
                     DetailRow("เลขกรมธรรม์", item.policyNumber)
                     DetailRow("บริษัท", item.companyName)
-                    DetailRow("วงเงินคุ้มครอง", "${item.coverageAmount} บาท")
+                    DetailRow("วงเงินคุ้มครอง", "${formatAmount(item.coverageAmount)} บาท")
                     DetailRow("ระยะเวลาคุ้มครอง", "${item.coveragePeriod} ปี")
-                    DetailRow("วันเริ่มสัญญา", item.conDate.take(10))
-                    DetailRow("วันสิ้นสุดสัญญา", item.expDate.take(10))
+                    DetailRow("วันเริ่มสัญญา", formatThaiDate(item.conDate))
+                    DetailRow("วันสิ้นสุดสัญญา", formatThaiDate(item.expDate))
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
                     DetailImageRow(files = item.files)
                 }
             }
 
-            // 5. อาคาร
             is BuildingIdData -> {
-                DetailDialog(subtitle = "ทรัพย์สิน · บ้าน ตึก อาคาร", title = item.name, themeType = "asset", onDismiss = onDismiss) {
+                DetailDialog(
+                    subtitle = "ทรัพย์สิน · บ้าน ตึก อาคาร",
+                    title = item.name,
+                    themeType = "asset",
+                    onDismiss = onDismiss,
+                    onDelete = {
+                        itemNameToDelete = item.name
+                        showConfirmDelete = true
+                    }
+                ) {
                     DetailRow("ประเภท", item.type)
-                    DetailRow("พื้นที่", "${item.area} ตร.ม.")
-                    DetailRow("มูลค่าประเมิน", "${item.amount} บาท")
+                    DetailRow("พื้นที่", "${formatAmount(item.area)} ตร.ม.")
+                    DetailRow("มูลค่าประเมิน", "${formatAmount(item.amount)} บาท")
                     val addressStr = item.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
                     DetailRow("ที่อยู่", addressStr)
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
@@ -320,12 +431,20 @@ fun AssetDetailFetcherDialog(
                 }
             }
 
-            // 6. ที่ดิน (สมมติ Model ล่วงหน้า)
             is LandIdData -> {
-                DetailDialog(subtitle = "ทรัพย์สิน · ที่ดิน", title = item.name, themeType = "asset", onDismiss = onDismiss) {
+                DetailDialog(
+                    subtitle = "ทรัพย์สิน · ที่ดิน",
+                    title = item.name,
+                    themeType = "asset",
+                    onDismiss = onDismiss,
+                    onDelete = {
+                        itemNameToDelete = item.name
+                        showConfirmDelete = true
+                    }
+                ) {
                     DetailRow("เลขโฉนด", item.deedNum)
-                    DetailRow("ขนาดพื้นที่", "${item.area} ตารางวา")
-                    DetailRow("มูลค่าประเมิน", "${item.amount} บาท")
+                    DetailRow("ขนาดพื้นที่", "${formatAmount(item.area)} ตารางวา")
+                    DetailRow("มูลค่าประเมิน", "${formatAmount(item.amount)} บาท")
                     val addressStr = item.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
                     DetailRow("ที่อยู่", addressStr)
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())

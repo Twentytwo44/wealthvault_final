@@ -47,4 +47,17 @@ class DebtScreenModel(
             .onFailure { println("🚨 โหลด Liability ล้มเหลว: ${it.message}") }
             .getOrNull()
     }
+    fun deleteLiability(id: String, type: String) {
+        screenModelScope.launch {
+            // useCase ตัวเดียวกับหน้า Asset ได้เลยถ้า inject มาถูกตัว
+            val result = useCase.deleteAsset(id, type)
+
+            result.onSuccess {
+                println("✅ ลบหนี้สินสำเร็จ!")
+                fetchLiabilities() // 🌟 พอลบเสร็จ สั่งโหลดข้อมูลหน้านี้ใหม่ทันที
+            }.onFailure { error ->
+                println("🚨 ลบหนี้สินล้มเหลว: ${error.message}")
+            }
+        }
+    }
 }

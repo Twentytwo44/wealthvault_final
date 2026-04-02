@@ -35,5 +35,5 @@ data class InvestmentIdData(
 data class FileDataInvestment(
     @SerialName("id") val id: String = "",
     @SerialName("url") override val url: String = "", // 🌟 สืบทอด HasImageUrl
-    @SerialName("file_type") val fileType: String = ""
+    @SerialName("file_type") override val fileType: String = ""
 ) : HasImageUrl

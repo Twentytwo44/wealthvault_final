@@ -2,6 +2,7 @@ package com.wealthvault.dashboard.ui
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,8 +25,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.navigator.tab.LocalTabNavigator // 🌟 1. Import LocalTabNavigator
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_down_line
 import com.wealthvault.core.generated.resources.ic_dashboard_money_bag
@@ -34,29 +33,15 @@ import com.wealthvault.core.generated.resources.ic_dashboard_share
 import com.wealthvault.core.generated.resources.ic_nav_asset
 import com.wealthvault.core.generated.resources.ic_nav_debt
 import com.wealthvault.core.generated.resources.ic_nav_social
+import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.dashboard.ui.components.RealItemCard
 import com.wealthvault.`user-api`.model.DashboardDataResponse
 import org.jetbrains.compose.resources.painterResource
+
 enum class DashboardTab {
     ASSET, DEBT
-}
-
-fun formatCurrency(value: Double): String {
-    val isNegative = value < 0
-    val absoluteValue = if (isNegative) -value else value
-    val intPart = absoluteValue.toLong()
-    val decPart = kotlin.math.round((absoluteValue - intPart) * 100).toInt()
-    val intString = intPart.toString().reversed().chunked(3).joinToString(",").reversed()
-    val sign = if (isNegative) "-" else ""
-
-    return if (decPart == 0) {
-        "$sign$intString"
-    } else {
-        val decString = decPart.toString().padStart(2, '0')
-        "$sign$intString.$decString"
-    }
 }
 
 class DashboardScreen(
@@ -70,16 +55,14 @@ class DashboardScreen(
         val dashboardState by screenModel.dashboardState.collectAsState()
         val isLoading by screenModel.isLoading.collectAsState()
 
-        // (ตัว tabNavigator ลบทิ้งจากหน้านี้ได้เลยครับ เพราะเราย้ายไปคุมที่ DashboardTab แล้ว)
-
         var selectedTab by remember { mutableStateOf(DashboardTab.ASSET) }
         LaunchedEffect(Unit) {
             screenModel.fetchDashboard()
         }
 
         DashboardContent(
-            onNotiClick = onNotiClick, // ✅ สายไฟ Noti
-            onAddClick = onAddClick,   // 🚀 แก้เป็นแบบนี้! เพื่อส่งต่อคำสั่งไปให้ DashboardTab ทำงาน
+            onNotiClick = onNotiClick,
+            onAddClick = onAddClick,
             dashboardState = dashboardState,
             isLoading = isLoading,
             selectedTab = selectedTab,
@@ -131,7 +114,7 @@ fun DashboardContent(
                 val isAsset = selectedTab == DashboardTab.ASSET
                 val headerTitle = if (isAsset) "มูลค่าทรัพย์สิน≈" else "มูลค่าหนี้สิน≈"
                 val headerAmountValue = if (isAsset) (data.netWorth?.totalAssets ?: 0.0) else (data.netWorth?.totalLiabilities ?: 0.0)
-                val headerAmount = formatCurrency(headerAmountValue) + " บาท"
+                val headerAmount = formatAmount(headerAmountValue) + " บาท"
                 val headerColor = if (isAsset) Color(0xFF398A1E) else Color(0xFFDC4A3C)
 
                 Row(
@@ -148,22 +131,75 @@ fun DashboardContent(
                 val currentList = if (isAsset) data.assets else data.liabilities
 
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp), // ระยะห่างระหว่างการ์ด
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 32.dp)
                 ) {
-                    items(currentList) { item ->
+                    items(currentList) { assetItem ->
+
+                        // 🌟 1. ดึงชื่อหมวดหมู่ชั่วคราว เพื่อเอามาเช็คว่าจะใช้ Label คำว่าอะไร
+                        val categoryName = getCategoryGroupName(assetItem.type, isAsset)
+
+                        // 🌟 2. กำหนด Label ของบรรทัดที่ 2
+                        val subLabel = when (categoryName) {
+                            "บัญชีเงินฝาก" -> "ธนาคาร"
+                            "เงินสด ทองคำ" -> "รายละเอียด"
+                            "ลงทุน หุ้น กองทุน" -> "โบรกเกอร์"
+                            "ประกัน" -> "บริษัท"
+                            "บ้าน ตึก อาคาร" -> "พื้นที่"
+                            "ที่ดิน" -> "เลขโฉนด"
+                            "หนี้สิน", "รายจ่ายระยะยาว" -> "เจ้าหนี้"
+                            else -> "ประเภท"
+                        }
+
+                        // 🌟 3. กำหนด Label ของบรรทัดที่ 3
+                        val amtLabel = when (categoryName) {
+                            "บัญชีเงินฝาก" -> "ยอดเงิน"
+                            "เงินสด ทองคำ" -> "มูลค่า"
+                            "ลงทุน หุ้น กองทุน" -> "มูลค่ารวม"
+                            "ประกัน" -> "วงเงินคุ้มครอง"
+                            "บ้าน ตึก อาคาร", "ที่ดิน" -> "มูลค่าประเมิน"
+                            "หนี้สิน", "รายจ่ายระยะยาว" -> "ยอดหนี้"
+                            else -> "มูลค่า"
+                        }
+
+                        // 🌟 4. วาดการ์ดเรียงกันลงมาเลย
                         RealItemCard(
-                            title = item.name.ifEmpty { "ไม่ระบุชื่อ" },
-                            subtitleLabel = "ประเภท",
-                            subtitleValue = item.type,
-                            amountLabel = if (isAsset) "มูลค่าทรัพย์สิน" else "มูลค่าหนี้สิน",
-                            amountValue = (item.value?.let { formatCurrency(it) } ?: "0") + " บาท",
-                            onClick = { /* TODO: เปิดหน้า Detail */ }
+                            title = assetItem.name.ifEmpty { "ไม่ระบุชื่อ" },
+                            subtitleLabel = subLabel,
+                            subtitleValue = assetItem.type, // ข้อมูลจริงที่ API Dashboard ส่งมา
+                            amountLabel = amtLabel,
+                            amountValue = "${assetItem.value?.let { formatAmount(it) } ?: "0"} บาท"
                         )
                     }
+                    item { Spacer(modifier = Modifier.height(80.dp)) }
+
                 }
             }
+        }
+    }
+}
+
+// =====================================
+// 🌟 ฟังก์ชันจัดกลุ่ม (Grouping Helper)
+// =====================================
+fun getCategoryGroupName(type: String, isAsset: Boolean): String {
+    val t = type.uppercase()
+    return if (isAsset) {
+        when {
+            t.contains("BANK") || t.contains("ACC") -> "บัญชีเงินฝาก"
+            t.contains("CASH") || t.contains("GOLD") -> "เงินสด ทองคำ"
+            t.contains("INVEST") || t.contains("FUND") || t.contains("STOCK") -> "ลงทุน หุ้น กองทุน"
+            t.contains("INSUR") -> "ประกัน"
+            t.contains("BUILDING") || t.contains("HOUSE") -> "บ้าน ตึก อาคาร"
+            t.contains("LAND") -> "ที่ดิน"
+            else -> "ทรัพย์สินอื่นๆ"
+        }
+    } else {
+        when {
+            t.contains("LOAN") -> "หนี้สิน"
+            t.contains("EXPENSE") -> "รายจ่ายระยะยาว"
+            else -> "หนี้สินอื่นๆ"
         }
     }
 }
@@ -198,7 +234,7 @@ fun DashboardGridCards(
     assetCount: String,
     onAssetClick: () -> Unit,
     onDebtClick: () -> Unit,
-    onAddClick: () -> Unit, // 🌟 6. รับมาเพื่อส่งต่อให้ SafeCard
+    onAddClick: () -> Unit,
     selectedTab: DashboardTab
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -207,12 +243,12 @@ fun DashboardGridCards(
                 modifier = Modifier.weight(1f),
                 bgBrush = Brush.linearGradient(colors = listOf(Color(0xFF6BC591), Color(0xFF26A65B))),
                 icon = painterResource(Res.drawable.ic_dashboard_money_bag),
-                title = formatCurrency(assetsValue),
+                title = formatAmount(assetsValue),
                 subtitle = "มูลค่าทรัพย์สิน≈",
                 isSelected = selectedTab == DashboardTab.ASSET,
                 onClick = onAssetClick
             )
-            SafeCard(modifier = Modifier.weight(1f), count = assetCount, onAddClick = onAddClick) // 🌟 7. ส่งต่อ
+            SafeCard(modifier = Modifier.weight(1f), count = assetCount, onAddClick = onAddClick)
         }
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -220,7 +256,7 @@ fun DashboardGridCards(
                 modifier = Modifier.weight(1f),
                 bgBrush = Brush.linearGradient(colors = listOf(Color(0xFFD15E51), Color(0xFFC63A2C))),
                 icon = painterResource(Res.drawable.ic_nav_debt),
-                title = formatCurrency(debtsValue),
+                title = formatAmount(debtsValue),
                 subtitle = "มูลค่าหนี้สิน≈",
                 isSelected = selectedTab == DashboardTab.DEBT,
                 onClick = onDebtClick
@@ -303,7 +339,7 @@ fun MainCard(
 }
 
 @Composable
-fun SafeCard(modifier: Modifier = Modifier, count: String = "0", onAddClick: () -> Unit = {}) { // 🌟 8. เพิ่มพารามิเตอร์ onAddClick
+fun SafeCard(modifier: Modifier = Modifier, count: String = "0", onAddClick: () -> Unit = {}) {
     Box(
         modifier = modifier.height(90.dp).shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp)).background(Brush.linearGradient(colors = listOf(Color(0xFFFDAE36), Color(0xFFF3A227)))).padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
@@ -312,19 +348,18 @@ fun SafeCard(modifier: Modifier = Modifier, count: String = "0", onAddClick: () 
             Spacer(modifier = Modifier.width(10.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(text = count, color = Color.White, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(text = if (count != "null"){count}else "0", color = Color.White, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(text = "ทรัพย์สิน", color = Color.White, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(bottom = 3.dp))
                 }
                 Spacer(modifier = Modifier.height(2.dp))
 
-                // 🌟 9. ผูก onAddClick กับปุ่ม "เพิ่ม"
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color.White)
-                        .clickable { onAddClick() } // 👈 เพิ่ม clickable ตรงนี้!
+                        .clickable { onAddClick() }
                         .padding(vertical = 4.dp)
                         .height(25.dp),
                     contentAlignment = Alignment.Center
@@ -351,6 +386,41 @@ fun SmallCard(modifier: Modifier = Modifier, bgBrush: Brush, icon: Painter? = nu
             Text(text = label, color = Color.White, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
             if (label2.isNotEmpty()) {
                 Text(text = label2, color = Color.White.copy(alpha = 0.9f), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center, modifier = Modifier.offset(y = (-6).dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun RealItemCard(
+    title: String,
+    subtitleLabel: String,
+    subtitleValue: String,
+    amountLabel: String,
+    amountValue: String,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = LightSoftWhite
+        ),
+        border = BorderStroke(1.dp, LightBorder),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = subtitleLabel, fontSize = 14.sp, color = Color.Gray)
+                Text(text = subtitleValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = amountLabel, fontSize = 14.sp, color = Color.Gray)
+                Text(text = amountValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
             }
         }
     }

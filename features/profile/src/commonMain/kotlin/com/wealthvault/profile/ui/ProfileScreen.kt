@@ -42,6 +42,7 @@ import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.WvWaveGradientEnd
+import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.profile.ui.components.ClosePersonItem
 import com.wealthvault.`user-api`.model.UserData
@@ -70,15 +71,7 @@ class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
     }
 }
 
-private fun formatBirthday(rawDate: String): String {
-    if (rawDate.isBlank()) return ""
-    val cleanDate = rawDate.take(10)
-    val parts = cleanDate.split("-")
-    if (parts.size == 3) {
-        return "${parts[2]}/${parts[1]}/${parts[0]}"
-    }
-    return cleanDate
-}
+
 
 @Composable
 fun ProfileContent(
@@ -183,7 +176,7 @@ fun ProfileContent(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = formatBirthday(userData.birthday),
+                            text = formatThaiDate(userData.birthday),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = Color.Gray
