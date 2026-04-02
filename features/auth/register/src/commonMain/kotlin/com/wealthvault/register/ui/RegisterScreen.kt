@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,6 +26,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,10 +40,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -59,44 +60,40 @@ import com.wealthvault.core.generated.resources.ic_auth_eye
 import com.wealthvault.core.generated.resources.ic_auth_eye_slash
 import com.wealthvault.core.generated.resources.ic_auth_lock
 
-// ==========================================
-// 🌟 1. สร้างคลาส Screen สำหรับให้ Voyager เรียกใช้
-// ==========================================
 class RegisterScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<RegisterScreenModel>()
 
-        // 🌟 จำสถานะของช่อง "ยืนยันรหัสผ่าน" แยกต่างหาก
-        var confirmPasswordText by remember { mutableStateOf("") }
-
         RegisterContent(
             username = screenModel.username,
-            onUsernameChange = { screenModel.username = it },
+            onUsernameChange = {
+                screenModel.username = it
+                screenModel.errorMessage = null
+            },
             password = screenModel.password,
-            onPasswordChange = { screenModel.password = it },
-            confirmPassword = confirmPasswordText, // ส่งค่า confirmPassword ลงไป
-            onConfirmPasswordChange = { confirmPasswordText = it }, // รับค่า confirmPassword กลับมา
+            onPasswordChange = {
+                screenModel.password = it
+                screenModel.errorMessage = null
+            },
+            confirmPassword = screenModel.confirmPassword,
+            onConfirmPasswordChange = {
+                screenModel.confirmPassword = it
+                screenModel.errorMessage = null // 🌟 ล้าง Error เมื่อเริ่มพิมพ์ช่องยืนยันด้วย
+            },
             isLoading = screenModel.isLoading,
+            errorMessage = screenModel.errorMessage,
+            onErrorDismiss = { screenModel.errorMessage = null }, // 🌟 เพิ่มสำหรับปิด Popup
             onRegisterClick = {
-                // เช็คว่ารหัสผ่าน 2 ช่องตรงกันไหม ถ้าตรงค่อยให้ ScreenModel ทำงานต่อ
-                if (screenModel.password == confirmPasswordText) {
+                if (!screenModel.isLoading) { // ป้องกันการกดซ้ำ
                     screenModel.onRegisterClick {
-                        // สมัครสำเร็จ เด้งกลับไปหน้า Login หรือไปหน้าหลัก
                         navigator.pop()
                     }
-                } else {
-                    // TODO: แสดง Error ว่ารหัสผ่านไม่ตรงกัน
                 }
             },
-            onLoginClick = {
-                // กด "เข้าสู่ระบบ?" -> ให้ดึงหน้าตัวเองออก เพื่อกลับไปหน้า Login
-                navigator.pop()
-            },
-            onGoogleClick = {
-                screenModel.onGoogleClick { /* TODO */ }
-            }
+            onLoginClick = { navigator.pop() },
+            onGoogleClick = { screenModel.onGoogleClick { /* TODO */ } }
         )
     }
 }
@@ -111,10 +108,53 @@ fun RegisterContent(
     onConfirmPasswordChange: (String) -> Unit,
     onLoginClick: () -> Unit,
     isLoading: Boolean,
+    errorMessage: String?,
+    onErrorDismiss: () -> Unit, // 🌟 เพิ่มมารับคำสั่งปิด Popup
     onRegisterClick: () -> Unit,
     onGoogleClick: () -> Unit
 ) {
     WavyBackground {
+        // 🌟 1. แสดง Popup แจ้งเตือนเมื่อสมัครไม่สำเร็จ
+        if (errorMessage != null) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = onErrorDismiss,
+                containerColor = LightSurface,
+                title = {
+                    Text(
+                        text = "สมัครสมาชิกไม่สำเร็จ",
+                        color = RedErr,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                text = {
+                    Text(
+                        text = errorMessage,
+                        color = Color(0xFF3A2F2A),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = onErrorDismiss) {
+                        Text("ตกลง", color = LightPrimary, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    }
+                }
+            )
+        }
+
+        // 🌟 2. Loading Dialog (วงกลมหมุนๆ)
+        if (isLoading) {
+            Dialog(onDismissRequest = {}) {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(Color.White, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = LightPrimary)
+                }
+            }
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -135,7 +175,7 @@ fun RegisterContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 1. ช่องอีเมล
+                // --- 1. ช่องอีเมล ---
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = "อีเมล",
@@ -146,18 +186,11 @@ fun RegisterContent(
                     OutlinedTextField(
                         value = username,
                         onValueChange = onUsernameChange,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(percent = 30),
                         singleLine = true,
                         leadingIcon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_auth_email),
-                                contentDescription = "email",
-                                tint = LightPrimary,
-                                modifier = Modifier.size(26.dp)
-                            )
+                            Icon(painterResource(Res.drawable.ic_auth_email), contentDescription = "email", tint = LightPrimary, modifier = Modifier.size(26.dp))
                         },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = LightSurface,
@@ -169,10 +202,9 @@ fun RegisterContent(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
                 var isPasswordVisible by remember { mutableStateOf(false) }
 
-                // 2. ช่องรหัสผ่าน
+                // --- 2. ช่องรหัสผ่าน ---
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = "รหัสผ่าน",
@@ -183,29 +215,17 @@ fun RegisterContent(
                     OutlinedTextField(
                         value = password,
                         onValueChange = onPasswordChange,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(percent = 30),
                         singleLine = true,
                         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         leadingIcon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_auth_lock),
-                                contentDescription = "lock",
-                                tint = LightPrimary,
-                                modifier = Modifier.size(26.dp)
-                            )
+                            Icon(painterResource(Res.drawable.ic_auth_lock), contentDescription = "lock", tint = LightPrimary, modifier = Modifier.size(26.dp))
                         },
                         trailingIcon = {
                             val icon = if (isPasswordVisible) painterResource(Res.drawable.ic_auth_eye) else painterResource(Res.drawable.ic_auth_eye_slash)
                             IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                                Icon(
-                                    painter = icon,
-                                    contentDescription = "Toggle Password Visibility",
-                                    tint = LightPrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                                Icon(painter = icon, contentDescription = "Toggle", tint = LightPrimary, modifier = Modifier.size(24.dp))
                             }
                         },
                         colors = OutlinedTextFieldDefaults.colors(
@@ -218,10 +238,9 @@ fun RegisterContent(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
                 var isConfirmPasswordVisible by remember { mutableStateOf(false) }
 
-                // 3. ช่องยืนยันรหัสผ่าน
+                // --- 3. ช่องยืนยันรหัสผ่าน ---
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = "ยืนยันรหัสผ่าน",
@@ -232,29 +251,17 @@ fun RegisterContent(
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = onConfirmPasswordChange,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(percent = 30),
                         singleLine = true,
                         visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         leadingIcon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_auth_lock),
-                                contentDescription = "lock",
-                                tint = LightPrimary,
-                                modifier = Modifier.size(26.dp)
-                            )
+                            Icon(painterResource(Res.drawable.ic_auth_lock), contentDescription = "lock", tint = LightPrimary, modifier = Modifier.size(26.dp))
                         },
                         trailingIcon = {
                             val icon = if (isConfirmPasswordVisible) painterResource(Res.drawable.ic_auth_eye) else painterResource(Res.drawable.ic_auth_eye_slash)
                             IconButton(onClick = { isConfirmPasswordVisible = !isConfirmPasswordVisible }) {
-                                Icon(
-                                    painter = icon,
-                                    contentDescription = "Toggle Confirm Password Visibility",
-                                    tint = LightPrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                                Icon(painter = icon, contentDescription = "Toggle Confirm", tint = LightPrimary, modifier = Modifier.size(24.dp))
                             }
                         },
                         colors = OutlinedTextFieldDefaults.colors(
@@ -268,12 +275,11 @@ fun RegisterContent(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // 4. ปุ่มสร้างบัญชี
+                // --- 4. ปุ่มสร้างบัญชี ---
                 Button(
                     onClick = onRegisterClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp), // ปรับเป็น 50.dp เหมือนหน้า Login
+                    enabled = !isLoading, // 🌟 ปิดปุ่มตอนโหลดเพื่อป้องกันการกดซ้ำ
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(percent = 30),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
                 ) {
@@ -282,12 +288,8 @@ fun RegisterContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 5. มีบัญชีอยู่แล้ว เข้าสู่ระบบ?
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                // --- 5. มีบัญชีอยู่แล้ว? ---
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "มีบัญชีอยู่แล้ว ", color = LightMuted, style = MaterialTheme.typography.bodyMedium)
                     Text(
                         text = "เข้าสู่ระบบ?",
@@ -300,11 +302,8 @@ fun RegisterContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 6. เส้นคั่น หรือ
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
-                ) {
+                // --- 6. เส้นคั่น หรือ ---
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)) {
                     HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
                     Text(text = " หรือ ", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
                     HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
@@ -312,24 +311,17 @@ fun RegisterContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 7. ปุ่ม Google
+                // --- 7. ปุ่ม Google ---
                 OutlinedButton(
                     onClick = onGoogleClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(horizontal = 48.dp),
+                    enabled = !isLoading,
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 48.dp),
                     shape = RoundedCornerShape(percent = 30),
                     border = BorderStroke(1.dp, LightBorder),
                     colors = ButtonDefaults.outlinedButtonColors(containerColor = LightSurface)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_auth_google),
-                            contentDescription = "Google Logo",
-                            modifier = Modifier.size(36.dp),
-                            tint = Color.Unspecified
-                        )
+                        Icon(painterResource(Res.drawable.ic_auth_google), contentDescription = "Google", modifier = Modifier.size(36.dp), tint = Color.Unspecified)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Google", color = LightPrimary, style = MaterialTheme.typography.bodyLarge)
                     }

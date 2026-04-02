@@ -14,7 +14,7 @@ class RegisterApiImpl(private val ktorfit: Ktorfit) : RegisterApi {
         val client = ktorfit.httpClient
 
         // ยิงเองตรงๆ แบบไม่ง้อ Generator
-        return client.post("${Config.localhost_ios}auth/register") {
+        return client.post("${Config.localhost_android}auth/register") {
             setBody(request)
         }.body()
     }

@@ -6,6 +6,6 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 
 interface RegisterApi {
-    @POST("/auth/register")
+    @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): RegisterResponse
 }
