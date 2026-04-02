@@ -64,12 +64,15 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.ui.text.AnnotatedString
+import com.wealthvault.core.generated.resources.ic_common_update
+import com.wealthvault.core.theme.LightText
 
 
 @Composable
 fun DetailDialog(
     subtitle: String = "",
     title: String,
+    updatedAt: String = "", // 🌟 1. เพิ่มตัวรับค่า "อัปเดตล่าสุด"
     themeType: String,
     onDismiss: () -> Unit,
     onDelete: () -> Unit = {},
@@ -105,13 +108,18 @@ fun DetailDialog(
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // --- 1. Fixed Header ---
+                    // --- 1. Fixed Header ---
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(LightBg)
                             .padding(top = 24.dp, bottom = 16.dp, start = 24.dp, end = 24.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth() // 🌟 ให้ Row นอกสุดกางเต็มพื้นที่
+                        ) {
+                            // 🎨 แถบสีแนวตั้ง
                             Box(
                                 modifier = Modifier
                                     .width(5.dp)
@@ -125,21 +133,53 @@ fun DetailDialog(
                                         }
                                     )
                             )
+
                             Spacer(modifier = Modifier.width(12.dp))
-                            Column {
+
+                            // 📝 ส่วนข้อความ (ใช้ weight เพื่อให้กินพื้นที่ที่เหลือ)
+                            Column(modifier = Modifier.weight(1f)) {
                                 if (subtitle.isNotEmpty()) {
-                                    Text(
-                                        text = subtitle,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = Color(0xFF9E918B)
-                                    )
+                                    // 🌟 สร้าง Row มาคลุม Subtitle กับ วันที่ เพื่อดันซ้าย-ขวา
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween, // 🌟 ดันซ้ายสุด-ขวาสุด
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        // ฝั่งซ้าย: Subtitle
+                                        Text(
+                                            text = subtitle,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = LightMuted.copy(0.8f)
+                                        )
+
+                                        // 🌟 ฝั่งขวา: วันที่อัปเดต (ย้ายมาไว้ตรงนี้)
+                                        if (updatedAt.isNotEmpty()) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    painter = painterResource(Res.drawable.ic_common_update),
+                                                    contentDescription = "Last Updated",
+                                                    tint = LightMuted.copy(0.7f),
+                                                    modifier = Modifier.size(14.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(3.dp))
+                                                Text(
+                                                    text = updatedAt,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = LightMuted.copy(0.8f)
+                                                )
+                                            }
+                                        }
+                                    }
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
+
+                                // ชื่อหัวข้อหลัก
                                 Text(
                                     text = title,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF3A2F2A)
+                                    color = LightText
                                 )
                             }
                         }
@@ -159,6 +199,7 @@ fun DetailDialog(
                         content()
                         Spacer(modifier = Modifier.height(12.dp))
                     }
+
                     // --- 3. Fixed Footer ---
                     Spacer(modifier = Modifier.height(6.dp))
                     Column(modifier = Modifier.fillMaxWidth()) {
@@ -226,7 +267,7 @@ fun DetailRow(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF9E918B),
+            color = LightMuted.copy(0.8f),
             letterSpacing = 0.4.sp
         )
         Spacer(modifier = Modifier.height(6.dp))
@@ -271,7 +312,7 @@ fun DetailImageRow(files: List<Any>?) {
         Text(
             text = "รูปภาพเอกสาร / สมุดบัญชี",
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF9E918B),
+            color = LightMuted.copy(0.8f),
         )
         Spacer(modifier = Modifier.height(14.dp))
         Row(
@@ -305,7 +346,7 @@ fun DetailImageRow(files: List<Any>?) {
         Text(
             text = "ไฟล์แนบ",
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF9E918B),
+            color = LightMuted.copy(0.8f),
         )
         Spacer(modifier = Modifier.height(8.dp))
 

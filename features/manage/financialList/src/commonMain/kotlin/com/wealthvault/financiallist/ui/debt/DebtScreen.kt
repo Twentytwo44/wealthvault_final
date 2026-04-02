@@ -235,6 +235,7 @@ fun DebtDetailFetcherDialog(
         DetailDialog(
             subtitle = if (isLoan) "หนี้สิน · รายละเอียดหนี้สิน" else "หนี้สิน · รายละเอียดรายจ่าย",
             title = item.name,
+            updatedAt = formatThaiDate(item.updatedAt),
             themeType = "debt",
             onDismiss = onDismiss,
             onDelete = {

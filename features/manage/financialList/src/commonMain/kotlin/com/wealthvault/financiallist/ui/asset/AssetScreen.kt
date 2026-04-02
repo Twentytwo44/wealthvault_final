@@ -335,6 +335,7 @@ fun AssetDetailFetcherDialog(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · บัญชีเงินฝาก",
                     title = item.name,
+                    updatedAt = formatThaiDate(item.updatedAt),
                     themeType = "asset",
                     onDismiss = onDismiss,
                     onDelete = {
@@ -355,6 +356,7 @@ fun AssetDetailFetcherDialog(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · เงินสด ทองคำ",
                     title = item.name,
+                    updatedAt = formatThaiDate(item.updatedAt),
                     themeType = "asset",
                     onDismiss = onDismiss,
                     onDelete = {
@@ -372,6 +374,7 @@ fun AssetDetailFetcherDialog(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · ลงทุน หุ้น กองทุน",
                     title = "${item.name} (${item.symbol})",
+                    updatedAt = formatThaiDate(item.updatedAt),
                     themeType = "asset",
                     onDismiss = onDismiss,
                     onDelete = {
@@ -392,6 +395,7 @@ fun AssetDetailFetcherDialog(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · ประกัน",
                     title = item.name,
+                    updatedAt = formatThaiDate(item.updatedAt),
                     themeType = "asset",
                     onDismiss = onDismiss,
                     onDelete = {
@@ -414,6 +418,7 @@ fun AssetDetailFetcherDialog(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · บ้าน ตึก อาคาร",
                     title = item.name,
+                    updatedAt = formatThaiDate(item.updatedAt),
                     themeType = "asset",
                     onDismiss = onDismiss,
                     onDelete = {
@@ -435,6 +440,7 @@ fun AssetDetailFetcherDialog(
                 DetailDialog(
                     subtitle = "ทรัพย์สิน · ที่ดิน",
                     title = item.name,
+                    updatedAt = formatThaiDate(item.updatedAt),
                     themeType = "asset",
                     onDismiss = onDismiss,
                     onDelete = {

@@ -31,9 +31,22 @@ fun formatThaiDate(dateString: String?): String {
 
     if (parts.size == 3) {
         val year = (parts[0].toIntOrNull() ?: 0) + 543 // บวก 543 เป็น พ.ศ.
-        val month = parts[1]
-        val day = parts[2]
-        return "$day/$month/$year"
+
+        // แปลงเป็น Int เพื่อใช้หาชื่อเดือน และตัดเลข 0 ข้างหน้าวันออก
+        val monthIndex = parts[1].toIntOrNull() ?: 1
+        val day = parts[2].toIntOrNull() ?: 1
+
+        // สร้าง Array เก็บชื่อย่อเดือน (ช่อง 0 ปล่อยว่างไว้ จะได้เริ่มเดือน 1 ที่ index 1 พอดี)
+        val thaiMonths = arrayOf(
+            "", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+            "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
+        )
+
+        // ดึงชื่อเดือนออกมา (ใส่เช็คกันพังไว้เผื่อข้อมูลผิดพลาด)
+        val monthStr = if (monthIndex in 1..12) thaiMonths[monthIndex] else ""
+
+        // ประกอบร่างใหม่!
+        return "$day $monthStr $year"
     }
 
     return dateString

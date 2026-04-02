@@ -141,16 +141,16 @@ fun DashboardContent(
                         val categoryName = getCategoryGroupName(assetItem.type, isAsset)
 
                         // 🌟 2. กำหนด Label ของบรรทัดที่ 2
-                        val subLabel = when (categoryName) {
-                            "บัญชีเงินฝาก" -> "ธนาคาร"
-                            "เงินสด ทองคำ" -> "รายละเอียด"
-                            "ลงทุน หุ้น กองทุน" -> "โบรกเกอร์"
-                            "ประกัน" -> "บริษัท"
-                            "บ้าน ตึก อาคาร" -> "พื้นที่"
-                            "ที่ดิน" -> "เลขโฉนด"
-                            "หนี้สิน", "รายจ่ายระยะยาว" -> "เจ้าหนี้"
-                            else -> "ประเภท"
-                        }
+//                        val subLabel = when (categoryName) {
+//                            "บัญชีเงินฝาก" -> "ธนาคาร"
+//                            "เงินสด ทองคำ" -> "รายละเอียด"
+//                            "ลงทุน หุ้น กองทุน" -> "โบรกเกอร์"
+//                            "ประกัน" -> "บริษัท"
+//                            "บ้าน ตึก อาคาร" -> "พื้นที่"
+//                            "ที่ดิน" -> "เลขโฉนด"
+//                            "หนี้สิน", "รายจ่ายระยะยาว" -> "เจ้าหนี้"
+//                            else -> "ประเภท"
+//                        }
 
                         // 🌟 3. กำหนด Label ของบรรทัดที่ 3
                         val amtLabel = when (categoryName) {
@@ -166,8 +166,8 @@ fun DashboardContent(
                         // 🌟 4. วาดการ์ดเรียงกันลงมาเลย
                         RealItemCard(
                             title = assetItem.name.ifEmpty { "ไม่ระบุชื่อ" },
-                            subtitleLabel = subLabel,
-                            subtitleValue = assetItem.type, // ข้อมูลจริงที่ API Dashboard ส่งมา
+//                            subtitleLabel = subLabel,
+//                            subtitleValue = assetItem.type, // ข้อมูลจริงที่ API Dashboard ส่งมา
                             amountLabel = amtLabel,
                             amountValue = "${assetItem.value?.let { formatAmount(it) } ?: "0"} บาท"
                         )
@@ -394,8 +394,8 @@ fun SmallCard(modifier: Modifier = Modifier, bgBrush: Brush, icon: Painter? = nu
 @Composable
 fun RealItemCard(
     title: String,
-    subtitleLabel: String,
-    subtitleValue: String,
+//    subtitleLabel: String,
+//    subtitleValue: String,
     amountLabel: String,
     amountValue: String,
 ) {
@@ -413,11 +413,11 @@ fun RealItemCard(
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
             Spacer(modifier = Modifier.height(4.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = subtitleLabel, fontSize = 14.sp, color = Color.Gray)
-                Text(text = subtitleValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
-            }
-            Spacer(modifier = Modifier.height(2.dp))
+//            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+//                Text(text = subtitleLabel, fontSize = 14.sp, color = Color.Gray)
+//                Text(text = subtitleValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
+//            }
+//            Spacer(modifier = Modifier.height(2.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(text = amountLabel, fontSize = 14.sp, color = Color.Gray)
                 Text(text = amountValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
