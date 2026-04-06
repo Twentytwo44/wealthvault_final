@@ -19,7 +19,7 @@ data class DeleteBuildingResponse(
 @Serializable
 data class DeleteBuildingData(
     @SerialName("success")
-    val success: String,
+    val success: String? = null,
 
 
 

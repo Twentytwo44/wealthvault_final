@@ -11,7 +11,7 @@ class DeleteCashApiImpl(private val ktorfit: Ktorfit) : DeleteCashApi {
     override suspend fun deleteCash(id: String): DeleteCashResponse {
         val client = ktorfit.httpClient
 
-        return client.delete("${Config.localhost_android}/ic_nav_asset/cash/$id") {
+        return client.delete("${Config.localhost_android}/asset/cash/$id/") {
             // ปกติ DELETE ไม่ต้องส่ง Body แต่ต้องแนบ Token
             // ซึ่ง HttpClient ตัวนี้มี Auth Plugin ที่เราเซ็ตไว้ใน ApiModule แล้ว
         }.body()

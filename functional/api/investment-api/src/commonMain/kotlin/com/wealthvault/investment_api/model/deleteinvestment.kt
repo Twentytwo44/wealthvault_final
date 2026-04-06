@@ -19,7 +19,7 @@ data class DeleteInvestmentResponse(
 @Serializable
 data class DeleteInvestmentData(
     @SerialName("success")
-    val success: String,
+    val success: String? = null,
 
 
 

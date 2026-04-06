@@ -1,10 +1,24 @@
 package com.wealthvault.social.ui.space
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,7 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wealthvault.social.ui.components.space.ActivityBubbleCard
-import com.wealthvault.social.ui.components.space.SpaceFloatingMenu
 import com.wealthvault.social.ui.components.space.SpaceTopBar
 
 @Composable
@@ -71,7 +84,7 @@ fun GroupSpaceScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "ต้องการแชร์ ic_nav_asset ของคุณให้ Twentytwo ในช่วงก่อนที่ Twentytwo จะเข้ากลุ่มหรือไม่",
+                            text = "ต้องการแชร์ asset ของคุณให้ Twentytwo ในช่วงก่อนที่ Twentytwo จะเข้ากลุ่มหรือไม่",
                             fontSize = 14.sp,
                             color = Color(0xFF3A2F2A),
                             fontWeight = FontWeight.Medium

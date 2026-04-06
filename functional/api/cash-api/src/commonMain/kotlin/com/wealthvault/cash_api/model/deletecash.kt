@@ -19,7 +19,7 @@ data class DeleteCashResponse(
 @Serializable
 data class DeleteCashData(
     @SerialName("success")
-    val success: String,
+    val success: String? = null,
 
 
 

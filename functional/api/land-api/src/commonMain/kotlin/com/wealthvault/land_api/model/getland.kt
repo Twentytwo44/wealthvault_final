@@ -4,8 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-
-
 @Serializable
 data class GetLandResponse(
     @SerialName("status")
@@ -22,34 +20,34 @@ data class GetLandResponse(
 data class GetLandData(
 
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String,
+    val userId: String? = null,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("deed_num")
-    val deedNum: String,
+    val deedNum: String? = null,
 
     @SerialName("area")
-    val area: Int,
+    val area: Int? = null,
 
     @SerialName("amount")
-    val amount: Int,
+    val amount: Int? = null,
 
     @SerialName("description")
-    val description: String,
+    val description: String? = null,
 
     @SerialName("location")
-    val location: LocationAll,
+    val location: LocationAll? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
 
     )
@@ -57,28 +55,28 @@ data class GetLandData(
 @Serializable
 data class LocationAll(
     @SerialName("location_id")
-    val locationId: String,
+    val locationId: String? = null,
 
     @SerialName("address")
-    val address: String,
+    val address: String? = null,
 
     @SerialName("sub_district")
-    val subDistrict: String,
+    val subDistrict: String? = null,
 
     @SerialName("district")
-    val district: String,
+    val district: String? = null,
 
     @SerialName("province")
-    val province: String,
+    val province: String? = null,
 
     @SerialName("postal_code")
-    val postalCode: String,
+    val postalCode: String? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
     )
 

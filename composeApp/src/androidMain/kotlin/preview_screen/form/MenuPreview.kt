@@ -2,10 +2,9 @@ package preview_screen.form
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
 
 @Preview(showBackground = true, name = "Preview")
 @Composable
 fun MenuScreenPreview() {
-    MenuScreen {  }
+
 }

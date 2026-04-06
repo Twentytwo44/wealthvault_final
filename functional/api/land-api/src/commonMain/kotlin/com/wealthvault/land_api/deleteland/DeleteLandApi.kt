@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.Path
 
 interface DeleteLandApi {
-    @DELETE("ic_nav_asset/land/{id}")
+    @DELETE("asset/land/{id}")
     suspend fun deleteLand(@Path("id") id: String): DeleteLandResponse
 }

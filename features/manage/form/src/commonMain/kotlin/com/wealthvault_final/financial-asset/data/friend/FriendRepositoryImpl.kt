@@ -1,0 +1,11 @@
+package com.wealthvault_final.`financial-asset`.data.friend
+
+import com.wealthvault.`user-api`.model.FriendData
+
+class FriendRepositoryImpl(
+    private val networkDataSource: FriendNetworkDataSource,
+) {
+    suspend fun getFriend(): Result<List<FriendData>> {
+        return networkDataSource.getFriend()
+    }
+}

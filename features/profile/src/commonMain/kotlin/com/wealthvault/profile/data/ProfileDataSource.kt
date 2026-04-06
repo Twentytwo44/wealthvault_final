@@ -9,6 +9,7 @@ class ProfileDataSource(
     suspend fun getUser(): Result<UserData> {
         return runCatching {
             val result = userApi.getUser()
+            print("result"+ result)
             result.data ?: throw IllegalArgumentException("User is null, Cannot create user")
         }
     }

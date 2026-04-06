@@ -19,7 +19,7 @@ data class DeleteLandResponse(
 @Serializable
 data class DeleteLandData(
     @SerialName("success")
-    val success: String,
+    val success: String? = null,
 
 
 

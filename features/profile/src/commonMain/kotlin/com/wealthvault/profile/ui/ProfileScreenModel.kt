@@ -5,7 +5,6 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.wealthvault.profile.data.ProfileRepositoryImpl
 import com.wealthvault.`user-api`.model.UserData
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ProfileScreenModel(
@@ -14,7 +13,6 @@ private val repository: ProfileRepositoryImpl
 
     // 1. สร้าง State ไว้รอรับข้อมูล (เริ่มต้นเป็น null ไปก่อน)
     private val _userState = MutableStateFlow<UserData?>(null)
-    val userState = _userState.asStateFlow()
 
     init {
         fetchUser()

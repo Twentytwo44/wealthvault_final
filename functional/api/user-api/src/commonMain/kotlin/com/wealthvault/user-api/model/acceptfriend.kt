@@ -28,7 +28,7 @@ data class AcceptFriendResponse(
 @Serializable
 data class AcceptFriendData(
     @SerialName("success")
-    val success: String
+    val success: String? = null,
 
 )
 

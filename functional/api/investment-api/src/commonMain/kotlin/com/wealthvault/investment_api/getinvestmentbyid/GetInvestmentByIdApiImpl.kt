@@ -1,7 +1,7 @@
 package com.wealthvault.investment_api.getinvestmentbyid
 
-import com.wealthvault.investment_api.model.InvestmentIdResponse
 import com.wealthvault.config.Config
+import com.wealthvault.investment_api.model.InvestmentIdResponse
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -11,7 +11,7 @@ class GetInvestmentByIdApiImpl(private val ktorfit: Ktorfit) : GetInvestmentById
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.get("${Config.localhost_android}/ic_nav_asset/invest/${id}") {
+        return client.get("${Config.localhost_android}/asset/invest/${id}") {
 
         }.body()
     }

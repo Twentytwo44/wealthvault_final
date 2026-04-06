@@ -1,8 +1,9 @@
 package com.wealthvault.investment_api.di
 
 import com.wealthvault.core.KoinConst
-import com.wealthvault.investment_api.createcash.CreateInvestmentApi
-import com.wealthvault.investment_api.createcash.CreateInvestmentApiImpl
+import com.wealthvault.investment_api.createinvestment.CreateInvestmentApi
+import com.wealthvault.investment_api.createinvestment.CreateInvestmentApiImpl
+
 import com.wealthvault.investment_api.deleteinvestment.DeleteInvestmentApi
 import com.wealthvault.investment_api.deleteinvestment.DeleteInvestmentApiImpl
 import com.wealthvault.investment_api.getinvestment.GetInvestmentApi

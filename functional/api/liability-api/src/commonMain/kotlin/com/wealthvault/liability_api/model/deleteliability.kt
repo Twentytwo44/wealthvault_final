@@ -19,7 +19,7 @@ data class DeleteLiabilityResponse(
 @Serializable
 data class DeleteLiabilityData(
     @SerialName("success")
-    val success: String,
+    val success: String? = null,
 
 
 

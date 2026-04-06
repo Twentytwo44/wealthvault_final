@@ -6,11 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BankAccountRequest(
-    @SerialName("id")
-    val id: String,
 
-    @SerialName("user_id")
-    val userId: String,
 
     @SerialName("name")
     val name: String,
@@ -25,10 +21,14 @@ data class BankAccountRequest(
     val type: String,
 
     @SerialName("amount")
-    val amount: Int,
+    val amount: Double,
 
     @SerialName("description")
-    val description: String
+    val description: String,
+
+    @SerialName("files")
+    val files:List<BankAccountFileUploadData> = emptyList(),
+
 )
 
 @Serializable
@@ -69,8 +69,12 @@ data class BankAccountData(
     @SerialName("description")
     val description: String
 
-
-
 )
 
 
+@Serializable
+data class BankAccountFileUploadData(
+    val bytes: ByteArray,
+    val mimeType: String,
+    val fileName: String
+)

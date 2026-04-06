@@ -7,6 +7,9 @@ import com.wealthvault_final.`financial-asset`.ui.stock.AssetInputForm
 @Preview(showBackground = true, name = "Preview")
 @Composable
 fun AssetFormScreenPreview() {
-    AssetInputForm()
+    AssetInputForm(
+        onBackClick = {},
+        onNextClick = {}
+    )
 }
 

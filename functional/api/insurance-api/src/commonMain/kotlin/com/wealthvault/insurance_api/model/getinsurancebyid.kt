@@ -21,43 +21,43 @@ data class InsuranceIdResponse(
 @Serializable
 data class InsuranceIdData(
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String,
+    val userId: String? = null,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("policy_number")
-    val policyNumber: String,
+    val policyNumber: String? = null,
 
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
 
     @SerialName("company_name")
-    val companyName: String,
+    val companyName: String? = null,
 
     @SerialName("coverage_period")
-    val coveragePeriod: Int,
+    val coveragePeriod: Int? = null,
 
     @SerialName("coverage_amount")
-    val coverageAmount: Int,
+    val coverageAmount: Int? = null,
 
     @SerialName("con_date")
-    val conDate: String,
+    val conDate: String? = null,
 
     @SerialName("exp_date")
-    val expDate: String,
+    val expDate: String? = null,
 
     @SerialName("description")
-    val description: String,
+    val description: String? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
 )
 

@@ -1,7 +1,7 @@
 package com.wealthvault.`user-api`.friend
 
-import com.wealthvault.`user-api`.model.FriendResponse
 import com.wealthvault.config.Config
+import com.wealthvault.`user-api`.model.FriendResponse
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -11,7 +11,7 @@ class FriendApiImpl(private val ktorfit: Ktorfit) : FriendApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.get("${Config.localhost_android}/friend") {
+        return client.get("${Config.localhost_android}friend/") {
 
         }.body()
     }

@@ -4,6 +4,6 @@ import com.wealthvault.account_api.model.BankAccountResponse
 import de.jensklingenberg.ktorfit.http.GET
 
 interface GetAccountApi {
-    @GET("ic_nav_asset/account")
+    @GET("asset/account/")
     suspend fun getAccount(): BankAccountResponse
 }

@@ -7,87 +7,94 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BuildingRequest(
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("area")
-    val area: Int,
+    val area: Double? = null,
 
     @SerialName("amount")
-    val amount: Int,
+    val amount: Double? = null,
 
     @SerialName("description")
-    val description: String,
+    val description: String? = null,
 
     @SerialName("location.address")
-    val locationAddress: String,
+    val locationAddress: String? = null,
 
     @SerialName("location.sub_district")
-    val locationSubDistrict: String,
+    val locationSubDistrict: String? = null,
 
     @SerialName("location.district")
-    val locationDistrict: String,
+    val locationDistrict: String? = null,
 
     @SerialName("location.province")
-    val locationProvince: String,
+    val locationProvince: String? = null,
 
     @SerialName("location.postal_code")
-    val locationPostalCode: String,
+    val locationPostalCode: String? = null,
 
     @SerialName("ins_ids")
-    val insIds: String,
+    val insIds: List<InsReferenceData> = emptyList(),
 
-)
+    @SerialName("files")
+    val files: List<BuildingFileUploadData> = emptyList(),
+
+    @SerialName("reference_ids")
+    val referenceIds:  List<BuildingReferenceData> = emptyList(),
+
+
+    )
 
 @Serializable
 data class BuildingResponse(
     @SerialName("status")
-    val status: String? = null,
+    val status: String?  = null,
 
     @SerialName("data")
     val data: BuildingData? = null,
 
     @SerialName("error")
-    val error: String? = null
+    val error: String?  = null
 )
 
 @Serializable
 data class BuildingData(
 
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String,
+    val userId: String? = null,
 
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("area")
-    val area: Int,
+    val area: Int? = null,
 
     @SerialName("amount")
-    val amount: Int,
+    val amount: Int? = null,
 
     @SerialName("description")
-    val description: String,
+    val description: String? = null,
 
     @SerialName("location")
-    val location: LocationData,
+    val location: LocationData? = null,
 
     @SerialName("ins")
-    val ins: List<InsData>,
+    val ins: List<InsData> = emptyList(),
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
 
 )
@@ -95,39 +102,59 @@ data class BuildingData(
 @Serializable
 data class LocationData(
     @SerialName("location_id")
-    val locationId: String,
+    val locationId: String? = null,
 
     @SerialName("address")
-    val address: String,
+    val address: String? = null,
 
     @SerialName("sub_district")
-    val subDistrict: String,
+    val subDistrict: String? = null,
 
     @SerialName("district")
-    val district: String,
+    val district: String? = null,
 
     @SerialName("province")
-    val province: String,
+    val province: String? = null,
 
     @SerialName("postal_code")
-    val postalCode: String,
+    val postalCode: String? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
 )
 
 @Serializable
 data class InsData(
     @SerialName("ins_id")
-    val insId: String,
+    val insId: String? = null,
 
     @SerialName("ins_name")
-    val insName: String,
+    val insName: String? = null,
 
 )
 
 
+@Serializable
+data class BuildingFileUploadData(
+    val bytes: ByteArray,
+    val mimeType: String? = null,
+    val fileName: String? = null
+)
+
+@Serializable
+data class BuildingReferenceData(
+    val areaName: String? = null,
+    val areaId: String? = null
+)
+
+
+
+@Serializable
+data class InsReferenceData(
+    val insName: String? = null,
+    val insId: String? = null
+)

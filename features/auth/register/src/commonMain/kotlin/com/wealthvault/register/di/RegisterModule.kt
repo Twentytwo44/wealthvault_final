@@ -1,3 +1,5 @@
+package com.wealthvault.register.di
+
 
 import com.wealthvault.register.data.RegisterDataSource
 import com.wealthvault.register.data.RegisterRepositoryImpl

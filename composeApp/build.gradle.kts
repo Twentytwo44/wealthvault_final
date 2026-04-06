@@ -85,11 +85,12 @@ kotlin {
             api(project(":functional:api:line-auth"))
             implementation(project(":functional:notification"))
             implementation(project(":functional:api:setup-api"))
+            implementation(project(":functional:api:group-api"))
+            implementation(project(":functional:api:insurance-api"))
 
 
 
-            implementation(project(":features:manage:financial-asset"))
-            implementation(project(":features:manage:financial-obligations"))
+            implementation(project(":features:manage:form"))
 
             implementation(project(":features:auth:register"))
             implementation(project(":features:dashboard"))

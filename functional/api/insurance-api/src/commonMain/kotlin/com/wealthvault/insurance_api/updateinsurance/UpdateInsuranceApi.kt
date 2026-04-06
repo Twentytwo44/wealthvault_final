@@ -7,6 +7,6 @@ import de.jensklingenberg.ktorfit.http.PATCH
 import de.jensklingenberg.ktorfit.http.Path
 
 interface UpdateInsuranceApi {
-    @PATCH("ic_nav_asset/insurance/{id}")
+    @PATCH("asset/insurance/{id}/")
     suspend fun updateInsurance(@Path("id") id: String, @Body request: InsuranceRequest): InsuranceResponse
 }

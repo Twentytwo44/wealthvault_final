@@ -4,7 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.navigator.Navigator
-import com.wealthvault.profile.ui.ProfileScreen
+import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
 
 @Composable
 @Preview
@@ -15,6 +15,6 @@ fun App() {
 //        Navigator(MainAppDestination())
 //        Navigator(LoginScreen(navigateToScreen = MainAppDestination()))
 //        Navigator(LoginScreen(navigateToScreen = MainAppDestination()))
-        Navigator(ProfileScreen())
+        Navigator(MenuScreen())
     }
 }

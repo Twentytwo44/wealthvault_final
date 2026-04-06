@@ -22,37 +22,37 @@ data class GetBuildingResponse(
 data class GetBuildingData(
 
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String,
+    val userId: String? = null,
 
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("area")
-    val area: Int,
+    val area: Int? =  null,
 
     @SerialName("amount")
-    val amount: Int,
+    val amount: Int? = null,
 
     @SerialName("description")
-    val description: String,
+    val description: String? = null,
 
     @SerialName("location")
-    val location: LocationDataAll,
+    val location: LocationDataAll? = null,
 
     @SerialName("ins")
-    val ins: List<InsDataAll>,
+    val ins: List<InsDataAll> = emptyList(),
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
 
     )
@@ -60,38 +60,38 @@ data class GetBuildingData(
 @Serializable
 data class LocationDataAll(
     @SerialName("location_id")
-    val locationId: String,
+    val locationId: String? = null,
 
     @SerialName("address")
-    val address: String,
+    val address: String? = null,
 
     @SerialName("sub_district")
-    val subDistrict: String,
+    val subDistrict: String? = null,
 
     @SerialName("district")
-    val district: String,
+    val district: String? = null,
 
     @SerialName("province")
-    val province: String,
+    val province: String? = null,
 
     @SerialName("postal_code")
-    val postalCode: String,
+    val postalCode: String? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
     )
 
 @Serializable
 data class InsDataAll(
     @SerialName("ins_id")
-    val insId: String,
+    val insId: String? = null,
 
     @SerialName("ins_name")
-    val insName: String,
+    val insName: String? = null,
     )
 
 
