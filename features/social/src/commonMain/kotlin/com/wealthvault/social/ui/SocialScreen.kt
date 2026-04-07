@@ -19,6 +19,7 @@ fun SocialScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .background(Color(0xFFFFF8F3)) // สีพื้นหลัง (LightBg)
             .padding(horizontal = 20.dp)
             .padding(top = 20.dp)

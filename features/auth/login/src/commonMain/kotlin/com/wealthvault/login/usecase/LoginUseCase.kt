@@ -24,8 +24,8 @@ class LoginUseCase(
 
         result.onSuccess {
             println("✅ [LoginUseCase] Login Success")
-//            println("TokenStore:, ${tokenStore.accessToken}")
-//            println("RefreshStore:, ${tokenStore.refreshToken}")
+            println("TokenStore:, ${tokenStore.accessToken}")
+            println("RefreshStore:, ${tokenStore.refreshToken}")
 
 
             emit(FlowResult.Continue(true))
@@ -35,6 +35,18 @@ class LoginUseCase(
         }
     }.catch { cause ->
         println("🚨 [LoginUseCase] Unexpected Error: ${cause.message}")
+
+        // 🌟 เปลี่ยนมาเช็คแค่ message ง่ายๆ พอครับ
+        val errorMsg = cause.message?.lowercase() ?: ""
+        if (errorMsg.contains("refused") || errorMsg.contains("failed to connect") || errorMsg.contains("timeout")) {
+
+            println("============================================================")
+            println("🕵️‍♂️ จับตาดู! Ktor พยายามยิง API ขัดข้อง!")
+            // พิมพ์แค่ StackTrace พอ จะได้ไม่ติดเรื่อง io.ktor...
+            cause.printStackTrace()
+            println("============================================================")
+        }
+
         emit(FlowResult.Failure(cause))
     }
 }

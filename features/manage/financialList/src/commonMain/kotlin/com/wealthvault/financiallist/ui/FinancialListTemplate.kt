@@ -14,9 +14,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_search
+import com.wealthvault.core.generated.resources.ic_nav_asset
+import com.wealthvault.core.theme.LightAsset
+import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightSoftWhite
+import org.jetbrains.compose.resources.painterResource
 
-// TODO: เปลี่ยนสีพื้นหลังให้ตรงกับ Theme ของคุณ (เช่น LightBg)
-val LightBg = Color(0xFFFFF8F3)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +39,7 @@ fun FinancialListTemplate(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .padding(horizontal = 20.dp)
             .padding(top = 20.dp)
     ) {
@@ -67,14 +74,19 @@ fun FinancialListTemplate(
                 Text(text = "ค้นหาด้วยชื่อ", color = Color.Gray, fontSize = 14.sp)
             },
             leadingIcon = {
-//                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = Color.Gray)
+                Icon(
+                    painter = painterResource(Res.drawable.ic_common_search),
+                    contentDescription = null,
+                    tint = LightBorder,
+                    modifier = Modifier.padding(horizontal = 4.dp).size(28.dp)
+                )
             },
             shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedBorderColor = themeColor, // ขอบตอนกดเป็นสีตามโหมด
-                unfocusedBorderColor = Color(0xFFE5E5E5), // ขอบตอนปกติสีเทาอ่อน
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = LightSoftWhite,
+                unfocusedContainerColor = LightSoftWhite,
+                focusedIndicatorColor = LightBorder,
+                unfocusedIndicatorColor = LightBorder
             ),
             singleLine = true
         )

@@ -5,6 +5,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
@@ -26,10 +27,22 @@ object DashboardTab : Tab {
 
     @Composable
     override fun Content() {
-        // 🌟 ดึง Root Navigator ออกมาตรงๆ เพื่อให้หน้าแจ้งเตือนทับ Navbar มิด
+        // ดึง Navigator ทั้ง 2 ตัวมาเตรียมไว้
         val rootNavigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+        val tabNavigator = LocalTabNavigator.current
 
-        Navigator(DashboardScreenDestination(rootNavigator))
+        Navigator(
+            DashboardScreen(
+                onNotiClick = {
+                    // 🌟 เอาคำสั่งเด้งหน้า Noti เดิมกลับมาใส่ตรงนี้ครับ!
+                    rootNavigator.push(NotificationDestination(rootNavigator))
+                },
+                onAddClick = {
+                    // 🚀 สั่งสลับ Tab ไปหน้าทรัพย์สิน
+                    tabNavigator.current = AssetTab
+                }
+            )
+        )
     }
 }
 
@@ -37,17 +50,7 @@ object DashboardTab : Tab {
 // 🚀 โซนสร้าง Screen (เส้นทาง)
 // ==========================================
 
-class DashboardScreenDestination(private val rootNavigator: Navigator) : Screen {
-    @Composable
-    override fun Content() {
-        DashboardScreen(
-            onNotiClick = {
-                // กดกระดิ่งปุ๊บ -> สไลด์หน้าแจ้งเตือนขึ้นมา!
-                rootNavigator.push(NotificationDestination(rootNavigator))
-            }
-        )
-    }
-}
+// 🗑️ ลบ DashboardScreenDestination ทิ้งไปได้เลยครับ เพราะ DashboardScreen ทำหน้าที่แทนแล้ว
 
 class NotificationDestination(private val rootNavigator: Navigator) : Screen {
     @Composable

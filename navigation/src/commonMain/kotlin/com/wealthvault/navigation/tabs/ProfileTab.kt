@@ -1,6 +1,5 @@
 package com.wealthvault.navigation.tabs
 
-// Import หน้า UI ทั้ง 4 หน้าของเรา
 import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -29,11 +28,15 @@ object ProfileTab : Tab {
 
     @Composable
     override fun Content() {
-        // 🌟 ดึง Root Navigator ออกมาตรงๆ แบบชัวร์ 100% (ไม่ต้อง while loop แล้ว)
         val rootNavigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
-        // 🌟 เรียกหน้า ProfileScreenDestination แล้วโยนทางด่วนให้มันเอาไปใช้!
-        Navigator(ProfileScreenDestination(rootNavigator))
+        Navigator(
+            ProfileScreen(
+                onSettingsClick = {
+                    rootNavigator.push(MenuProfileSettingDestination(rootNavigator))
+                }
+            )
+        )
     }
 }
 
@@ -41,53 +44,39 @@ object ProfileTab : Tab {
 // 🚀 โซนสร้าง Screen (เส้นทาง) สำหรับให้ Voyager รู้จัก
 // ==========================================
 
-// 🌟 1. หน้าเริ่มต้น
-class ProfileScreenDestination(private val rootNavigator: Navigator) : Screen {
-    @Composable
-    override fun Content() {
-        ProfileScreen(
-//            onSettingsClick = {
-//                // กดแล้วผลักหน้ารวมเมนูขึ้นมาผ่าน Root Navigator (ทับ Navbar มิดแน่นอน)
-//                rootNavigator.push(MenuProfileSettingDestination(rootNavigator))
-//            }
-        )
-    }
-}
-
-// 🌟 2. หน้ารวมเมนู
 class MenuProfileSettingDestination(private val rootNavigator: Navigator) : Screen {
     @Composable
     override fun Content() {
         MenuProfileSettingScreen(
-            onBackClick = { rootNavigator.pop() }, // กดย้อนกลับ
+            onBackClick = { rootNavigator.pop() },
             onEditProfileClick = { rootNavigator.push(EditProfileDestination(rootNavigator)) },
             onShareSettingClick = { rootNavigator.push(ShareSettingDestination(rootNavigator)) },
             onLogoutClick = {
-                // 🌟 สั่งให้มันรู้ว่า ถ้าล็อคอินรอบหน้าเสร็จ ให้กลับมาที่ MainAppDestination นะ!
                 rootNavigator.replaceAll(LoginScreen(navigateToScreen = MainAppDestination()))
             }
         )
     }
 }
 
-// 🌟 3. หน้าแก้โปรไฟล์
 class EditProfileDestination(private val rootNavigator: Navigator) : Screen {
     @Composable
     override fun Content() {
         EditProfileScreen(
             onBackClick = { rootNavigator.pop() },
-            onSaveClick = { rootNavigator.pop() }
-        )
+            onSaveClick = {
+                rootNavigator.pop()
+                rootNavigator.pop()
+            }
+        ).Content() // 🌟 อันนี้ถูกต้องแล้ว
     }
 }
 
-// 🌟 4. หน้าตั้งค่าแชร์ทรัพย์สิน
 class ShareSettingDestination(private val rootNavigator: Navigator) : Screen {
     @Composable
     override fun Content() {
         ShareSettingScreen(
             onBackClick = { rootNavigator.pop() },
-            onSaveClick = { rootNavigator.pop() }
-        )
+//            onSaveClick = { rootNavigator.pop() }
+        ).Content() // 🌟 เติม .Content() ตรงนี้! ไม่งั้นมันจะไม่ยอมวาด UI ครับ
     }
 }

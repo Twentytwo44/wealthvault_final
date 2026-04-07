@@ -9,6 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun ProfileScreenPreview() {
     ProfileScreen(
+        onSettingsClick = {},
     )
 }
 
@@ -40,6 +41,6 @@ fun EditProfileScreenPreview() {
 fun ShareSettingScreenPreview() {
     ShareSettingScreen(
         onBackClick = {},
-        onSaveClick = {}
+//        onSaveClick = {}
     )
 }

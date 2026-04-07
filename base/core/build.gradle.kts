@@ -1,11 +1,11 @@
 plugins {
     alias(libs.plugins.wealth.vault.lib)
     alias(libs.plugins.wealth.vault.compose)
-//    alias(libs.plugins.composeCompiler)
-//    alias(libs.plugins.composeMultiplatform)
-//    alias(libs.plugins.wealth.vault.test)
+    // ...
 
-
+    // 🌟 เปลี่ยนเป็นบรรทัดนี้ครับ
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
+    // หมายเหตุ: version ให้ดูจากไฟล์ libs.versions.toml หรือใช้เลขเดียวกับ kotlin version หลักในโปรเจกต์ครับ
 }
 
 kotlin {

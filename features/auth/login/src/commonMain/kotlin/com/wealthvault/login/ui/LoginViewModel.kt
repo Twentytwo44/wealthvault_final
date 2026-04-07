@@ -65,7 +65,30 @@ class LoginScreenModel(
                     is FlowResult.Failure -> {
                         println("❌ [LoginScreenModel] UseCase Error: ${flowResult.cause?.message}")
                         isLoading = false
-                        errorMessage = flowResult.cause?.message ?: "การเข้าสู่ระบบล้มเหลว"
+
+                        // 🌟 ดึงข้อความ Error ดิบๆ จาก Backend
+                        val rawError = flowResult.cause?.message ?: ""
+
+                        // 🌟 ดักจับข้อความ Error และแปลงเป็นภาษาไทยที่ User เข้าใจง่าย
+                        errorMessage = when {
+                            rawError.contains("invalid email or password", ignoreCase = true) -> {
+                                "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+                            }
+                            rawError.contains("user not found", ignoreCase = true) -> {
+                                "ไม่พบบัญชีผู้ใช้งานนี้ในระบบ"
+                            }
+                            rawError.contains("network", ignoreCase = true) || rawError.contains("timeout", ignoreCase = true) -> {
+                                "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง"
+                            }
+                            rawError.isNotBlank() -> {
+                                // ถ้ามี Error แปลกๆ นอกเหนือจากที่ดักไว้ ให้โชว์ออกมาเผื่อไว้ดีบัก
+                                "การเข้าสู่ระบบล้มเหลว: $rawError"
+                            }
+                            else -> {
+                                // ถ้าไม่มี Message อะไรมาเลย
+                                "การเข้าสู่ระบบล้มเหลว กรุณาลองใหม่อีกครั้ง"
+                            }
+                        }
                     }
 
                     // 4. จัดการเมื่อจบการทำงาน (ไม่ว่าจะสำเร็จหรือพัง)

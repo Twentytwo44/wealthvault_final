@@ -1,5 +1,6 @@
 package com.wealthvault.profile.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -13,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_next // 🌟 ดึงไอคอนลูกศรชี้ขวามาใช้
+import com.wealthvault.core.theme.LightBg
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -27,8 +29,10 @@ fun MenuProfileSettingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(LightBg)
             .statusBarsPadding()
             .padding(horizontal = 24.dp, vertical = 24.dp)
+
     ) {
         // --- Header ---
         Row(

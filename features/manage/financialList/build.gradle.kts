@@ -31,8 +31,16 @@ kotlin {
                 implementation(project(":base:core"))
 
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
-
-
+                implementation(project(":functional:api:account-api"))
+                implementation(project(":functional:api:cash-api"))
+                implementation(project(":functional:api:investment-api"))
+                implementation(project(":functional:api:insurance-api"))
+                implementation(project(":functional:api:building-api"))
+                implementation(project(":functional:api:land-api"))
+                implementation(project(":functional:api:liability-api"))
+                implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
+                implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
+                implementation("org.jetbrains.kotlinx:atomicfu:0.23.2")
             }
         }
         commonTest {

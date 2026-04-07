@@ -1,6 +1,6 @@
 package com.wealthvault.building_api.getbuildingbyid
 
-import com.wealthvault.building_api.model.BuildingIdResponse
+import com.wealthvault.building_api.model.BuildingIdResponse // 🌟 ใช้ Model ของ GET by ID
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 

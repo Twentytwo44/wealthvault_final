@@ -22,6 +22,6 @@ object RegisterModule {
 
         factory { RegisterUseCase(get(), get()) }
 
-        factory { RegisterScreenModel() }
+        factory { RegisterScreenModel(get()) }
     }
 }

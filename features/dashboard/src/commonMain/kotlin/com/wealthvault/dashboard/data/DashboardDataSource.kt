@@ -1,16 +1,14 @@
 package com.wealthvault.dashboard.data
 
-import com.wealthvault.`auth-api`.model.RegisterRequest
-import com.wealthvault.`auth-api`.register.RegisterApi
+import com.wealthvault.`user-api`.dashboard.DashboardApi
+import com.wealthvault.`user-api`.model.DashboardDataResponse
 
 class DashboardDataSource(
-    private val registerApi: RegisterApi,
+    private val dashboardApi: DashboardApi, // 🌟 แก้เป็นตัวเล็ก (camelCase)
 ) {
-    suspend fun register(request: RegisterRequest): Result<String> {
+    suspend fun fetchDashboardData(): Result<DashboardDataResponse> {
         return runCatching {
-            val result = registerApi.register(request)
-            result.data?.userId ?: throw IllegalArgumentException("User is null, Cannot create user")
+            dashboardApi.getDashboard()
         }
     }
 }
-

@@ -1,6 +1,6 @@
 package com.wealthvault.land_api.deleteland
 
-import com.wealthvault.land_api.model.DeleteLandResponse
+import com.wealthvault.core.model.DeleteBaseResponse
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.Path
 

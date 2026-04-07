@@ -21,7 +21,6 @@ import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-
 object ApiModule {
     val allModules = module {
         single<Json>(named(KoinConst.KotlinSerialization.AUTH)) {
@@ -38,8 +37,16 @@ object ApiModule {
 
         single<Ktorfit>(named(KoinConst.Ktor.AUTH)) {
             val httpClient: HttpClient = get(named(KoinConst.HttpClient.AUTH))
+            val safeBaseUrl = if (Config.localhost_android.endsWith("/")) {
+                Config.localhost_android
+            } else {
+                "${Config.localhost_android}/"
+            }
+            println("============================================================")
+            println("🚨 [Koin_Setup] Ktorfit (AUTH) กำลังจะใช้ Base URL: $safeBaseUrl")
+            println("============================================================")
             Ktorfit.Builder()
-                .baseUrl(Config.localhost_android)
+                .baseUrl(safeBaseUrl)
                 .httpClient(httpClient)
                 .build()
         }
@@ -49,7 +56,6 @@ object ApiModule {
         single<ForgetApi> { ForgetApiImpl(get(named(KoinConst.Ktor.AUTH))) }
         single<ResetApi> { ResetApiImpl(get(named(KoinConst.Ktor.AUTH))) }
         single<OTPApi> { OTPApiImpl(get(named(KoinConst.Ktor.AUTH))) }
-
     }
 
 

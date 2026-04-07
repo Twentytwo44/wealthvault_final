@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen // 🌟 อย่าลืม Import ตัวนี้นะครับ
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.WealthVaultTheme
 import com.wealthvault.navigation.components.BottomBarItem
 import com.wealthvault.navigation.tabs.*
@@ -33,20 +34,19 @@ class MainAppDestination : Screen {
 fun MainScreen() {
     TabNavigator(DashboardTab) { navigator ->
         Scaffold(
-            containerColor = Color(0xFFFFF8F3), // สีพื้นหลังแอป
+            containerColor = LightBg,
             bottomBar = {
-                // 🌟 กล่อง Navbar ขอบมนด้านบน + มีเงา
                 Surface(
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                     color = Color.White,
-                    shadowElevation = 8.dp, // ความเข้มของเงา
+                    shadowElevation = 8.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 12.dp, horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceAround, // จัดระยะห่างให้เท่ากัน
+                        horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         BottomBarItem(DebtTab, navigator)
@@ -58,7 +58,13 @@ fun MainScreen() {
                 }
             }
         ) { padding ->
-            Box(Modifier.padding(padding)) {
+            // 🌟 แก้ตรงนี้: เราจะใช้แค่ padding.calculateBottomPadding()
+            // เพื่อไม่ให้เนื้อหาโดน BottomBar บัง แต่ปล่อยด้านบน (Top) ให้ทะลุไปถึง StatusBar
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(bottom = padding.calculateBottomPadding())
+            ) {
                 WealthVaultTheme {
                     CurrentTab()
                 }
