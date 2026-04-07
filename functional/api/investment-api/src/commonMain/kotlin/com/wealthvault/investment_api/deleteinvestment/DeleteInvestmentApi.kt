@@ -1,6 +1,6 @@
 package com.wealthvault.investment_api.deleteinvestment
 
-import com.wealthvault.core.model.DeleteBaseResponse
+import com.wealthvault.investment_api.model.DeleteInvestmentResponse
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.Path
 

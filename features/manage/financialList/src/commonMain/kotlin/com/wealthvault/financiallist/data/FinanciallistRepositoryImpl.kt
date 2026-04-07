@@ -2,17 +2,17 @@ package com.wealthvault.financiallist.data
 
 import com.wealthvault.account_api.model.AccountData
 import com.wealthvault.account_api.model.BankAccountData
-import com.wealthvault.cash_api.model.GetCashData
-import com.wealthvault.investment_api.model.GetInvestmentData
-import com.wealthvault.insurance_api.model.GetInsuranceData
-import com.wealthvault.building_api.model.GetBuildingData
-import com.wealthvault.land_api.model.GetLandData
-import com.wealthvault.liability_api.model.GetLiabilityData
 import com.wealthvault.building_api.model.BuildingIdData
+import com.wealthvault.building_api.model.GetBuildingData
 import com.wealthvault.cash_api.model.CashIdData
+import com.wealthvault.cash_api.model.GetCashData
+import com.wealthvault.insurance_api.model.GetInsuranceData
 import com.wealthvault.insurance_api.model.InsuranceIdData
+import com.wealthvault.investment_api.model.GetInvestmentData
 import com.wealthvault.investment_api.model.InvestmentIdData
+import com.wealthvault.land_api.model.GetLandData
 import com.wealthvault.land_api.model.LandIdData
+import com.wealthvault.liability_api.model.GetLiabilityData
 import com.wealthvault.liability_api.model.LiabilityIdData
 
 class FinanciallistRepositoryImpl(
@@ -49,7 +49,7 @@ class FinanciallistRepositoryImpl(
         dataSource.getAccount().data ?: emptyList()
     }
     suspend fun getCashes(): Result<List<GetCashData>> = runCatching {
-        dataSource.getCash().data ?: emptyList()
+        dataSource.getCash().data
     }
     suspend fun getInvestments(): Result<List<GetInvestmentData>> = runCatching {
         dataSource.getInvestment().data ?: emptyList()

@@ -1,6 +1,6 @@
 package com.wealthvault.liability_api.deleteliability
 
-import com.wealthvault.core.model.DeleteBaseResponse
+import com.wealthvault.liability_api.model.DeleteLiabilityResponse
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.Path
 

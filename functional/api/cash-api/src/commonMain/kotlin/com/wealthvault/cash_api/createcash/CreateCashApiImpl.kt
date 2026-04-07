@@ -25,7 +25,7 @@ class CreateCashApiImpl(private val ktorfit: Ktorfit) : CreateCashApi {
 
                         append("name", request.name ?: "")
                         append("description", request.description?: "")
-                        append("amount", request.ammount.toString()?: "")
+                        append("amount", request.ammount.toString())
 
                         request.files.forEach { fileData ->
                             append("files", fileData.bytes ?: byteArrayOf(), Headers.build {

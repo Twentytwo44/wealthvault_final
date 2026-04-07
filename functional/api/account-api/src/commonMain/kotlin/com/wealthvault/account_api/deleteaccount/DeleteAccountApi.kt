@@ -1,6 +1,6 @@
 package com.wealthvault.account_api.deleteaccount
 
-import com.wealthvault.core.model.DeleteBaseResponse
+import com.wealthvault.account_api.model.DeleteAccountResponse
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.Path
 

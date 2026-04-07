@@ -22,12 +22,12 @@ class UpdateAccountApiImpl(private val ktorfit: Ktorfit) : UpdateAccountApi {
                 MultiPartFormDataContent(
                     formData {
 
-                        append("name", request.name ?: "")
-                        append("description", request.description ?: "")
-                        append("bank_name", request.bankName ?: "")
-                        append("bank_account", request.bankAccount ?: "")
-                        append("type", request.type ?: "")
-                        append("amount", request.amount ?: 0.0)
+                        append("name", request.name)
+                        append("description", request.description)
+                        append("bank_name", request.bankName)
+                        append("bank_account", request.bankAccount)
+                        append("type", request.type)
+                        append("amount", request.amount)
 
 
                         request.files.forEach { fileData ->

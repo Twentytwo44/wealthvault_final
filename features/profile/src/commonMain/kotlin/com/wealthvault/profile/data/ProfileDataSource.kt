@@ -1,15 +1,15 @@
 package com.wealthvault.profile.data
 
-import com.wealthvault.`user-api`.closefriend.CloseFriendApi // 🌟 1. Import API
+import com.wealthvault.`user-api`.closefriend.CloseFriendApi
 import com.wealthvault.`user-api`.friend.FriendApi
-import com.wealthvault.`user-api`.model.CloseFriendData    // 🌟 2. Import Model
+import com.wealthvault.`user-api`.model.CloseFriendData
 import com.wealthvault.`user-api`.model.FriendData
-import com.wealthvault.`user-api`.model.UserData
-import com.wealthvault.`user-api`.user.UserApi
 import com.wealthvault.`user-api`.model.UpdateUserData
 import com.wealthvault.`user-api`.model.UpdateUserDataRequest
+import com.wealthvault.`user-api`.model.UserData
 import com.wealthvault.`user-api`.updateclosefriend.UpdateCloseFriendApi
 import com.wealthvault.`user-api`.updateuser.UpdateUserApi
+import com.wealthvault.`user-api`.user.UserApi
 
 class ProfileDataSource(
     private val userApi: UserApi,
@@ -59,7 +59,7 @@ class ProfileDataSource(
     suspend fun getAllFriends(): Result<List<FriendData>> {
         return runCatching {
             val result = friendApi.getFriend()
-            result.data?.status ?: emptyList() // ดึงจากก้อน data.friend (ตาม Model FriendArray)
+            result.data?.friend ?: emptyList() // ดึงจากก้อน data.friend (ตาม Model FriendArray)
         }
     }
 }

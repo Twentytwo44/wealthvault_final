@@ -28,7 +28,7 @@ class CreateInsuranceApiImpl(private val ktorfit: Ktorfit) : CreateInsuranceApi 
                         append("type", request.type?: "")
                         append("company_name", request.companyName?: "")
                         append("coverage_period", request.coveragePeriod?: "")
-                        append("coverage_amount", request.coverageAmount.toString() ?: "")
+                        append("coverage_amount", request.coverageAmount.toString())
                         append("con_date", request.conDate?: "")
                         append("exp_date", request.expDate?: "")
 

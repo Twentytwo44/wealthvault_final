@@ -37,16 +37,16 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
 import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.ic_profile_setting
 import com.wealthvault.core.generated.resources.ic_nav_profile
+import com.wealthvault.core.generated.resources.ic_profile_setting
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.profile.ui.components.ClosePersonItem
+import com.wealthvault.`user-api`.model.CloseFriendData
 import com.wealthvault.`user-api`.model.UserData
-import com.wealthvault.`user-api`.model.CloseFriendData // 🌟 นำเข้า Model เพื่อนสนิท
 import org.jetbrains.compose.resources.painterResource
 
 class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
@@ -131,7 +131,7 @@ fun ProfileContent(
                             .background(LightBg),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (userData.profile.isNotEmpty()) {
+                        if (userData.profile.toString().isNotEmpty()) {
                             AsyncImage(
                                 model = userData.profile,
                                 contentDescription = "Profile Picture",
@@ -152,7 +152,7 @@ fun ProfileContent(
 
                     Column {
                         Text(
-                            text = userData.username,
+                            text = userData.username ?: "",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF3A2F2A)
@@ -168,7 +168,7 @@ fun ProfileContent(
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = userData.email,
+                            text = userData.email ?: "",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
@@ -202,7 +202,7 @@ fun ProfileContent(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = if (userData?.sharedEnabled == true) "${userData.sharedAge} ปี" else "ไม่ได้เปิดใช้งาน",
+                    text = if (userData?.shareEnabled == true) "${userData.sharedAge} ปี" else "ไม่ได้เปิดใช้งาน",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -242,7 +242,7 @@ fun ProfileContent(
             items(closeFriends) { friend ->
                 ClosePersonItem(
                     friend = friend,
-                    isEnabled = userData?.sharedEnabled ?: false
+                    isEnabled = userData?.shareEnabled ?: false
                 )
             }
         }

@@ -6,6 +6,7 @@ import com.wealthvault.profile.data.ProfileRepositoryImpl
 import com.wealthvault.`user-api`.model.CloseFriendData
 import com.wealthvault.`user-api`.model.UserData
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ProfileScreenModel(
@@ -13,6 +14,9 @@ class ProfileScreenModel(
 ) : ScreenModel {
 
     private val _userState = MutableStateFlow<UserData?>(null)
+    val userState = _userState.asStateFlow()
+
+
 
     private val _closeFriends = MutableStateFlow<List<CloseFriendData>>(emptyList())
     val closeFriends = _closeFriends.asStateFlow()

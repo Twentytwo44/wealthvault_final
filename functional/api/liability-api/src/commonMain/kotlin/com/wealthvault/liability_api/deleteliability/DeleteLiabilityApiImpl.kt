@@ -9,7 +9,7 @@ import io.ktor.client.request.delete
 
 class DeleteLiabilityApiImpl(private val ktorfit: Ktorfit) : DeleteLiabilityApi {
 
-    override suspend fun deleteLiability(id: String): DeleteBaseResponse {
+    override suspend fun deleteLiability(id: String): DeleteLiabilityResponse {
         val client = ktorfit.httpClient
 
         return client.delete("${Config.localhost_android}lia/$id/") {

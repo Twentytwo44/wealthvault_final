@@ -8,7 +8,7 @@ import io.ktor.client.request.delete
 
 class DeleteInsuranceApiImpl(private val ktorfit: Ktorfit) : DeleteInsuranceApi {
 
-    override suspend fun deleteInsurance(id: String): DeleteBaseResponse {
+    override suspend fun deleteInsurance(id: String): DeleteInsuranceResponse {
         val client = ktorfit.httpClient
 
         return client.delete("${Config.localhost_android}asset/insurance/$id/") {
