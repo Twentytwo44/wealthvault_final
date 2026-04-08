@@ -26,7 +26,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,23 +69,22 @@ class RegisterScreen : Screen {
             username = screenModel.username,
             onUsernameChange = {
                 screenModel.username = it
-                screenModel.errorMessage = null
+                screenModel.errorMessage = null // 🌟 ล้าง Error เมื่อพิมพ์
             },
             password = screenModel.password,
             onPasswordChange = {
                 screenModel.password = it
-                screenModel.errorMessage = null
+                screenModel.errorMessage = null // 🌟 ล้าง Error เมื่อพิมพ์
             },
             confirmPassword = screenModel.confirmPassword,
             onConfirmPasswordChange = {
                 screenModel.confirmPassword = it
-                screenModel.errorMessage = null // 🌟 ล้าง Error เมื่อเริ่มพิมพ์ช่องยืนยันด้วย
+                screenModel.errorMessage = null // 🌟 ล้าง Error เมื่อพิมพ์
             },
             isLoading = screenModel.isLoading,
             errorMessage = screenModel.errorMessage,
-            onErrorDismiss = { screenModel.errorMessage = null }, // 🌟 เพิ่มสำหรับปิด Popup
             onRegisterClick = {
-                if (!screenModel.isLoading) { // ป้องกันการกดซ้ำ
+                if (!screenModel.isLoading) {
                     screenModel.onRegisterClick {
                         navigator.pop()
                     }
@@ -109,39 +107,12 @@ fun RegisterContent(
     onLoginClick: () -> Unit,
     isLoading: Boolean,
     errorMessage: String?,
-    onErrorDismiss: () -> Unit, // 🌟 เพิ่มมารับคำสั่งปิด Popup
     onRegisterClick: () -> Unit,
     onGoogleClick: () -> Unit
 ) {
     WavyBackground {
-        // 🌟 1. แสดง Popup แจ้งเตือนเมื่อสมัครไม่สำเร็จ
-        if (errorMessage != null) {
-            androidx.compose.material3.AlertDialog(
-                onDismissRequest = onErrorDismiss,
-                containerColor = LightSurface,
-                title = {
-                    Text(
-                        text = "สมัครสมาชิกไม่สำเร็จ",
-                        color = RedErr,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                text = {
-                    Text(
-                        text = errorMessage,
-                        color = Color(0xFF3A2F2A),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = onErrorDismiss) {
-                        Text("ตกลง", color = LightPrimary, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                    }
-                }
-            )
-        }
 
-        // 🌟 2. Loading Dialog (วงกลมหมุนๆ)
+        // 🌟 1. Loading Dialog (วงกลมหมุนๆ) ยังคงเก็บไว้
         if (isLoading) {
             Dialog(onDismissRequest = {}) {
                 Box(
@@ -176,13 +147,31 @@ fun RegisterContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // --- 1. ช่องอีเมล ---
+                // --- 1. ช่องอีเมล ---
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "อีเมล",
-                        color = LightPrimary,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
-                    )
+                    // 🌟 ใช้ Row เพื่อจัดคำว่า "อีเมล" ไว้ซ้าย และ "Error" ไว้ขวา
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Text(
+                            text = "อีเมล",
+                            color = LightPrimary,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        // 🌟 ข้อความ Error จะมาโผล่ตรงนี้ในบรรทัดเดียวกัน
+                        if (errorMessage != null) {
+                            Text(
+                                text = errorMessage,
+                                color = RedErr,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
+
                     OutlinedTextField(
                         value = username,
                         onValueChange = onUsernameChange,
@@ -197,6 +186,8 @@ fun RegisterContent(
                             unfocusedContainerColor = LightSurface,
                             focusedBorderColor = LightPrimary,
                             unfocusedBorderColor = LightBorder,
+                            errorBorderColor = RedErr, // สีกรอบตอน Error
+                            errorLeadingIconColor = RedErr // สีไอคอนตอน Error
                         )
                     )
                 }
@@ -273,12 +264,14 @@ fun RegisterContent(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                // 🌟 โซนแสดง Error Message ก่อนถึงปุ่มสร้างบัญชี
+                Spacer(modifier = Modifier.height(34.dp))
+
 
                 // --- 4. ปุ่มสร้างบัญชี ---
                 Button(
                     onClick = onRegisterClick,
-                    enabled = !isLoading, // 🌟 ปิดปุ่มตอนโหลดเพื่อป้องกันการกดซ้ำ
+                    enabled = !isLoading,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(percent = 30),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
