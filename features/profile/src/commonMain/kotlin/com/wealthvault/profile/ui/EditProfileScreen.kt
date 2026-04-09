@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
 import com.preat.peekaboo.image.picker.SelectionMode
@@ -316,7 +317,6 @@ fun ProfileTextField(
             readOnly = readOnly,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
                 .border(
                     width = 1.dp,
                     color = LightBorder.copy(alpha = 0.5f), // ปรับให้จางลงนิดนึงจะสวยมากครับ
@@ -338,7 +338,7 @@ fun ProfileTextField(
                 unfocusedTextColor = Color(0xFF3A2F2A)
             ),
             trailingIcon = trailingIcon,
-            singleLine = true
+            singleLine = true,
         )
     }
 }

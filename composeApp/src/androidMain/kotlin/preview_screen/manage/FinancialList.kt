@@ -8,7 +8,7 @@ import com.wealthvault.financiallist.ui.debt.DebtScreen
 @Preview(showBackground = true, name = "1. Asset Screen (ทรัพย์สิน)")
 @Composable
 fun AssetScreenPreview() {
-    AssetScreen(onAddClick = {})
+    AssetScreen()
 }
 
 @Preview(showBackground = true, name = "2. Debt Screen (หนี้สิน)")

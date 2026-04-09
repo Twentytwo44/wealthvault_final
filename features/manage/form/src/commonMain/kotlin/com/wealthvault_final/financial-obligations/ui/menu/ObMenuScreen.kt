@@ -48,6 +48,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.bookbank
 import com.wealthvault.core.generated.resources.cashgold
+import com.wealthvault.core.generated.resources.debtpic
+import com.wealthvault.core.generated.resources.expensepic
 import com.wealthvault_final.`financial-obligations`.ui.expense.ExpenseFormScreen
 import com.wealthvault_final.`financial-obligations`.ui.liability.LiabilityFormScreen
 import org.jetbrains.compose.resources.DrawableResource
@@ -68,8 +70,8 @@ data class AssetCategory(
 )
 
 val assetCategories = listOf(
-    AssetCategory(1, "หนี้สิน", Res.drawable.bookbank, Color(0xFFE3F2FD), Color(0xFF2196F3)),
-    AssetCategory(2, "ค่าใช้จ่ายต่อเนื่อง",Res.drawable.cashgold,Color(0xFFF1F8E9), Color(0xFF8BC34A)),
+    AssetCategory(1, "หนี้สิน", Res.drawable.debtpic, Color(0xFFE3F2FD), Color(0xFF2196F3)),
+    AssetCategory(2, "ค่าใช้จ่ายต่อเนื่อง",Res.drawable.expensepic,Color(0xFFF1F8E9), Color(0xFF8BC34A)),
 
 )
 

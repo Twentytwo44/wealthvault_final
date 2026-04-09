@@ -63,10 +63,20 @@ import com.wealthvault.investment_api.model.InvestmentIdData
 import com.wealthvault.land_api.model.GetLandData
 import com.wealthvault.land_api.model.LandIdData
 import org.jetbrains.compose.resources.painterResource
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
 
-class AssetScreen(private val onAddClick: () -> Unit) : Screen {
+class AssetScreen : Screen {
+
     @Composable
     override fun Content() {
+        // 🌟 1. ดึง Navigator ของ Tab ปัจจุบัน
+//        val navigator = LocalNavigator.currentOrThrow
+
+        // 🌟 2. ดึง Navigator ตัวแม่สุด (Root) ที่อยู่หน้า App() มาใช้
+//        val rootNavigator = navigator.parent
+
         val screenModel = getScreenModel<AssetScreenModel>()
 
         LaunchedEffect(Unit) {
@@ -82,7 +92,10 @@ class AssetScreen(private val onAddClick: () -> Unit) : Screen {
 
         AssetContent(
             screenModel = screenModel,
-            onAddClick = onAddClick,
+            // 🌟 3. สั่ง rootNavigator ให้ดัน MenuScreen ขึ้นมาทับทุกอย่าง!
+            onAddClick = {
+//                rootNavigator?.push(MenuScreen())
+            },
             accounts = accounts,
             cashes = cashes,
             investments = investments,
