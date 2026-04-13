@@ -3,6 +3,7 @@ package com.wealthvault.wealthvault_final.di
 import com.wealthvault.account_api.di.AccountApiModule
 import com.wealthvault.`auth-api`.di.ApiModule
 import com.wealthvault.building_api.di.BuildingApiModule
+import com.wealthvault.cash_api.di.CashApiModule
 import com.wealthvault.data_store.di.DataStoreModule
 import com.wealthvault.google_auth.di.GoogleAuthMainModule
 import com.wealthvault.group_api.di.GroupApiModule
@@ -30,14 +31,14 @@ object AllModules {
         add(GlobalApiModule.allModules)
         // function:api
         add(GoogleAuthMainModule.allModules)
-//        add(AccountApiModule.allModules)
+        add(AccountApiModule.allModules)
         add(ApiModule.allModules)
-//        add(BuildingApiModule.allModules)
-//        add(CashApiModule.allModules)
-//        add(InsuranceApiModule.allModules)
+        add(BuildingApiModule.allModules)
+        add(CashApiModule.allModules)
+        add(InsuranceApiModule.allModules)
         add(InvestmentApiModule.allModules)
-//        add(LandApiModule.allModules)
-//        add(LiabilityApiModule.allModules)
+        add(LandApiModule.allModules)
+        add(LiabilityApiModule.allModules)
         add(UserApiModule.allModules)
 
         add(LoginModule.allModules)

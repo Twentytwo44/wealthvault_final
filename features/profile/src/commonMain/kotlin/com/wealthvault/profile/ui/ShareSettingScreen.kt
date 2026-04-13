@@ -136,7 +136,7 @@ fun ShareSettingContent(
 
     LaunchedEffect(userData) {
         if (userData != null) {
-            isSharingEnabled = userData.shareEnabled
+            isSharingEnabled = userData.shareEnabled?: false
             sharedAgeText = userData.sharedAge.toString()
         }
     }

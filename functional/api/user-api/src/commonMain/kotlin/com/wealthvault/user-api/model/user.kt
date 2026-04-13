@@ -45,8 +45,8 @@ data class UserData(
     @SerialName("shared_age")
     val sharedAge: Int? = null,
 
-    @SerialName("share_enabled")
-    val shareEnabled: Boolean,
+    @SerialName("shared_enabled")
+    val shareEnabled: Boolean? = false,
 
     @SerialName("created_at")
     val createdAt: String? = null,
