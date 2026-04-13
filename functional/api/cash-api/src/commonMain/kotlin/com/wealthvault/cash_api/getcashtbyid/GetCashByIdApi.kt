@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 
 interface GetCashByIdApi {
-    @GET("asset/cash/{id}")
+    @GET("asset/cash/{id}/")
     suspend fun getCashById(@Path("id") id: String): CashIdResponse
 }

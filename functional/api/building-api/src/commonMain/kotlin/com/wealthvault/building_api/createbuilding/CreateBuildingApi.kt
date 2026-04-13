@@ -7,6 +7,6 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 
 interface CreateBuildingApi {
-    @POST("ic_nav_asset/building")
+    @POST("asset/building/")
     suspend fun create(@Body request: BuildingRequest): BuildingResponse
 }

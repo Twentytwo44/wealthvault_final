@@ -22,40 +22,40 @@ data class GetLiabilityResponse(
 data class GetLiabilityData(
 
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String,
+    val userId: String? = null,
 
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("creditor")
-    val creditor: String,
+    val creditor: String? = null,
 
     @SerialName("principal")
-    val principal: Int,
+    val principal: Int? = null,
 
     @SerialName("interest_rate")
-    val interestRate: Double,
+    val interestRate: Double? = null,
 
     @SerialName("description")
-    val description: String,
+    val description: String? = null,
 
     @SerialName("started_at")
-    val startedAt: String,
+    val startedAt: String? = null,
 
     @SerialName("ended_at")
-    val endedAt: String,
+    val endedAt: String? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
 
     )

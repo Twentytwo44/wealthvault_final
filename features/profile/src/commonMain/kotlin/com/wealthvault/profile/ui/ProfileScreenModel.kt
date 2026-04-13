@@ -16,6 +16,8 @@ class ProfileScreenModel(
     private val _userState = MutableStateFlow<UserData?>(null)
     val userState = _userState.asStateFlow()
 
+
+
     private val _closeFriends = MutableStateFlow<List<CloseFriendData>>(emptyList())
     val closeFriends = _closeFriends.asStateFlow()
 

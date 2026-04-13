@@ -22,6 +22,6 @@ object AssetTab : Tab {
     @Composable
     override fun Content() {
         // 🌟 2. ครอบด้วย Navigator
-        Navigator(AssetScreen(onAddClick = {}))
+        Navigator(AssetScreen())
     }
 }

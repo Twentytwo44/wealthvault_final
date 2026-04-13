@@ -1,5 +1,7 @@
 package com.wealthvault.profile.ui
 
+// 🌟 Import สีจาก Theme ของคุณ Champ
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,36 +13,30 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush // 🌟 นำเข้า Brush สำหรับ Gradient
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
+import com.preat.peekaboo.image.picker.SelectionMode
+import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_calendar
 import com.wealthvault.core.generated.resources.ic_common_pen
-import com.wealthvault.core.utils.getScreenModel
-import org.jetbrains.compose.resources.painterResource
-
-import com.preat.peekaboo.image.picker.SelectionMode
-import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
-
-// 🌟 Import สีจาก Theme ของคุณ Champ
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.core.theme.WvBgGradientStart
-import com.wealthvault.core.theme.WvBgGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.utils.formatThaiDate
-
+import com.wealthvault.core.utils.getScreenModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 
 class EditProfileScreen(
     private val onBackClick: () -> Unit,
@@ -115,12 +111,12 @@ fun EditProfileContent(
 
     LaunchedEffect(userData) {
         userData?.let { user ->
-            username = user.username
-            firstName = user.firstName
-            lastName = user.lastName
-            val rawApiDate = user.birthday.take(10)
+            username = user.username ?: ""
+            firstName = user.firstName ?: ""
+            lastName = user.lastName ?: ""
+            val rawApiDate = user.birthday?.take(10)
             birthDate = formatThaiDate(rawApiDate)
-            phone = user.phoneNumber
+            phone = user.phoneNumber ?: ""
             screenModel.setProfileImageByteArray(null)
         }
     }
@@ -321,7 +317,6 @@ fun ProfileTextField(
             readOnly = readOnly,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
                 .border(
                     width = 1.dp,
                     color = LightBorder.copy(alpha = 0.5f), // ปรับให้จางลงนิดนึงจะสวยมากครับ
@@ -343,7 +338,7 @@ fun ProfileTextField(
                 unfocusedTextColor = Color(0xFF3A2F2A)
             ),
             trailingIcon = trailingIcon,
-            singleLine = true
+            singleLine = true,
         )
     }
 }

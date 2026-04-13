@@ -12,7 +12,7 @@ data class GetCashResponse(
     val status: String? = null,
 
     @SerialName("data")
-    val data: List<GetCashData>? = null,
+    val data: List<GetCashData> = emptyList(),
 
     @SerialName("error")
     val error: String? = null
@@ -22,25 +22,25 @@ data class GetCashResponse(
 data class GetCashData(
 
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String,
+    val userId: String? = null,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("amount")
-    val amount: Int,
+    val ammount: Int? = null,
 
     @SerialName("description")
-    val description: String,
+    val description: String? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
 
 )

@@ -2,9 +2,15 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
-}
 
+
+
+
+
+}
 kotlin {
 
     // Target declarations - add or remove as needed below. These define

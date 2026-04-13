@@ -1,8 +1,8 @@
-
-import com.wealthvault.login.ui.LoginScreenModel
+package com.wealthvault.login.di
 import com.wealthvault.data_store.TokenStore
 import com.wealthvault.login.data.AuthNetworkDataSource
 import com.wealthvault.login.data.AuthRepositoryImpl
+import com.wealthvault.login.ui.LoginScreenModel
 import com.wealthvault.login.usecase.LoginUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO

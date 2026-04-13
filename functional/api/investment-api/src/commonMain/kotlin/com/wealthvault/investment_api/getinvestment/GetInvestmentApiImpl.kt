@@ -1,7 +1,7 @@
 package com.wealthvault.investment_api.getinvestment
 
-import com.wealthvault.investment_api.model.GetInvestmentResponse
 import com.wealthvault.config.Config
+import com.wealthvault.investment_api.model.GetInvestmentResponse
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.call.body
 import io.ktor.client.request.get

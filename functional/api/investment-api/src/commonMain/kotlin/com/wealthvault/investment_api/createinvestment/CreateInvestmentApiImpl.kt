@@ -1,20 +1,56 @@
-package com.wealthvault.investment_api.createcash
+package com.wealthvault.investment_api.createinvestment
 
 
+import com.wealthvault.config.Config
 import com.wealthvault.investment_api.model.InvestmentRequest
 import com.wealthvault.investment_api.model.InvestmentResponse
-import com.wealthvault.config.Config
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 
 class CreateInvestmentApiImpl(private val ktorfit: Ktorfit) : CreateInvestmentApi {
     override suspend fun create(request: InvestmentRequest): InvestmentResponse {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
+        println("reqeust check: ${request}")
+        return client.post("${Config.localhost_android}asset/invest/") {
 
-        return client.post("${Config.localhost_android}/ic_nav_asset/invest") {
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        // ส่งข้อมูลที่เป็น Text/String จาก request object
 
+                        append("name", request.name ?: "")
+                        append("description", request.description ?: "")
+                        append("symbol", request.symbol ?: "")
+                        append("broker_name", request.brokerName ?: "")
+                        append("quantity", request.quantity ?: "")
+                        append("cost_per_price", request.costPerPrice ?: "")
+
+                        append("type", request.type ?: "")
+                        append("amount", request.quantity ?: "")
+
+                        request.files.forEach { fileData ->
+                            append("files", fileData.bytes ?: byteArrayOf(), Headers.build {
+
+                                // ✅ 1. ใส่ ContentType ตามชนิดไฟล์จริงๆ (image/jpeg หรือ application/pdf)
+                                append(HttpHeaders.ContentType, fileData.mimeType?: "")
+
+                                // ✅ 2. ใส่ชื่อไฟล์ที่มีนามสกุลถูกต้อง (.jpg หรือ .pdf)
+                                append(HttpHeaders.ContentDisposition, "filename=\"${fileData.fileName}\"")
+
+                            })
+                        }
+
+
+                    }
+                )
+            )
         }.body()
     }
 }

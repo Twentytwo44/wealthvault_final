@@ -9,6 +9,9 @@ import io.ktor.client.request.get
 class GetBuildingByIdApiImpl(private val ktorfit: Ktorfit) : GetBuildingByIdApi {
     override suspend fun getBuildingById(id: String): BuildingIdResponse {
         val client = ktorfit.httpClient
-        return client.get("${Config.localhost_android}asset/building/${id}").body()
+
+        return client.get("${Config.localhost_android}asset/building/${id}/") {
+
+        }.body()
     }
 }

@@ -31,7 +31,14 @@ class HttpClientBuilder(
     // เพิ่ม withAuth: Boolean เพื่อแยกการใช้งาน
     fun build(withAuth: Boolean = true): HttpClient {
         return HttpClient(CIO) {
-            install(ContentNegotiation) { json(json) }
+            val safeJson = Json {
+                ignoreUnknownKeys = true // ข้ามฟิลด์ที่ไม่รู้จัก (เช่น amount)
+                coerceInputValues = true // แปลงค่าว่างเป็น default
+                isLenient = true         // ยอมรับ JSON ที่หน้าตาแปลกๆ ได้
+            }
+            install(ContentNegotiation) {
+                json(safeJson)
+            }
 
             // ติดตั้ง Auth Plugin เฉพาะเมื่อต้องการ (Global) และมี TokenStore
             if (withAuth && tokenStore != null) {
@@ -44,7 +51,7 @@ class HttpClientBuilder(
 //                            if (authData.accessToken.isNullOrBlank()) return@loadTokens null
 
                             BearerTokens(
-                                accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5heW1lZ2FkcmFnb25AZ21haWwuY29tIiwiZXhwIjoxNzc3NzI0NjgwLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjUzOGJmMWJmLTQ4NGYtNDdhYS04MDI4LTYzNDU0YjU4ZDI2OSJ9.zsgihxqRWJSEPXKwscT5Mwp_E4-9DXhZw4V1lE9bwjk",
+                                accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5heW1lZ2FkcmFnb25AZ21haWwuY29tIiwiZXhwIjoxNzc4NjY4MzUyLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjUzOGJmMWJmLTQ4NGYtNDdhYS04MDI4LTYzNDU0YjU4ZDI2OSJ9.Ap4m2PU9BqWytCS79JvwhYGuTpCIw5Y_PSEH4Cnpjmw",
                                 refreshToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzc0NTE5NzY2LCJ0eXBlIjoicmVmcmVzaCIsInVzZXJfaWQiOiIyNjhlYzIyZi0yOGQ5LTQzZmYtYjg5OS04ODdiMDI1MzZiN2QifQ.cVdNvwpAOMb8aHWcXr5IK1cyS1u9E4l_GyFJAidjSqI"
 
                             )
@@ -58,12 +65,12 @@ class HttpClientBuilder(
                             }
 
                             try {
-                                val response: RefreshResponse = client.post("${Config.localhost_android}auth/refresh") {
+                                val response: RefreshResponse = client.post("${Config.localhost_android}auth/refresh/") {
                                     setBody(RefreshRequest(oldTokens?.refreshToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzczOTE1ODY2LCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjI2OGVjMjJmLTI4ZDktNDNmZi1iODk5LTg4N2IwMjUzNmI3ZCJ9.C4rtORbHvK1hEFdKrNWNMUcARdohw_mbpLkay7FtaFM"))
                                     contentType(ContentType.Application.Json)
                                 }.body()
 
-                                val newAccess = response.data?.accessToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwidHlwZSI6ImFjY2VzcyIsInVzZXJfaWQiOiIyNjhlYzIyZi0yOGQ5LTQzZmYtYjg5OS04ODdiMDI1MzZiN2QifQ.jYNvi8QcWjCHit2SYMdi6bMWbb96l8_NAgt4OBVx11I"
+                                val newAccess = response.data?.accessToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzc0OTgwMzc1LCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjI2OGVjMjJmLTI4ZDktNDNmZi1iODk5LTg4N2IwMjUzNmI3ZCJ9.aRVlwjBWNnYLcFejyn_hHsTioh1-VkmBERn5lcRHtYQ"
                                 val newRefresh = response.data?.refreshToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJ1c2VyX2lkIjoiMjY4ZWMyMmYtMjhkOS00M2ZmLWI4OTktODg3YjAyNTM2YjdkIn0.P8QeHyBn1HAzjP9_WJFBVkwVDYhBiT8DabaJKjAs1y0"
 
                                 if (newAccess.isNotBlank()) {

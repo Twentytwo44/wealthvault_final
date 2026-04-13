@@ -22,37 +22,37 @@ data class GetInvestmentResponse(
 data class GetInvestmentData(
 
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String,
+    val userId: String? = null,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("symbol")
-    val symbol: String,
+    val symbol: String? = null,
 
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
 
     @SerialName("broker_name")
-    val brokerName: String,
+    val brokerName: String? = null,
 
     @SerialName("quantity")
-    val quantity: Double,
+    val quantity: Double? = null,
 
     @SerialName("cost_per_price")
-    val costPerPrice: Double,
+    val costPerPrice: Double? = null,
 
     @SerialName("description")
-    val description: String,
+    val description: String? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
+    val updatedAt: String? = null,
 
 
 

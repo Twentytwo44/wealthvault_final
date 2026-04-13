@@ -4,10 +4,22 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +36,6 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.`user-api`.model.CloseFriendData
 import com.wealthvault.`user-api`.model.FriendData
 import org.jetbrains.compose.resources.painterResource
 
@@ -58,7 +69,7 @@ fun SelectPersonItem(
                     .background(LightBg),
                 contentAlignment = Alignment.Center
             ) {
-                if (friend.profile.isNotEmpty()) {
+                if (friend.profile.toString().isNotEmpty()) {
                     AsyncImage(
                         model = friend.profile,
                         contentDescription = "Profile Picture",
@@ -80,15 +91,15 @@ fun SelectPersonItem(
             // --- 2. ข้อมูลชื่อและอีเมล ---
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = friend.username.ifEmpty { "ไม่ระบุชื่อ" },
+                    text = friend.username.toString().ifEmpty { "ไม่ระบุชื่อ" },
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF3A2F2A)
                 )
-                if (friend.email.isNotEmpty()) {
+                if (friend.email.toString().isNotEmpty()) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = friend.email,
+                        text = friend.email ?: "",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF9E918B)
                     )

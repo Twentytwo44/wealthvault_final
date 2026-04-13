@@ -13,13 +13,13 @@ data class BuildingIdResponse(
 
 @Serializable
 data class BuildingIdData(
-    @SerialName("id") val id: String,
-    @SerialName("user_id") val userId: String,
-    @SerialName("type") val type: String,
-    @SerialName("name") val name: String,
-    @SerialName("area") val area: Double, // 🌟 เปลี่ยนเป็น Double
-    @SerialName("amount") val amount: Double, // 🌟 เปลี่ยนเป็น Double
-    @SerialName("description") val description: String,
+    @SerialName("id") val id: String? = null,
+    @SerialName("user_id") val userId: String? = null,
+    @SerialName("type") val type: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("area") val area: Double? = null, // 🌟 เปลี่ยนเป็น Double
+    @SerialName("amount") val amount: Double? = null, // 🌟 เปลี่ยนเป็น Double
+    @SerialName("description") val description: String? = null,
     @SerialName("location") val location: LocationDataById? = null,
     @SerialName("ins") val ins: List<InsDataById>? = emptyList(),
     @SerialName("reference_ids") val referenceIds: List<String>? = emptyList(), // 🌟 ตาม Postman

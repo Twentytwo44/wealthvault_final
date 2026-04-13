@@ -9,7 +9,9 @@ import io.ktor.client.request.get
 class GetAccountByIdApiImpl(private val ktorfit: Ktorfit) : GetAccountByIdApi {
     override suspend fun getAccountById(id: String): BankAccountResponse {
         val client = ktorfit.httpClient
-        // 🌟 เอา / ออกหน้า asset เพื่อกันมันซ้อนกับ localhost_android ที่มี / ปิดท้าย
-        return client.get("${Config.localhost_android}asset/account/${id}").body()
+
+        return client.get("${Config.localhost_android}asset/account/${id}/") {
+
+        }.body()
     }
 }

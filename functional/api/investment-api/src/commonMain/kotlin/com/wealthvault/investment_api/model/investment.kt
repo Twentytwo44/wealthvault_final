@@ -6,33 +6,15 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class InvestmentRequest(
-    @SerialName("id")
-    val id: String,
-
-    @SerialName("user_id")
-    val userId: String,
-
-    @SerialName("name")
-    val name: String,
-
-    @SerialName("symbol")
-    val symbol: String,
-
-    @SerialName("type")
-    val type: String,
-
-    @SerialName("broker_name")
-    val brokerName: String,
-
-    @SerialName("quantity")
-    val quantity: Double,
-
-    @SerialName("cost_per_price")
-    val costPerPrice: Double,
-
-    @SerialName("description")
-    val description: String,
-
+    val name: String? = null,
+    val symbol: String? = null,
+    val type: String? = null,
+    val brokerName: String? = null,
+    val quantity: String? = null,
+    val costPerPrice: String? = null,
+    val description: String? = null,
+    // เปลี่ยนจาก String เป็น ByteArray
+    val files: List<FileUploadData> = emptyList(),
 )
 
 @Serializable
@@ -50,40 +32,61 @@ data class InvestmentResponse(
 @Serializable
 data class InvestmentData(
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String,
+    val userId: String? = null,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("symbol")
-    val symbol: String,
+    val symbol: String? = null,
 
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
 
     @SerialName("broker_name")
-    val brokerName: String,
+    val brokerName: String? = null,
 
     @SerialName("quantity")
-    val quantity: Double,
+    val quantity: Double? = 0.0,
 
     @SerialName("cost_per_price")
-    val costPerPrice: Double,
+    val costPerPrice: Double? = 0.0,
 
     @SerialName("description")
-    val description: String,
+    val description: String? = null,
+
+    @SerialName("files")
+    val files: List<FileArray>? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
-
+    val updatedAt: String? = null,
 
 
 )
 
+@Serializable
+data class FileArray(
+    @SerialName("id")
+    val id: String? = null,
 
+    @SerialName("url")
+    val url: String? = null,
+
+    @SerialName("file_type")
+    val fileType: String? = null,
+
+)
+
+
+@Serializable
+data class FileUploadData(
+    val bytes: ByteArray? = null,
+    val mimeType: String? = null,
+    val fileName: String? = null,
+)

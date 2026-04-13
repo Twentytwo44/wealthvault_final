@@ -7,6 +7,6 @@ import de.jensklingenberg.ktorfit.http.PATCH
 import de.jensklingenberg.ktorfit.http.Path
 
 interface UpdateLandApi {
-    @PATCH("ic_nav_asset/land/{id}")
+    @PATCH("asset/land/{id}/")
     suspend fun updateLand(@Path("id") id: String, @Body request: LandRequest): LandResponse
 }

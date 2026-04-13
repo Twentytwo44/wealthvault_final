@@ -1,54 +1,57 @@
 package com.wealthvault.financiallist.ui.debt
 
+// 🌟 Import เพิ่มเติมสำหรับปุ่มเพิ่มรายการ
+
+// 🌟 Import Data Class
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.ic_nav_debt
-import com.wealthvault.core.theme.LightDebt
-import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.financiallist.ui.FinancialListTemplate
-import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
-import com.wealthvault.financiallist.ui.component.RealItemCard
-import com.wealthvault.financiallist.ui.component.DetailDialog // 🌟 Import Dialog
-import com.wealthvault.financiallist.ui.component.DetailRow    // 🌟 Import Row
-import org.jetbrains.compose.resources.painterResource
-
-// 🌟 Import เพิ่มเติมสำหรับปุ่มเพิ่มรายการ
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Surface
-import androidx.compose.foundation.clickable
-import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.core.generated.resources.ic_common_plus
-
-// 🌟 Import Data Class
-import com.wealthvault.liability_api.model.GetLiabilityData
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.window.Dialog
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import cafe.adriel.voyager.core.screen.Screen
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_plus
+import com.wealthvault.core.generated.resources.ic_nav_debt
+import com.wealthvault.core.theme.LightDebt
+import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
+import com.wealthvault.core.utils.getScreenModel
+import com.wealthvault.financiallist.ui.FinancialListTemplate
 import com.wealthvault.financiallist.ui.component.ConfirmDeleteDialog
-import com.wealthvault.financiallist.ui.component.DetailImageRow // 🌟 นำเข้าโชว์รูปภาพ
+import com.wealthvault.financiallist.ui.component.DetailDialog
+import com.wealthvault.financiallist.ui.component.DetailImageRow
+import com.wealthvault.financiallist.ui.component.DetailRow
+import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
+import com.wealthvault.financiallist.ui.component.RealItemCard
+import com.wealthvault.liability_api.model.GetLiabilityData
 import com.wealthvault.liability_api.model.LiabilityIdData
-import kotlinx.atomicfu.TraceBase.None.append
-import kotlin.math.roundToLong
+import org.jetbrains.compose.resources.painterResource
 
 class DebtScreen(private val onAddClick: () -> Unit) : Screen {
     @Composable
@@ -83,8 +86,8 @@ fun DebtContent(
     // 🌟 เปลี่ยนมาเก็บแค่ ID แบบหน้า Asset
     var selectedLiabilityId by remember { mutableStateOf<String?>(null) }
 
-    val filteredExpenses = expenses.filter { it.name.contains(searchQuery, ignoreCase = true) }
-    val filteredLoans = loans.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    val filteredExpenses = expenses.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
+    val filteredLoans = loans.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
 
     // 🌟 1. ใช้ Box ครอบทั้งหน้าเพื่อวางปุ่มลอย
     Box(modifier = Modifier.fillMaxSize()) {
@@ -111,9 +114,9 @@ fun DebtContent(
                         ExpandableCategoryCard(title = "หนี้สิน", itemCount = filteredLoans.size, themeColor = "debt", initiallyExpanded = true) {
                             filteredLoans.forEach { loan ->
                                 RealItemCard(
-                                    title = loan.name,
-                                    subtitleLabel = "เจ้าหนี้", subtitleValue = loan.creditor,
-                                    amountLabel = "ยอดหนี้", amountValue = "${formatAmount(loan.principal)} บาท",
+                                    title = loan.name ?: "",
+                                    subtitleLabel = "เจ้าหนี้", subtitleValue = loan.creditor ?: "",
+                                    amountLabel = "ยอดหนี้", amountValue = "${formatAmount(loan.principal  ?: 0.0)} บาท",
                                     onClick = { selectedLiabilityId = loan.id }
                                 )
                             }
@@ -127,9 +130,9 @@ fun DebtContent(
                         ExpandableCategoryCard(title = "รายจ่ายระยะยาว", itemCount = filteredExpenses.size, themeColor = "debt", initiallyExpanded = true) {
                             filteredExpenses.forEach { exp ->
                                 RealItemCard(
-                                    title = exp.name,
-                                    subtitleLabel = "เจ้าหนี้", subtitleValue = exp.creditor,
-                                    amountLabel = "ยอดหนี้", amountValue = "${formatAmount(exp.principal)} บาท",
+                                    title = exp.name ?: "",
+                                    subtitleLabel = "เจ้าหนี้", subtitleValue = exp.creditor ?: "",
+                                    amountLabel = "ยอดหนี้", amountValue = "${formatAmount(exp.principal ?: 0.0)} บาท",
                                     onClick = { selectedLiabilityId = exp.id }
                                 )
                             }

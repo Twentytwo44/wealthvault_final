@@ -8,6 +8,6 @@ import de.jensklingenberg.ktorfit.http.PATCH
 import de.jensklingenberg.ktorfit.http.Path
 
 interface UpdateBuildingApi {
-    @PATCH("ic_nav_asset/building/{id}")
+    @PATCH("asset/building/{id}/")
     suspend fun updateBuilding(@Path("id") id: String, @Body request: BuildingRequest): BuildingResponse
 }

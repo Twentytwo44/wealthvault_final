@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 
 interface GetInsuranceByIdApi {
-    @GET("asset/insurance/{id}")
+    @GET("asset/insurance/{id}/")
     suspend fun getInsuranceById(@Path("id") id: String): InsuranceIdResponse
 }

@@ -1,9 +1,9 @@
 package com.wealthvault.account_api.getaccount
 
-import com.wealthvault.account_api.model.AccountResponse // 🌟 นำเข้าตัวใหม่
+import com.wealthvault.account_api.model.AccountResponse
 import de.jensklingenberg.ktorfit.http.GET
 
 interface GetAccountApi {
-    @GET("asset/account")
-    suspend fun getAccount(): AccountResponse // 🌟 เปลี่ยนเป็น AccountResponse
+    @GET("asset/account/")
+    suspend fun getAccount(): AccountResponse
 }

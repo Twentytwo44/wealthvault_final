@@ -7,6 +7,6 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 
 interface CreateLiabilityApi {
-    @POST("ic_nav_asset/lia")
+    @POST("asset/lia/")
     suspend fun create(@Body request: LiabilityRequest): LiabilityResponse
 }

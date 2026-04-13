@@ -31,42 +31,39 @@ data class UpdateUserDataResponse(
 @Serializable
 data class UpdateUserData(
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
 
     @SerialName("username")
-    val username: String,
+    val username: String? = null,
 
     @SerialName("email")
-    val email: String,
+    val email: String? = null,
 
     @SerialName("first_name")
-    val firstName: String,
+    val firstName: String? = null,
 
     @SerialName("last_name")
-    val lastName: String,
+    val lastName: String? = null,
 
     @SerialName("phone_number")
-    val phoneNumber: String,
+    val phoneNumber: String? = null,
 
     @SerialName("profile")
-    val profile: String,
+    val profile: String? = null,
 
     @SerialName("birthday")
-    val birthday: String,
+    val birthday: String? = null,
 
     @SerialName("shared_age")
-    val sharedAge: Int,
+    val sharedAge: Int? = null,
 
-    @SerialName("shared_enabled")
-    val sharedEnabled: Boolean,
+    @SerialName("share_enabled")
+    val shareEnabled: Boolean? = null,
 
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String,
-
-    @SerialName("is_close")
-    val isClose: Boolean? = null,
+    val updatedAt: String? = null,
 
 )

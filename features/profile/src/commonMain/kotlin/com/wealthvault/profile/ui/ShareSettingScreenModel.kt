@@ -59,14 +59,14 @@ class ShareSettingScreenModel(
         val currentUser = _userState.value ?: return
         _isSaving.value = true
 
-        val formattedBirthday = currentUser.birthday.take(10)
+        val formattedBirthday = currentUser.birthday?.take(10)
 
         val request = UpdateUserDataRequest(
-            username = currentUser.username,
-            firstName = currentUser.firstName,
-            lastName = currentUser.lastName,
-            birthday = formattedBirthday,
-            phoneNumber = currentUser.phoneNumber,
+            username = currentUser.username ?: "",
+            firstName = currentUser.firstName ?: "",
+            lastName = currentUser.lastName ?: "",
+            birthday = formattedBirthday ?: "",
+            phoneNumber = currentUser.phoneNumber ?: "",
             sharedEnabled = sharedEnabled,
             sharedAge = sharedAge
         )
@@ -76,7 +76,7 @@ class ShareSettingScreenModel(
                 println("✅ อัปเดตการตั้งค่าการแชร์สำเร็จ! Enabled=$sharedEnabled, Age=$sharedAge")
                 // อัปเดต State ในเครื่องด้วยค่าที่ส่งไปล่าสุด
                 _userState.value = currentUser.copy(
-                    sharedEnabled = sharedEnabled,
+                    shareEnabled = sharedEnabled,
                     sharedAge = sharedAge
                 )
             }.onFailure { error ->

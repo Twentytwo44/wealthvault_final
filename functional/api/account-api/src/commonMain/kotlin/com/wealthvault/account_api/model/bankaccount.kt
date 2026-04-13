@@ -7,14 +7,29 @@ import kotlinx.serialization.Serializable
 // ตัว Request สำหรับ Create/Update ปล่อยไว้เหมือนเดิมได้ (ถ้าเพื่อนยังใช้แบบนี้)
 @Serializable
 data class BankAccountRequest(
-    @SerialName("id") val id: String,
-    @SerialName("user_id") val userId: String,
-    @SerialName("name") val name: String,
-    @SerialName("bank_name") val bankName: String,
-    @SerialName("bank_account") val bankAccount: String,
-    @SerialName("type") val type: String,
-    @SerialName("amount") val amount: Int,
-    @SerialName("description") val description: String
+
+
+    @SerialName("name")
+    val name: String,
+
+    @SerialName("bank_name")
+    val bankName: String,
+
+    @SerialName("bank_account")
+    val bankAccount: String,
+
+    @SerialName("type")
+    val type: String,
+
+    @SerialName("amount")
+    val amount: Double,
+
+    @SerialName("description")
+    val description: String,
+
+    @SerialName("files")
+    val files:List<BankAccountFileUploadData> = emptyList(),
+
 )
 
 // ตัวรับ Response (เพิ่ม Files และเปลี่ยน amount)
@@ -49,3 +64,11 @@ data class FileData(
     @SerialName("url") override val url: String = "", // 🌟 ใส่ override หน้า val
     @SerialName("file_type") override val fileType: String = ""
 ) : HasImageUrl // 🌟 ตบเข้า Interface
+
+
+@Serializable
+data class BankAccountFileUploadData(
+    val bytes: ByteArray,
+    val mimeType: String,
+    val fileName: String
+)

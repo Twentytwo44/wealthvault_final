@@ -1,7 +1,7 @@
 package com.wealthvault.investment_api.getinvestmentbyid
 
-import com.wealthvault.investment_api.model.InvestmentIdResponse
 import com.wealthvault.config.Config
+import com.wealthvault.investment_api.model.InvestmentIdResponse
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.call.body
 import io.ktor.client.request.get

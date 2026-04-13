@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 
 interface GetBuildingByIdApi {
-    @GET("asset/building/{id}") // 🌟 เปลี่ยน path ให้ถูกต้อง
+    @GET("asset/building/{id}/")
     suspend fun getBuildingById(@Path("id") id: String): BuildingIdResponse
 }

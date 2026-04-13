@@ -5,24 +5,58 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BuildingRequest(
-    @SerialName("type") val type: String,
-    @SerialName("name") val name: String,
-    @SerialName("area") val area: Double, // 🌟 เป็น Double
-    @SerialName("amount") val amount: Double, // 🌟 เป็น Double
-    @SerialName("description") val description: String,
-    @SerialName("location.address") val locationAddress: String,
-    @SerialName("location.sub_district") val locationSubDistrict: String,
-    @SerialName("location.district") val locationDistrict: String,
-    @SerialName("location.province") val locationProvince: String,
-    @SerialName("location.postal_code") val locationPostalCode: String,
-    @SerialName("ins_ids") val insIds: String,
-)
+    @SerialName("type")
+    val type: String? = null,
+
+    @SerialName("name")
+    val name: String? = null,
+
+    @SerialName("area")
+    val area: Double? = null,
+
+    @SerialName("amount")
+    val amount: Double? = null,
+
+    @SerialName("description")
+    val description: String? = null,
+
+    @SerialName("location.address")
+    val locationAddress: String? = null,
+
+    @SerialName("location.sub_district")
+    val locationSubDistrict: String? = null,
+
+    @SerialName("location.district")
+    val locationDistrict: String? = null,
+
+    @SerialName("location.province")
+    val locationProvince: String? = null,
+
+    @SerialName("location.postal_code")
+    val locationPostalCode: String? = null,
+
+    @SerialName("ins_ids")
+    val insIds: List<InsReferenceData> = emptyList(),
+
+    @SerialName("files")
+    val files: List<BuildingFileUploadData> = emptyList(),
+
+    @SerialName("reference_ids")
+    val referenceIds:  List<BuildingReferenceData> = emptyList(),
+
+
+    )
 
 @Serializable
 data class BuildingResponse(
-    @SerialName("status") val status: String? = null,
-    @SerialName("data") val data: BuildingData? = null,
-    @SerialName("error") val error: String? = null
+    @SerialName("status")
+    val status: String?  = null,
+
+    @SerialName("data")
+    val data: BuildingData? = null,
+
+    @SerialName("error")
+    val error: String?  = null
 )
 
 @Serializable
@@ -56,9 +90,36 @@ data class LocationData(
 
 @Serializable
 data class InsData(
-    @SerialName("ins_id") val insId: String = "",
-    @SerialName("ins_name") val insName: String = ""
+    @SerialName("ins_id")
+    val insId: String? = null,
+
+    @SerialName("ins_name")
+    val insName: String? = null,
+
 )
+
+
+@Serializable
+data class BuildingFileUploadData(
+    val bytes: ByteArray,
+    val mimeType: String? = null,
+    val fileName: String? = null
+)
+
+@Serializable
+data class BuildingReferenceData(
+    val areaName: String? = null,
+    val areaId: String? = null
+)
+
+
+
+@Serializable
+data class InsReferenceData(
+    val insName: String? = null,
+    val insId: String? = null
+)
+
 
 @Serializable
 data class FileData(
