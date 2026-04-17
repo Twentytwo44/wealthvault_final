@@ -1,8 +1,8 @@
 package com.wealthvault.investment_api.model
 
+import com.wealthvault.core.model.FileDataModel
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import com.wealthvault.core.model.HasImageUrl // 🌟 นำเข้า Interface รูปภาพ
 
 @Serializable
 data class InvestmentIdResponse(
@@ -24,16 +24,18 @@ data class InvestmentIdData(
     @SerialName("description") val description: String,
 
     // 🌟 เติม files เผื่อมีรูปแคปหน้าจอพอร์ต
-    @SerialName("files") val files: List<FileDataInvestment>? = emptyList(),
+    @SerialName("files") val files: List<FileDataModel>? = emptyList(),
 
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null
 )
 
 // 🌟 สร้าง FileData สำหรับ Investment
-@Serializable
-data class FileDataInvestment(
-    @SerialName("id") val id: String = "",
-    @SerialName("url") override val url: String = "", // 🌟 สืบทอด HasImageUrl
-    @SerialName("file_type") override val fileType: String = ""
-) : HasImageUrl
+//@Serializable
+//data class FileDataInvestment(
+//    @SerialName("id") val id: String = "",
+//    @SerialName("url") override val url: String = "", // 🌟 สืบทอด HasImageUrl
+//    @SerialName("file_type") override val fileType: String = ""
+//) : HasImageUrl
+
+

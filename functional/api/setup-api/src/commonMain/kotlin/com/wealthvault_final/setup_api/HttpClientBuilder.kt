@@ -10,99 +10,128 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.auth.providers.BearerTokens
-import io.ktor.client.plugins.auth.providers.bearer
+import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.plugin
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
+
 
 class HttpClientBuilder(
     private val json: Json,
-    private val tokenStore: TokenStore? = null // ปรับเป็น Nullable เพื่อรองรับ Auth-API
+    private val tokenStore: TokenStore? = null
 ) {
-    // ปรับชื่อฟังก์ชันให้สั้นลง หรือใช้ชื่อเดิมตามสะดวก
-    // เพิ่ม withAuth: Boolean เพื่อแยกการใช้งาน
     fun build(withAuth: Boolean = true): HttpClient {
-        return HttpClient(CIO) {
+        val client = HttpClient(CIO) {
             val safeJson = Json {
-                ignoreUnknownKeys = true // ข้ามฟิลด์ที่ไม่รู้จัก (เช่น amount)
-                coerceInputValues = true // แปลงค่าว่างเป็น default
-                isLenient = true         // ยอมรับ JSON ที่หน้าตาแปลกๆ ได้
+                ignoreUnknownKeys = true
+                coerceInputValues = true
+                isLenient = true
             }
             install(ContentNegotiation) {
-                json(safeJson)
+                json(safeJson,contentType = ContentType.Any)
             }
 
-            // ติดตั้ง Auth Plugin เฉพาะเมื่อต้องการ (Global) และมี TokenStore
-            if (withAuth && tokenStore != null) {
-                install(Auth) {
-                    bearer {
-                        loadTokens {
-                            // เรียกผ่าน Namespace 'token' ตามที่คุณแบ่งไว้
-//                            val authData = tokenStore.authData.first()
-//
-//                            if (authData.accessToken.isNullOrBlank()) return@loadTokens null
-
-                            BearerTokens(
-                                accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5heW1lZ2FkcmFnb25AZ21haWwuY29tIiwiZXhwIjoxNzc4NjY4MzUyLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjUzOGJmMWJmLTQ4NGYtNDdhYS04MDI4LTYzNDU0YjU4ZDI2OSJ9.Ap4m2PU9BqWytCS79JvwhYGuTpCIw5Y_PSEH4Cnpjmw",
-                                refreshToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzc0NTE5NzY2LCJ0eXBlIjoicmVmcmVzaCIsInVzZXJfaWQiOiIyNjhlYzIyZi0yOGQ5LTQzZmYtYjg5OS04ODdiMDI1MzZiN2QifQ.cVdNvwpAOMb8aHWcXr5IK1cyS1u9E4l_GyFJAidjSqI"
-
-                            )
-                        }
-
-                        refreshTokens {
-                            println("🔄 Access Token expired, refreshing...")
-
-                            val client = HttpClient(CIO) {
-                                install(ContentNegotiation) { json(json) }
-                            }
-
-                            try {
-                                val response: RefreshResponse = client.post("${Config.localhost_android}auth/refresh/") {
-                                    setBody(RefreshRequest(oldTokens?.refreshToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzczOTE1ODY2LCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjI2OGVjMjJmLTI4ZDktNDNmZi1iODk5LTg4N2IwMjUzNmI3ZCJ9.C4rtORbHvK1hEFdKrNWNMUcARdohw_mbpLkay7FtaFM"))
-                                    contentType(ContentType.Application.Json)
-                                }.body()
-
-                                val newAccess = response.data?.accessToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzc0OTgwMzc1LCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjI2OGVjMjJmLTI4ZDktNDNmZi1iODk5LTg4N2IwMjUzNmI3ZCJ9.aRVlwjBWNnYLcFejyn_hHsTioh1-VkmBERn5lcRHtYQ"
-                                val newRefresh = response.data?.refreshToken ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwidHlwZSI6InJlZnJlc2giLCJ1c2VyX2lkIjoiMjY4ZWMyMmYtMjhkOS00M2ZmLWI4OTktODg3YjAyNTM2YjdkIn0.P8QeHyBn1HAzjP9_WJFBVkwVDYhBiT8DabaJKjAs1y0"
-
-                                if (newAccess.isNotBlank()) {
-                                    // บันทึกผ่าน Namespace 'token'
-                                    tokenStore.saveAuthToken(AuthToken(newAccess, newRefresh))
-
-                                    BearerTokens(newAccess, newRefresh)
-                                } else {
-                                    null
-                                }
-                            } catch (e: Exception) {
-                                println("❌ Refresh Token failed: ${e.message}")
-                                // กรณี refresh ไม่ผ่าน อาจจะสั่งล้าง token เพื่อให้เด้งไปหน้า login
-                                tokenStore.saveAuthToken(AuthToken(null, null))
-                                null
-                            } finally {
-                                client.close()
-                            }
-                        }
-
-                        // ข้ามการแปะ Token สำหรับ Path ที่เกี่ยวกับ Auth
-                        sendWithoutRequest { request ->
-                            request.url.pathSegments.contains("auth") ||
-                                    request.url.pathSegments.contains("login")
-                        }
-                    }
-                }
-            }
+            // ติดตั้ง Logging เอาไว้ดูผลลัพธ์เหมือนเดิม
+//            install(Logging) {
+//                logger = object : Logger {
+//                    override fun log(message: String) {
+//                        println("KtorAPI: $message")
+//                    }
+//                }
+//                level = LogLevel.ALL
+//            }
 
             install(DefaultRequest) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
             }
+
+            // 🌟 ลบ install(Auth) ทิ้ง แล้วใช้ install(HttpSend) แทน
+            if (withAuth && tokenStore != null) {
+                install(HttpSend) {
+                    // กำหนดให้ลองยิงใหม่ได้สูงสุด 2 รอบ (กันลูปอินฟินิตี้)
+                    maxSendCount = 2
+                }
+            }
         }
+
+        // 🌟 เขียน Logic ดักจับ Request / Response ด้วยตัวเอง
+        if (withAuth && tokenStore != null) {
+            client.plugin(HttpSend).intercept { request ->
+
+                // 1. เช็กว่าไม่ใช่เส้น Auth/Login ค่อยแปะ Token
+                val isAuthRoute = request.url.pathSegments.contains("auth") ||
+                        request.url.pathSegments.contains("login")
+
+                if (!isAuthRoute) {
+                    val accessToken = tokenStore.accessToken.first()
+                    if (!accessToken.isNullOrBlank()) {
+                        request.header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    }
+                }
+
+                // 2. 🚀 ปล่อย Request วิ่งออกไปหา Backend
+                var originalCall = execute(request)
+
+                // 3. 🚨 ถ้า Backend ตอบ 401 กลับมา (โดยไม่ต้องสน Header WWW-Authenticate!)
+                if (originalCall.response.status == HttpStatusCode.Unauthorized && !isAuthRoute) {
+                    println("🔄 401 Detected! กำลังแอบไปขอ Token ใหม่ให้...")
+
+                    val currentRefreshToken = tokenStore.refreshToken.first()
+
+                    if (!currentRefreshToken.isNullOrBlank()) {
+                        // สร้าง Client ตัวจิ๋วไปขอ Token
+                        val refreshClient = HttpClient(CIO) {
+                            install(ContentNegotiation) { json(json) }
+                        }
+
+                        try {
+                            val response: RefreshResponse = refreshClient.post("${Config.localhost_android}auth/refresh/") {
+                                setBody(RefreshRequest(currentRefreshToken))
+                                contentType(ContentType.Application.Json)
+                            }.body()
+
+                            val newAccess = response.data?.accessToken
+                            val newRefresh = response.data?.refreshToken
+
+                            if (!newAccess.isNullOrBlank() && !newRefresh.isNullOrBlank()) {
+                                println("✅ ได้ Token ใหม่มาแล้ว! บันทึกลงเครื่องและยิง API เดิมอีกรอบ...")
+                                tokenStore.saveAuthToken(AuthToken(newAccess, newRefresh))
+
+                                // 4. ลบ Token เก่าทิ้ง แปะ Token ใหม่ แล้วสั่งยิง API เส้นเดิม!
+                                request.headers.remove(HttpHeaders.Authorization)
+                                request.header(HttpHeaders.Authorization, "Bearer $newAccess")
+                                originalCall = execute(request)
+
+                            } else {
+                                println("❌ ขอ Token ใหม่ไม่ผ่าน (API ส่งกลับมาว่างเปล่า)")
+                                tokenStore.saveAuthToken(AuthToken(null, null))
+                            }
+                        } catch (e: Exception) {
+                            println("❌ ขอ Token ใหม่พัง: ${e.message}")
+                            tokenStore.saveAuthToken(AuthToken(null, null))
+                        } finally {
+                            refreshClient.close()
+                        }
+                    } else {
+                        println("❌ ไม่มี Refresh Token ในเครื่อง บังคับ Logout")
+                        tokenStore.saveAuthToken(AuthToken(null, null))
+                    }
+                }
+
+                // คืนค่าผลลัพธ์กลับไปให้ UI
+                originalCall
+            }
+        }
+
+        return client
     }
 }

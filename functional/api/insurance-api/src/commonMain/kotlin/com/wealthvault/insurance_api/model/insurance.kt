@@ -37,6 +37,8 @@ data class InsuranceRequest(
     @SerialName("files")
     val files: List<InsuranceFileUploadData> = emptyList(),
 
+    val deleteListId: List<String> = emptyList()
+
 )
 
 @Serializable

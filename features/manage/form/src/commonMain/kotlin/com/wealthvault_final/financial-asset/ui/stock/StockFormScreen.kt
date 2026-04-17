@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -126,11 +128,34 @@ fun AssetInputForm(
 
             // ส่วนกรอกข้อมูลหลัก
             AssetTextField(value = stockName, onValueChange = { stockName = it }, label = "ชื่อหุ้น กองทุน*", placeholder = "กรอกชื่อ")
-            AssetTextField(value = quantity, onValueChange = { quantity = it }, label = "จำนวนหุ้น กองทุน*", placeholder = "0.00")
-            AssetTextField(value = costPerPrice, onValueChange = { costPerPrice = it }, label = "ราคาที่ซื้อ*", placeholder = "0.00")
+
+            AssetTextField(
+                value = quantity,
+                onValueChange = { newValue ->
+                    // ✅ ใช้ Regex ดักให้พิมพ์ตัวเลขและมีจุดได้แค่ 1 จุดเท่านั้น
+                    if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                        quantity = newValue
+                    }
+                },
+                label = "จำนวนหุ้น กองทุน*",
+                placeholder = "0.00",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+            AssetTextField(
+                value = costPerPrice,
+                onValueChange = { newValue ->
+                    if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                        costPerPrice = newValue
+                    }
+                },
+                label = "ราคาที่ซื้อ*",
+                placeholder = "0.00",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
             AssetTextField(value = description, onValueChange = { description = it }, label = "คำอธิบาย", placeholder = "รายละเอียดเพิ่มเติม", isMultiLine = true)
             AssetTextField(value = brokerName, onValueChange = { brokerName = it }, label = "แอปที่ซื้อ", placeholder = "กรอกชื่อ")
-
             Spacer(modifier = Modifier.height(24.dp))
 
             // 3. ส่ง State และคำสั่ง Launch เข้าไปใน ReferenceSection

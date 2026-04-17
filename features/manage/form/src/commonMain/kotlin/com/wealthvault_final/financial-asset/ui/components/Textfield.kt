@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -13,9 +14,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-
 @Composable
-fun AssetTextField(value: String, onValueChange: (String) -> Unit, label: String, placeholder: String, isMultiLine: Boolean = false) {
+fun AssetTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    isMultiLine: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default // 🌟 เติมบรรทัดนี้ (ค่าเริ่มต้นคือคีย์บอร์ดปกติ)
+) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Text(text = label, color = Color(0xFFBCAAA4), style = MaterialTheme.typography.bodySmall)
         OutlinedTextField(
@@ -31,7 +38,8 @@ fun AssetTextField(value: String, onValueChange: (String) -> Unit, label: String
                 unfocusedContainerColor = Color.White,
                 focusedBorderColor = Color(0xFFB08968),
                 unfocusedBorderColor = Color(0xFFE0E0E0)
-            )
+            ),
+            keyboardOptions = keyboardOptions // 🌟 และส่งค่ามาใส่ตรงนี้
         )
     }
 }

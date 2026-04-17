@@ -52,6 +52,7 @@ object AllModules {
         add(BuildingApiModule.allModules)
         add(InsuranceApiModule.allModules)
         add(AccountApiModule.allModules)
+        add(ShareApiModule.allModules)
 
 
 

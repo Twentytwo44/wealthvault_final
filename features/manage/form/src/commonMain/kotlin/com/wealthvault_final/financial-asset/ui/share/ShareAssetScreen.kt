@@ -200,10 +200,10 @@ fun ShareAssetContent(
                     onClick = {
 
                         val dataToSend = ShareTo(
-                            friend = selectedFriends.toList(), // แปลง SnapshotStateList เป็น List ปกติ
+                            friend = selectedFriends.filter { it.typeData == "F" },
                             email = selectedEmails.toList(),
-                            group = emptyList(), // หรือใส่ selectedGroups ถ้ามี
-                            shareAt = "2024-05-20T10:00:00" // ควรใช้ฟังก์ชันดึงเวลาปัจจุบันใน ScreenModel
+                            group = selectedFriends.filter { it.typeData == "G" },
+                            shareAt = "" // ควรใช้ฟังก์ชันดึงเวลาปัจจุบันใน ScreenModel
                         )
                         onNextClick(dataToSend)
                     },
@@ -413,13 +413,6 @@ fun SectionHeader(
 
 
 // สร้าง Data Class เพื่อให้จัดการข้อมูลได้ง่ายขึ้น
-data class FriendItemData(
-    val name: String,
-    val id: String? = null,
-    val groupCount: String? = null,
-    val date: String? = null,
-    val isEmail: Boolean = false
-)
 
 @Composable
 fun ShareItemWithDelete(
@@ -475,8 +468,8 @@ fun FriendSelectionList(
 ) {
     // 1. เตรียมข้อมูล
     val allSelectableData = remember(friendData, groupData) {
-        val friends = friendData.map { ShareInfo(name = it.username, userId = it.id) }
-        val groups = groupData.map { ShareInfo(name = it.groupName, userId = it.id) }
+        val friends = friendData.map { ShareInfo(name = it.username, userId = it.id, typeData = "F") }
+        val groups = groupData.map { ShareInfo(name = it.groupName, userId = it.id, typeData = "G") }
         friends + groups
     }
 

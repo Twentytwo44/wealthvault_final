@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -85,7 +87,7 @@ fun InsuranceInputForm(
     var type by remember { mutableStateOf("") }
     var companyName by remember { mutableStateOf("")}
     var coverageAmount by remember { mutableStateOf("")}
-    var coveragePeroid by remember { mutableStateOf("")}
+    var coveragePeriod by remember { mutableStateOf("")}
     var expDate by remember { mutableStateOf("")}
     var conDate by remember { mutableStateOf("")}
     var description by remember { mutableStateOf("") }
@@ -131,17 +133,34 @@ fun InsuranceInputForm(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ส่วนกรอกข้อมูลหลัก
-            AssetTextField(value = name, onValueChange = {name = it } , label = "ชื่อประกัน" , placeholder = "กรอกชื่อประกัน" )
+            AssetTextField(value = name, onValueChange = { name = it } , label = "ชื่อประกัน" , placeholder = "กรอกชื่อประกัน" )
             AssetTextField(value = policyNumber, onValueChange = { policyNumber = it }, label = "เลขประกัน*", placeholder = "กรอกเลขประกัน")
             AssetTextField(value = type, onValueChange = { type = it }, label = "ชนิด*", placeholder = "กรอกชนิด")
             AssetTextField(value = companyName, onValueChange = { companyName = it }, label = "ชื่อบริษัทประกัน*", placeholder = "กรอกชื่อบริษัทประกัน")
-            AssetTextField(value = coverageAmount, onValueChange = { coverageAmount = it }, label = "จำนวนวงเงินคุ้มครอง*", placeholder = "กรอกจำนวนวงเงินคุ้มครอง")
-            AssetTextField(value = coveragePeroid, onValueChange = { coveragePeroid = it }, label = "ระยะเวลาคุ้มครอง*", placeholder = "กรอกระยะเวลาคุ้มครอง")
+
+            AssetTextField(
+                value = coverageAmount,
+                onValueChange = { newValue ->
+                    if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                        coverageAmount = newValue
+                    }
+                },
+                label = "จำนวนวงเงินคุ้มครอง*",
+                placeholder = "0.00", // 💡 แนะนำให้ใช้ "0.00" จะดูเข้ากับช่องตัวเลขมากกว่าครับ
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+            AssetTextField(value = coveragePeriod, onValueChange = { coveragePeriod = it }, label = "ระยะเวลาคุ้มครอง*", placeholder = "กรอกระยะเวลาคุ้มครอง")
             AssetTextField(value = expDate, onValueChange = { expDate = it }, label = "วันหมดอายุ*", placeholder = "กรอกวันหมดอายุ")
             AssetTextField(value = conDate, onValueChange = { conDate = it }, label = "วันที่สัญญา*", placeholder = "กรอกวันที่สัญญา")
-            AssetTextField(value = description, onValueChange = { description = it }, label = "คำอธิบาย*", placeholder = "กรอกคำอธิบาย")
 
+            AssetTextField(
+                value = description,
+                onValueChange = { description = it },
+                label = "คำอธิบาย*",
+                placeholder = "กรอกคำอธิบาย",
+                isMultiLine = true // 🌟 อย่าลืมตัวนี้นะครับ!
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -163,7 +182,7 @@ fun InsuranceInputForm(
                         type = type,
                         companyName = companyName,
                         coverageAmount = coverageAmount.toDouble(),
-                        coveragePeroid = coveragePeroid,
+                        coveragePeriod = coveragePeriod,
                         expDate = expDate,
                         conDate = conDate,
                         description = description,

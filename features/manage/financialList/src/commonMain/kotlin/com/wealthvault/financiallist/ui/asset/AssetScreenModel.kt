@@ -2,26 +2,29 @@ package com.wealthvault.financiallist.ui.asset
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.wealthvault.account_api.model.AccountData
+import com.wealthvault.account_api.model.BankAccountData
+import com.wealthvault.building_api.model.BuildingIdData
+import com.wealthvault.building_api.model.GetBuildingData
+import com.wealthvault.cash_api.model.CashIdData
+import com.wealthvault.cash_api.model.GetCashData
+import com.wealthvault.financiallist.data.share.ShareTargetsRepositoryImpl
 import com.wealthvault.financiallist.usecase.FinanciallistUseCase
+import com.wealthvault.insurance_api.model.GetInsuranceData
+import com.wealthvault.insurance_api.model.InsuranceIdData
+import com.wealthvault.investment_api.model.GetInvestmentData
+import com.wealthvault.investment_api.model.InvestmentIdData
+import com.wealthvault.land_api.model.GetLandData
+import com.wealthvault.land_api.model.LandIdData
+import com.wealthvault.share_api.model.ItemShareTargetsResponse
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-import com.wealthvault.account_api.model.AccountData
-import com.wealthvault.account_api.model.BankAccountData // 🌟 นำเข้า BankAccountData
-import com.wealthvault.cash_api.model.GetCashData
-import com.wealthvault.investment_api.model.GetInvestmentData
-import com.wealthvault.insurance_api.model.GetInsuranceData
-import com.wealthvault.building_api.model.GetBuildingData
-import com.wealthvault.land_api.model.GetLandData
-import com.wealthvault.building_api.model.BuildingIdData
-import com.wealthvault.cash_api.model.CashIdData
-import com.wealthvault.insurance_api.model.InsuranceIdData
-import com.wealthvault.investment_api.model.InvestmentIdData
-import com.wealthvault.land_api.model.LandIdData
-
 class AssetScreenModel(
-    private val useCase: FinanciallistUseCase
+    private val useCase: FinanciallistUseCase,
+    private val shareTargetsRepository: ShareTargetsRepositoryImpl
 ) : ScreenModel {
 
     private val _accounts = MutableStateFlow<List<AccountData>>(emptyList())
@@ -41,6 +44,10 @@ class AssetScreenModel(
 
     private val _lands = MutableStateFlow<List<GetLandData>>(emptyList())
     val lands = _lands.asStateFlow()
+
+    private val _shareTargets = MutableStateFlow<ItemShareTargetsResponse>(ItemShareTargetsResponse())
+    val shareTargets = _shareTargets.asStateFlow()
+
 
     fun fetchAllAssets() {
         screenModelScope.launch {
@@ -101,4 +108,23 @@ class AssetScreenModel(
             }
         }
     }
+
+
+    fun getShareTarget(id:String,type:String) {
+        screenModelScope.launch {
+            val shareTargetsResponse = async { shareTargetsRepository.shareTargets(id,type) }
+
+            // รอรับผลลัพธ์จากทั้ง 2 API
+            val shareTargetsResult = shareTargetsResponse.await()
+            shareTargetsResult.onSuccess { data ->
+                _shareTargets.value = data
+                println("[Asset ScreenModel Fetch Share Target ] sucess")
+
+
+            }.onFailure { error ->
+                println("[Asset ScreenModel Fetch Share Target fail] ${error}")
+            }
+
+    } }
+
 }

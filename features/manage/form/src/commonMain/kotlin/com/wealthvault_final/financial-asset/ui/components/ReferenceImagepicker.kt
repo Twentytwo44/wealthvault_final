@@ -59,7 +59,6 @@ fun ReferenceImagepicker(
 ) {
     val images = attachments.filter { it.type == AttachmentType.IMAGE }
     val pdfs = attachments.filter { it.type == AttachmentType.PDF }
-    print("images: $images")
     // สร้าง State สำหรับควบคุมการเปิด/ปิดเมนู Dropdown
     var expanded by remember { mutableStateOf(false) }
 

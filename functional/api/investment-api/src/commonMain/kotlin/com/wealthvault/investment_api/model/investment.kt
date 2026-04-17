@@ -15,6 +15,8 @@ data class InvestmentRequest(
     val description: String? = null,
     // เปลี่ยนจาก String เป็น ByteArray
     val files: List<FileUploadData> = emptyList(),
+
+    val deleteListId: List<String> = emptyList()
 )
 
 @Serializable

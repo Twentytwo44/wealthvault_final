@@ -44,6 +44,10 @@ data class LandRequest(
     @SerialName("reference_ids")
     val referenceIds: List <LandReferenceData> = emptyList(),
 
+    val deleteListId: List<String> = emptyList(),
+
+    val deleteRefListId: List<LandReferenceData> = emptyList()
+
 
     )
 

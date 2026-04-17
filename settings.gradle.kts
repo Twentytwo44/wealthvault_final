@@ -58,7 +58,6 @@ include(":features:profile")
 include(":navigation")
 
 include(":features:manage:form")
-include(":features:manage:financial-obligations")
 include(":features:manage:financialList")
 
 include(":features:social")

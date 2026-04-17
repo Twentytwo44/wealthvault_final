@@ -18,7 +18,7 @@ class UpdateInvestmentApiImpl(private val ktorfit: Ktorfit) : UpdateInvestmentAp
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.patch("${Config.localhost_android}/asset/invest/${id}") {
+        return client.patch("${Config.localhost_android}asset/invest/${id}") {
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -34,6 +34,10 @@ class UpdateInvestmentApiImpl(private val ktorfit: Ktorfit) : UpdateInvestmentAp
                         append("type", request.type ?: "")
                         append("amount", request.quantity ?: "")
                         append("files", request.symbol ?: "")
+
+                        request.deleteListId.forEach { fileData ->
+                            append("delete_file_ids", fileData)
+                        }
 
                         request.files.forEach { fileData ->
                             append("files", fileData.bytes ?: byteArrayOf(), Headers.build {

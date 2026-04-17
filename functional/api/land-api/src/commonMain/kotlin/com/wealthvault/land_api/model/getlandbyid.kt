@@ -1,8 +1,8 @@
 package com.wealthvault.land_api.model
 
+import com.wealthvault.core.model.FileDataModel
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import com.wealthvault.core.model.HasImageUrl // 🌟 นำเข้า Interface รูปภาพ
 
 @Serializable
 data class LandIdResponse(
@@ -25,10 +25,14 @@ data class LandIdData(
     @SerialName("location") val location: LocationById? = null,
 
     // 🌟 เติม files เผื่อมีรูปถ่ายโฉนดที่ดิน
-    @SerialName("files") val files: List<FileDataLand>? = emptyList(),
+    @SerialName("files") val files: List<FileDataModel>? = emptyList(),
 
     @SerialName("created_at") val createdAt: String? = null,
-    @SerialName("updated_at") val updatedAt: String? = null
+    @SerialName("updated_at") val updatedAt: String? = null,
+    @SerialName("ref") val ref: List<RefData>? = emptyList(),
+
+
+
 )
 
 @Serializable
@@ -44,9 +48,16 @@ data class LocationById(
 )
 
 // 🌟 สร้าง FileData สำหรับ Land
+//@Serializable
+//data class FileDataLand(
+//    @SerialName("id") val id: String = "",
+//    @SerialName("url") override val url: String = "", // 🌟 สืบทอด HasImageUrl
+//    @SerialName("file_type") override val fileType: String = ""
+//) : HasImageUrl
+
 @Serializable
-data class FileDataLand(
-    @SerialName("id") val id: String = "",
-    @SerialName("url") override val url: String = "", // 🌟 สืบทอด HasImageUrl
-    @SerialName("file_type") override val fileType: String = ""
-) : HasImageUrl
+data class RefData(
+    @SerialName("ref_id") val refId: String,
+    @SerialName("ref_name") val refName: String
+)
+

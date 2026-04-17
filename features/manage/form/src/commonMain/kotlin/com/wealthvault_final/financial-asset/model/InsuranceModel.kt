@@ -10,7 +10,7 @@ data class InsuranceModel (
     val type: String,
     val companyName: String,
     val coverageAmount: Double,
-    val coveragePeroid: String,
+    val coveragePeriod: String,
     val expDate: String,
     val description: String,
     val attachments: List<Attachment>,
