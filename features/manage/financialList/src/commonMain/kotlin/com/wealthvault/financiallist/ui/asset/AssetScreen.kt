@@ -1,9 +1,5 @@
 package com.wealthvault.financiallist.ui.asset
 
-// 🌟 Import เพิ่มเติมสำหรับปุ่มเพิ่มรายการ
-
-// Import Data Class
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -26,20 +20,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+
+// Import Models
 import com.wealthvault.account_api.model.AccountData
-import com.wealthvault.account_api.model.BankAccountData
-import com.wealthvault.building_api.model.BuildingIdData
 import com.wealthvault.building_api.model.GetBuildingData
-import com.wealthvault.cash_api.model.CashIdData
 import com.wealthvault.cash_api.model.GetCashData
+import com.wealthvault.insurance_api.model.GetInsuranceData
+import com.wealthvault.investment_api.model.GetInvestmentData
+import com.wealthvault.land_api.model.GetLandData
+
+// Import Utils & Resources
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_plus
 import com.wealthvault.core.generated.resources.ic_nav_asset
@@ -47,35 +45,27 @@ import com.wealthvault.core.theme.LightAsset
 import com.wealthvault.core.theme.LightDebt
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.formatAmount
-import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
+import org.jetbrains.compose.resources.painterResource
+
+// Import Components ของฝั่ง Financial
 import com.wealthvault.financiallist.ui.FinancialListTemplate
 import com.wealthvault.financiallist.ui.component.ConfirmDeleteDialog
-import com.wealthvault.financiallist.ui.component.DetailDialog
-import com.wealthvault.financiallist.ui.component.DetailImageRow
-import com.wealthvault.financiallist.ui.component.DetailRow
 import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
 import com.wealthvault.financiallist.ui.component.RealItemCard
-import com.wealthvault.insurance_api.model.GetInsuranceData
-import com.wealthvault.insurance_api.model.InsuranceIdData
-import com.wealthvault.investment_api.model.GetInvestmentData
-import com.wealthvault.investment_api.model.InvestmentIdData
-import com.wealthvault.land_api.model.GetLandData
-import com.wealthvault.land_api.model.LandIdData
-import org.jetbrains.compose.resources.painterResource
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.financiallist.ui.component.SmartAssetDetailDialog
+
 import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
 
 class AssetScreen : Screen {
-
     @Composable
     override fun Content() {
-        // 🌟 1. ดึง Navigator ของ Tab ปัจจุบัน
-//        val navigator = LocalNavigator.currentOrThrow
+        val navigator = LocalNavigator.currentOrThrow
 
-        // 🌟 2. ดึง Navigator ตัวแม่สุด (Root) ที่อยู่หน้า App() มาใช้
-//        val rootNavigator = navigator.parent
+        var rootNavigator = navigator
+        while (rootNavigator.parent != null) {
+            rootNavigator = rootNavigator.parent!!
+        }
 
         val screenModel = getScreenModel<AssetScreenModel>()
 
@@ -92,9 +82,8 @@ class AssetScreen : Screen {
 
         AssetContent(
             screenModel = screenModel,
-            // 🌟 3. สั่ง rootNavigator ให้ดัน MenuScreen ขึ้นมาทับทุกอย่าง!
             onAddClick = {
-//                rootNavigator?.push(MenuScreen())
+                rootNavigator.push(MenuScreen())
             },
             accounts = accounts,
             cashes = cashes,
@@ -118,9 +107,12 @@ fun AssetContent(
     lands: List<GetLandData>
 ) {
     var searchQuery by remember { mutableStateOf("") }
-
     var selectedAssetId by remember { mutableStateOf<String?>(null) }
     var selectedAssetType by remember { mutableStateOf<String?>(null) }
+
+    // 🌟 State สำหรับ Alert ลบข้อมูล
+    var showConfirmDelete by remember { mutableStateOf(false) }
+    var itemNameToDelete by remember { mutableStateOf("") }
 
     val filteredAccounts = accounts.filter { it.name.contains(searchQuery, ignoreCase = true) }
     val filteredCashes = cashes.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
@@ -129,16 +121,13 @@ fun AssetContent(
     val filteredBuildings = buildings.filter { it.name.contains(searchQuery, ignoreCase = true) }
     val filteredLands = lands.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
 
-    // 🌟 1. ใช้ Box ครอบทั้งหน้าจอเพื่อที่จะวางปุ่มไว้ด้านบนสุด (Overlay) ได้
     Box(modifier = Modifier.fillMaxSize()) {
-
-        // เนื้อหาหลัก (รายการทรัพย์สิน)
         FinancialListTemplate(
             headerTitle = "ทรัพย์สิน",
             themeColor = LightAsset,
             searchQuery = searchQuery,
             onSearchChange = { searchQuery = it },
-            onAddClick = onAddClick, // ถ้าใน FinancialListTemplate มีปุ่มเพิ่มของมันเองด้วย
+            onAddClick = onAddClick,
             headerIcon = {
                 Icon(
                     painter = painterResource(Res.drawable.ic_nav_asset),
@@ -161,6 +150,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -176,6 +166,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -192,6 +183,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -207,6 +199,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -222,6 +215,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -240,11 +234,10 @@ fun AssetContent(
                     }
                 }
 
-                item { Spacer(modifier = Modifier.height(140.dp)) } // 🌟 เผื่อพื้นที่ด้านล่างไว้ไม่ให้โดนปุ่มบัง
+                item { Spacer(modifier = Modifier.height(140.dp)) }
             }
         }
 
-        // 🌟 2. ปุ่มลอยมุมขวาล่าง (Floating Action Button)
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -266,216 +259,52 @@ fun AssetContent(
         }
     }
 
-    if (selectedAssetId != null && selectedAssetType != null) {
-        AssetDetailFetcherDialog(
+    // 🌟 ส่วนของ Alert ลบข้อมูล
+    if (showConfirmDelete) {
+        val annotatedMessage = buildAnnotatedString {
+            append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
+            withStyle(style = SpanStyle(color = LightAsset, fontWeight = FontWeight.Bold)) {
+                append("'$itemNameToDelete'")
+            }
+            append(" ออกจากระบบ?")
+        }
+
+        ConfirmDeleteDialog(
+            title = "ลบทรัพย์สิน",
+            message = annotatedMessage,
+            onConfirm = {
+                selectedAssetId?.let { id ->
+                    selectedAssetType?.let { type ->
+                        screenModel.deleteAsset(id, type)
+                    }
+                }
+                showConfirmDelete = false
+                selectedAssetId = null
+                selectedAssetType = null
+            },
+            onDismiss = { showConfirmDelete = false }
+        )
+    }
+
+    // 🌟 เรียกใช้ Smart Dialog สุดฉลาด
+    if (selectedAssetId != null && selectedAssetType != null && !showConfirmDelete) {
+        SmartAssetDetailDialog(
             assetId = selectedAssetId!!,
             assetType = selectedAssetType!!,
-            screenModel = screenModel,
+            showBottomMenu = true, // หน้าจัดการทรัพย์สินของตัวเอง ต้องมีปุ่ม
             onDismiss = {
+                selectedAssetId = null
+                selectedAssetType = null
+            },
+            onDelete = { itemName ->
+                itemNameToDelete = itemName // รับชื่อที่ Smart Dialog ส่งกลับมา
+                showConfirmDelete = true
+            },
+            onEdit = {
+                // TODO: นำทางไปยังหน้าแก้ไข
                 selectedAssetId = null
                 selectedAssetType = null
             }
         )
-    }
-}
-
-@Composable
-fun AssetDetailFetcherDialog(
-    assetId: String,
-    assetType: String,
-    screenModel: AssetScreenModel,
-    onDismiss: () -> Unit
-) {
-    var isLoading by remember { mutableStateOf(true) }
-    var detailData by remember { mutableStateOf<Any?>(null) }
-
-    // 🌟 1. ปรับ State ให้เก็บชื่อของ Item ที่จะลบด้วย
-    var showConfirmDelete by remember { mutableStateOf(false) }
-    var itemNameToDelete by remember { mutableStateOf("") }
-
-    LaunchedEffect(assetId, assetType) {
-        isLoading = true
-        detailData = when (assetType) {
-            "account" -> screenModel.getAccountById(assetId)
-            "cash" -> screenModel.getCashById(assetId)
-            "investment" -> screenModel.getInvestmentById(assetId)
-            "insurance" -> screenModel.getInsuranceById(assetId)
-            "building" -> screenModel.getBuildingById(assetId)
-            "land" -> screenModel.getLandById(assetId)
-            else -> null
-        }
-        isLoading = false
-    }
-
-    if (isLoading) {
-        Dialog(onDismissRequest = onDismiss) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .background(Color.White, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = LightAsset)
-            }
-        }
-    } else if (detailData != null) {
-        val item = detailData!!
-
-        // 🌟 2. Popup ยืนยันการลบที่ระบุชื่อชัดเจน
-        // 🌟 2. Popup ยืนยันการลบที่มีการเน้นสีชื่อไอเทม
-        if (showConfirmDelete) {
-            // สร้างข้อความแบบเน้นสีเฉพาะจุด (AnnotatedString)
-            val annotatedMessage = buildAnnotatedString {
-                append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
-                withStyle(style = SpanStyle(
-                    color = if (assetType == "debt") LightDebt else LightAsset, // 🌟 เลือกสีตามประเภท
-                    fontWeight = FontWeight.Bold
-                )
-                ) {
-                    append("'$itemNameToDelete'")
-                }
-                append(" ออกจากระบบ?")
-            }
-
-            ConfirmDeleteDialog(
-                title = "ลบทรัพย์สิน",
-                message = annotatedMessage, // 🌟 ส่งค่าที่เป็น AnnotatedString เข้าไป
-                onConfirm = {
-                    screenModel.deleteAsset(assetId, assetType)
-                    showConfirmDelete = false
-                    onDismiss()
-                },
-                onDismiss = { showConfirmDelete = false }
-            )
-        }
-
-        when (item) {
-            is BankAccountData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · บัญชีเงินฝาก",
-                    title = item.name,
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name // 🌟 เก็บชื่อก่อนเปิด Dialog
-                        showConfirmDelete = true
-                    }
-                ) {
-                    DetailRow("ธนาคาร", item.bankName)
-                    DetailRow("เลขบัญชี", item.bankAccount)
-                    DetailRow("ประเภท", item.type)
-                    DetailRow("ยอดเงิน", "${formatAmount(item.amount)} บาท")
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is CashIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · เงินสด ทองคำ",
-                    title = item.name,
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name
-                        showConfirmDelete = true
-                    }
-                ) {
-                    DetailRow("มูลค่า", "${formatAmount(item.amount)} บาท")
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is InvestmentIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · ลงทุน หุ้น กองทุน",
-                    title = "${item.name} (${item.symbol})",
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = "${item.name} (${item.symbol})"
-                        showConfirmDelete = true
-                    }
-                ) {
-                    DetailRow("โบรกเกอร์", item.brokerName)
-                    DetailRow("จำนวน", "${formatAmount(item.quantity)}")
-                    DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(item.costPerPrice)} บาท")
-                    DetailRow("ประเภท", item.type)
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is InsuranceIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · ประกัน",
-                    title = item.name,
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name
-                        showConfirmDelete = true
-                    }
-                ) {
-                    DetailRow("เลขกรมธรรม์", item.policyNumber)
-                    DetailRow("บริษัท", item.companyName)
-                    DetailRow("วงเงินคุ้มครอง", "${formatAmount(item.coverageAmount)} บาท")
-                    DetailRow("ระยะเวลาคุ้มครอง", "${item.coveragePeriod} ปี")
-                    DetailRow("วันเริ่มสัญญา", formatThaiDate(item.conDate))
-                    DetailRow("วันสิ้นสุดสัญญา", formatThaiDate(item.expDate))
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is BuildingIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · บ้าน ตึก อาคาร",
-                    title = item.name?: "",
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name?: ""
-                        showConfirmDelete = true
-                    }
-                ) {
-                    DetailRow("ประเภท", item.type?: "")
-                    DetailRow("พื้นที่", "${formatAmount(item.area?: 0)} ตร.ม.")
-                    DetailRow("มูลค่าประเมิน", "${formatAmount(item.amount?: 0)} บาท")
-                    val addressStr = item.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
-                    DetailRow("ที่อยู่", addressStr)
-                    DetailRow("คำอธิบาย", item.description?: "", isLast = item.files.isNullOrEmpty())
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is LandIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · ที่ดิน",
-                    title = item.name,
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name
-                        showConfirmDelete = true
-                    }
-                ) {
-                    DetailRow("เลขโฉนด", item.deedNum)
-                    DetailRow("ขนาดพื้นที่", "${formatAmount(item.area)} ตารางวา")
-                    DetailRow("มูลค่าประเมิน", "${formatAmount(item.amount)} บาท")
-                    val addressStr = item.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
-                    DetailRow("ที่อยู่", addressStr)
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    DetailImageRow(files = item.files)
-                }
-            }
-        }
     }
 }

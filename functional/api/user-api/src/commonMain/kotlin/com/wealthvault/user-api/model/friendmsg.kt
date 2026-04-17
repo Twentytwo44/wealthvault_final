@@ -47,6 +47,9 @@ data class MessageMetadata(
     @SerialName("asset_type")
     val assetType: String? = null, // เช่น "investment", "account"
 
+    @SerialName("item_name")
+    val itemName: String? = null,
+
     @SerialName("snapshot_title")
     val snapshotTitle: String? = null
 )

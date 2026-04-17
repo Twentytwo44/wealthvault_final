@@ -4,18 +4,51 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.screen.Screen // 🌟 อย่าลืม Import Screen ของ Voyager
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.social.ui.components.SocialHeader
-import com.wealthvault.social.ui.friend.FriendScreen
-import com.wealthvault.social.ui.group.GroupScreen
+import com.wealthvault.social.ui.main_social.add_friend.AddFriendScreen
+import com.wealthvault.social.ui.main_social.form_group.CreateGroupScreen
+import com.wealthvault.social.ui.main_social.friend.FriendScreen
+import com.wealthvault.social.ui.main_social.group.GroupScreen
 
+// 🌟 1. คลาส Screen สำหรับผูกกับ Voyager และจัดการ State / ScreenModel
+class SocialScreen : Screen {
+    @Composable
+    override fun Content() {
+
+
+        var currentTab by rememberSaveable { mutableStateOf("กลุ่ม") }
+
+        val navigator = LocalNavigator.currentOrThrow
+
+        // 🌟 2. ท่าไม้ตาย! ไต่หา Navigator ตัวนอกสุด (Root) เพื่อซ่อน Navbar
+        var rootNavigator = navigator
+        while (rootNavigator.parent != null) {
+            rootNavigator = rootNavigator.parent!!
+        }
+        SocialContent(
+            currentTab = currentTab,
+            onTabSelected = { selectedTab -> currentTab = selectedTab },
+            onAddFriendClick = { rootNavigator.push(AddFriendScreen()) },
+            onAddGroupClick = { rootNavigator.push(CreateGroupScreen()) }
+        )
+    }
+}
+
+// 🌟 2. ฟังก์ชัน Content สำหรับวาด UI ล้วนๆ (Stateless)
 @Composable
-fun SocialScreen() {
-    // กำหนด State เพื่อจำว่าตอนนี้อยู่หน้า "เพื่อน" หรือ "กลุ่ม" (ค่าเริ่มต้นคือ เพื่อน)
-    var currentTab by remember { mutableStateOf("เพื่อน") }
-
+fun SocialContent(
+    currentTab: String,
+    onTabSelected: (String) -> Unit,
+    onAddFriendClick: () -> Unit,
+    onAddGroupClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -28,18 +61,20 @@ fun SocialScreen() {
         // 1. แถบ Header (เมนู Dropdown และปุ่มเพิ่ม)
         SocialHeader(
             currentTabName = currentTab,
-            onTabSelected = { selectedTab ->
-                currentTab = selectedTab // เมื่อเลือก Dropdown ให้เปลี่ยน State
-            },
-            onAddFriendClick = { /* TODO: นำทางไปหน้าเพิ่มเพื่อน */ },
-            onAddGroupClick = { /* TODO: นำทางไปหน้าสร้างกลุ่ม */ }
+            onTabSelected = onTabSelected,
+            onAddFriendClick = onAddFriendClick,
+            onAddGroupClick = onAddGroupClick
         )
 
         // 2. ส่วนเนื้อหา (สลับหน้าจอไปมาอย่างนุ่มนวลด้วย Crossfade)
-        Crossfade(targetState = currentTab, label = "Tab Switching") { tab ->
+        Crossfade(
+            targetState = currentTab,
+            label = "Tab Switching",
+            modifier = Modifier.weight(1f) // <--- ตรงนี้สำคัญมาก!
+        ) { tab ->
             when (tab) {
-                "เพื่อน" -> FriendScreen()
-                "กลุ่ม" -> GroupScreen()
+                "เพื่อน" -> FriendScreen().Content()
+                "กลุ่ม" -> GroupScreen().Content()
             }
         }
     }

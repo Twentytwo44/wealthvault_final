@@ -39,7 +39,7 @@ fun getAppTypography(): Typography {
         // หัวข้อหน้าจอ
         titleLarge = TextStyle(
             fontFamily = appFontFamily,
-            fontWeight = FontWeight.Bold, // 💡 ปรับจาก SemiBold เป็น Bold เพราะเราโหลดฟอนต์มาแค่ Normal, Medium, Bold
+            fontWeight = FontWeight.Medium, // 💡 ปรับจาก SemiBold เป็น Bold เพราะเราโหลดฟอนต์มาแค่ Normal, Medium, Bold
             fontSize = 24.sp
         ),
 

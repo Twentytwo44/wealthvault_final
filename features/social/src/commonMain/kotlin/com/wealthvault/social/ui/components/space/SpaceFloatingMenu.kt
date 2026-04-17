@@ -19,12 +19,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_dashboard_share
+import com.wealthvault.core.generated.resources.ic_nav_profile
+import com.wealthvault.core.generated.resources.ic_profile_setting
+import com.wealthvault.core.generated.resources.ic_social_manage
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun SpaceFloatingMenu(
     onShareClick: () -> Unit,
     onManageClick: () -> Unit,
-    themeColor: Color = Color(0xFFC27A5A)
 ) {
     var expanded by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
@@ -51,13 +58,18 @@ fun SpaceFloatingMenu(
                         expanded = false
                         onShareClick()
                     },
-                    containerColor = themeColor.copy(alpha = 0.6f),
+                    containerColor = LightPrimary,
                     contentColor = Color.White,
                     modifier = Modifier.padding(end = 16.dp).size(48.dp),
                     shape = CircleShape,
                     elevation = FloatingActionButtonDefaults.elevation(0.dp)
                 ) {
-//                    Icon(Icons.Default.Share, contentDescription = "Share", modifier = Modifier.size(20.dp))
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_dashboard_share),
+                        contentDescription = null,
+                        tint = LightSoftWhite,
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -68,13 +80,18 @@ fun SpaceFloatingMenu(
                         expanded = false
                         onManageClick()
                     },
-                    containerColor = themeColor.copy(alpha = 0.6f),
+                    containerColor = LightPrimary,
                     contentColor = Color.White,
                     modifier = Modifier.padding(end = 74.dp).size(48.dp),
                     shape = CircleShape,
                     elevation = FloatingActionButtonDefaults.elevation(0.dp)
                 ) {
-//                    Icon(Icons.Default.Tune, contentDescription = "Manage", modifier = Modifier.size(20.dp))
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_social_manage),
+                        contentDescription = null,
+                        tint = LightSoftWhite,
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -84,16 +101,17 @@ fun SpaceFloatingMenu(
         // --- ปุ่มหลัก (ฟันเฟือง) ---
         FloatingActionButton(
             onClick = { expanded = !expanded },
-            containerColor = themeColor,
+            containerColor = if (expanded) Color(0xFFD4A089) else LightPrimary,
             contentColor = Color.White,
             modifier = Modifier.offset(y = (-30).dp).size(56.dp),
             shape = CircleShape
         ) {
-//            Icon(
-//                imageVector = Icons.Default.Settings,
-//                contentDescription = "Menu",
-//                modifier = Modifier.rotate(rotation)
-//            )
+            Icon(
+                painter = painterResource(Res.drawable.ic_profile_setting),
+                contentDescription = null,
+                tint = LightSoftWhite,
+                modifier = Modifier.size(32.dp)
+            )
         }
     }
 }

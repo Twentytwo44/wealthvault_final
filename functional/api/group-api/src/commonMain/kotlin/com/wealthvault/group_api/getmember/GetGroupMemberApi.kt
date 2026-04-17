@@ -6,5 +6,5 @@ import de.jensklingenberg.ktorfit.http.Path
 
 interface GetGroupMemberApi {
     @GET("group/member/{id}/")
-    suspend fun getAllGroup(@Path("id") id: String): GroupMemberResponse
+    suspend fun getGroupMembers(@Path("id") id: String): GroupMemberResponse
 }

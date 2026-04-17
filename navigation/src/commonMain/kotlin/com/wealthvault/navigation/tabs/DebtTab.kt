@@ -21,6 +21,6 @@ object DebtTab : Tab {
     @Composable
     override fun Content() {
         // 🌟 2. ครอบด้วย Navigator
-        Navigator(DebtScreen(onAddClick = {}))
+        Navigator(DebtScreen())
     }
 }

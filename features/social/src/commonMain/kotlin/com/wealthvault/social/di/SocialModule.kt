@@ -1,24 +1,45 @@
-package com.wealthvault.social.di//
-//import com.example.dashboard.data.RegisterDataSource
-//import com.example.dashboard.data.RegisterRepositoryImpl
-//import com.example.dashboard.usecase.RegisterUseCase
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.IO
-//import org.koin.dsl.module
-//
-//object DashboardModule {
-//    val allModules = module {
-//        factory { RegisterDataSource(get()) }
-//
-//        single<RegisterRepositoryImpl> {
-//            RegisterRepositoryImpl(
-//                networkDataSource = get(),
-//            )
-//        }
-//        single { Dispatchers.IO }
-//
-//        factory { RegisterUseCase(get(), get()) }
-//
-////        factory { RegisterScreenModel(get()) }
-//    }
-//}
+package com.wealthvault.social.di
+
+import com.wealthvault.social.data.SocialDataSource
+import com.wealthvault.social.data.SocialRepositoryImpl
+import com.wealthvault.social.ui.SocialScreenModel
+import com.wealthvault.social.ui.main_social.add_friend.AddFriendScreenModel
+import com.wealthvault.social.ui.main_social.form_group.CreateGroupScreenModel
+import com.wealthvault.social.ui.main_social.friend.FriendScreenModel
+import com.wealthvault.social.ui.main_social.group.GroupScreenModel
+import com.wealthvault.social.ui.manage_shared.SharedAssetScreenModel
+import com.wealthvault.social.ui.profile.FriendProfileScreenModel
+import com.wealthvault.social.ui.profile.GroupProfileScreenModel
+import com.wealthvault.social.ui.space.FriendSpaceScreenModel
+import com.wealthvault.social.ui.space.GroupSpaceScreenModel
+import org.koin.dsl.module
+
+object SocialModule {
+    val allModules = module {
+
+        factory {
+            SocialDataSource(
+                get(), get(), get(), get(), get(), get(), get(),
+                get(), get(), get(), get(), get(), get(), get(),
+                get(), get(), get(), get(), get(),
+                get(), get(), get(), get(), get(),
+                get(), get()
+            )
+        }
+
+        factory { SocialScreenModel(repository = get()) }
+
+        single { SocialRepositoryImpl(get()) }
+        factory { FriendScreenModel(repository = get()) }
+        factory { GroupScreenModel(repository = get()) }
+        factory { CreateGroupScreenModel(repository = get()) }
+        factory { AddFriendScreenModel(repository = get()) }
+        factory { FriendSpaceScreenModel(repository = get()) }
+        factory { FriendProfileScreenModel(repository = get()) }
+        factory { GroupSpaceScreenModel(repository = get()) }
+        factory { GroupProfileScreenModel(repository = get()) }
+        factory { SharedAssetScreenModel(repository = get()) }
+
+
+    }
+}

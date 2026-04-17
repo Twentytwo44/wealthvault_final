@@ -66,18 +66,199 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.ui.text.AnnotatedString
 import com.wealthvault.core.generated.resources.ic_common_update
 import com.wealthvault.core.theme.LightText
+// 🌟 นำเข้าพวกนี้ไว้ด้านบนสุดของไฟล์ Dialog.kt นะครับ
+import org.koin.compose.koinInject
+import com.wealthvault.financiallist.data.FinanciallistRepositoryImpl
+import com.wealthvault.core.utils.formatThaiDate
+import com.wealthvault.core.utils.formatAmount
+import com.wealthvault.account_api.model.BankAccountData
+import com.wealthvault.cash_api.model.CashIdData
+import com.wealthvault.investment_api.model.InvestmentIdData
+import com.wealthvault.insurance_api.model.InsuranceIdData
+import com.wealthvault.building_api.model.BuildingIdData
+import com.wealthvault.land_api.model.LandIdData
+import com.wealthvault.liability_api.model.LiabilityIdData
 
+
+// ==========================================
+// 🌟 Smart Component: ดึง API และวาดตัวเองได้เลย
+// ==========================================
+@Composable
+fun SmartAssetDetailDialog(
+    assetId: String,
+    assetType: String,
+    repository: FinanciallistRepositoryImpl = koinInject(), // 🌟 ดูด Repository มาใช้ตรงๆ ด้วย Koin
+    showBottomMenu: Boolean = false,
+    onDismiss: () -> Unit,
+    onDelete: (String) -> Unit = {},
+    onEdit: () -> Unit = {},
+    onShare: () -> Unit = {}
+) {
+    var isLoading by remember { mutableStateOf(true) }
+    var detailData by remember { mutableStateOf<Any?>(null) }
+
+    val themeType = if (assetType.lowercase() == "liability") "debt" else "asset"
+
+    // 🌟 ดึงข้อมูล API ทันทีที่เปิด Dialog
+    LaunchedEffect(assetId, assetType) {
+        isLoading = true
+        detailData = when (assetType.lowercase()) {
+            "account" -> repository.getAccountById(assetId).getOrNull()
+            "cash" -> repository.getCashById(assetId).getOrNull()
+            "investment" -> repository.getInvestmentById(assetId).getOrNull()
+            "insurance" -> repository.getInsuranceById(assetId).getOrNull()
+            "building" -> repository.getBuildingById(assetId).getOrNull()
+            "land" -> repository.getLandById(assetId).getOrNull()
+            "liability" -> repository.getLiabilityById(assetId).getOrNull()
+            else -> null
+        }
+        isLoading = false
+    }
+
+    if (isLoading) {
+        Dialog(onDismissRequest = onDismiss) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .background(Color.White, RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = LightPrimary)
+            }
+        }
+    } else if (detailData != null) {
+
+        // 🌟 สร้าง Subtitle อัจฉริยะ
+        val subtitleText = when (assetType.lowercase()) {
+            "account" -> "ทรัพย์สิน · บัญชีเงินฝาก"
+            "insurance" -> "ทรัพย์สิน · ประกัน"
+            "land" -> "ทรัพย์สิน · ที่ดิน"
+            "building" -> "ทรัพย์สิน · บ้าน ตึก อาคาร"
+            "investment" -> "ทรัพย์สิน · ลงทุน หุ้น กองทุน"
+            "cash" -> "ทรัพย์สิน · เงินสด ทองคำ"
+            "liability" -> {
+                val liabilityData = detailData as? LiabilityIdData
+                if (liabilityData?.type == "LIABILITY_TYPE_LOAN") "หนี้สิน · รายละเอียดหนี้สิน"
+                else "หนี้สิน · รายละเอียดรายจ่าย"
+            }
+            else -> "รายละเอียดทรัพย์สิน"
+        }
+
+        // 🌟 วาดหน้าต่างตามประเภท
+        when (val itemData = detailData!!) {
+            is BankAccountData -> {
+                DetailDialog(
+                    subtitle = subtitleText, title = itemData.name, updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name) }, onEdit = onEdit, onShare = onShare
+                ) {
+                    DetailRow("ธนาคาร", itemData.bankName)
+                    DetailRow("เลขบัญชี", itemData.bankAccount)
+                    DetailRow("ประเภท", itemData.type)
+                    DetailRow("ยอดเงิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
+                    DetailImageRow(files = itemData.files)
+                }
+            }
+
+            is CashIdData -> {
+                DetailDialog(
+                    subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                ) {
+                    DetailRow("มูลค่า", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
+                    DetailImageRow(files = itemData.files)
+                }
+            }
+
+            is InvestmentIdData -> {
+                DetailDialog(
+                    subtitle = subtitleText, title = "${itemData.name} (${itemData.symbol})", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete("${itemData.name} (${itemData.symbol})") }, onEdit = onEdit, onShare = onShare
+                ) {
+                    DetailRow("โบรกเกอร์", itemData.brokerName)
+                    DetailRow("จำนวน", formatAmount(itemData.quantity ?: 0.0))
+                    DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(itemData.costPerPrice ?: 0.0)} บาท")
+                    DetailRow("ประเภท", itemData.type)
+                    DetailRow("มูลค่ารวม", "${formatAmount((itemData.quantity ?: 0.0) * (itemData.costPerPrice ?: 0.0))} บาท", isHighlight = true)
+                    DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
+                    DetailImageRow(files = itemData.files)
+                }
+            }
+
+            is InsuranceIdData -> {
+                DetailDialog(
+                    subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                ) {
+                    DetailRow("เลขกรมธรรม์", itemData.policyNumber)
+                    DetailRow("บริษัท", itemData.companyName)
+                    DetailRow("วงเงินคุ้มครอง", "${formatAmount(itemData.coverageAmount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("ระยะเวลาคุ้มครอง", "${itemData.coveragePeriod} ปี")
+                    DetailRow("วันเริ่มสัญญา", formatThaiDate(itemData.conDate))
+                    DetailRow("วันสิ้นสุดสัญญา", formatThaiDate(itemData.expDate))
+                    DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
+                    DetailImageRow(files = itemData.files)
+                }
+            }
+
+            is BuildingIdData -> {
+                DetailDialog(
+                    subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                ) {
+                    DetailRow("ประเภท", itemData.type ?: "")
+                    DetailRow("พื้นที่", "${formatAmount(itemData.area ?: 0.0)} ตร.ม.")
+                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    val addressStr = itemData.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
+                    DetailRow("ที่อยู่", addressStr)
+                    DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
+                    DetailImageRow(files = itemData.files)
+                }
+            }
+
+            is LandIdData -> {
+                DetailDialog(
+                    subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                ) {
+                    DetailRow("เลขโฉนด", itemData.deedNum)
+                    DetailRow("ขนาดพื้นที่", "${formatAmount(itemData.area ?: 0.0)} ตารางวา")
+                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    val addressStr = itemData.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
+                    DetailRow("ที่อยู่", addressStr)
+                    DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
+                    DetailImageRow(files = itemData.files)
+                }
+            }
+
+            is LiabilityIdData -> {
+                DetailDialog(
+                    subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                ) {
+                    DetailRow("เจ้าหนี้", itemData.creditor)
+                    DetailRow("ประเภท", if (itemData.type == "LIABILITY_TYPE_LOAN") "หนี้สิน" else "รายจ่าย")
+                    DetailRow("เงินต้น/ยอดหนี้", "${formatAmount(itemData.principal ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
+                    DetailImageRow(files = itemData.files)
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun DetailDialog(
     subtitle: String = "",
     title: String,
-    updatedAt: String = "", // 🌟 1. เพิ่มตัวรับค่า "อัปเดตล่าสุด"
+    updatedAt: String = "",
     themeType: String,
     onDismiss: () -> Unit,
     onDelete: () -> Unit = {},
     onEdit: () -> Unit = {},
     onShare: () -> Unit = {},
+    showBottomMenu: Boolean = false, // 🌟 1. เพิ่ม Parameter นี้ โดยให้ค่าเริ่มต้นเป็น false
     content: @Composable ColumnScope.() -> Unit
 ) {
     Dialog(
@@ -107,8 +288,8 @@ fun DetailDialog(
                 shadowElevation = 12.dp
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // --- 1. Fixed Header ---
-                    // --- 1. Fixed Header ---
+
+                    // --- 1. Fixed Header (เหมือนเดิม) ---
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -117,9 +298,8 @@ fun DetailDialog(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth() // 🌟 ให้ Row นอกสุดกางเต็มพื้นที่
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            // 🎨 แถบสีแนวตั้ง
                             Box(
                                 modifier = Modifier
                                     .width(5.dp)
@@ -133,26 +313,19 @@ fun DetailDialog(
                                         }
                                     )
                             )
-
                             Spacer(modifier = Modifier.width(12.dp))
-
-                            // 📝 ส่วนข้อความ (ใช้ weight เพื่อให้กินพื้นที่ที่เหลือ)
                             Column(modifier = Modifier.weight(1f)) {
                                 if (subtitle.isNotEmpty()) {
-                                    // 🌟 สร้าง Row มาคลุม Subtitle กับ วันที่ เพื่อดันซ้าย-ขวา
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween, // 🌟 ดันซ้ายสุด-ขวาสุด
+                                        horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        // ฝั่งซ้าย: Subtitle
                                         Text(
                                             text = subtitle,
                                             style = MaterialTheme.typography.labelSmall,
                                             color = LightMuted.copy(0.8f)
                                         )
-
-                                        // 🌟 ฝั่งขวา: วันที่อัปเดต (ย้ายมาไว้ตรงนี้)
                                         if (updatedAt.isNotEmpty()) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Icon(
@@ -173,8 +346,6 @@ fun DetailDialog(
                                     }
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
-
-                                // ชื่อหัวข้อหลัก
                                 Text(
                                     text = title,
                                     style = MaterialTheme.typography.titleMedium,
@@ -188,7 +359,7 @@ fun DetailDialog(
                     HorizontalDivider(color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // --- 2. Scrollable Content ---
+                    // --- 2. Scrollable Content (เหมือนเดิม) ---
                     val scrollState = rememberScrollState()
                     Column(
                         modifier = Modifier
@@ -200,49 +371,68 @@ fun DetailDialog(
                         Spacer(modifier = Modifier.height(12.dp))
                     }
 
-                    // --- 3. Fixed Footer ---
+                    // --- 3. Fixed Footer (🌟 ปรับเพิ่มเงื่อนไข) ---
                     Spacer(modifier = Modifier.height(6.dp))
                     Column(modifier = Modifier.fillMaxWidth()) {
                         HorizontalDivider(color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
-                        Row(
-                            modifier = Modifier.fillMaxWidth().height(70.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            TextButton(
-                                onClick = { onDelete() },
-                                modifier = Modifier.weight(1f).fillMaxHeight(),
-                                shape = RoundedCornerShape(0.dp),
-                                contentPadding = PaddingValues(0.dp)
+
+                        // 🌟 2. ถ้า showBottomMenu เป็น true โชว์ปุ่ม 3 ปุ่ม
+                        if (showBottomMenu) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().height(70.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    Icon(painter = painterResource(Res.drawable.ic_common_bin), contentDescription = "ลบ", tint = RedErr, modifier = Modifier.size(20.dp))
-                                    Text(text = "ลบ", fontSize = 12.sp, color = RedErr, fontWeight = FontWeight.Medium)
+                                TextButton(
+                                    onClick = { onDelete() },
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    shape = RoundedCornerShape(0.dp),
+                                    contentPadding = PaddingValues(0.dp)
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                        Icon(painter = painterResource(Res.drawable.ic_common_bin), contentDescription = "ลบ", tint = RedErr, modifier = Modifier.size(20.dp))
+                                        Text(text = "ลบ", fontSize = 12.sp, color = RedErr, fontWeight = FontWeight.Medium)
+                                    }
+                                }
+                                VerticalDivider(modifier = Modifier.fillMaxHeight(0.5f), color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
+                                TextButton(
+                                    onClick = { onShare() },
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    shape = RoundedCornerShape(0.dp),
+                                    contentPadding = PaddingValues(0.dp)
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                        Icon(painter = painterResource(Res.drawable.ic_dashboard_share), contentDescription = "แชร์", tint = LightPrimary, modifier = Modifier.size(20.dp))
+                                        Text(text = "แชร์", fontSize = 12.sp, color = LightPrimary, fontWeight = FontWeight.Medium)
+                                    }
+                                }
+                                VerticalDivider(modifier = Modifier.fillMaxHeight(0.5f), color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
+                                TextButton(
+                                    onClick = { onEdit(); onDismiss() },
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    shape = RoundedCornerShape(0.dp),
+                                    contentPadding = PaddingValues(0.dp)
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                        Icon(painter = painterResource(Res.drawable.ic_common_pen), contentDescription = "แก้ไข", tint = LightPrimary, modifier = Modifier.size(20.dp))
+                                        Text(text = "แก้ไข", fontSize = 12.sp, color = LightPrimary, fontWeight = FontWeight.Medium)
+                                    }
                                 }
                             }
-                            VerticalDivider(modifier = Modifier.fillMaxHeight(0.5f), color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
+                        } else {
+                            // 🌟 3. ถ้า showBottomMenu เป็น false โชว์ปุ่มปิดอันเดียวใหญ่ๆ
                             TextButton(
-                                onClick = { onShare() },
-                                modifier = Modifier.weight(1f).fillMaxHeight(),
+                                onClick = onDismiss,
+                                modifier = Modifier.fillMaxWidth().height(60.dp),
                                 shape = RoundedCornerShape(0.dp),
                                 contentPadding = PaddingValues(0.dp)
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    Icon(painter = painterResource(Res.drawable.ic_dashboard_share), contentDescription = "แชร์", tint = LightPrimary, modifier = Modifier.size(20.dp))
-                                    Text(text = "แชร์", fontSize = 12.sp, color = LightPrimary, fontWeight = FontWeight.Medium)
-                                }
-                            }
-                            VerticalDivider(modifier = Modifier.fillMaxHeight(0.5f), color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
-                            TextButton(
-                                onClick = { onEdit(); onDismiss() },
-                                modifier = Modifier.weight(1f).fillMaxHeight(),
-                                shape = RoundedCornerShape(0.dp),
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    Icon(painter = painterResource(Res.drawable.ic_common_pen), contentDescription = "แก้ไข", tint = LightPrimary, modifier = Modifier.size(20.dp))
-                                    Text(text = "แก้ไข", fontSize = 12.sp, color = LightPrimary, fontWeight = FontWeight.Medium)
-                                }
+                                Text(
+                                    text = "ปิด",
+                                    fontSize = 16.sp,
+                                    color = LightPrimary,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }

@@ -9,13 +9,36 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+
 // --- Import ชิ้นส่วนจากโฟลเดอร์ components/space ---
 import com.wealthvault.social.ui.components.space.SharedAssetItem
 import com.wealthvault.social.ui.components.space.SpaceTopBar
 
+// 🌟 1. สร้าง Class แบบ Screen เพื่อรับค่าที่ส่งมา
+class SharedAssetManageScreen(
+    private val targetId: String,
+    private val targetName: String,
+    private val isGroup: Boolean // 🌟 เอาไว้เช็คตอนเรียก API ว่าจะดึงของกลุ่มหรือเพื่อน
+) : Screen {
+
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+
+        SharedAssetManageContent(
+            targetName = targetName,
+            onBackClick = { navigator.pop() }
+        )
+    }
+}
+
+// 🌟 2. ตัว UI เดิมของคุณ Champ (แยกออกมาเพื่อให้โค้ดสะอาด)
 @Composable
-fun SharedAssetManageScreen(
-    targetName: String = "Twentytwo",
+fun SharedAssetManageContent(
+    targetName: String,
     onBackClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
@@ -23,6 +46,7 @@ fun SharedAssetManageScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding() // 🌟 เผื่อไว้กันขอบจอด้านบน
             .padding(top = 20.dp)
     ) {
         SpaceTopBar(title = "การจัดการทรัพย์สิน", onBackClick = onBackClick)
@@ -80,5 +104,4 @@ fun SharedAssetManageScreen(
             }
         }
     }
-
 }

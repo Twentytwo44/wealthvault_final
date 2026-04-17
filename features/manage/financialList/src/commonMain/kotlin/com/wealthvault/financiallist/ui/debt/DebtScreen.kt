@@ -1,8 +1,5 @@
 package com.wealthvault.financiallist.ui.debt
 
-// 🌟 Import เพิ่มเติมสำหรับปุ่มเพิ่มรายการ
-
-// 🌟 Import Data Class
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -34,6 +31,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_plus
 import com.wealthvault.core.generated.resources.ic_nav_debt
@@ -49,13 +48,23 @@ import com.wealthvault.financiallist.ui.component.DetailImageRow
 import com.wealthvault.financiallist.ui.component.DetailRow
 import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
 import com.wealthvault.financiallist.ui.component.RealItemCard
+import com.wealthvault.financiallist.ui.component.SmartAssetDetailDialog
 import com.wealthvault.liability_api.model.GetLiabilityData
 import com.wealthvault.liability_api.model.LiabilityIdData
+import com.wealthvault_final.`financial-obligations`.ui.menu.ObMenuScreen
 import org.jetbrains.compose.resources.painterResource
 
-class DebtScreen(private val onAddClick: () -> Unit) : Screen {
+
+class DebtScreen : Screen {
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+
+        var rootNavigator = navigator
+        while (rootNavigator.parent != null) {
+            rootNavigator = rootNavigator.parent!!
+        }
+
         val screenModel = getScreenModel<DebtScreenModel>()
 
         LaunchedEffect(Unit) {
@@ -66,7 +75,9 @@ class DebtScreen(private val onAddClick: () -> Unit) : Screen {
         val expenses by screenModel.expenses.collectAsState()
 
         DebtContent(
-            onAddClick = onAddClick,
+            onAddClick = {
+                rootNavigator.push(ObMenuScreen())
+            },
             loans = loans,
             expenses = expenses,
             screenModel = screenModel
@@ -79,17 +90,18 @@ fun DebtContent(
     onAddClick: () -> Unit,
     loans: List<GetLiabilityData>,
     expenses: List<GetLiabilityData>,
-    screenModel: DebtScreenModel // 🌟 รับ Model เข้ามาเพื่อยิง API
+    screenModel: DebtScreenModel
 ) {
     var searchQuery by remember { mutableStateOf("") }
-
-    // 🌟 เปลี่ยนมาเก็บแค่ ID แบบหน้า Asset
     var selectedLiabilityId by remember { mutableStateOf<String?>(null) }
+
+    // 🌟 State สำหรับ Confirm Dialog
+    var showConfirmDelete by remember { mutableStateOf(false) }
+    var itemNameToDelete by remember { mutableStateOf("") }
 
     val filteredExpenses = expenses.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
     val filteredLoans = loans.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
 
-    // 🌟 1. ใช้ Box ครอบทั้งหน้าเพื่อวางปุ่มลอย
     Box(modifier = Modifier.fillMaxSize()) {
 
         FinancialListTemplate(
@@ -108,7 +120,6 @@ fun DebtContent(
             }
         ) {
             LazyColumn {
-                // 🌟 1. หนี้สิน
                 if (filteredLoans.isNotEmpty()) {
                     item {
                         ExpandableCategoryCard(title = "หนี้สิน", itemCount = filteredLoans.size, themeColor = "debt", initiallyExpanded = true) {
@@ -116,15 +127,15 @@ fun DebtContent(
                                 RealItemCard(
                                     title = loan.name ?: "",
                                     subtitleLabel = "เจ้าหนี้", subtitleValue = loan.creditor ?: "",
-                                    amountLabel = "ยอดหนี้", amountValue = "${formatAmount(loan.principal  ?: 0.0)} บาท",
+                                    amountLabel = "ยอดหนี้", amountValue = "${formatAmount(loan.principal ?: 0.0)} บาท",
                                     onClick = { selectedLiabilityId = loan.id }
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
-                // 🌟 2. รายจ่ายระยะยาว
                 if (filteredExpenses.isNotEmpty()) {
                     item {
                         ExpandableCategoryCard(title = "รายจ่ายระยะยาว", itemCount = filteredExpenses.size, themeColor = "debt", initiallyExpanded = true) {
@@ -140,16 +151,14 @@ fun DebtContent(
                     }
                 }
 
-                // 🌟 ปรับความสูงตรงนี้เผื่อให้ดึง List ขึ้นมาพ้นปุ่มได้ (ถ้า 80.dp ไม่พอ ลองปรับเป็น 100.dp ได้ครับ)
                 item { Spacer(modifier = Modifier.height(140.dp)) }
             }
         }
 
-        // 🌟 2. ปุ่ม Floating Action Button ของคุณ Champ
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 40.dp, end = 25.dp) // 💡 ถ้าติด Navigation Bar ด้านล่าง อาจจะต้องเพิ่ม bottom นิดนึงนะครับ
+                .padding(bottom = 40.dp, end = 25.dp)
                 .size(56.dp)
                 .clickable { onAddClick() },
             shape = CircleShape,
@@ -159,7 +168,7 @@ fun DebtContent(
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_common_plus),
-                    contentDescription = "เพิ่มหนี้สิน", // 🌟 เปลี่ยนเป็นหนี้สินให้ตรงหน้า
+                    contentDescription = "เพิ่มหนี้สิน",
                     tint = LightSoftWhite,
                     modifier = Modifier.size(40.dp)
                 )
@@ -167,100 +176,45 @@ fun DebtContent(
         }
     }
 
-    // 🌟 เรียกใช้ FetcherDialog เมื่อมีการกดการ์ด (เอาไว้นอก Box เพราะเป็น Dialog ลอยทับหน้าจออยู่แล้ว)
-    if (selectedLiabilityId != null) {
-        DebtDetailFetcherDialog(
-            liabilityId = selectedLiabilityId!!,
-            screenModel = screenModel,
-            onDismiss = { selectedLiabilityId = null }
+    // 🌟 ระบบแจ้งเตือนลบ
+    if (showConfirmDelete) {
+        val annotatedMessage = buildAnnotatedString {
+            append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
+            withStyle(style = SpanStyle(color = LightDebt, fontWeight = FontWeight.Bold)) {
+                append("'$itemNameToDelete'")
+            }
+            append(" ออกจากระบบ?")
+        }
+
+        ConfirmDeleteDialog(
+            title = "ลบหนี้สิน", // หรือจะเช็คจาก type ให้ลึกขึ้นก็ได้ครับ
+            message = annotatedMessage,
+            onConfirm = {
+                selectedLiabilityId?.let { id ->
+                    screenModel.deleteLiability(id, "liability")
+                }
+                showConfirmDelete = false
+                selectedLiabilityId = null
+            },
+            onDismiss = { showConfirmDelete = false }
         )
     }
-}
 
-@Composable
-fun DebtDetailFetcherDialog(
-    liabilityId: String,
-    screenModel: DebtScreenModel,
-    onDismiss: () -> Unit
-) {
-    var isLoading by remember { mutableStateOf(true) }
-    var detailData by remember { mutableStateOf<LiabilityIdData?>(null) }
-
-    // 🌟 1. เพิ่ม State สำหรับคุมการเปิด/ปิด และเก็บชื่อที่จะลบ
-    var showConfirmDelete by remember { mutableStateOf(false) }
-    var itemNameToDelete by remember { mutableStateOf("") }
-
-    LaunchedEffect(liabilityId) {
-        isLoading = true
-        detailData = screenModel.getLiabilityById(liabilityId)
-        isLoading = false
-    }
-
-    if (isLoading) {
-        Dialog(onDismissRequest = onDismiss) {
-            Box(
-                modifier = Modifier.size(100.dp).background(Color.White, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = LightDebt)
-            }
-        }
-    } else if (detailData != null) {
-        val item = detailData!!
-        val isLoan = item.type == "LIABILITY_TYPE_LOAN"
-
-        // 🌟 2. Popup ยืนยันการลบแบบไฮไลต์ชื่อเป็นสีแดง (LightDebt)
-        if (showConfirmDelete) {
-            val annotatedMessage = buildAnnotatedString {
-                append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
-                withStyle(style = SpanStyle(
-                    color = LightDebt, // 🌟 ใช้สีแดงตามธีมหนี้สิน
-                    fontWeight = FontWeight.Bold
-                )
-                ) {
-                    append("'$itemNameToDelete'")
-                }
-                append(" ออกจากระบบ?")
-            }
-
-            ConfirmDeleteDialog(
-                title = if (isLoan) "ลบหนี้สิน" else "ลบรายจ่าย",
-                message = annotatedMessage, // 🌟 ส่ง AnnotatedString เข้าไป
-                onConfirm = {
-                    screenModel.deleteLiability(item.id, "liability")
-                    showConfirmDelete = false
-                    onDismiss()
-                },
-                onDismiss = { showConfirmDelete = false }
-            )
-        }
-
-        DetailDialog(
-            subtitle = if (isLoan) "หนี้สิน · รายละเอียดหนี้สิน" else "หนี้สิน · รายละเอียดรายจ่าย",
-            title = item.name,
-            updatedAt = formatThaiDate(item.updatedAt),
-            themeType = "debt",
-            onDismiss = onDismiss,
-            onDelete = {
-                // 🌟 3. เก็บชื่อรายการก่อนเปิด Popup
-                itemNameToDelete = item.name
+    // 🌟 เรียกใช้ Smart Dialog ตัวเก่ง
+    if (selectedLiabilityId != null && !showConfirmDelete) {
+        SmartAssetDetailDialog(
+            assetId = selectedLiabilityId!!,
+            assetType = "liability", // 🌟 ฟิกซ์ให้เป็น liability เพราะหน้านี้คือหน้าหนี้สิน
+            showBottomMenu = true, // หน้าจัดการหนี้สิน ต้องโชว์ปุ่มลบ/แก้ไข
+            onDismiss = { selectedLiabilityId = null },
+            onDelete = { itemName ->
+                itemNameToDelete = itemName // รับชื่อจาก Smart Dialog
                 showConfirmDelete = true
+            },
+            onEdit = {
+                // TODO: ไปหน้า Edit หนี้สิน
+                selectedLiabilityId = null
             }
-        ) {
-            DetailRow("เจ้าหนี้", item.creditor)
-            DetailRow("ยอดหนี้คงเหลือ", "${formatAmount(item.principal)} บาท")
-            DetailRow("อัตราดอกเบี้ย", "${item.interestRate}%")
-
-            item.startedAt?.takeIf { it.isNotEmpty() }?.let { date ->
-                DetailRow("เริ่มทำสัญญา", formatThaiDate(date))
-            }
-            item.endedAt?.takeIf { it.isNotEmpty() }?.let { date ->
-                DetailRow("สิ้นสุดสัญญา", formatThaiDate(date))
-            }
-
-            DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-
-            DetailImageRow(files = item.files)
-        }
+        )
     }
 }

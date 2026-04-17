@@ -62,17 +62,28 @@ class EditProfileScreen(
 
 
 fun formatToApiDate(displayDate: String): String {
-    if (displayDate.isBlank() || !displayDate.contains("/")) return displayDate
+    // 1. ถ้าว่างเปล่า ไม่ต้องทำอะไร ส่งว่างๆ กลับไป (หรือจะส่ง null ก็ได้ขึ้นอยู่กับ API)
+    if (displayDate.isBlank()) return ""
 
-    val parts = displayDate.split("/")
-    if (parts.size == 3) {
-        val day = parts[0].padStart(2, '0')
-        val month = parts[1].padStart(2, '0')
-        val thaiYear = parts[2].toIntOrNull() ?: return displayDate
-        val engYear = thaiYear - 543 // 🌟 แปลงกลับเป็น ค.ศ.
-
-        return "$engYear-$month-$day" // 🌟 ส่งให้ API ในรูปแบบ YYYY-MM-DD
+    // 2. ถ้ามันเป็นฟอร์แมต YYYY-MM-DD อยู่แล้ว (สังเกตจากการมีขีดกลาง) ให้ส่งกลับไปเลย ไม่ต้องแปลง
+    if (displayDate.contains("-") && displayDate.length >= 10) {
+        return displayDate.take(10)
     }
+
+    // 3. ถ้าเป็นฟอร์แมต วัน/เดือน/ปี พ.ศ. (แบบที่หน้าจอแสดง)
+    if (displayDate.contains("/")) {
+        val parts = displayDate.split("/")
+        if (parts.size == 3) {
+            val day = parts[0].padStart(2, '0')
+            val month = parts[1].padStart(2, '0')
+            val thaiYear = parts[2].toIntOrNull() ?: return displayDate
+            val engYear = thaiYear - 543 // 🌟 แปลงกลับเป็น ค.ศ.
+
+            return "$engYear-$month-$day" // 🌟 ส่งให้ API ในรูปแบบ YYYY-MM-DD
+        }
+    }
+
+    // ถ้าไม่ตรงเงื่อนไขอะไรเลย ก็ส่งของเดิมกลับไป
     return displayDate
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,6 +103,7 @@ fun EditProfileContent(
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
+    var apiBirthDate by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
 
     var showDatePicker by remember { mutableStateOf(false) }
@@ -114,8 +126,12 @@ fun EditProfileContent(
             username = user.username ?: ""
             firstName = user.firstName ?: ""
             lastName = user.lastName ?: ""
-            val rawApiDate = user.birthday?.take(10)
+
+            // 🌟 เก็บค่า Raw ไว้ส่ง API และแปลงค่าไทยไว้โชว์
+            val rawApiDate = user.birthday?.take(10) ?: ""
+            apiBirthDate = rawApiDate
             birthDate = formatThaiDate(rawApiDate)
+
             phone = user.phoneNumber ?: ""
             screenModel.setProfileImageByteArray(null)
         }
@@ -243,8 +259,8 @@ fun EditProfileContent(
 
         Button(
             onClick = {
-                val apiReadyBirthDate = formatToApiDate(birthDate)
-                screenModel.saveProfile(username, firstName, lastName, apiReadyBirthDate, phone)
+                // 🌟 โยน apiBirthDate ที่เตรียมไว้แล้วเข้าไปได้เลย ไม่ต้องแปลงอะไรแล้ว!
+                screenModel.saveProfile(username, firstName, lastName, apiBirthDate, phone)
             },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             shape = RoundedCornerShape(12.dp),
@@ -270,15 +286,17 @@ fun EditProfileContent(
 
                         val day = localDate.dayOfMonth.toString().padStart(2, '0')
                         val month = localDate.monthNumber.toString().padStart(2, '0')
+                        val engYear = localDate.year.toString()
 
-                        // 🌟 เอาปี ค.ศ. ที่เลือก มาบวก 543 ให้เป็น พ.ศ. ตรงนี้เลย
-                        val thaiYear = (localDate.year + 543).toString()
+                        // 🌟 1. เก็บค่า YYYY-MM-DD ไว้ส่ง API เบื้องหลัง (ถูกต้องแน่นอน 100%)
+                        apiBirthDate = "$engYear-$month-$day"
 
-                        birthDate = "$day/$month/$thaiYear" // โชว์ในช่องกรอกเป็น พ.ศ.
+                        // 🌟 2. เอา apiBirthDate โยนเข้าฟังก์ชันเดิม ให้มันจัดฟอร์แมตภาษาไทยสวยๆ มาโชว์บนจอ!
+                        birthDate = formatThaiDate(apiBirthDate)
                     }
                     showDatePicker = false
                 }) {
-                    Text("ตกลง", color = LightPrimary) // 🌟 ใช้ LightPrimary
+                    Text("ตกลง", color = LightPrimary)
                 }
             },
             dismissButton = {

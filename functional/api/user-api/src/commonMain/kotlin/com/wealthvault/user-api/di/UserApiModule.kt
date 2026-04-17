@@ -8,8 +8,16 @@ import com.wealthvault.`user-api`.addfriend.AddFriendApiImpl
 import com.wealthvault.`user-api`.closefriend.CloseFriendApi
 import com.wealthvault.`user-api`.dashboard.DashboardApi
 import com.wealthvault.`user-api`.dashboard.DashboardApiImpl
+import com.wealthvault.`user-api`.deletefriend.DeleteFriendApi
+import com.wealthvault.`user-api`.deletefriend.DeleteFriendApiImpl
 import com.wealthvault.`user-api`.friend.FriendApi
 import com.wealthvault.`user-api`.friend.FriendApiImpl
+import com.wealthvault.`user-api`.friendmsg.GetFriendMsgApi
+import com.wealthvault.`user-api`.friendmsg.GetFriendMsgApiImpl
+import com.wealthvault.`user-api`.friendprofile.GetFriendProfileApi
+import com.wealthvault.`user-api`.friendprofile.GetFriendProfileApiImpl
+import com.wealthvault.`user-api`.getuserbyemail.GetUserByEmailApi
+import com.wealthvault.`user-api`.getuserbyemail.GetUserByEmailApiImpl
 import com.wealthvault.`user-api`.pendingfriend.PendingFriendApi
 import com.wealthvault.`user-api`.pendingfriend.PendingFriendApiImpl
 import com.wealthvault.`user-api`.updateclosefriend.UpdateCloseFriendApi
@@ -41,6 +49,10 @@ object UserApiModule {
         single<CloseFriendApi> { CloseFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<UpdateCloseFriendApi> { UpdateCloseFriendApiImpl(tokenStore = get()) }
         single<DashboardApi> { DashboardApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<GetUserByEmailApi> { GetUserByEmailApiImpl(get(named(KoinConst.Ktor.GLOBAL)))}
+        single<GetFriendMsgApi> { GetFriendMsgApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<GetFriendProfileApi> { GetFriendProfileApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<DeleteFriendApi> { DeleteFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
     }
 
 

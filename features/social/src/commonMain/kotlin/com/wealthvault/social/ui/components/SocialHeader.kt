@@ -51,7 +51,6 @@ fun SocialHeader(
                     Text(
                         text = currentTabName,
                         style = MaterialTheme.typography.titleLarge, // 🌟 ใช้ Typography ของแอป
-                        fontWeight = FontWeight.Medium,
                         color = themeColor
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -72,14 +71,26 @@ fun SocialHeader(
                     shape = RoundedCornerShape(12.dp),
                 ) {
                     DropdownMenuItem(
-                        text = { Text("เพื่อน", color = themeColor) },
+                        text = {
+                            Text(
+                                text = "เพื่อน",
+                                color = themeColor,
+                                style = MaterialTheme.typography.bodyLarge // 🌟 เติมบรรทัดนี้เข้าไปครับ
+                            )
+                        },
                         onClick = {
                             onTabSelected("เพื่อน")
                             expanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("กลุ่ม", color = themeColor) },
+                        text = {
+                            Text(
+                                text = "กลุ่ม",
+                                color = themeColor,
+                                style = MaterialTheme.typography.bodyLarge // 🌟 เติมบรรทัดนี้เข้าไปครับ
+                            )
+                        },
                         onClick = {
                             onTabSelected("กลุ่ม")
                             expanded = false
@@ -104,7 +115,7 @@ fun SocialHeader(
                         tint = themeColor,
                         modifier = Modifier
                             .padding(end = 8.dp, top = 4.dp) // ดันไอคอนหลักลงและไปซ้ายนิดนึง เพื่อเว้นที่ให้เครื่องหมายบวก
-                            .size(24.dp)
+                            .size(20.dp)
                     )
                     Icon(
                         painter = painterResource(Res.drawable.ic_social_plus),
@@ -112,7 +123,7 @@ fun SocialHeader(
                         tint = themeColor,
                         modifier = Modifier
                             .padding(start = 8.dp, top = 8.dp)
-                            .size(14.dp)
+                            .size(10.dp)
 
                     )
                 }
@@ -132,7 +143,7 @@ fun SocialHeader(
                         tint = themeColor,
                         modifier = Modifier
                             .padding(end = 8.dp, top = 4.dp)
-                            .size(27.dp) // ไอคอนกลุ่มปรับให้ใหญ่กว่าไอคอนคนเดี่ยวนิดนึง
+                            .size(22.dp) // ไอคอนกลุ่มปรับให้ใหญ่กว่าไอคอนคนเดี่ยวนิดนึง
                     )
                     Icon(
                         painter = painterResource(Res.drawable.ic_social_plus),
@@ -140,7 +151,7 @@ fun SocialHeader(
                         tint = themeColor,
                         modifier = Modifier
                             .padding(start = 8.dp)
-                            .size(14.dp)
+                            .size(10.dp)
                     )
                 }
             }

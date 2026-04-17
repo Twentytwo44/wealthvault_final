@@ -33,11 +33,12 @@ data class DashboardItem(
     val name: String = "",
 
     // 🌟 ตั้งเป็น Double? เพราะบางอัน (เช่นประกัน) ไม่มี value ส่งมา
-    @SerialName("value")
+    @SerialName("amount")
     val value: Double? = null,
 
     @SerialName("created_at")
-    val createdAt: CreatedAtData? = null
+    val createdAt: String? = null,
+
 )
 
 @Serializable

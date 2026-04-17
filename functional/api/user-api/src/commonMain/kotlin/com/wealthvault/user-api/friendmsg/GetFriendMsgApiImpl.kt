@@ -11,7 +11,7 @@ class GetFriendMsgApiImpl(private val ktorfit: Ktorfit) : GetFriendMsgApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.get("${Config.localhost_android}/friend/${id}/msg/") {
+        return client.get("${Config.localhost_android}friend/${id}/msg/") {
 
         }.body()
     }

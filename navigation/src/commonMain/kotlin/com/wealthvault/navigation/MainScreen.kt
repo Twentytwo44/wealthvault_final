@@ -65,9 +65,7 @@ fun MainScreen() {
                     .fillMaxSize()
                     .padding(bottom = padding.calculateBottomPadding())
             ) {
-                WealthVaultTheme {
-                    CurrentTab()
-                }
+                CurrentTab()
             }
         }
     }

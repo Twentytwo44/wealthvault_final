@@ -15,6 +15,7 @@ import com.wealthvault.login.di.LoginModule
 import com.wealthvault.profile.di.ProfileModule
 import com.wealthvault.register.di.RegisterModule
 import com.wealthvault.share_api.di.ShareApiModule
+import com.wealthvault.social.di.SocialModule
 import com.wealthvault.`user-api`.di.UserApiModule
 import com.wealthvault_final.`financial-asset`.di.FinancialAssetModule
 import com.wealthvault_final.setup_api.di.GlobalApiModule
@@ -52,6 +53,7 @@ object AllModules {
         add(BuildingApiModule.allModules)
         add(InsuranceApiModule.allModules)
         add(AccountApiModule.allModules)
+        add(SocialModule.allModules)
 
 
 
