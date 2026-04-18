@@ -1,10 +1,11 @@
 
-import com.wealthvault.forgetpassword.data.ForgetNetworkDataSource
-import com.wealthvault.forgetpassword.data.ForgetRepositoryImpl
-import com.wealthvault.forgetpassword.data.OTPNetworkDataSource
-import com.wealthvault.forgetpassword.data.OTPRepositoryImpl
-import com.wealthvault.forgetpassword.data.ResetNetworkDataSource
-import com.wealthvault.forgetpassword.data.ResetRepositoryImpl
+import com.wealthvault.forgetpassword.data.forget.ForgetNetworkDataSource
+import com.wealthvault.forgetpassword.data.forget.ForgetRepositoryImpl
+import com.wealthvault.forgetpassword.data.otp.OTPNetworkDataSource
+import com.wealthvault.forgetpassword.data.otp.OTPRepositoryImpl
+import com.wealthvault.forgetpassword.data.reset.ResetNetworkDataSource
+import com.wealthvault.forgetpassword.data.reset.ResetRepositoryImpl
+import com.wealthvault.forgetpassword.ui.ForgetPasswordScreenModel
 import com.wealthvault.forgetpassword.usecase.ForgetUsecase
 import com.wealthvault.forgetpassword.usecase.OTPUseCase
 import com.wealthvault.forgetpassword.usecase.ResetPasswordUseCase
@@ -42,6 +43,7 @@ object ForgetModule {
         factory { ResetPasswordUseCase(get(),get()) }
 
 
+        factory { ForgetPasswordScreenModel(get(), get(), get()) }
 
     }
 }

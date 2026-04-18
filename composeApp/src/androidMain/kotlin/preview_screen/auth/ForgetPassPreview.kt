@@ -1,11 +1,11 @@
 package preview_screen.auth
 
+// สังเกตว่า package ของคุณมีทั้ง fogetpassword และ forgetpassword ระวังพิมพ์ผิดตอนสร้างไฟล์จริงนะครับ
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-// สังเกตว่า package ของคุณมีทั้ง fogetpassword และ forgetpassword ระวังพิมพ์ผิดตอนสร้างไฟล์จริงนะครับ
-import com.wealthvault.fogetpassword.ui.ConfirmOTPContent
-import com.wealthvault.fogetpassword.ui.ResetPasswordContent
+import com.wealthvault.forgetpassword.ui.ConfirmOTPContent
 import com.wealthvault.forgetpassword.ui.ForgetPasswordContent
+import com.wealthvault.forgetpassword.ui.ResetPasswordContent
 
 // หน้าที่ 1
 @Preview(showBackground = true, name = "1. Forget Password Screen")

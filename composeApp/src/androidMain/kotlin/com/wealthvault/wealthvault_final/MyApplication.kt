@@ -1,5 +1,6 @@
 package com.wealthvault.wealthvault_final
 
+import ForgetModule
 import android.app.Application
 import com.google.firebase.FirebaseApp
 import com.wealthvault.data_store.androidDataStoreModule
@@ -34,7 +35,8 @@ class MyApplication : Application() {
                         GoogleAuthAndroidModule.allModules +
                         NotificationModule.allModules +
                         financiallistModule +
-                        dashboardModule // 👈 เสียบสายไฟตรงนี้!
+                        dashboardModule+
+                        ForgetModule.allModules
             )
         }
     }

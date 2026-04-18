@@ -14,7 +14,7 @@ class ForgetApiImpl(private val ktorfit: Ktorfit) : ForgetApi {
         val client = ktorfit.httpClient
 
         // ยิงเองตรงๆ แบบไม่ง้อ Generator
-        return client.post("${Config.localhost_ios}auth/login") {
+        return client.post("${Config.localhost_android}auth/forgot/password") {
             setBody(request)
         }.body()
     }
