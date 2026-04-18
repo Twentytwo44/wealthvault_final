@@ -32,6 +32,8 @@ kotlin {
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
                 implementation(project(":functional:api:user-api"))
 
+                implementation(project(":features:manage:form"))
+
 
 
 

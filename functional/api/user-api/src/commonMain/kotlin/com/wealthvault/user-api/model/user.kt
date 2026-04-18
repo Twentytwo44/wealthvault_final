@@ -51,7 +51,17 @@ data class UserData(
     @SerialName("created_at")
     val createdAt: String? = null,
 
+    @SerialName("is_friend")
+    val isFriend: Boolean? = null,
+
     @SerialName("updated_at")
     val updatedAt: String? = null,
 
+)
+@Serializable
+data class SearchUserResponse(
+    @SerialName("status") val status: String? = null,
+    // 🌟 รับเป็น List<FriendData> เพราะ Backend ส่งมาเป็น Array [ { ... } ]
+    @SerialName("data") val data: List<FriendData>? = null,
+    @SerialName("error") val error: String? = null
 )

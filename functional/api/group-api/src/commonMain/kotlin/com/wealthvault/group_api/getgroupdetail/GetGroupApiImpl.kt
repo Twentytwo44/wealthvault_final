@@ -7,12 +7,8 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 
 class GetGroupApiImpl(private val ktorfit: Ktorfit) : GetGroupApi {
-    override suspend fun getInvestment(id: String): GroupResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
+    override suspend fun getGroupDetail(id: String): GroupResponse { // 🌟 เปลี่ยนชื่อฟังก์ชัน
         val client = ktorfit.httpClient
-
-        return client.get("${Config.localhost_android}/group/${id}") {
-
-        }.body()
+        return client.get("${Config.localhost_android}group/detail/${id}") {}.body()
     }
 }

@@ -1,6 +1,8 @@
 package com.wealthvault.share_api.di
 
 import com.wealthvault.core.KoinConst
+import com.wealthvault.share_api.getitemtoshare.GetItemToShareApi
+import com.wealthvault.share_api.getitemtosharegroup.GetItemToShareApiImpl
 import com.wealthvault.share_api.getsharefriend.GetShareFriendApi
 import com.wealthvault.share_api.getsharefriend.GetShareFriendApiImpl
 import com.wealthvault.share_api.getsharegroup.GetShareGroupApi
@@ -31,9 +33,7 @@ object ShareApiModule {
         single<GetShareFriendApi> { GetShareFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<UnShareGroupApi> { UnShareGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<UnShareFriendApi> { UnShareFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-
-
-
+        single<GetItemToShareApi> { GetItemToShareApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
 
 
     }

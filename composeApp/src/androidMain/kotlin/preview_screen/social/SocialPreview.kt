@@ -21,68 +21,68 @@ fun SocialScreenPreview() {
 }
 
 // 2. พรีวิวหน้า Friend Space
-@Preview(showBackground = true, name = "2. Friend Space (Twentytwo)", device = "id:pixel_7")
-@Composable
-fun FriendSpaceScreenPreview() {
-    FriendSpaceScreen(
-        friendName = "Twentytwo",
-        onBackClick = {},
-        onShareClick = {},
-        onManageClick = {}
-    )
-}
+//@Preview(showBackground = true, name = "2. Friend Space (Twentytwo)", device = "id:pixel_7")
+//@Composable
+//fun FriendSpaceScreenPreview() {
+//    FriendSpaceScreen(
+//        friendName = "Twentytwo",
+//        onBackClick = {},
+//        onShareClick = {},
+//        onManageClick = {}
+//    )
+//}
 
 // 3. พรีวิวหน้า Group Space
-@Preview(showBackground = true, name = "3. Group Space (Family)", device = "id:pixel_7")
-@Composable
-fun GroupSpaceScreenPreview() {
-    GroupSpaceScreen(
-        groupName = "Family",
-        onBackClick = {},
-        onShareClick = {},
-        onManageClick = {}
-    )
-}
+//@Preview(showBackground = true, name = "3. Group Space (Family)", device = "id:pixel_7")
+//@Composable
+//fun GroupSpaceScreenPreview() {
+//    GroupSpaceScreen(
+//        groupName = "Family",
+//        onBackClick = {},
+//        onShareClick = {},
+//        onManageClick = {}
+//    )
+//}
 
 // 4. พรีวิวหน้าเลือกทรัพย์สินเพื่อแชร์
-@Preview(showBackground = true, name = "4. Asset Share Screen", device = "id:pixel_7")
-@Composable
-fun AssetShareScreenPreview() {
-    AssetShareScreen(
-        targetName = "Twentytwo",
-        onBackClick = {},
-        onShareConfirm = {}
-    )
-}
+//@Preview(showBackground = true, name = "4. Asset Share Screen", device = "id:pixel_7")
+//@Composable
+//fun AssetShareScreenPreview() {
+//    AssetShareScreen(
+//        targetName = "Twentytwo",
+//        onBackClick = {},
+//        onShareConfirm = {}
+//    )
+//}
+//
+//// 5. พรีวิวหน้าจัดการทรัพย์สินที่แชร์
+//@Preview(showBackground = true, name = "5. Shared Manage Screen", device = "id:pixel_7")
+//@Composable
+//fun SharedAssetManageScreenPreview() {
+//    SharedAssetManageScreen(
+//        targetName = "Twentytwo", // ลองเปลี่ยนชื่อตรงนี้ดู ข้อความในหน้าจอจะเปลี่ยนตามครับ
+//        onBackClick = {}
+//    )
+//}
 
-// 5. พรีวิวหน้าจัดการทรัพย์สินที่แชร์
-@Preview(showBackground = true, name = "5. Shared Manage Screen", device = "id:pixel_7")
-@Composable
-fun SharedAssetManageScreenPreview() {
-    SharedAssetManageScreen(
-        targetName = "Twentytwo", // ลองเปลี่ยนชื่อตรงนี้ดู ข้อความในหน้าจอจะเปลี่ยนตามครับ
-        onBackClick = {}
-    )
-}
-
-// 6. พรีวิวหน้าโปรไฟล์เพื่อน
-@Preview(showBackground = true, name = "6. Friend Profile Screen", device = "id:pixel_7")
-@Composable
-fun FriendProfileScreenPreview() {
-    FriendProfileScreen(
-        onBackClick = {},
-        onRemoveFriendClick = {}
-    )
-}
+//// 6. พรีวิวหน้าโปรไฟล์เพื่อน
+//@Preview(showBackground = true, name = "6. Friend Profile Screen", device = "id:pixel_7")
+//@Composable
+//fun FriendProfileScreenPreview() {
+//    FriendProfileScreen(
+//        onBackClick = {},
+//        onRemoveFriendClick = {}
+//    )
+//}
 
 // 7. พรีวิวหน้าโปรไฟล์กลุ่ม
-@Preview(showBackground = true, name = "7. Group Profile Screen", device = "id:pixel_7")
-@Composable
-fun GroupProfileScreenPreview() {
-    GroupProfileScreen(
-        onBackClick = {},
-        onLeaveGroupClick = {},
-        onMembersClick = {},
-        onAddMemberClick = {}
-    )
-}
+//@Preview(showBackground = true, name = "7. Group Profile Screen", device = "id:pixel_7")
+//@Composable
+//fun GroupProfileScreenPreview() {
+//    GroupProfileScreen(
+//        onBackClick = {},
+//        onLeaveGroupClick = {},
+//        onMembersClick = {},
+//        onAddMemberClick = {}
+//    )
+//}

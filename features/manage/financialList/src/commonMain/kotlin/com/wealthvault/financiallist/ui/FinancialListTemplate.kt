@@ -55,8 +55,7 @@ fun FinancialListTemplate(
 
             Text(
                 text = headerTitle,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
                 color = themeColor
             )
         }

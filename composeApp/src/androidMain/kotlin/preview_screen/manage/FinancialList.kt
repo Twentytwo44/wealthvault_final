@@ -14,5 +14,5 @@ fun AssetScreenPreview() {
 @Preview(showBackground = true, name = "2. Debt Screen (หนี้สิน)")
 @Composable
 fun DebtScreenPreview() {
-    DebtScreen(onAddClick = {})
+    DebtScreen()
 }

@@ -25,6 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_down_line
 import com.wealthvault.core.generated.resources.ic_dashboard_money_bag
@@ -38,6 +40,7 @@ import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.`user-api`.model.DashboardDataResponse
+import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
 import org.jetbrains.compose.resources.painterResource
 
 enum class DashboardTab {
@@ -46,7 +49,6 @@ enum class DashboardTab {
 
 class DashboardScreen(
     private val onNotiClick: () -> Unit = {} ,
-    private val onAddClick: () -> Unit = {}
 ) : Screen {
 
     @Composable
@@ -54,7 +56,12 @@ class DashboardScreen(
         val screenModel = getScreenModel<DashboardScreenModel>()
         val dashboardState by screenModel.dashboardState.collectAsState()
         val isLoading by screenModel.isLoading.collectAsState()
+        val navigator = LocalNavigator.currentOrThrow
 
+        var rootNavigator = navigator
+        while (rootNavigator.parent != null) {
+            rootNavigator = rootNavigator.parent!!
+        }
         var selectedTab by remember { mutableStateOf(DashboardTab.ASSET) }
         LaunchedEffect(Unit) {
             screenModel.fetchDashboard()
@@ -62,7 +69,9 @@ class DashboardScreen(
 
         DashboardContent(
             onNotiClick = onNotiClick,
-            onAddClick = onAddClick,
+            onAddClick = {
+                rootNavigator.push(MenuScreen())
+            },
             dashboardState = dashboardState,
             isLoading = isLoading,
             selectedTab = selectedTab,
@@ -141,16 +150,7 @@ fun DashboardContent(
                         val categoryName = getCategoryGroupName(assetItem.type, isAsset)
 
                         // 🌟 2. กำหนด Label ของบรรทัดที่ 2
-//                        val subLabel = when (categoryName) {
-//                            "บัญชีเงินฝาก" -> "ธนาคาร"
-//                            "เงินสด ทองคำ" -> "รายละเอียด"
-//                            "ลงทุน หุ้น กองทุน" -> "โบรกเกอร์"
-//                            "ประกัน" -> "บริษัท"
-//                            "บ้าน ตึก อาคาร" -> "พื้นที่"
-//                            "ที่ดิน" -> "เลขโฉนด"
-//                            "หนี้สิน", "รายจ่ายระยะยาว" -> "เจ้าหนี้"
-//                            else -> "ประเภท"
-//                        }
+
 
                         // 🌟 3. กำหนด Label ของบรรทัดที่ 3
                         val amtLabel = when (categoryName) {
@@ -166,8 +166,8 @@ fun DashboardContent(
                         // 🌟 4. วาดการ์ดเรียงกันลงมาเลย
                         RealItemCard(
                             title = assetItem.name.ifEmpty { "ไม่ระบุชื่อ" },
-//                            subtitleLabel = subLabel,
-//                            subtitleValue = assetItem.type, // ข้อมูลจริงที่ API Dashboard ส่งมา
+                            subtitleLabel = "ประเภท",
+                            subtitleValue = categoryName, // ข้อมูลจริงที่ API Dashboard ส่งมา
                             amountLabel = amtLabel,
                             amountValue = "${assetItem.value?.let { formatAmount(it) } ?: "0"} บาท"
                         )
@@ -184,21 +184,20 @@ fun DashboardContent(
 // 🌟 ฟังก์ชันจัดกลุ่ม (Grouping Helper)
 // =====================================
 fun getCategoryGroupName(type: String, isAsset: Boolean): String {
-    val t = type.uppercase()
+    val t = type.lowercase() // 🌟 1. เปลี่ยนเป็น lowercase() ครับ
     return if (isAsset) {
         when {
-            t.contains("BANK") || t.contains("ACC") -> "บัญชีเงินฝาก"
-            t.contains("CASH") || t.contains("GOLD") -> "เงินสด ทองคำ"
-            t.contains("INVEST") || t.contains("FUND") || t.contains("STOCK") -> "ลงทุน หุ้น กองทุน"
-            t.contains("INSUR") -> "ประกัน"
-            t.contains("BUILDING") || t.contains("HOUSE") -> "บ้าน ตึก อาคาร"
-            t.contains("LAND") -> "ที่ดิน"
+            t.contains("account") -> "บัญชีเงินฝาก"
+            t.contains("cash") -> "เงินสด ทองคำ"
+            t.contains("investment") -> "ลงทุน หุ้น กองทุน"
+            t.contains("insurance") -> "ประกัน" // 🌟 2. เติมหมวดประกันให้ครับ
+            t.contains("building") -> "บ้าน ตึก อาคาร"
+            t.contains("land") -> "ที่ดิน"
             else -> "ทรัพย์สินอื่นๆ"
         }
     } else {
         when {
-            t.contains("LOAN") -> "หนี้สิน"
-            t.contains("EXPENSE") -> "รายจ่ายระยะยาว"
+            t.contains("liability") || t.contains("loan") || t.contains("expense") -> "หนี้สิน"
             else -> "หนี้สินอื่นๆ"
         }
     }
@@ -318,8 +317,8 @@ fun MainCard(
                     text = title,
                     color = Color.White,
                     style = when {
-                        title.length <= 10 -> MaterialTheme.typography.titleLarge
-                        title.length <= 13 -> MaterialTheme.typography.titleMedium
+                        title.length <= 8 -> MaterialTheme.typography.titleLarge
+                        title.length <= 11 -> MaterialTheme.typography.titleMedium
                         else -> MaterialTheme.typography.bodyLarge
                     },
                     fontWeight = FontWeight.Bold,
@@ -394,8 +393,8 @@ fun SmallCard(modifier: Modifier = Modifier, bgBrush: Brush, icon: Painter? = nu
 @Composable
 fun RealItemCard(
     title: String,
-//    subtitleLabel: String,
-//    subtitleValue: String,
+    subtitleLabel: String,
+    subtitleValue: String,
     amountLabel: String,
     amountValue: String,
 ) {
@@ -413,11 +412,11 @@ fun RealItemCard(
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
             Spacer(modifier = Modifier.height(4.dp))
-//            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-//                Text(text = subtitleLabel, fontSize = 14.sp, color = Color.Gray)
-//                Text(text = subtitleValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
-//            }
-//            Spacer(modifier = Modifier.height(2.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = subtitleLabel, fontSize = 14.sp, color = Color.Gray)
+                Text(text = subtitleValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
+            }
+            Spacer(modifier = Modifier.height(2.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(text = amountLabel, fontSize = 14.sp, color = Color.Gray)
                 Text(text = amountValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))

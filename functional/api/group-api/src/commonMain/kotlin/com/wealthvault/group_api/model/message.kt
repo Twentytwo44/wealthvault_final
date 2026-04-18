@@ -61,7 +61,21 @@ data class MessageMetadata(
     @SerialName("asset_type")
     val assetType: String? = null, // เช่น "investment", "account"
 
+    @SerialName("item_name")
+    val itemName: String? = null,
 
     @SerialName("snapshot_title")
-    val snapshotTitle: String? = null
+    val snapshotTitle: String? = null,
+
+    @SerialName("is_action_required")
+    val isActionRequired: Boolean? = null,
+
+    @SerialName("is_completed")
+    val isCompleted: Boolean? = null,
+
+    @SerialName("target_user_id")
+    val targetUserId: String? = null,
+
+    @SerialName("type")
+    val type: String? = null // เช่น "GRANT_ACCESS_PROMPT"
 )

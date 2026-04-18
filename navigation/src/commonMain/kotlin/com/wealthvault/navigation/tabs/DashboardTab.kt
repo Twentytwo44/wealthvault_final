@@ -37,10 +37,6 @@ object DashboardTab : Tab {
                     // 🌟 เอาคำสั่งเด้งหน้า Noti เดิมกลับมาใส่ตรงนี้ครับ!
                     rootNavigator.push(NotificationDestination(rootNavigator))
                 },
-                onAddClick = {
-                    // 🚀 สั่งสลับ Tab ไปหน้าทรัพย์สิน
-                    tabNavigator.current = AssetTab
-                }
             )
         )
     }

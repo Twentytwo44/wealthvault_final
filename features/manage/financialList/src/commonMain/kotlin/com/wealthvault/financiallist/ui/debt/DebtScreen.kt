@@ -1,8 +1,5 @@
 package com.wealthvault.financiallist.ui.debt
 
-// 🌟 Import เพิ่มเติมสำหรับปุ่มเพิ่มรายการ
-
-// 🌟 Import Data Class
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -45,10 +42,7 @@ import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.financiallist.ui.FinancialListTemplate
-import com.wealthvault.financiallist.ui.component.ConfirmDeleteDialog
-import com.wealthvault.financiallist.ui.component.DetailDialog
-import com.wealthvault.financiallist.ui.component.DetailImageRow
-import com.wealthvault.financiallist.ui.component.DetailRow
+import com.wealthvault.core.components.ConfirmDeleteDialog
 import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
 import com.wealthvault.financiallist.ui.component.RealItemCard
 import com.wealthvault.financiallist.ui.component.ShareTargetList
@@ -62,9 +56,17 @@ import com.wealthvault_final.`financial-obligations`.model.ExpenseModel
 import com.wealthvault_final.`financial-obligations`.model.LiabilityModel
 import org.jetbrains.compose.resources.painterResource
 
-class DebtScreen(private val onAddClick: () -> Unit) : Screen {
+
+class DebtScreen : Screen {
     @Composable
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+
+        var rootNavigator = navigator
+        while (rootNavigator.parent != null) {
+            rootNavigator = rootNavigator.parent!!
+        }
+
         val screenModel = getScreenModel<DebtScreenModel>()
         val navigator = LocalRootNavigator.current
 
@@ -76,7 +78,9 @@ class DebtScreen(private val onAddClick: () -> Unit) : Screen {
         val expenses by screenModel.expenses.collectAsState()
 
         DebtContent(
-            onAddClick = onAddClick,
+            onAddClick = {
+                rootNavigator.push(ObMenuScreen())
+            },
             loans = loans,
             expenses = expenses,
             screenModel = screenModel,
@@ -94,14 +98,15 @@ fun DebtContent(
     navigatorContent: Navigator
 ) {
     var searchQuery by remember { mutableStateOf("") }
-
-    // 🌟 เปลี่ยนมาเก็บแค่ ID แบบหน้า Asset
     var selectedLiabilityId by remember { mutableStateOf<String?>(null) }
+
+    // 🌟 State สำหรับ Confirm Dialog
+    var showConfirmDelete by remember { mutableStateOf(false) }
+    var itemNameToDelete by remember { mutableStateOf("") }
 
     val filteredExpenses = expenses.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
     val filteredLoans = loans.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
 
-    // 🌟 1. ใช้ Box ครอบทั้งหน้าเพื่อวางปุ่มลอย
     Box(modifier = Modifier.fillMaxSize()) {
 
         FinancialListTemplate(
@@ -120,7 +125,6 @@ fun DebtContent(
             }
         ) {
             LazyColumn {
-                // 🌟 1. หนี้สิน
                 if (filteredLoans.isNotEmpty()) {
                     item {
                         ExpandableCategoryCard(title = "หนี้สิน", itemCount = filteredLoans.size, themeColor = "debt", initiallyExpanded = true) {
@@ -128,15 +132,15 @@ fun DebtContent(
                                 RealItemCard(
                                     title = loan.name ?: "",
                                     subtitleLabel = "เจ้าหนี้", subtitleValue = loan.creditor ?: "",
-                                    amountLabel = "ยอดหนี้", amountValue = "${formatAmount(loan.principal  ?: 0.0)} บาท",
+                                    amountLabel = "ยอดหนี้", amountValue = "${formatAmount(loan.principal ?: 0.0)} บาท",
                                     onClick = { selectedLiabilityId = loan.id }
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
-                // 🌟 2. รายจ่ายระยะยาว
                 if (filteredExpenses.isNotEmpty()) {
                     item {
                         ExpandableCategoryCard(title = "รายจ่ายระยะยาว", itemCount = filteredExpenses.size, themeColor = "debt", initiallyExpanded = true) {
@@ -152,16 +156,14 @@ fun DebtContent(
                     }
                 }
 
-                // 🌟 ปรับความสูงตรงนี้เผื่อให้ดึง List ขึ้นมาพ้นปุ่มได้ (ถ้า 80.dp ไม่พอ ลองปรับเป็น 100.dp ได้ครับ)
                 item { Spacer(modifier = Modifier.height(140.dp)) }
             }
         }
 
-        // 🌟 2. ปุ่ม Floating Action Button ของคุณ Champ
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 40.dp, end = 25.dp) // 💡 ถ้าติด Navigation Bar ด้านล่าง อาจจะต้องเพิ่ม bottom นิดนึงนะครับ
+                .padding(bottom = 40.dp, end = 25.dp)
                 .size(56.dp)
                 .clickable { onAddClick() },
             shape = CircleShape,
@@ -171,7 +173,7 @@ fun DebtContent(
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_common_plus),
-                    contentDescription = "เพิ่มหนี้สิน", // 🌟 เปลี่ยนเป็นหนี้สินให้ตรงหน้า
+                    contentDescription = "เพิ่มหนี้สิน",
                     tint = LightSoftWhite,
                     modifier = Modifier.size(40.dp)
                 )
@@ -188,7 +190,6 @@ fun DebtContent(
             navigatorContent = navigatorContent
         )
     }
-}
 
 @Composable
 fun DebtDetailFetcherDialog(

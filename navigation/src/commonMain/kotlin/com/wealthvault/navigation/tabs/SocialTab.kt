@@ -1,6 +1,7 @@
 package com.wealthvault.navigation.tabs
 
 import androidx.compose.runtime.Composable
+import cafe.adriel.voyager.navigator.Navigator // 🌟 1. อย่าลืม Import Navigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
@@ -19,7 +20,7 @@ object SocialTab : Tab {
 
     @Composable
     override fun Content() {
-        SocialScreen()
-
+        // 🌟 2. ครอบ SocialScreen ด้วย Navigator
+        Navigator(SocialScreen())
     }
 }

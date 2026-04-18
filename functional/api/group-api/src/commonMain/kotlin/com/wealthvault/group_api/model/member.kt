@@ -8,8 +8,9 @@ data class MemberResponse(
     @SerialName("message")
     val message: String? = null,
 
+    // 🌟 เปลี่ยนจาก GroupMemberData เป็น GroupMemberItem ครับ
     @SerialName("data")
-    val data: List<GroupMemberData> = emptyList(),
+    val data: List<GroupMemberItem> = emptyList(),
 
     @SerialName("error")
     val error: String? = null
@@ -24,8 +25,8 @@ data class AddMemberRequest(
 @Serializable
 data class GrantAccessRequest(
     @SerialName("target_id")
-    val targetIds: String? = null,
+    val targetId: String? = null,
 
     @SerialName("item_ids")
-    val itemIds: String? = null
+    val itemIds: List<String>? = null
 )

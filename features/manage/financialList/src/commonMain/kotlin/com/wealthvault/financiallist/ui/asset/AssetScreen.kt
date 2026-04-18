@@ -1,9 +1,5 @@
 package com.wealthvault.financiallist.ui.asset
 
-// 🌟 Import เพิ่มเติมสำหรับปุ่มเพิ่มรายการ
-
-// Import Data Class
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -26,21 +20,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import com.wealthvault.account_api.model.AccountData
-import com.wealthvault.account_api.model.BankAccountData
-import com.wealthvault.building_api.model.BuildingIdData
 import com.wealthvault.building_api.model.GetBuildingData
-import com.wealthvault.cash_api.model.CashIdData
 import com.wealthvault.cash_api.model.GetCashData
+import com.wealthvault.core.components.ConfirmDeleteDialog
+import com.wealthvault.insurance_api.model.GetInsuranceData
+import com.wealthvault.investment_api.model.GetInvestmentData
+import com.wealthvault.land_api.model.GetLandData
+
+// Import Utils & Resources
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_plus
 import com.wealthvault.core.generated.resources.ic_nav_asset
@@ -49,8 +44,10 @@ import com.wealthvault.core.theme.LightDebt
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.formatAmount
-import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
+import org.jetbrains.compose.resources.painterResource
+
+// Import Components ของฝั่ง Financial
 import com.wealthvault.financiallist.ui.FinancialListTemplate
 import com.wealthvault.financiallist.ui.asset.form.account.BankAccountFormScreen
 import com.wealthvault.financiallist.ui.asset.form.building.BuildingFormScreen
@@ -107,9 +104,8 @@ class AssetScreen() : Screen {
 
         AssetContent(
             screenModel = screenModel,
-            // 🌟 3. สั่ง rootNavigator ให้ดัน MenuScreen ขึ้นมาทับทุกอย่าง!
             onAddClick = {
-//                rootNavigator?.push(MenuScreen())
+                rootNavigator.push(MenuScreen())
             },
             accounts = accounts,
             cashes = cashes,
@@ -135,9 +131,12 @@ fun AssetContent(
     navigatorContent: Navigator
 ) {
     var searchQuery by remember { mutableStateOf("") }
-
     var selectedAssetId by remember { mutableStateOf<String?>(null) }
     var selectedAssetType by remember { mutableStateOf<String?>(null) }
+
+    // 🌟 State สำหรับ Alert ลบข้อมูล
+    var showConfirmDelete by remember { mutableStateOf(false) }
+    var itemNameToDelete by remember { mutableStateOf("") }
 
     val filteredAccounts = accounts.filter { it.name.contains(searchQuery, ignoreCase = true) }
     val filteredCashes = cashes.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
@@ -146,16 +145,13 @@ fun AssetContent(
     val filteredBuildings = buildings.filter { it.name.contains(searchQuery, ignoreCase = true) }
     val filteredLands = lands.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
 
-    // 🌟 1. ใช้ Box ครอบทั้งหน้าจอเพื่อที่จะวางปุ่มไว้ด้านบนสุด (Overlay) ได้
     Box(modifier = Modifier.fillMaxSize()) {
-
-        // เนื้อหาหลัก (รายการทรัพย์สิน)
         FinancialListTemplate(
             headerTitle = "ทรัพย์สิน",
             themeColor = LightAsset,
             searchQuery = searchQuery,
             onSearchChange = { searchQuery = it },
-            onAddClick = onAddClick, // ถ้าใน FinancialListTemplate มีปุ่มเพิ่มของมันเองด้วย
+            onAddClick = onAddClick,
             headerIcon = {
                 Icon(
                     painter = painterResource(Res.drawable.ic_nav_asset),
@@ -178,6 +174,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -193,6 +190,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -209,6 +207,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -224,6 +223,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -239,6 +239,7 @@ fun AssetContent(
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -257,11 +258,10 @@ fun AssetContent(
                     }
                 }
 
-                item { Spacer(modifier = Modifier.height(140.dp)) } // 🌟 เผื่อพื้นที่ด้านล่างไว้ไม่ให้โดนปุ่มบัง
+                item { Spacer(modifier = Modifier.height(140.dp)) }
             }
         }
 
-        // 🌟 2. ปุ่มลอยมุมขวาล่าง (Floating Action Button)
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -283,11 +283,39 @@ fun AssetContent(
         }
     }
 
-    if (selectedAssetId != null && selectedAssetType != null) {
-        AssetDetailFetcherDialog(
+    // 🌟 ส่วนของ Alert ลบข้อมูล
+    if (showConfirmDelete) {
+        val annotatedMessage = buildAnnotatedString {
+            append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
+            withStyle(style = SpanStyle(color = LightAsset, fontWeight = FontWeight.Bold)) {
+                append("'$itemNameToDelete'")
+            }
+            append(" ออกจากระบบ?")
+        }
+
+        ConfirmDeleteDialog(
+            title = "ลบทรัพย์สิน",
+            message = annotatedMessage,
+            onConfirm = {
+                selectedAssetId?.let { id ->
+                    selectedAssetType?.let { type ->
+                        screenModel.deleteAsset(id, type)
+                    }
+                }
+                showConfirmDelete = false
+                selectedAssetId = null
+                selectedAssetType = null
+            },
+            onDismiss = { showConfirmDelete = false }
+        )
+    }
+
+    // 🌟 เรียกใช้ Smart Dialog สุดฉลาด
+    if (selectedAssetId != null && selectedAssetType != null && !showConfirmDelete) {
+        SmartAssetDetailDialog(
             assetId = selectedAssetId!!,
             assetType = selectedAssetType!!,
-            screenModel = screenModel,
+            showBottomMenu = true, // หน้าจัดการทรัพย์สินของตัวเอง ต้องมีปุ่ม
             onDismiss = {
                 selectedAssetId = null
                 selectedAssetType = null

@@ -57,6 +57,9 @@ data class FriendData(
     @SerialName("created_at")
     val createdAt: String? = null,
 
+    @SerialName("is_friend")
+    val isFriend: Boolean? = null,
+
     @SerialName("updated_at")
     val updatedAt: String? = null,
 

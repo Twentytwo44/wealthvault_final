@@ -50,7 +50,7 @@ data class GroupData(
     val createdBy: String? = null,
 
     @SerialName("member_count")
-    val memberCount: String? = null,
+    val memberCount: Int? = null,
 
     @SerialName("created_at")
     val createdAt: String? = null,

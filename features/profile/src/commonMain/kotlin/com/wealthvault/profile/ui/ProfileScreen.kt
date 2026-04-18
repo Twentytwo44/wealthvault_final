@@ -98,7 +98,6 @@ fun ProfileContent(
                 Text(
                     text = "โปรไฟล์",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Medium,
                     color = themeColor
                 )
 

@@ -5,6 +5,6 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 
 interface GetGroupApi {
-    @GET("asset/invest/{id}")
-    suspend fun getInvestment(@Path("id") id: String): GroupResponse
+    @GET("group/detail/{id}")
+    suspend fun getGroupDetail(@Path("id") id: String): GroupResponse // 🌟 เปลี่ยนชื่อฟังก์ชัน
 }

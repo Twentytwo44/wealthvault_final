@@ -79,6 +79,9 @@ data class AssetDetail(
     @SerialName("type")
     val type: String? = null,
 
+    @SerialName("image")
+    val image: String? = null,
+
     // ----------------------------------------
     // type = "building"
     // ----------------------------------------
