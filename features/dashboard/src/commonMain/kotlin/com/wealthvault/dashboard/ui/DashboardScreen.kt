@@ -25,6 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_down_line
 import com.wealthvault.core.generated.resources.ic_dashboard_money_bag
@@ -38,6 +40,7 @@ import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.`user-api`.model.DashboardDataResponse
+import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
 import org.jetbrains.compose.resources.painterResource
 
 enum class DashboardTab {
@@ -46,7 +49,6 @@ enum class DashboardTab {
 
 class DashboardScreen(
     private val onNotiClick: () -> Unit = {} ,
-    private val onAddClick: () -> Unit = {}
 ) : Screen {
 
     @Composable
@@ -54,7 +56,12 @@ class DashboardScreen(
         val screenModel = getScreenModel<DashboardScreenModel>()
         val dashboardState by screenModel.dashboardState.collectAsState()
         val isLoading by screenModel.isLoading.collectAsState()
+        val navigator = LocalNavigator.currentOrThrow
 
+        var rootNavigator = navigator
+        while (rootNavigator.parent != null) {
+            rootNavigator = rootNavigator.parent!!
+        }
         var selectedTab by remember { mutableStateOf(DashboardTab.ASSET) }
         LaunchedEffect(Unit) {
             screenModel.fetchDashboard()
@@ -62,7 +69,9 @@ class DashboardScreen(
 
         DashboardContent(
             onNotiClick = onNotiClick,
-            onAddClick = onAddClick,
+            onAddClick = {
+                rootNavigator.push(MenuScreen())
+            },
             dashboardState = dashboardState,
             isLoading = isLoading,
             selectedTab = selectedTab,
@@ -308,8 +317,8 @@ fun MainCard(
                     text = title,
                     color = Color.White,
                     style = when {
-                        title.length <= 10 -> MaterialTheme.typography.titleLarge
-                        title.length <= 13 -> MaterialTheme.typography.titleMedium
+                        title.length <= 8 -> MaterialTheme.typography.titleLarge
+                        title.length <= 11 -> MaterialTheme.typography.titleMedium
                         else -> MaterialTheme.typography.bodyLarge
                     },
                     fontWeight = FontWeight.Bold,

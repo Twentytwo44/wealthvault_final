@@ -225,7 +225,7 @@ fun GroupSpaceContent(
 
                                 ActivityBubbleCard(
                                     title = titleText,
-                                    assetName = msg.metadata?.snapshotTitle ?: "ไม่ระบุชื่อทรัพย์สิน",
+                                    assetName = msg.metadata?.itemName ?: "ไม่ระบุชื่อทรัพย์สิน",
                                     assetType = msg.metadata?.assetType ?: "ไม่ระบุประเภท",
                                     isMe = isMe,
                                     profileImageUrl = msg.senderImage,

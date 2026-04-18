@@ -196,8 +196,9 @@ fun SharedAssetContent(
                                         model = imageUrl,
                                         contentDescription = assetName,
                                         contentScale = ContentScale.Crop,
-                                        modifier = Modifier.size(48.dp).clip(CircleShape)
-                                    )
+                                        modifier = Modifier.size(48.dp).background(LightBg, RoundedCornerShape(8.dp)),
+
+                                        )
                                 } else {
                                     val assetType = asset.type ?: ""
                                     val iconRes = when {

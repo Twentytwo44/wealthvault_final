@@ -65,7 +65,7 @@ class FriendSpaceScreen(
         WealthVaultTheme {
             FriendSpaceContent(
                 friendName = friendName,
-                messages = reversedMessages,
+                messages = messages,
                 isLoading = isLoading,
                 onBackClick = { navigator.pop() },
                 onShareClick = {

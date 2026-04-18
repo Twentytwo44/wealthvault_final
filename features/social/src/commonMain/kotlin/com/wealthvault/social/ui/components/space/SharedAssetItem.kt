@@ -2,10 +2,12 @@ package com.wealthvault.social.ui.components.space
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,61 +16,136 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.wealthvault.core.generated.resources.*
+import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.utils.formatAmount
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 
 @Composable
 fun SharedAssetItem(
-    name: String,
-    tag: String,
-    showDelete: Boolean,
-    themeColor: Color = Color(0xFFC27A5A)
+    assetId: String,          // 🌟 ต้องมี ID เพื่อบอกตัวแม่ว่าใครคือใคร
+    assetName: String,
+    assetType: String,
+    imageUrl: String? = null,
+    value: Double? = null,
+    showDelete: Boolean = false,
+    isFirstItem: Boolean = false,
+    isOpened: Boolean = false, // 🌟 สถานะจากตัวแม่ (สั่งเปิด/ปิด)
+    onOpenRequested: () -> Unit = {}, // 🌟 ส่งเสียงบอกตัวแม่ตอนเริ่มปัด
+    onCloseRequested: () -> Unit = {}, // 🌟 ส่งเสียงบอกตัวแม่ตอนปัดกลับเอง
+    themeColor: Color = Color(0xFFC27A5A),
+    onDeleteClick: () -> Unit = {}
 ) {
-    // 1. กำหนดความกว้างของปุ่มลบ
-    val buttonWidthDp = 72.dp
+    val buttonWidthDp = 80.dp
     val density = LocalDensity.current
     val maxSwipePx = with(density) { buttonWidthDp.toPx() }
-
-    // 2. ตัวแปรสำหรับจับการปัดนิ้ว
     val offsetX = remember { Animatable(0f) }
     val coroutineScope = rememberCoroutineScope()
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
+    // 🌟 1. ดักฟังตัวแม่: ถ้าแม่บอกให้ปิด (isOpened = false) และเราเปิดอยู่ ให้หดกลับซะ!
+    LaunchedEffect(isOpened) {
+        if (!isOpened && offsetX.value != 0f) {
+            offsetX.animateTo(0f, tween(300, easing = FastOutSlowInEasing))
+        }
+    }
 
-    ) {
-        // --- กล่องหลัก (ที่จะขยับซ้ายขวา) ---
-        Box(
+    // 🌟 2. แอนิเมชัน Hint ดั้งเดิมของคุณ Champ
+    LaunchedEffect(isFirstItem, showDelete) {
+        if (isFirstItem && showDelete && !isOpened) { // ไม่ทำถ้ากำลังโดนปัดอยู่
+            kotlinx.coroutines.delay(600)
+            offsetX.animateTo(
+                targetValue = -maxSwipePx * 0.4f,
+                animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
+            )
+            offsetX.animateTo(
+                targetValue = 0f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)
+            )
+        }
+    }
+
+    val thaiAssetType = when {
+        assetType.contains("account", ignoreCase = true) -> "เงินฝาก"
+        assetType.contains("cash", ignoreCase = true) -> "เงินสด/ทอง"
+        assetType.contains("investment", ignoreCase = true) -> "ลงทุน"
+        assetType.contains("insurance", ignoreCase = true) -> "ประกัน"
+        assetType.contains("building", ignoreCase = true) -> "บ้าน/อาคาร"
+        assetType.contains("land", ignoreCase = true) -> "ที่ดิน"
+        assetType.contains("loan", ignoreCase = true) || assetType.contains("liability", ignoreCase = true) -> "หนี้สิน"
+        assetType.contains("expense", ignoreCase = true) -> "ค่าใช้จ่าย"
+        else -> assetType.take(6)
+    }
+
+    Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) {
+
+        // --- สีแดงด้านหลัง ---
+        if (showDelete) {
+            Surface(
+                color = Color(0xFFE53935),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.matchParentSize().offset {
+                    val safeX = if (offsetX.value.isNaN()) 0f else offsetX.value
+                    IntOffset(safeX.coerceAtLeast(0f).roundToInt(), 0)
+                }
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize().clickable {
+                        onDeleteClick()
+                        coroutineScope.launch { offsetX.animateTo(0f, tween(300)) }
+                    },
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(text = "ลบ", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(end = 28.dp))
+                }
+            }
+        }
+
+        // --- การ์ดสีขาวด้านหน้า ---
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = Color.White,
+            shadowElevation = 2.dp,
             modifier = Modifier
                 .fillMaxWidth()
-                // เลื่อนตำแหน่ง X ตามนิ้วที่ปัด
-                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                .offset {
+                    val safeX = if (offsetX.value.isNaN()) 0f else offsetX.value
+                    IntOffset(safeX.roundToInt(), 0)
+                }
                 .then(
                     if (showDelete) {
                         Modifier.pointerInput(Unit) {
                             detectHorizontalDragGestures(
+                                onDragStart = {
+                                    // 🌟 พอเอานิ้วแตะปุ๊บ บอกตัวแม่เลยว่าฉันขอยึดพื้นที่! (ใบอื่นจะได้ปิด)
+                                    onOpenRequested()
+                                },
                                 onDragEnd = {
                                     coroutineScope.launch {
-                                        // ปล่อยนิ้ว: ถ้าปัดเกินครึ่งนึง ให้เปิดจนสุด, ถ้าไม่ถึง ให้เด้งปิด
                                         if (offsetX.value < -maxSwipePx / 2) {
                                             offsetX.animateTo(-maxSwipePx, tween(300))
                                         } else {
                                             offsetX.animateTo(0f, tween(300))
+                                            onCloseRequested() // ถ้าปัดไม่สุดแล้วหดกลับ บอกตัวแม่ด้วยว่าว่างแล้ว
                                         }
                                     }
-                                },
-                                onDragCancel = {
-                                    coroutineScope.launch { offsetX.animateTo(0f, tween(300)) }
                                 },
                                 onHorizontalDrag = { change, dragAmount ->
                                     change.consume()
                                     coroutineScope.launch {
-                                        // บังคับไม่ให้ปัดเกินความกว้างของปุ่มลบ (หยุดกึกพอดี)
                                         val newOffset = (offsetX.value + dragAmount).coerceIn(-maxSwipePx, 0f)
                                         offsetX.snapTo(newOffset)
                                     }
@@ -78,56 +155,37 @@ fun SharedAssetItem(
                     } else Modifier
                 )
         ) {
-            // --- 1. เนื้อหา Asset ปกติ ---
-            // (ใช้โค้ดเดิมของคุณ Champ เลยครับ)
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .padding(vertical = 6.dp)
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFEFEBE9))
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(text = name, fontSize = 14.sp, color = Color(0xFF3A2F2A), modifier = Modifier.weight(1f))
-                Surface(
-                    color = Color(0xFF3498DB),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.padding(end = 24.dp)
-                ) {
-                    Text(text = tag, color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-                }
-            }
-
-            // --- 2. ปุ่มลบ ที่นำไปต่อท้ายด้านขวานอกจอ ---
-            if (showDelete) {
-                Box(modifier = Modifier.matchParentSize()) { // บังคับให้สูงเท่ากับเนื้อหา Asset พอดี
-                    Surface(
-                        color = Color(0xFFE74C3C),
-                        // ทำขอบมนเฉพาะฝั่งขวา
-                        shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            // 🌟 พระเอกอยู่ตรงนี้: ดันปุ่มออกไปด้านขวาจนพ้นหน้าจอ 🌟
-                            .offset(x = buttonWidthDp)
-                            .width(buttonWidthDp)
-                            .fillMaxHeight()
-                            .clickable {
-                                // TODO: ใส่คำสั่งการลบตรงนี้
-                                coroutineScope.launch {
-                                    offsetX.animateTo(0f, tween(300)) // กดเสร็จเด้งกลับ
-                                }
-                            }
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(text = "ลบ", color = Color.White, fontSize = 12.sp)
-                        }
+                val isImageUrl = imageUrl?.let { it.endsWith(".png", ignoreCase = true) || it.endsWith(".jpg", ignoreCase = true) || it.endsWith(".jpeg", ignoreCase = true) || it.endsWith(".webp", ignoreCase = true) } == true
+                if (isImageUrl) {
+                    AsyncImage(model = imageUrl, contentDescription = assetName, contentScale = ContentScale.Crop, modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)))
+                } else {
+                    val iconRes = when {
+                        assetType.contains("account", ignoreCase = true) -> Res.drawable.ic_asset_type_account
+                        assetType.contains("building", ignoreCase = true) -> Res.drawable.ic_asset_type_building
+                        assetType.contains("cash", ignoreCase = true) -> Res.drawable.ic_asset_type_cash
+                        assetType.contains("insurance", ignoreCase = true) -> Res.drawable.ic_asset_type_insurance
+                        assetType.contains("investment", ignoreCase = true) -> Res.drawable.ic_asset_type_investment
+                        assetType.contains("land", ignoreCase = true) -> Res.drawable.ic_asset_type_land
+                        assetType.contains("loan", ignoreCase = true) || assetType.contains("liability", ignoreCase = true) -> Res.drawable.ic_asset_type_loan
+                        else -> null
                     }
+                    Box(modifier = Modifier.size(48.dp).background(LightBg, RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
+                        if (iconRes != null) Icon(painterResource(iconRes), contentDescription = assetType, tint = LightPrimary, modifier = Modifier.size(28.dp))
+                        else Text(text = assetType.take(3).uppercase(), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                    }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = assetName, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(text = if (value != null) "${formatAmount(value)} บาท" else "ไม่ระบุมูลค่า", fontSize = 13.sp, color = Color.Gray)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Surface(color = themeColor.copy(alpha = 0.1f), shape = RoundedCornerShape(8.dp), border = BorderStroke(1.dp, themeColor.copy(alpha = 0.3f))) {
+                    Text(text = thaiAssetType, color = themeColor, fontSize = 10.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
                 }
             }
         }

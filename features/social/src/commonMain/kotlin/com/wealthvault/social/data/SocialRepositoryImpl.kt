@@ -195,5 +195,13 @@ class SocialRepositoryImpl(
             .onSuccess { println("✅ บันทึกการแชร์ทรัพย์สินสำเร็จ!") }
             .onFailure { println("🚨 บันทึกการแชร์ทรัพย์สินล้มเหลว: ${it.message}") }
     }
+    suspend fun unShareAsset(sharedItemId: String, isGroup: Boolean): Result<Boolean> {
+        return if (isGroup) {
+            dataSource.unShareGroupItem(sharedItemId)
+        } else {
+            dataSource.unShareFriendItem(sharedItemId)
+        }
+    }
+
 
 }

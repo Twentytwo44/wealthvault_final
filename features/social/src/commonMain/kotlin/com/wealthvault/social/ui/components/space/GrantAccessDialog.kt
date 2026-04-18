@@ -162,7 +162,7 @@ fun InlineGrantAccessCard(
                                         contentDescription = assetName,
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
-                                            .size(36.dp)
+                                            .size(40.dp)
                                             .clip(RoundedCornerShape(8.dp))
                                     )
                                 } else {
@@ -185,7 +185,7 @@ fun InlineGrantAccessCard(
                                     // 🌟 วาดกล่องใส่ Icon
                                     Box(
                                         modifier = Modifier
-                                            .size(36.dp)
+                                            .size(40.dp)
                                             .background(LightBg, RoundedCornerShape(8.dp)), // ปรับพื้นหลังให้อ่อนลงนิดนึงจะได้เห็น Icon ชัดๆ
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -273,9 +273,7 @@ fun InlineGrantAccessCard(
 
                     Button(
                         onClick = {
-                            if (selectedAssets.isNotEmpty()) {
-                                onSaveSuccess(selectedAssets)
-                            }
+                            onSaveSuccess(selectedAssets)
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = themeColor),
                         shape = RoundedCornerShape(50)

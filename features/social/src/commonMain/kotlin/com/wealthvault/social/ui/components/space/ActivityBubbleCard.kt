@@ -23,6 +23,7 @@ import com.wealthvault.core.generated.resources.ic_common_solid_right
 import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -35,6 +36,19 @@ fun ActivityBubbleCard(
     themeColor: Color = Color(0xFFC27A5A),
     onDetailClick: () -> Unit = {}
 ) {
+    // 🌟 1. ส่วนแปลง Type เป็นภาษาไทย
+    val thaiAssetType = when {
+        assetType.contains("account", ignoreCase = true) -> "บัญชีเงินฝาก"
+        assetType.contains("cash", ignoreCase = true) -> "เงินสด ทองคำ"
+        assetType.contains("investment", ignoreCase = true) -> "ลงทุน หุ้น กองทุน"
+        assetType.contains("insurance", ignoreCase = true) -> "ประกัน"
+        assetType.contains("building", ignoreCase = true) -> "บ้าน ตึก อาคาร"
+        assetType.contains("land", ignoreCase = true) -> "ที่ดิน"
+        assetType.contains("loan", ignoreCase = true) || assetType.contains("liability", ignoreCase = true) -> "หนี้สิน"
+        assetType.contains("expense", ignoreCase = true) -> "ค่าใช้จ่ายระยะยาว"
+        else -> assetType // ถ้าไม่ตรงกับอะไรเลย ให้โชว์ค่าเดิมไว้ก่อน
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -71,7 +85,7 @@ fun ActivityBubbleCard(
         Card(
             modifier = if (isMe) Modifier.fillMaxWidth(0.80f) else Modifier.fillMaxWidth(0.85f),
             colors = CardDefaults.cardColors(
-                containerColor = if (isMe) themeColor.copy(alpha = 0.05f) else Color.White
+                containerColor = if (isMe) LightSoftWhite else LightSoftWhite
             ),
             shape = RoundedCornerShape(
                 topStart = if (isMe) 16.dp else 4.dp,
@@ -92,7 +106,7 @@ fun ActivityBubbleCard(
                         text = assetName,
                         fontSize = 12.sp,
                         color = Color(0xFF3A2F2A),
-                        textAlign = TextAlign.End, // 🌟 2. ดันตัวหนังสือให้ชิดขวา
+                        textAlign = TextAlign.End,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -102,39 +116,39 @@ fun ActivityBubbleCard(
                     Text(text = "ประเภท", fontSize = 12.sp, color = Color.Gray)
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = assetType,
+                        // 🌟 2. เปลี่ยนจาก assetType เป็น thaiAssetType
+                        text = thaiAssetType,
                         fontSize = 12.sp,
                         color = Color(0xFF3A2F2A),
-                        textAlign = TextAlign.End, // 🌟 2. ดันตัวหนังสือให้ชิดขวา
+                        textAlign = TextAlign.End,
                         modifier = Modifier.weight(1f)
                     )
                 }
 
                 Row(
                     modifier = Modifier
-                        .align(Alignment.End) // 🌟 ดันทั้ง Row ไปชิดขวาของการ์ด (ถ้าอยู่ใน Column)
+                        .align(Alignment.End)
                         .clip(RoundedCornerShape(8.dp))
-                        .clickable { onDetailClick() } // 🌟 ให้กดได้ทั้งกลุ่ม (Text + Icon)
-                        .padding(vertical = 4.dp), // เพิ่มพื้นที่กดนิดนึง
-                    verticalAlignment = Alignment.CenterVertically // 🌟 ให้ Text กับ Icon กึ่งกลางแนวตั้งเท่ากัน
+                        .clickable { onDetailClick() }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                            text = "รายละเอียด", // ปรับชื่อตามความชอบเลยครับ
-                    fontSize = 12.sp,
-                    color = themeColor,
-                    fontWeight = FontWeight.Medium
+                        text = "รายละเอียด",
+                        fontSize = 12.sp,
+                        color = themeColor,
+                        fontWeight = FontWeight.Medium
                     )
 
-                    Spacer(modifier = Modifier.width(4.dp)) // ระยะห่างเล็กน้อยระหว่างตัวหนังสือกับหัวลูกศร
+                    Spacer(modifier = Modifier.width(4.dp))
 
                     Icon(
                         painter = painterResource(Res.drawable.ic_common_solid_right),
                         contentDescription = null,
-                        tint = themeColor, // 🌟 ใช้สีเดียวกับ Text จะดูเป็นกลุ่มเดียวกันสวยกว่าครับ
-                        modifier = Modifier.size(14.dp) // ปรับขนาดไอคอนให้พอดีกับฟอนต์ 12.sp
+                        tint = themeColor,
+                        modifier = Modifier.size(14.dp)
                     )
                 }
-
             }
         }
     }

@@ -31,6 +31,8 @@ import com.wealthvault.share_api.model.ItemToShareData
 import com.wealthvault.share_api.model.ShareGroupData
 import com.wealthvault.share_api.model.ShareItemRequest
 import com.wealthvault.share_api.shareitem.ShareItemApi
+import com.wealthvault.share_api.unsharefriend.UnShareFriendApi
+import com.wealthvault.share_api.unsharegroup.UnShareGroupApi
 // 🌟 1. Import API 2 ตัวที่เพิ่งสร้างมา
 import com.wealthvault.`user-api`.getuserbyemail.GetUserByEmailApi
 import com.wealthvault.`user-api`.addfriend.AddFriendApi
@@ -68,6 +70,9 @@ class SocialDataSource(
     private val deleteFriendApi: DeleteFriendApi,
     private val getItemToShareApi: GetItemToShareApi,
     private val shareItemApi: ShareItemApi,
+    private val unShareFriendApi: UnShareFriendApi,
+    private val unShareGroupApi: UnShareGroupApi
+
 
 
     ) {
@@ -258,6 +263,18 @@ class SocialDataSource(
             // ถ้าสำเร็จให้คืนค่า true
             response.data ?: true
         }
+    }
+    suspend fun unShareFriendItem(id: String): Result<Boolean> = runCatching {
+        val response = unShareFriendApi.unShareFriend(id)
+        if (response.error != null) throw Exception(response.error)
+        true
+    }
+
+    // 🌟 ฟังก์ชันยกเลิกแชร์กลุ่ม
+    suspend fun unShareGroupItem(id: String): Result<Boolean> = runCatching {
+        val response = unShareGroupApi.unShareGroup(id)
+        if (response.error != null) throw Exception(response.error)
+        true
     }
 
 }
