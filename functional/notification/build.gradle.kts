@@ -2,6 +2,14 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
+    alias(libs.plugins.composeCompiler)
+
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.mokkery)
+    alias(libs.plugins.kotlin.serialization)
+
+
+
 
 }
 
@@ -18,13 +26,6 @@ kotlin {
 
     }
 
-    // For iOS targets, this is also where you should
-    // configure native binary output. For more information, see:
-    // https://kotlinlang.org/docs/multiplatform-build-native-binaries.html#build-xcframeworks
-
-    // A step-by-step guide on how to include this library in an XCode
-    // project can be found here:
-    // https://developer.android.com/kotlin/multiplatform/migrate
     val xcfName = "notificationKit"
 
     iosX64 {
@@ -45,6 +46,16 @@ kotlin {
         }
     }
 
+    // For iOS targets, this is also where you should
+    // configure native binary output. For more information, see:
+    // https://kotlinlang.org/docs/multiplatform-build-native-binaries.html#build-xcframeworks
+
+    // A step-by-step guide on how to include this library in an XCode
+    // project can be found here:
+    // https://developer.android.com/kotlin/multiplatform/migrate
+
+
+
     // Source set declarations.
     // Declaring a target automatically creates a source set with the same name. By default, the
     // Kotlin Gradle Plugin creates additional source sets that depend on each other, since it is
@@ -54,8 +65,26 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
+                // Add KMP dependencies here
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.json)
+                implementation(libs.ktor.client.auth)
+                implementation(libs.ktor.client.cio)
+
+
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
+                implementation(libs.ktorfit.lib)
+
+                implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.3.4")
+
+
+                implementation(project(":base:core"))
+                implementation(project(":base:config"))
+                implementation(project(":functional:data-store"))
+                implementation(project(":functional:api:auth-api"))
+
                 // Add KMP dependencies here
             }
         }
@@ -69,19 +98,6 @@ kotlin {
             }
         }
 
-
-
-        iosMain {
-            dependencies {
-
-
-                // Add iOS-specific dependencies here. This a source set created by Kotlin Gradle
-                // Plugin (KGP) that each specific iOS target (e.g., iosX64) depends on as
-                // part of KMP’s default source set hierarchy. Note that this source set depends
-                // on common by default and will correctly pull the iOS artifacts of any
-                // KMP dependencies declared in commonMain.
-            }
-        }
     }
 
 }

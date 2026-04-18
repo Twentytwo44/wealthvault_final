@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.flow
 
 class LoginUseCase(
     private val authRepository: AuthRepositoryImpl,
+
     // 1. รับ dispatcher เพิ่มเข้ามา
     dispatcher: CoroutineDispatcher,
     private val tokenStore: TokenStore
