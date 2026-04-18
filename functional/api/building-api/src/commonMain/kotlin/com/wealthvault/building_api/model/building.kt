@@ -44,6 +44,15 @@ data class BuildingRequest(
     @SerialName("reference_ids")
     val referenceIds:  List<BuildingReferenceData> = emptyList(),
 
+    @SerialName("delete_list_id")
+    val deleteListId: List<String> = emptyList(),
+
+    @SerialName("delete_ref_list_id")
+    val deleteRefListId: List<BuildingReferenceData> = emptyList(),
+
+    @SerialName("delete_ins_list_id")
+    val deleteInsListId: List<InsReferenceData> = emptyList(),
+
 
     )
 

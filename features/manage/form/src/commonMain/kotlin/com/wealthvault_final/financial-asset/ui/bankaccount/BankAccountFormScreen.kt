@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -129,10 +131,33 @@ fun BankAccountInputForm(
             AssetTextField(value = type, onValueChange = { type = it }, label = "ชนิด*", placeholder = "ชนิด")
             AssetTextField(value = name, onValueChange = { name = it }, label = "ชื่อ*", placeholder = "กรอกชื่อ")
             AssetTextField(value = bankName, onValueChange = { bankName = it }, label = "ธนาคาร*", placeholder = "กรอกธนาคาร")
-            AssetTextField(value = bankId, onValueChange = { bankId = it }, label = "เลขบัญชี*", placeholder = "กรอกเลขบัญชี")
-            AssetTextField(value = amount, onValueChange = { amount = it }, label = "จำนวน*", placeholder = "0.00")
-            AssetTextField(value = description, onValueChange = { description = it }, label = "คำอธิบาย", placeholder = "รายละเอียดเพิ่มเติม", isMultiLine = true)
 
+            AssetTextField(
+                value = bankId,
+                onValueChange = { newValue ->
+                    if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                        bankId = newValue
+                    }
+                },
+                label = "เลขบัญชี*",
+                placeholder = "กรอกเลขบัญชี",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+            AssetTextField(
+                value = amount,
+                onValueChange = { newValue ->
+                    // ใช้ Regex เพื่อให้รองรับทศนิยม เผื่อมีเศษสตางค์ครับ
+                    if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                        amount = newValue
+                    }
+                },
+                label = "จำนวน*",
+                placeholder = "0.00",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+            AssetTextField(value = description, onValueChange = { description = it }, label = "คำอธิบาย", placeholder = "รายละเอียดเพิ่มเติม", isMultiLine = true)
             Spacer(modifier = Modifier.height(24.dp))
 
             // 3. ส่ง State และคำสั่ง Launch เข้าไปใน ReferenceSection

@@ -69,7 +69,7 @@ class InsuranceSummaryScreenModel(
             type = current?.type ?: "",
             companyName = current?.companyName ?: "",
             coverageAmount = current?.coverageAmount ?: 0.0,
-            coveragePeriod = current?.coveragePeroid ?: "",
+            coveragePeriod = current?.coveragePeriod ?: "",
             conDate = current?.conDate ?: "",
             expDate = current?.expDate ?: "",
             description = current?.description ?: "",

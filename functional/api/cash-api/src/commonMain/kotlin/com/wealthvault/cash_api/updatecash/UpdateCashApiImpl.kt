@@ -27,7 +27,11 @@ class UpdateCashApiImpl(private val ktorfit: Ktorfit) : UpdateCashApi {
                         append("description", request.description?: "")
                         append("amount", request.ammount.toString())
 
-                        request.files.forEach { fileData ->
+                        request.deleteListId?.forEach { fileData ->
+                            append("delete_file_ids", fileData)
+                        }
+
+                        request.files?.forEach { fileData ->
                             append("files", fileData.bytes ?: byteArrayOf(), Headers.build {
 
                                 // ✅ 1. ใส่ ContentType ตามชนิดไฟล์จริงๆ (image/jpeg หรือ application/pdf)

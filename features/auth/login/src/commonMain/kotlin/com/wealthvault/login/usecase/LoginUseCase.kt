@@ -8,10 +8,12 @@ import com.wealthvault.login.data.AuthRepositoryImpl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 
 class LoginUseCase(
     private val authRepository: AuthRepositoryImpl,
+
     // 1. รับ dispatcher เพิ่มเข้ามา
     dispatcher: CoroutineDispatcher,
     private val tokenStore: TokenStore
@@ -24,8 +26,8 @@ class LoginUseCase(
 
         result.onSuccess {
             println("✅ [LoginUseCase] Login Success")
-            println("TokenStore:, ${tokenStore.accessToken}")
-            println("RefreshStore:, ${tokenStore.refreshToken}")
+            println("TokenStore:, ${tokenStore.accessToken.first()}")
+            println("RefreshStore:, ${tokenStore.refreshToken.first()}")
 
 
             emit(FlowResult.Continue(true))

@@ -5,7 +5,7 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 
 interface GetShareFriendApi {
-    @GET("group/{id}/item/")
+    @GET("friend/{id}/item/")
     suspend fun getShareFriend(@Path("id") id: String): ShareFriendResponse
 
 }

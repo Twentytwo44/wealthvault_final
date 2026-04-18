@@ -71,7 +71,7 @@ kotlin {
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
                 implementation(libs.ktorfit.lib)
-
+                implementation("io.ktor:ktor-client-logging:3.4.0")
                 implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.3.4")
 
 

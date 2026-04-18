@@ -1,8 +1,8 @@
 package com.wealthvault.insurance_api.model
 
+import com.wealthvault.core.model.FileDataModel
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import com.wealthvault.core.model.HasImageUrl // 🌟 นำเข้า Interface รูปภาพ
 
 @Serializable
 data class InsuranceIdResponse(
@@ -24,14 +24,14 @@ data class InsuranceIdData(
     @SerialName("con_date") val conDate: String,
     @SerialName("exp_date") val expDate: String,
     @SerialName("description") val description: String,
-    @SerialName("files") val files: List<FileDataInsurance>? = emptyList(), // 🌟 รองรับรูปภาพ
+    @SerialName("files") val files: List<FileDataModel>? = emptyList(), // 🌟 รองรับรูปภาพ
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null
 )
 
-@Serializable
-data class FileDataInsurance(
-    @SerialName("id") val id: String = "",
-    @SerialName("url") override val url: String = "", // 🌟 สืบทอด HasImageUrl
-    @SerialName("file_type") override val fileType: String = ""
-) : HasImageUrl
+//@Serializable
+//data class FileDataInsurance(
+//    @SerialName("id") val id: String = "",
+//    @SerialName("url") override val url: String = "", // 🌟 สืบทอด HasImageUrl
+//    @SerialName("file_type") override val fileType: String = ""
+//) : HasImageUrl

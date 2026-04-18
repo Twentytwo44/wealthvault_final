@@ -29,6 +29,9 @@ class UpdateAccountApiImpl(private val ktorfit: Ktorfit) : UpdateAccountApi {
                         append("type", request.type)
                         append("amount", request.amount)
 
+                        request.deleteListId?.forEach { fileData ->
+                            append("delete_file_ids", fileData)
+                        }
 
                         request.files.forEach { fileData ->
                             append("files", fileData.bytes, Headers.build {

@@ -34,11 +34,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.Navigator
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_plus
 import com.wealthvault.core.generated.resources.ic_nav_debt
 import com.wealthvault.core.theme.LightDebt
 import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
@@ -49,14 +51,22 @@ import com.wealthvault.financiallist.ui.component.DetailImageRow
 import com.wealthvault.financiallist.ui.component.DetailRow
 import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
 import com.wealthvault.financiallist.ui.component.RealItemCard
+import com.wealthvault.financiallist.ui.component.ShareTargetList
+import com.wealthvault.financiallist.ui.debt.form.debt.LiabilityFormScreen
+import com.wealthvault.financiallist.ui.debt.form.expense.ExpenseFormScreen
+import com.wealthvault.financiallist.ui.shareasset.ShareAssetScreen
 import com.wealthvault.liability_api.model.GetLiabilityData
 import com.wealthvault.liability_api.model.LiabilityIdData
+import com.wealthvault_final.`financial-asset`.Imagepicker.toAttachment
+import com.wealthvault_final.`financial-obligations`.model.ExpenseModel
+import com.wealthvault_final.`financial-obligations`.model.LiabilityModel
 import org.jetbrains.compose.resources.painterResource
 
 class DebtScreen(private val onAddClick: () -> Unit) : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<DebtScreenModel>()
+        val navigator = LocalRootNavigator.current
 
         LaunchedEffect(Unit) {
             screenModel.fetchLiabilities()
@@ -69,7 +79,8 @@ class DebtScreen(private val onAddClick: () -> Unit) : Screen {
             onAddClick = onAddClick,
             loans = loans,
             expenses = expenses,
-            screenModel = screenModel
+            screenModel = screenModel,
+            navigatorContent = navigator
         )
     }
 }
@@ -79,7 +90,8 @@ fun DebtContent(
     onAddClick: () -> Unit,
     loans: List<GetLiabilityData>,
     expenses: List<GetLiabilityData>,
-    screenModel: DebtScreenModel // 🌟 รับ Model เข้ามาเพื่อยิง API
+    screenModel: DebtScreenModel,
+    navigatorContent: Navigator
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
@@ -131,7 +143,7 @@ fun DebtContent(
                             filteredExpenses.forEach { exp ->
                                 RealItemCard(
                                     title = exp.name ?: "",
-                                    subtitleLabel = "เจ้าหนี้", subtitleValue = exp.creditor ?: "",
+                                    subtitleLabel = "จ่ายให้", subtitleValue = exp.creditor ?: "",
                                     amountLabel = "ยอดหนี้", amountValue = "${formatAmount(exp.principal ?: 0.0)} บาท",
                                     onClick = { selectedLiabilityId = exp.id }
                                 )
@@ -172,7 +184,8 @@ fun DebtContent(
         DebtDetailFetcherDialog(
             liabilityId = selectedLiabilityId!!,
             screenModel = screenModel,
-            onDismiss = { selectedLiabilityId = null }
+            onDismiss = { selectedLiabilityId = null },
+            navigatorContent = navigatorContent
         )
     }
 }
@@ -181,7 +194,8 @@ fun DebtContent(
 fun DebtDetailFetcherDialog(
     liabilityId: String,
     screenModel: DebtScreenModel,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    navigatorContent: Navigator
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var detailData by remember { mutableStateOf<LiabilityIdData?>(null) }
@@ -189,8 +203,11 @@ fun DebtDetailFetcherDialog(
     // 🌟 1. เพิ่ม State สำหรับคุมการเปิด/ปิด และเก็บชื่อที่จะลบ
     var showConfirmDelete by remember { mutableStateOf(false) }
     var itemNameToDelete by remember { mutableStateOf("") }
+    val shareTargets by screenModel.shareTargets.collectAsState()
+
 
     LaunchedEffect(liabilityId) {
+        screenModel.getShareTarget(liabilityId,"liability")
         isLoading = true
         detailData = screenModel.getLiabilityById(liabilityId)
         isLoading = false
@@ -241,25 +258,75 @@ fun DebtDetailFetcherDialog(
             updatedAt = formatThaiDate(item.updatedAt),
             themeType = "debt",
             onDismiss = onDismiss,
+            onEdit ={
+                if (isLoan) {
+                    val attachments = item.files?.map { it.toAttachment() }
+                    println("IMAGE LIST: ${attachments}")
+                    val dataToSend = LiabilityModel(
+                        type = item.type,
+                        name = item.name,
+                        creditor = item.creditor,
+                        principal = item.principal,
+                        interestRate = item.interestRate.toString(),
+                        description = item.description,
+                        attachments = attachments ?: emptyList(),
+                        startedAt = item.startedAt ?: "",
+                        endedAt = item.endedAt ?: ""
+
+                    )
+                    println("data to send cash: ${dataToSend}")
+                    navigatorContent.push(LiabilityFormScreen(item.id, dataToSend))
+                } else {
+                    val attachments = item.files?.map { it.toAttachment() }
+                    println("IMAGE LIST: ${attachments}")
+                    val dataToSend = ExpenseModel(
+                        type = item.type,
+                        name = item.name,
+                        creditor = "",
+                        principal = item.principal,
+                        interestRate = "",
+                        description = item.description,
+                        attachments = attachments ?: emptyList(),
+                        startedAt = item.startedAt ?: "",
+                        endedAt = ""
+
+                    )
+                    println("data to send cash: ${dataToSend}")
+                    navigatorContent.push(ExpenseFormScreen(item.id, dataToSend))
+                }
+            },
             onDelete = {
                 // 🌟 3. เก็บชื่อรายการก่อนเปิด Popup
                 itemNameToDelete = item.name
                 showConfirmDelete = true
+            },
+            onShare = {
+                navigatorContent.push(ShareAssetScreen("liability", item.id))
             }
         ) {
-            DetailRow("เจ้าหนี้", item.creditor)
-            DetailRow("ยอดหนี้คงเหลือ", "${formatAmount(item.principal)} บาท")
-            DetailRow("อัตราดอกเบี้ย", "${item.interestRate}%")
+            if (isLoan) {
+                DetailRow("ยอดหนี้คงเหลือ", "${formatAmount(item.principal)} บาท")
+                DetailRow("อัตราดอกเบี้ย", "${item.interestRate}%")
 
-            item.startedAt?.takeIf { it.isNotEmpty() }?.let { date ->
-                DetailRow("เริ่มทำสัญญา", formatThaiDate(date))
+                item.startedAt?.takeIf { it.isNotEmpty() }?.let { date ->
+                    DetailRow("เริ่มทำสัญญา", formatThaiDate(date))
+                }
+                item.endedAt?.takeIf { it.isNotEmpty() }?.let { date ->
+                    DetailRow("สิ้นสุดสัญญา", formatThaiDate(date))
+                }
+            } else {
+                DetailRow("วันที่เริ่มต้น", "${formatAmount(item.principal)} บาท")
+                DetailRow("จำนวนที่ต้องจ่าย", "${item.interestRate}%")
+
+                item.startedAt?.takeIf { it.isNotEmpty() }?.let { date ->
+                    DetailRow("วันที่เริ่ม", formatThaiDate(date))
+                }
+
             }
-            item.endedAt?.takeIf { it.isNotEmpty() }?.let { date ->
-                DetailRow("สิ้นสุดสัญญา", formatThaiDate(date))
-            }
+
 
             DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-
+            ShareTargetList("แชร์ไปยัง",shareTargets)
             DetailImageRow(files = item.files)
         }
     }

@@ -18,7 +18,7 @@ class UpdateLiabilityApiImpl(private val ktorfit: Ktorfit) : UpdateLiabilityApi 
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.patch("${Config.localhost_android}asset/lia/${id}/") {
+        return client.patch("${Config.localhost_android}lia/${id}") {
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -31,6 +31,10 @@ class UpdateLiabilityApiImpl(private val ktorfit: Ktorfit) : UpdateLiabilityApi 
                         append("description", request.description ?: "")
                         append("started_at", request.startedAt ?: "")
                         append("ended_at", request.endedAt ?: "")
+
+                        request.deleteListId.forEach { fileData ->
+                            append("delete_file_ids", fileData)
+                        }
 
                         request.files.forEach { fileData ->
                             append("files", fileData.bytes, Headers.build {

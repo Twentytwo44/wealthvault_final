@@ -34,6 +34,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.Navigator
 import com.wealthvault.account_api.model.AccountData
 import com.wealthvault.account_api.model.BankAccountData
 import com.wealthvault.building_api.model.BuildingIdData
@@ -46,36 +47,50 @@ import com.wealthvault.core.generated.resources.ic_nav_asset
 import com.wealthvault.core.theme.LightAsset
 import com.wealthvault.core.theme.LightDebt
 import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.financiallist.ui.FinancialListTemplate
+import com.wealthvault.financiallist.ui.asset.form.account.BankAccountFormScreen
+import com.wealthvault.financiallist.ui.asset.form.building.BuildingFormScreen
+import com.wealthvault.financiallist.ui.asset.form.cash.CashFormScreen
+import com.wealthvault.financiallist.ui.asset.form.insurance.InsuranceFormScreen
+import com.wealthvault.financiallist.ui.asset.form.investment.StockFormScreen
+import com.wealthvault.financiallist.ui.asset.form.land.LandFormScreen
 import com.wealthvault.financiallist.ui.component.ConfirmDeleteDialog
 import com.wealthvault.financiallist.ui.component.DetailDialog
 import com.wealthvault.financiallist.ui.component.DetailImageRow
 import com.wealthvault.financiallist.ui.component.DetailRow
 import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
 import com.wealthvault.financiallist.ui.component.RealItemCard
+import com.wealthvault.financiallist.ui.component.ShareTargetList
+import com.wealthvault.financiallist.ui.shareasset.ShareAssetScreen
 import com.wealthvault.insurance_api.model.GetInsuranceData
 import com.wealthvault.insurance_api.model.InsuranceIdData
 import com.wealthvault.investment_api.model.GetInvestmentData
 import com.wealthvault.investment_api.model.InvestmentIdData
 import com.wealthvault.land_api.model.GetLandData
 import com.wealthvault.land_api.model.LandIdData
+import com.wealthvault_final.`financial-asset`.Imagepicker.toAttachment
+import com.wealthvault_final.`financial-asset`.model.BankAccountModel
+import com.wealthvault_final.`financial-asset`.model.BuildingModel
+import com.wealthvault_final.`financial-asset`.model.CashModel
+import com.wealthvault_final.`financial-asset`.model.InsRefModel
+import com.wealthvault_final.`financial-asset`.model.InsuranceModel
+import com.wealthvault_final.`financial-asset`.model.LandModel
+import com.wealthvault_final.`financial-asset`.model.RefModel
+import com.wealthvault_final.`financial-asset`.model.StockModel
 import org.jetbrains.compose.resources.painterResource
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
 
-class AssetScreen : Screen {
+class AssetScreen() : Screen {
 
     @Composable
     override fun Content() {
         // 🌟 1. ดึง Navigator ของ Tab ปัจจุบัน
-//        val navigator = LocalNavigator.currentOrThrow
+        val navigator = LocalRootNavigator.current
 
         // 🌟 2. ดึง Navigator ตัวแม่สุด (Root) ที่อยู่หน้า App() มาใช้
-//        val rootNavigator = navigator.parent
 
         val screenModel = getScreenModel<AssetScreenModel>()
 
@@ -101,7 +116,8 @@ class AssetScreen : Screen {
             investments = investments,
             insurances = insurances,
             buildings = buildings,
-            lands = lands
+            lands = lands,
+            navigatorContent = navigator
         )
     }
 }
@@ -115,7 +131,8 @@ fun AssetContent(
     investments: List<GetInvestmentData>,
     insurances: List<GetInsuranceData>,
     buildings: List<GetBuildingData>,
-    lands: List<GetLandData>
+    lands: List<GetLandData>,
+    navigatorContent: Navigator
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
@@ -274,7 +291,8 @@ fun AssetContent(
             onDismiss = {
                 selectedAssetId = null
                 selectedAssetType = null
-            }
+            },
+            navigatorContent = navigatorContent
         )
     }
 }
@@ -284,10 +302,13 @@ fun AssetDetailFetcherDialog(
     assetId: String,
     assetType: String,
     screenModel: AssetScreenModel,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    navigatorContent: Navigator
 ) {
+
     var isLoading by remember { mutableStateOf(true) }
     var detailData by remember { mutableStateOf<Any?>(null) }
+
 
     // 🌟 1. ปรับ State ให้เก็บชื่อของ Item ที่จะลบด้วย
     var showConfirmDelete by remember { mutableStateOf(false) }
@@ -304,8 +325,11 @@ fun AssetDetailFetcherDialog(
             "land" -> screenModel.getLandById(assetId)
             else -> null
         }
+        screenModel.getShareTarget(assetId,assetType)
         isLoading = false
     }
+
+    val shareTargets by screenModel.shareTargets.collectAsState()
 
     if (isLoading) {
         Dialog(onDismissRequest = onDismiss) {
@@ -360,6 +384,25 @@ fun AssetDetailFetcherDialog(
                     onDelete = {
                         itemNameToDelete = item.name // 🌟 เก็บชื่อก่อนเปิด Dialog
                         showConfirmDelete = true
+                    },
+                    onEdit ={
+                        val attachments = item.files?.map { it.toAttachment() }
+                        println("IMAGE LIST: ${attachments}")
+                        val dataToSend = BankAccountModel(
+                            type = item.type,
+                            name = item.name,
+                            bankName = item.bankName,
+                            bankId = item.bankAccount,
+                            amount = item.amount,
+                            description = item.description,
+                            attachments = attachments ?: emptyList()
+
+                        )
+                        println("data to send cash: ${dataToSend}")
+                        navigatorContent.push(BankAccountFormScreen(item.id,dataToSend))
+                    },
+                    onShare = {
+                        navigatorContent.push(ShareAssetScreen("account", item.id))
                     }
                 ) {
                     DetailRow("ธนาคาร", item.bankName)
@@ -367,6 +410,7 @@ fun AssetDetailFetcherDialog(
                     DetailRow("ประเภท", item.type)
                     DetailRow("ยอดเงิน", "${formatAmount(item.amount)} บาท")
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
+                    ShareTargetList("แชร์ไปยัง",shareTargets)
                     DetailImageRow(files = item.files)
                 }
             }
@@ -381,10 +425,26 @@ fun AssetDetailFetcherDialog(
                     onDelete = {
                         itemNameToDelete = item.name
                         showConfirmDelete = true
+                    },
+                    onEdit ={
+                        val attachments = item.files?.map { it.toAttachment() }
+                        println("IMAGE LIST: ${attachments}")
+                        val dataToSend = CashModel(
+                            cashName = item.name,
+                            amount = item.amount,
+                            description = item.description,
+                            attachments = attachments ?: emptyList()
+                        )
+                        println("data to send cash: ${dataToSend}")
+                        navigatorContent.push(CashFormScreen(item.id,dataToSend))
+                    },
+                    onShare = {
+                        navigatorContent.push(ShareAssetScreen("cash", item.id))
                     }
                 ) {
                     DetailRow("มูลค่า", "${formatAmount(item.amount)} บาท")
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
+                    ShareTargetList("แชร์ไปยัง",shareTargets)
                     DetailImageRow(files = item.files)
                 }
             }
@@ -399,6 +459,25 @@ fun AssetDetailFetcherDialog(
                     onDelete = {
                         itemNameToDelete = "${item.name} (${item.symbol})"
                         showConfirmDelete = true
+                    },
+                    onEdit ={
+                        val attachments = item.files?.map { it.toAttachment() }
+                        println("IMAGE LIST: ${attachments}")
+                        val dataToSend = StockModel(
+                            stockName = item.name,
+                            quantity = item.quantity,
+                            costPerPrice = item.costPerPrice,
+                            description = item.description,
+                            attachments = attachments ?: emptyList(),
+                            stockSymbol = "",
+                            brokerName = item.brokerName,
+
+                        )
+                        println("data to send cash: ${dataToSend}")
+                        navigatorContent.push(StockFormScreen(item.id,dataToSend))
+                    },
+                    onShare = {
+                        navigatorContent.push(ShareAssetScreen("investment", item.id))
                     }
                 ) {
                     DetailRow("โบรกเกอร์", item.brokerName)
@@ -406,6 +485,7 @@ fun AssetDetailFetcherDialog(
                     DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(item.costPerPrice)} บาท")
                     DetailRow("ประเภท", item.type)
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
+                    ShareTargetList("แชร์ไปยัง",shareTargets)
                     DetailImageRow(files = item.files)
                 }
             }
@@ -420,6 +500,28 @@ fun AssetDetailFetcherDialog(
                     onDelete = {
                         itemNameToDelete = item.name
                         showConfirmDelete = true
+                    },
+                    onEdit ={
+                        val attachments = item.files?.map { it.toAttachment() }
+                        println("IMAGE LIST: ${attachments}")
+                        val dataToSend = InsuranceModel(
+                            type = item.type,
+                            name = item.name,
+                            policyNumber = item.policyNumber,
+                            companyName = item.companyName,
+                            coveragePeriod = item.coveragePeriod.toString(),
+                            coverageAmount = item.coverageAmount,
+                            conDate = item.conDate,
+                            expDate = item.expDate,
+                            description = item.description,
+                            attachments = attachments ?: emptyList()
+
+                        )
+                        println("data to send cash: ${dataToSend}")
+                        navigatorContent.push(InsuranceFormScreen(item.id,dataToSend))
+                    },
+                    onShare = {
+                        navigatorContent.push(ShareAssetScreen("insurance", item.id))
                     }
                 ) {
                     DetailRow("เลขกรมธรรม์", item.policyNumber)
@@ -429,6 +531,7 @@ fun AssetDetailFetcherDialog(
                     DetailRow("วันเริ่มสัญญา", formatThaiDate(item.conDate))
                     DetailRow("วันสิ้นสุดสัญญา", formatThaiDate(item.expDate))
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
+                    ShareTargetList("แชร์ไปยัง",shareTargets)
                     DetailImageRow(files = item.files)
                 }
             }
@@ -443,6 +546,44 @@ fun AssetDetailFetcherDialog(
                     onDelete = {
                         itemNameToDelete = item.name?: ""
                         showConfirmDelete = true
+                    },
+                    onEdit ={
+                        val attachments = item.files?.map { it.toAttachment() }
+                        val insData = item.ins?.map {
+                            InsRefModel(
+                                insId = it.insId,
+                                insName = it.insName
+                            )
+                        }
+                        val refData = item.referenceIds?.map {
+                            RefModel(
+                                areaName = it.refName,
+                                areaId = it.refId
+                            )
+                        }
+                        println("IMAGE LIST: ${attachments}")
+                        val dataToSend = BuildingModel(
+
+                            buildingName = item.name?: "",
+                            area = item.area?: 0.0,
+                            amount = item.amount?: 0.0,
+                            description = item.description?: "",
+                            attachments = attachments ?: emptyList(),
+                            locationAddress = item.location?.address ?: "",
+                            locationSubDistrict = item.location?.subDistrict ?: "",
+                            locationDistrict = item.location?.district ?: "",
+                            locationProvince = item.location?.province ?: "",
+                            locationPostalCode = item.location?.postalCode ?: "",
+                            insIds = insData ?: emptyList(),
+                            referenceIds = refData ?: emptyList(),
+                            type = item.type ?: ""
+
+                        )
+                        println("data to send cash: ${dataToSend}")
+                        navigatorContent.push(BuildingFormScreen(item.id ?: "",dataToSend))
+                    },
+                    onShare = {
+                        navigatorContent.push(ShareAssetScreen("building", item.id ?: ""))
                     }
                 ) {
                     DetailRow("ประเภท", item.type?: "")
@@ -451,6 +592,7 @@ fun AssetDetailFetcherDialog(
                     val addressStr = item.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
                     DetailRow("ที่อยู่", addressStr)
                     DetailRow("คำอธิบาย", item.description?: "", isLast = item.files.isNullOrEmpty())
+                    ShareTargetList("แชร์ไปยัง",shareTargets)
                     DetailImageRow(files = item.files)
                 }
             }
@@ -465,6 +607,37 @@ fun AssetDetailFetcherDialog(
                     onDelete = {
                         itemNameToDelete = item.name
                         showConfirmDelete = true
+                    },
+                    onEdit ={
+                        val attachments = item.files?.map { it.toAttachment() }
+
+                        val refData = item.ref?.map {
+                            RefModel(
+                                areaName = it.refName,
+                                areaId = it.refName
+                            )
+                        }
+                        println("IMAGE LIST: ${attachments}")
+                        val dataToSend = LandModel(
+                            landName = item.name,
+                            area = item.area,
+                            amount = item.amount,
+                            description = item.description,
+                            attachments = attachments ?: emptyList(),
+                            locationAddress = item.location?.address ?: "",
+                            locationSubDistrict = item.location?.subDistrict ?: "",
+                            locationDistrict = item.location?.district ?: "",
+                            locationProvince = item.location?.province ?: "",
+                            locationPostalCode = item.location?.postalCode ?: "",
+                            referenceIds = refData ?: emptyList(),
+                            deedNum = item.deedNum,
+
+                        )
+                        println("data to send cash: ${dataToSend}")
+                        navigatorContent.push(LandFormScreen(item.id,dataToSend))
+                    },
+                    onShare = {
+                        navigatorContent.push(ShareAssetScreen("land", item.id))
                     }
                 ) {
                     DetailRow("เลขโฉนด", item.deedNum)
@@ -473,6 +646,7 @@ fun AssetDetailFetcherDialog(
                     val addressStr = item.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
                     DetailRow("ที่อยู่", addressStr)
                     DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
+                    ShareTargetList("แชร์ไปยัง",shareTargets)
                     DetailImageRow(files = item.files)
                 }
             }

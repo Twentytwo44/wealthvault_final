@@ -27,7 +27,7 @@ class CreateCashApiImpl(private val ktorfit: Ktorfit) : CreateCashApi {
                         append("description", request.description?: "")
                         append("amount", request.ammount.toString())
 
-                        request.files.forEach { fileData ->
+                        request.files?.forEach { fileData ->
                             append("files", fileData.bytes ?: byteArrayOf(), Headers.build {
 
                                 // ✅ 1. ใส่ ContentType ตามชนิดไฟล์จริงๆ (image/jpeg หรือ application/pdf)

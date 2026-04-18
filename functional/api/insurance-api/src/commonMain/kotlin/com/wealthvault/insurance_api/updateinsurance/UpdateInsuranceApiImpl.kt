@@ -31,6 +31,10 @@ class UpdateInsuranceApiImpl(private val ktorfit: Ktorfit) : UpdateInsuranceApi 
                         append("con_date", request.conDate?: "")
                         append("exp_date", request.expDate?: "")
 
+                        request.deleteListId.forEach { fileData ->
+                            append("delete_file_ids", fileData)
+                        }
+
 
                         request.files.forEach { fileData ->
                             append("files", fileData.bytes ?: byteArrayOf(), Headers.build {

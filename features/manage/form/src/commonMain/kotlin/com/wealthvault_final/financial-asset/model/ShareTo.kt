@@ -15,4 +15,5 @@ data class ShareInfo(
     val name: String? = null,
     val userId: String? = null,
     val date: String? = null,
+    val typeData: String? = null
 )
