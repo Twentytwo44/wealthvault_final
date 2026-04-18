@@ -1,6 +1,5 @@
 package com.wealthvault.financiallist.ui.debt
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -10,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -23,15 +20,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.components.ConfirmDeleteDialog
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_plus
 import com.wealthvault.core.generated.resources.ic_nav_debt
@@ -39,13 +37,11 @@ import com.wealthvault.core.theme.LightDebt
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.formatAmount
-import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.financiallist.ui.FinancialListTemplate
-import com.wealthvault.core.components.ConfirmDeleteDialog
 import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
 import com.wealthvault.financiallist.ui.component.RealItemCard
-import com.wealthvault.financiallist.ui.component.ShareTargetList
+import com.wealthvault.financiallist.ui.component.SmartAssetDetailDialog
 import com.wealthvault.financiallist.ui.debt.form.debt.LiabilityFormScreen
 import com.wealthvault.financiallist.ui.debt.form.expense.ExpenseFormScreen
 import com.wealthvault.financiallist.ui.shareasset.ShareAssetScreen
@@ -55,7 +51,6 @@ import com.wealthvault_final.`financial-asset`.Imagepicker.toAttachment
 import com.wealthvault_final.`financial-obligations`.model.ExpenseModel
 import com.wealthvault_final.`financial-obligations`.model.LiabilityModel
 import org.jetbrains.compose.resources.painterResource
-
 
 class DebtScreen : Screen {
     @Composable
@@ -68,7 +63,7 @@ class DebtScreen : Screen {
         }
 
         val screenModel = getScreenModel<DebtScreenModel>()
-        val navigator = LocalRootNavigator.current
+        val navigatorContent = LocalRootNavigator.current
 
         LaunchedEffect(Unit) {
             screenModel.fetchLiabilities()
@@ -79,12 +74,13 @@ class DebtScreen : Screen {
 
         DebtContent(
             onAddClick = {
-                rootNavigator.push(ObMenuScreen())
+                // สมมติว่ามี ObMenuScreen หรือเปลี่ยนเป็น MenuScreen ตามที่ใช้งานจริง
+                // rootNavigator.push(ObMenuScreen())
             },
             loans = loans,
             expenses = expenses,
             screenModel = screenModel,
-            navigatorContent = navigator
+            navigatorContent = navigatorContent
         )
     }
 }
@@ -181,154 +177,80 @@ fun DebtContent(
         }
     }
 
-    // 🌟 เรียกใช้ FetcherDialog เมื่อมีการกดการ์ด (เอาไว้นอก Box เพราะเป็น Dialog ลอยทับหน้าจออยู่แล้ว)
-    if (selectedLiabilityId != null) {
-        DebtDetailFetcherDialog(
-            liabilityId = selectedLiabilityId!!,
-            screenModel = screenModel,
-            onDismiss = { selectedLiabilityId = null },
-            navigatorContent = navigatorContent
+    // 🌟 Popup ยืนยันการลบ
+    if (showConfirmDelete) {
+        val annotatedMessage = buildAnnotatedString {
+            append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
+            withStyle(style = SpanStyle(color = LightDebt, fontWeight = FontWeight.Bold)) {
+                append("'$itemNameToDelete'")
+            }
+            append(" ออกจากระบบ?")
+        }
+
+        ConfirmDeleteDialog(
+            title = "ลบรายการ",
+            message = annotatedMessage,
+            onConfirm = {
+                selectedLiabilityId?.let { id ->
+                    screenModel.deleteLiability(id, "liability")
+                }
+                showConfirmDelete = false
+                selectedLiabilityId = null
+            },
+            onDismiss = { showConfirmDelete = false }
         )
     }
 
-@Composable
-fun DebtDetailFetcherDialog(
-    liabilityId: String,
-    screenModel: DebtScreenModel,
-    onDismiss: () -> Unit,
-    navigatorContent: Navigator
-) {
-    var isLoading by remember { mutableStateOf(true) }
-    var detailData by remember { mutableStateOf<LiabilityIdData?>(null) }
-
-    // 🌟 1. เพิ่ม State สำหรับคุมการเปิด/ปิด และเก็บชื่อที่จะลบ
-    var showConfirmDelete by remember { mutableStateOf(false) }
-    var itemNameToDelete by remember { mutableStateOf("") }
-    val shareTargets by screenModel.shareTargets.collectAsState()
-
-
-    LaunchedEffect(liabilityId) {
-        screenModel.getShareTarget(liabilityId,"liability")
-        isLoading = true
-        detailData = screenModel.getLiabilityById(liabilityId)
-        isLoading = false
-    }
-
-    if (isLoading) {
-        Dialog(onDismissRequest = onDismiss) {
-            Box(
-                modifier = Modifier.size(100.dp).background(Color.White, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = LightDebt)
-            }
-        }
-    } else if (detailData != null) {
-        val item = detailData!!
-        val isLoan = item.type == "LIABILITY_TYPE_LOAN"
-
-        // 🌟 2. Popup ยืนยันการลบแบบไฮไลต์ชื่อเป็นสีแดง (LightDebt)
-        if (showConfirmDelete) {
-            val annotatedMessage = buildAnnotatedString {
-                append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
-                withStyle(style = SpanStyle(
-                    color = LightDebt, // 🌟 ใช้สีแดงตามธีมหนี้สิน
-                    fontWeight = FontWeight.Bold
-                )
-                ) {
-                    append("'$itemNameToDelete'")
-                }
-                append(" ออกจากระบบ?")
-            }
-
-            ConfirmDeleteDialog(
-                title = if (isLoan) "ลบหนี้สิน" else "ลบรายจ่าย",
-                message = annotatedMessage, // 🌟 ส่ง AnnotatedString เข้าไป
-                onConfirm = {
-                    screenModel.deleteLiability(item.id, "liability")
-                    showConfirmDelete = false
-                    onDismiss()
-                },
-                onDismiss = { showConfirmDelete = false }
-            )
-        }
-
-        DetailDialog(
-            subtitle = if (isLoan) "หนี้สิน · รายละเอียดหนี้สิน" else "หนี้สิน · รายละเอียดรายจ่าย",
-            title = item.name,
-            updatedAt = formatThaiDate(item.updatedAt),
-            themeType = "debt",
-            onDismiss = onDismiss,
-            onEdit ={
-                if (isLoan) {
-                    val attachments = item.files?.map { it.toAttachment() }
-                    println("IMAGE LIST: ${attachments}")
-                    val dataToSend = LiabilityModel(
-                        type = item.type,
-                        name = item.name,
-                        creditor = item.creditor,
-                        principal = item.principal,
-                        interestRate = item.interestRate.toString(),
-                        description = item.description,
-                        attachments = attachments ?: emptyList(),
-                        startedAt = item.startedAt ?: "",
-                        endedAt = item.endedAt ?: ""
-
-                    )
-                    println("data to send cash: ${dataToSend}")
-                    navigatorContent.push(LiabilityFormScreen(item.id, dataToSend))
-                } else {
-                    val attachments = item.files?.map { it.toAttachment() }
-                    println("IMAGE LIST: ${attachments}")
-                    val dataToSend = ExpenseModel(
-                        type = item.type,
-                        name = item.name,
-                        creditor = "",
-                        principal = item.principal,
-                        interestRate = "",
-                        description = item.description,
-                        attachments = attachments ?: emptyList(),
-                        startedAt = item.startedAt ?: "",
-                        endedAt = ""
-
-                    )
-                    println("data to send cash: ${dataToSend}")
-                    navigatorContent.push(ExpenseFormScreen(item.id, dataToSend))
-                }
+    // 🌟 เรียกใช้ Smart Dialog กลางแทน
+    if (selectedLiabilityId != null && !showConfirmDelete) {
+        SmartAssetDetailDialog(
+            assetId = selectedLiabilityId!!,
+            assetType = "liability", // ส่ง type เป็น liability
+            showBottomMenu = true,
+            onDismiss = {
+                selectedLiabilityId = null
             },
-            onDelete = {
-                // 🌟 3. เก็บชื่อรายการก่อนเปิด Popup
-                itemNameToDelete = item.name
+            onDelete = { itemName ->
+                itemNameToDelete = itemName
                 showConfirmDelete = true
             },
             onShare = {
-                navigatorContent.push(ShareAssetScreen("liability", item.id))
+                navigatorContent.push(ShareAssetScreen("liability", selectedLiabilityId!!))
+            },
+            onEdit = { rawData ->
+                if (rawData is LiabilityIdData) {
+                    val isLoan = rawData.type == "LIABILITY_TYPE_LOAN"
+                    val attachments = rawData.files?.map { it.toAttachment() }
+
+                    if (isLoan) {
+                        val dataToSend = LiabilityModel(
+                            type = rawData.type,
+                            name = rawData.name,
+                            creditor = rawData.creditor,
+                            principal = rawData.principal,
+                            interestRate = rawData.interestRate.toString(),
+                            description = rawData.description,
+                            attachments = attachments ?: emptyList(),
+                            startedAt = rawData.startedAt ?: "",
+                            endedAt = rawData.endedAt ?: ""
+                        )
+                        navigatorContent.push(LiabilityFormScreen(rawData.id, dataToSend))
+                    } else {
+                        val dataToSend = ExpenseModel(
+                            type = rawData.type,
+                            name = rawData.name,
+                            creditor = "",
+                            principal = rawData.principal,
+                            interestRate = "",
+                            description = rawData.description,
+                            attachments = attachments ?: emptyList(),
+                            startedAt = rawData.startedAt ?: "",
+                            endedAt = ""
+                        )
+                        navigatorContent.push(ExpenseFormScreen(rawData.id, dataToSend))
+                    }
+                }
             }
-        ) {
-            if (isLoan) {
-                DetailRow("ยอดหนี้คงเหลือ", "${formatAmount(item.principal)} บาท")
-                DetailRow("อัตราดอกเบี้ย", "${item.interestRate}%")
-
-                item.startedAt?.takeIf { it.isNotEmpty() }?.let { date ->
-                    DetailRow("เริ่มทำสัญญา", formatThaiDate(date))
-                }
-                item.endedAt?.takeIf { it.isNotEmpty() }?.let { date ->
-                    DetailRow("สิ้นสุดสัญญา", formatThaiDate(date))
-                }
-            } else {
-                DetailRow("วันที่เริ่มต้น", "${formatAmount(item.principal)} บาท")
-                DetailRow("จำนวนที่ต้องจ่าย", "${item.interestRate}%")
-
-                item.startedAt?.takeIf { it.isNotEmpty() }?.let { date ->
-                    DetailRow("วันที่เริ่ม", formatThaiDate(date))
-                }
-
-            }
-
-
-            DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-            ShareTargetList("แชร์ไปยัง",shareTargets)
-            DetailImageRow(files = item.files)
-        }
+        )
     }
 }

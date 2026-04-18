@@ -1,35 +1,39 @@
-package com.wealthvault.financiallist.ui.component // หรือโฟลเดอร์ที่คุณ Champ ต้องการในฝั่ง Social
+package com.wealthvault.financiallist.ui.component
 
+// 🌟 Import UI จาก Core
+
+// 🌟 Import Utils & Models
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import org.koin.compose.koinInject
-
-// 🌟 Import UI จาก Core
+import com.wealthvault.account_api.model.BankAccountData
+import com.wealthvault.building_api.model.BuildingIdData
+import com.wealthvault.cash_api.model.CashIdData
 import com.wealthvault.core.components.DetailDialog
-import com.wealthvault.core.components.DetailRow
 import com.wealthvault.core.components.DetailImageRow
+import com.wealthvault.core.components.DetailRow
 import com.wealthvault.core.theme.LightPrimary
-
-// 🌟 Import Utils & Models
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.financiallist.data.FinanciallistRepositoryImpl
-import com.wealthvault.account_api.model.BankAccountData
-import com.wealthvault.cash_api.model.CashIdData
-import com.wealthvault.investment_api.model.InvestmentIdData
 import com.wealthvault.insurance_api.model.InsuranceIdData
-import com.wealthvault.building_api.model.BuildingIdData
+import com.wealthvault.investment_api.model.InvestmentIdData
 import com.wealthvault.land_api.model.LandIdData
 import com.wealthvault.liability_api.model.LiabilityIdData
+import org.koin.compose.koinInject
 
 @Composable
 fun SmartAssetDetailDialog(
@@ -39,7 +43,8 @@ fun SmartAssetDetailDialog(
     showBottomMenu: Boolean = false,
     onDismiss: () -> Unit,
     onDelete: (String) -> Unit = {},
-    onEdit: () -> Unit = {},
+    // 🌟 แก้ตรงนี้: ให้ส่งข้อมูล Any กลับไปให้ AssetScreen
+    onEdit: (Any) -> Unit = {},
     onShare: () -> Unit = {}
 ) {
     var isLoading by remember { mutableStateOf(true) }
@@ -94,12 +99,14 @@ fun SmartAssetDetailDialog(
             is BankAccountData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = itemData.name, updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name) }, onEdit = onEdit, onShare = onShare
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name) },
+                    onEdit = { onEdit(itemData) }, // 🌟 ส่งค่าออกไป
+                    onShare = onShare
                 ) {
                     DetailRow("ธนาคาร", itemData.bankName)
                     DetailRow("เลขบัญชี", itemData.bankAccount)
                     DetailRow("ประเภท", itemData.type)
-                    DetailRow("ยอดเงิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("ยอดเงิน", "${formatAmount(itemData.amount)} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
@@ -108,7 +115,9 @@ fun SmartAssetDetailDialog(
             is CashIdData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") },
+                    onEdit = { onEdit(itemData) }, // 🌟 ส่งค่าออกไป
+                    onShare = onShare
                 ) {
                     DetailRow("มูลค่า", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
@@ -119,7 +128,9 @@ fun SmartAssetDetailDialog(
             is InvestmentIdData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = "${itemData.name} (${itemData.symbol})", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete("${itemData.name} (${itemData.symbol})") }, onEdit = onEdit, onShare = onShare
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete("${itemData.name} (${itemData.symbol})") },
+                    onEdit = { onEdit(itemData) }, // 🌟 ส่งค่าออกไป
+                    onShare = onShare
                 ) {
                     DetailRow("โบรกเกอร์", itemData.brokerName)
                     DetailRow("จำนวน", formatAmount(itemData.quantity ?: 0.0))
@@ -134,7 +145,9 @@ fun SmartAssetDetailDialog(
             is InsuranceIdData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") },
+                    onEdit = { onEdit(itemData) }, // 🌟 ส่งค่าออกไป
+                    onShare = onShare
                 ) {
                     DetailRow("เลขกรมธรรม์", itemData.policyNumber)
                     DetailRow("บริษัท", itemData.companyName)
@@ -150,7 +163,9 @@ fun SmartAssetDetailDialog(
             is BuildingIdData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") },
+                    onEdit = { onEdit(itemData) }, // 🌟 ส่งค่าออกไป
+                    onShare = onShare
                 ) {
                     DetailRow("ประเภท", itemData.type ?: "")
                     DetailRow("พื้นที่", "${formatAmount(itemData.area ?: 0.0)} ตร.ม.")
@@ -165,7 +180,9 @@ fun SmartAssetDetailDialog(
             is LandIdData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") },
+                    onEdit = { onEdit(itemData) }, // 🌟 ส่งค่าออกไป
+                    onShare = onShare
                 ) {
                     DetailRow("เลขโฉนด", itemData.deedNum)
                     DetailRow("ขนาดพื้นที่", "${formatAmount(itemData.area ?: 0.0)} ตารางวา")
@@ -180,7 +197,9 @@ fun SmartAssetDetailDialog(
             is LiabilityIdData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") },
+                    onEdit = { onEdit(itemData) }, // 🌟 ส่งค่าออกไป
+                    onShare = onShare
                 ) {
                     DetailRow("เจ้าหนี้", itemData.creditor)
                     DetailRow("ประเภท", if (itemData.type == "LIABILITY_TYPE_LOAN") "หนี้สิน" else "รายจ่าย")

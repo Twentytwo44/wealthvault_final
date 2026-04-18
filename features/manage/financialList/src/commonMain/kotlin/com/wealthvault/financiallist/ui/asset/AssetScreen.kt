@@ -1,5 +1,8 @@
 package com.wealthvault.financiallist.ui.asset
 
+// Import Utils & Resources
+
+// Import Components ของฝั่ง Financial
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -28,26 +31,20 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import com.wealthvault.account_api.model.AccountData
+import com.wealthvault.account_api.model.BankAccountData
+import com.wealthvault.building_api.model.BuildingIdData
 import com.wealthvault.building_api.model.GetBuildingData
+import com.wealthvault.cash_api.model.CashIdData
 import com.wealthvault.cash_api.model.GetCashData
 import com.wealthvault.core.components.ConfirmDeleteDialog
-import com.wealthvault.insurance_api.model.GetInsuranceData
-import com.wealthvault.investment_api.model.GetInvestmentData
-import com.wealthvault.land_api.model.GetLandData
-
-// Import Utils & Resources
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_plus
 import com.wealthvault.core.generated.resources.ic_nav_asset
 import com.wealthvault.core.theme.LightAsset
-import com.wealthvault.core.theme.LightDebt
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
-import org.jetbrains.compose.resources.painterResource
-
-// Import Components ของฝั่ง Financial
 import com.wealthvault.financiallist.ui.FinancialListTemplate
 import com.wealthvault.financiallist.ui.asset.form.account.BankAccountFormScreen
 import com.wealthvault.financiallist.ui.asset.form.building.BuildingFormScreen
@@ -55,13 +52,9 @@ import com.wealthvault.financiallist.ui.asset.form.cash.CashFormScreen
 import com.wealthvault.financiallist.ui.asset.form.insurance.InsuranceFormScreen
 import com.wealthvault.financiallist.ui.asset.form.investment.StockFormScreen
 import com.wealthvault.financiallist.ui.asset.form.land.LandFormScreen
-import com.wealthvault.financiallist.ui.component.ConfirmDeleteDialog
-import com.wealthvault.financiallist.ui.component.DetailDialog
-import com.wealthvault.financiallist.ui.component.DetailImageRow
-import com.wealthvault.financiallist.ui.component.DetailRow
 import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
 import com.wealthvault.financiallist.ui.component.RealItemCard
-import com.wealthvault.financiallist.ui.component.ShareTargetList
+import com.wealthvault.financiallist.ui.component.SmartAssetDetailDialog
 import com.wealthvault.financiallist.ui.shareasset.ShareAssetScreen
 import com.wealthvault.insurance_api.model.GetInsuranceData
 import com.wealthvault.insurance_api.model.InsuranceIdData
@@ -78,17 +71,14 @@ import com.wealthvault_final.`financial-asset`.model.InsuranceModel
 import com.wealthvault_final.`financial-asset`.model.LandModel
 import com.wealthvault_final.`financial-asset`.model.RefModel
 import com.wealthvault_final.`financial-asset`.model.StockModel
+import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
 import org.jetbrains.compose.resources.painterResource
 
 class AssetScreen() : Screen {
 
     @Composable
     override fun Content() {
-        // 🌟 1. ดึง Navigator ของ Tab ปัจจุบัน
         val navigator = LocalRootNavigator.current
-
-        // 🌟 2. ดึง Navigator ตัวแม่สุด (Root) ที่อยู่หน้า App() มาใช้
-
         val screenModel = getScreenModel<AssetScreenModel>()
 
         LaunchedEffect(Unit) {
@@ -105,7 +95,7 @@ class AssetScreen() : Screen {
         AssetContent(
             screenModel = screenModel,
             onAddClick = {
-                rootNavigator.push(MenuScreen())
+                navigator.push(MenuScreen())
             },
             accounts = accounts,
             cashes = cashes,
@@ -134,7 +124,6 @@ fun AssetContent(
     var selectedAssetId by remember { mutableStateOf<String?>(null) }
     var selectedAssetType by remember { mutableStateOf<String?>(null) }
 
-    // 🌟 State สำหรับ Alert ลบข้อมูล
     var showConfirmDelete by remember { mutableStateOf(false) }
     var itemNameToDelete by remember { mutableStateOf("") }
 
@@ -283,7 +272,6 @@ fun AssetContent(
         }
     }
 
-    // 🌟 ส่วนของ Alert ลบข้อมูล
     if (showConfirmDelete) {
         val annotatedMessage = buildAnnotatedString {
             append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
@@ -310,374 +298,91 @@ fun AssetContent(
         )
     }
 
-    // 🌟 เรียกใช้ Smart Dialog สุดฉลาด
+    // 🌟 จัดการ logic ทั้งหมดตรงนี้แทน
     if (selectedAssetId != null && selectedAssetType != null && !showConfirmDelete) {
         SmartAssetDetailDialog(
             assetId = selectedAssetId!!,
             assetType = selectedAssetType!!,
-            showBottomMenu = true, // หน้าจัดการทรัพย์สินของตัวเอง ต้องมีปุ่ม
+            showBottomMenu = true,
             onDismiss = {
                 selectedAssetId = null
                 selectedAssetType = null
             },
-            navigatorContent = navigatorContent
-        )
-    }
-}
-
-@Composable
-fun AssetDetailFetcherDialog(
-    assetId: String,
-    assetType: String,
-    screenModel: AssetScreenModel,
-    onDismiss: () -> Unit,
-    navigatorContent: Navigator
-) {
-
-    var isLoading by remember { mutableStateOf(true) }
-    var detailData by remember { mutableStateOf<Any?>(null) }
-
-
-    // 🌟 1. ปรับ State ให้เก็บชื่อของ Item ที่จะลบด้วย
-    var showConfirmDelete by remember { mutableStateOf(false) }
-    var itemNameToDelete by remember { mutableStateOf("") }
-
-    LaunchedEffect(assetId, assetType) {
-        isLoading = true
-        detailData = when (assetType) {
-            "account" -> screenModel.getAccountById(assetId)
-            "cash" -> screenModel.getCashById(assetId)
-            "investment" -> screenModel.getInvestmentById(assetId)
-            "insurance" -> screenModel.getInsuranceById(assetId)
-            "building" -> screenModel.getBuildingById(assetId)
-            "land" -> screenModel.getLandById(assetId)
-            else -> null
-        }
-        screenModel.getShareTarget(assetId,assetType)
-        isLoading = false
-    }
-
-    val shareTargets by screenModel.shareTargets.collectAsState()
-
-    if (isLoading) {
-        Dialog(onDismissRequest = onDismiss) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .background(Color.White, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = LightAsset)
-            }
-        }
-    } else if (detailData != null) {
-        val item = detailData!!
-
-        // 🌟 2. Popup ยืนยันการลบที่ระบุชื่อชัดเจน
-        // 🌟 2. Popup ยืนยันการลบที่มีการเน้นสีชื่อไอเทม
-        if (showConfirmDelete) {
-            // สร้างข้อความแบบเน้นสีเฉพาะจุด (AnnotatedString)
-            val annotatedMessage = buildAnnotatedString {
-                append("คุณแน่ใจหรือไม่ว่าต้องการลบ ")
-                withStyle(style = SpanStyle(
-                    color = if (assetType == "debt") LightDebt else LightAsset, // 🌟 เลือกสีตามประเภท
-                    fontWeight = FontWeight.Bold
-                )
-                ) {
-                    append("'$itemNameToDelete'")
-                }
-                append(" ออกจากระบบ?")
-            }
-
-            ConfirmDeleteDialog(
-                title = "ลบทรัพย์สิน",
-                message = annotatedMessage, // 🌟 ส่งค่าที่เป็น AnnotatedString เข้าไป
-                onConfirm = {
-                    screenModel.deleteAsset(assetId, assetType)
-                    showConfirmDelete = false
-                    onDismiss()
-                },
-                onDismiss = { showConfirmDelete = false }
-            )
-        }
-
-        when (item) {
-            is BankAccountData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · บัญชีเงินฝาก",
-                    title = item.name,
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name // 🌟 เก็บชื่อก่อนเปิด Dialog
-                        showConfirmDelete = true
-                    },
-                    onEdit ={
-                        val attachments = item.files?.map { it.toAttachment() }
-                        println("IMAGE LIST: ${attachments}")
+            onDelete = { itemName ->
+                itemNameToDelete = itemName
+                showConfirmDelete = true
+            },
+            onShare = {
+                navigatorContent.push(ShareAssetScreen(selectedAssetType!!, selectedAssetId!!))
+            },
+            onEdit = { rawData ->
+                when (rawData) {
+                    is BankAccountData -> {
+                        val attachments = rawData.files?.map { it.toAttachment() }
                         val dataToSend = BankAccountModel(
-                            type = item.type,
-                            name = item.name,
-                            bankName = item.bankName,
-                            bankId = item.bankAccount,
-                            amount = item.amount,
-                            description = item.description,
+                            type = rawData.type, name = rawData.name, bankName = rawData.bankName,
+                            bankId = rawData.bankAccount, amount = rawData.amount, description = rawData.description,
                             attachments = attachments ?: emptyList()
-
                         )
-                        println("data to send cash: ${dataToSend}")
-                        navigatorContent.push(BankAccountFormScreen(item.id,dataToSend))
-                    },
-                    onShare = {
-                        navigatorContent.push(ShareAssetScreen("account", item.id))
+                        navigatorContent.push(BankAccountFormScreen(rawData.id, dataToSend))
                     }
-                ) {
-                    DetailRow("ธนาคาร", item.bankName)
-                    DetailRow("เลขบัญชี", item.bankAccount)
-                    DetailRow("ประเภท", item.type)
-                    DetailRow("ยอดเงิน", "${formatAmount(item.amount)} บาท")
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    ShareTargetList("แชร์ไปยัง",shareTargets)
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is CashIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · เงินสด ทองคำ",
-                    title = item.name,
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name
-                        showConfirmDelete = true
-                    },
-                    onEdit ={
-                        val attachments = item.files?.map { it.toAttachment() }
-                        println("IMAGE LIST: ${attachments}")
+                    is CashIdData -> {
+                        val attachments = rawData.files?.map { it.toAttachment() }
                         val dataToSend = CashModel(
-                            cashName = item.name,
-                            amount = item.amount,
-                            description = item.description,
+                            cashName = rawData.name, amount = rawData.amount, description = rawData.description,
                             attachments = attachments ?: emptyList()
                         )
-                        println("data to send cash: ${dataToSend}")
-                        navigatorContent.push(CashFormScreen(item.id,dataToSend))
-                    },
-                    onShare = {
-                        navigatorContent.push(ShareAssetScreen("cash", item.id))
+                        navigatorContent.push(CashFormScreen(rawData.id, dataToSend))
                     }
-                ) {
-                    DetailRow("มูลค่า", "${formatAmount(item.amount)} บาท")
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    ShareTargetList("แชร์ไปยัง",shareTargets)
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is InvestmentIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · ลงทุน หุ้น กองทุน",
-                    title = "${item.name} (${item.symbol})",
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = "${item.name} (${item.symbol})"
-                        showConfirmDelete = true
-                    },
-                    onEdit ={
-                        val attachments = item.files?.map { it.toAttachment() }
-                        println("IMAGE LIST: ${attachments}")
+                    is InvestmentIdData -> {
+                        val attachments = rawData.files?.map { it.toAttachment() }
                         val dataToSend = StockModel(
-                            stockName = item.name,
-                            quantity = item.quantity,
-                            costPerPrice = item.costPerPrice,
-                            description = item.description,
-                            attachments = attachments ?: emptyList(),
-                            stockSymbol = "",
-                            brokerName = item.brokerName,
-
+                            stockName = rawData.name, quantity = rawData.quantity, costPerPrice = rawData.costPerPrice,
+                            description = rawData.description, attachments = attachments ?: emptyList(),
+                            stockSymbol = "", brokerName = rawData.brokerName
                         )
-                        println("data to send cash: ${dataToSend}")
-                        navigatorContent.push(StockFormScreen(item.id,dataToSend))
-                    },
-                    onShare = {
-                        navigatorContent.push(ShareAssetScreen("investment", item.id))
+                        navigatorContent.push(StockFormScreen(rawData.id, dataToSend))
                     }
-                ) {
-                    DetailRow("โบรกเกอร์", item.brokerName)
-                    DetailRow("จำนวน", "${formatAmount(item.quantity)}")
-                    DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(item.costPerPrice)} บาท")
-                    DetailRow("ประเภท", item.type)
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    ShareTargetList("แชร์ไปยัง",shareTargets)
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is InsuranceIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · ประกัน",
-                    title = item.name,
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name
-                        showConfirmDelete = true
-                    },
-                    onEdit ={
-                        val attachments = item.files?.map { it.toAttachment() }
-                        println("IMAGE LIST: ${attachments}")
+                    is InsuranceIdData -> {
+                        val attachments = rawData.files?.map { it.toAttachment() }
                         val dataToSend = InsuranceModel(
-                            type = item.type,
-                            name = item.name,
-                            policyNumber = item.policyNumber,
-                            companyName = item.companyName,
-                            coveragePeriod = item.coveragePeriod.toString(),
-                            coverageAmount = item.coverageAmount,
-                            conDate = item.conDate,
-                            expDate = item.expDate,
-                            description = item.description,
+                            type = rawData.type, name = rawData.name, policyNumber = rawData.policyNumber,
+                            companyName = rawData.companyName, coveragePeriod = rawData.coveragePeriod.toString(),
+                            coverageAmount = rawData.coverageAmount, conDate = rawData.conDate,
+                            expDate = rawData.expDate, description = rawData.description,
                             attachments = attachments ?: emptyList()
-
                         )
-                        println("data to send cash: ${dataToSend}")
-                        navigatorContent.push(InsuranceFormScreen(item.id,dataToSend))
-                    },
-                    onShare = {
-                        navigatorContent.push(ShareAssetScreen("insurance", item.id))
+                        navigatorContent.push(InsuranceFormScreen(rawData.id, dataToSend))
                     }
-                ) {
-                    DetailRow("เลขกรมธรรม์", item.policyNumber)
-                    DetailRow("บริษัท", item.companyName)
-                    DetailRow("วงเงินคุ้มครอง", "${formatAmount(item.coverageAmount)} บาท")
-                    DetailRow("ระยะเวลาคุ้มครอง", "${item.coveragePeriod} ปี")
-                    DetailRow("วันเริ่มสัญญา", formatThaiDate(item.conDate))
-                    DetailRow("วันสิ้นสุดสัญญา", formatThaiDate(item.expDate))
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    ShareTargetList("แชร์ไปยัง",shareTargets)
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is BuildingIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · บ้าน ตึก อาคาร",
-                    title = item.name?: "",
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name?: ""
-                        showConfirmDelete = true
-                    },
-                    onEdit ={
-                        val attachments = item.files?.map { it.toAttachment() }
-                        val insData = item.ins?.map {
-                            InsRefModel(
-                                insId = it.insId,
-                                insName = it.insName
-                            )
-                        }
-                        val refData = item.referenceIds?.map {
-                            RefModel(
-                                areaName = it.refName,
-                                areaId = it.refId
-                            )
-                        }
-                        println("IMAGE LIST: ${attachments}")
+                    is BuildingIdData -> {
+                        val attachments = rawData.files?.map { it.toAttachment() }
+                        val insData = rawData.ins?.map { InsRefModel(insId = it.insId, insName = it.insName) }
+                        val refData = rawData.referenceIds?.map { RefModel(areaName = it.refName, areaId = it.refId) }
                         val dataToSend = BuildingModel(
-
-                            buildingName = item.name?: "",
-                            area = item.area?: 0.0,
-                            amount = item.amount?: 0.0,
-                            description = item.description?: "",
-                            attachments = attachments ?: emptyList(),
-                            locationAddress = item.location?.address ?: "",
-                            locationSubDistrict = item.location?.subDistrict ?: "",
-                            locationDistrict = item.location?.district ?: "",
-                            locationProvince = item.location?.province ?: "",
-                            locationPostalCode = item.location?.postalCode ?: "",
-                            insIds = insData ?: emptyList(),
-                            referenceIds = refData ?: emptyList(),
-                            type = item.type ?: ""
-
+                            buildingName = rawData.name ?: "", area = rawData.area ?: 0.0, amount = rawData.amount ?: 0.0,
+                            description = rawData.description ?: "", attachments = attachments ?: emptyList(),
+                            locationAddress = rawData.location?.address ?: "", locationSubDistrict = rawData.location?.subDistrict ?: "",
+                            locationDistrict = rawData.location?.district ?: "", locationProvince = rawData.location?.province ?: "",
+                            locationPostalCode = rawData.location?.postalCode ?: "", insIds = insData ?: emptyList(),
+                            referenceIds = refData ?: emptyList(), type = rawData.type ?: ""
                         )
-                        println("data to send cash: ${dataToSend}")
-                        navigatorContent.push(BuildingFormScreen(item.id ?: "",dataToSend))
-                    },
-                    onShare = {
-                        navigatorContent.push(ShareAssetScreen("building", item.id ?: ""))
+                        navigatorContent.push(BuildingFormScreen(rawData.id ?: "", dataToSend))
                     }
-                ) {
-                    DetailRow("ประเภท", item.type?: "")
-                    DetailRow("พื้นที่", "${formatAmount(item.area?: 0)} ตร.ม.")
-                    DetailRow("มูลค่าประเมิน", "${formatAmount(item.amount?: 0)} บาท")
-                    val addressStr = item.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
-                    DetailRow("ที่อยู่", addressStr)
-                    DetailRow("คำอธิบาย", item.description?: "", isLast = item.files.isNullOrEmpty())
-                    ShareTargetList("แชร์ไปยัง",shareTargets)
-                    DetailImageRow(files = item.files)
-                }
-            }
-
-            is LandIdData -> {
-                DetailDialog(
-                    subtitle = "ทรัพย์สิน · ที่ดิน",
-                    title = item.name,
-                    updatedAt = formatThaiDate(item.updatedAt),
-                    themeType = "asset",
-                    onDismiss = onDismiss,
-                    onDelete = {
-                        itemNameToDelete = item.name
-                        showConfirmDelete = true
-                    },
-                    onEdit ={
-                        val attachments = item.files?.map { it.toAttachment() }
-
-                        val refData = item.ref?.map {
-                            RefModel(
-                                areaName = it.refName,
-                                areaId = it.refName
-                            )
-                        }
-                        println("IMAGE LIST: ${attachments}")
+                    is LandIdData -> {
+                        val attachments = rawData.files?.map { it.toAttachment() }
+                        val refData = rawData.ref?.map { RefModel(areaName = it.refName, areaId = it.refName) }
                         val dataToSend = LandModel(
-                            landName = item.name,
-                            area = item.area,
-                            amount = item.amount,
-                            description = item.description,
-                            attachments = attachments ?: emptyList(),
-                            locationAddress = item.location?.address ?: "",
-                            locationSubDistrict = item.location?.subDistrict ?: "",
-                            locationDistrict = item.location?.district ?: "",
-                            locationProvince = item.location?.province ?: "",
-                            locationPostalCode = item.location?.postalCode ?: "",
-                            referenceIds = refData ?: emptyList(),
-                            deedNum = item.deedNum,
-
+                            landName = rawData.name, area = rawData.area, amount = rawData.amount,
+                            description = rawData.description, attachments = attachments ?: emptyList(),
+                            locationAddress = rawData.location?.address ?: "", locationSubDistrict = rawData.location?.subDistrict ?: "",
+                            locationDistrict = rawData.location?.district ?: "", locationProvince = rawData.location?.province ?: "",
+                            locationPostalCode = rawData.location?.postalCode ?: "", referenceIds = refData ?: emptyList(),
+                            deedNum = rawData.deedNum
                         )
-                        println("data to send cash: ${dataToSend}")
-                        navigatorContent.push(LandFormScreen(item.id,dataToSend))
-                    },
-                    onShare = {
-                        navigatorContent.push(ShareAssetScreen("land", item.id))
+                        navigatorContent.push(LandFormScreen(rawData.id, dataToSend))
                     }
-                ) {
-                    DetailRow("เลขโฉนด", item.deedNum)
-                    DetailRow("ขนาดพื้นที่", "${formatAmount(item.area)} ตารางวา")
-                    DetailRow("มูลค่าประเมิน", "${formatAmount(item.amount)} บาท")
-                    val addressStr = item.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
-                    DetailRow("ที่อยู่", addressStr)
-                    DetailRow("คำอธิบาย", item.description, isLast = item.files.isNullOrEmpty())
-                    ShareTargetList("แชร์ไปยัง",shareTargets)
-                    DetailImageRow(files = item.files)
                 }
             }
-        }
+        )
     }
 }
