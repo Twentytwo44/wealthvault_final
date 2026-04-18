@@ -26,10 +26,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.social.ui.main_social.form_group.CreateGroupScreenModel
+import com.wealthvault.social.ui.main_social.form_group.FormGroupScreenModel
 import com.wealthvault.social.ui.main_social.form_group.GroupFormContent
-import androidx.compose.runtime.getValue  // 🌟 สำหรับอ่านค่า (getter)
 import androidx.compose.runtime.setValue  // 🌟 สำหรับเขียนค่า (setter) - ตัวนี้แหละที่หายไป
+import com.wealthvault.core.theme.RedErr
 
 class EditGroupScreen(
     private val groupId: String,
@@ -41,7 +41,7 @@ class EditGroupScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val screenModel = getScreenModel<CreateGroupScreenModel>()
+        val screenModel = getScreenModel<FormGroupScreenModel>()
 
         val isLoading by screenModel.isLoading.collectAsState()
         val isSuccess by screenModel.isSuccess.collectAsState()
@@ -67,7 +67,15 @@ class EditGroupScreen(
                 snackbarHostState.showSnackbar(message = msg)
             }
         }
+
+        LaunchedEffect(isSuccess) {
+            if (isSuccess) {
+                // ถอยกลับไปจนกว่าจะเจอหน้า SocialMainScreen
+                navigator.popUntil { it::class.simpleName == "SocialMainScreen" }
+            }
+        }
         var showExitDialog by remember { mutableStateOf(false) }
+        var showDeleteGroupDialog by remember { mutableStateOf(false) }
 
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -79,6 +87,10 @@ class EditGroupScreen(
                 initialMemberIds = initialMemberIds,
                 availableFriends = allFriends,
                 isLoading = isLoading,
+                showDeleteButton = true, // 🌟 เปิดใช้งานปุ่มถังขยะ
+                onDeleteGroupClick = {
+                    showDeleteGroupDialog = true // 🌟 พอกดถังขยะ ให้โชว์ Popup
+                },
                 onBackClick = { changed ->
                     if (changed) {
                         showExitDialog = true // ถ้าเปลี่ยน ให้โชว์ Popup
@@ -98,6 +110,40 @@ class EditGroupScreen(
                     )
                 }
             )
+            if (showDeleteGroupDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteGroupDialog = false },
+                    containerColor = Color.White,
+                    shape = RoundedCornerShape(20.dp),
+                    title = {
+                        Text(
+                            text = "ลบกลุ่ม",
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF3A2F2A)
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "คุณแน่ใจหรือไม่ว่าต้องการลบกลุ่มนี้? ข้อมูลทรัพย์สินที่ถูกแชร์ในกลุ่มนี้จะถูกยกเลิกการแชร์ทั้งหมด",
+                            color = Color.Gray
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showDeleteGroupDialog = false
+                            // 🌟 สั่งให้ ScreenModel ลบกลุ่ม
+                            screenModel.deleteGroup(groupId)
+                        }) {
+                            Text("ลบกลุ่ม", color = RedErr, fontWeight = FontWeight.Bold)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteGroupDialog = false }) {
+                            Text("ยกเลิก", color = Color.Gray)
+                        }
+                    }
+                )
+            }
             if (showExitDialog) {
                 AlertDialog(
                     onDismissRequest = { showExitDialog = false }, // 🌟 เพิ่มบรรทัดนี้เพื่อแก้ Error

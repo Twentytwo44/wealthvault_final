@@ -23,7 +23,7 @@ class SocialScreen : Screen {
     override fun Content() {
 
 
-        var currentTab by rememberSaveable { mutableStateOf("กลุ่ม") }
+        var currentTab by rememberSaveable { mutableStateOf("เพื่อน") }
 
         val navigator = LocalNavigator.currentOrThrow
 

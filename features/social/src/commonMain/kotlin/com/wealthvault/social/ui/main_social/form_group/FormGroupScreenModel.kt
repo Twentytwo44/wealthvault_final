@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class CreateGroupScreenModel(
+class FormGroupScreenModel(
     private val repository: SocialRepositoryImpl
 ) : ScreenModel {
 
@@ -91,6 +91,26 @@ class CreateGroupScreenModel(
                 // ถ้ามีเส้นใดเส้นหนึ่งพัง ให้พ่น Error ออกมาโชว์ที่ Snackbar
                 _errorMessage.value = e.message ?: "เกิดข้อผิดพลาดในการอัปเดตกลุ่ม"
                 println("🚨 Update Group Error: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    fun deleteGroup(groupId: String) {
+        screenModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+
+            try {
+                // 💡 อย่าลืมไปเขียนฟังก์ชัน deleteGroup ใน Repository ให้เรียก API ที่เพิ่งสร้างด้วยนะครับ
+                repository.deleteGroup(groupId)
+
+                println("✅ ลบกลุ่มสำเร็จ!")
+                _isSuccess.value = true // พอเปลี่ยนเป็น true, LaunchedEffect ใน UI จะสั่ง navigator.pop() อัตโนมัติ
+
+            } catch (e: Exception) {
+                println("🚨 ลบกลุ่มไม่สำเร็จ: ${e.message}")
+                _errorMessage.value = e.message ?: "ลบกลุ่มไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
             } finally {
                 _isLoading.value = false
             }

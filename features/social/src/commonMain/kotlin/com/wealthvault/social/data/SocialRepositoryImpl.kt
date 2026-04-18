@@ -202,6 +202,9 @@ class SocialRepositoryImpl(
             dataSource.unShareFriendItem(sharedItemId)
         }
     }
+    suspend fun deleteGroup(groupId: String): Result<Boolean> {
+        return dataSource.deleteGroup(groupId)
+    }
 
 
 }

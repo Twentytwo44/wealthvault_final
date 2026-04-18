@@ -9,6 +9,7 @@ import com.wealthvault.`user-api`.model.FriendData
 import com.wealthvault.group_api.getgrouplist.GetAllGroupApi
 import com.wealthvault.group_api.model.GetAllGroupData
 import com.wealthvault.group_api.creategroup.CreateGroupApi
+import com.wealthvault.group_api.deletegroup.DeleteGroupApi
 import com.wealthvault.group_api.getgroupdetail.GetGroupApi
 import com.wealthvault.group_api.getmember.GetGroupMemberApi
 import com.wealthvault.group_api.grantaccess.GrantAccessApi
@@ -71,7 +72,8 @@ class SocialDataSource(
     private val getItemToShareApi: GetItemToShareApi,
     private val shareItemApi: ShareItemApi,
     private val unShareFriendApi: UnShareFriendApi,
-    private val unShareGroupApi: UnShareGroupApi
+    private val unShareGroupApi: UnShareGroupApi,
+    private val deleteGroupApi: DeleteGroupApi,
 
 
 
@@ -275,6 +277,17 @@ class SocialDataSource(
         val response = unShareGroupApi.unShareGroup(id)
         if (response.error != null) throw Exception(response.error)
         true
+    }
+    suspend fun deleteGroup(groupId: String): Result<Boolean> = runCatching {
+        val response = deleteGroupApi.deleteGroup(groupId)
+
+        // ถ้า Backend ส่ง error กลับมา ให้โยน Exception
+        if (response.error != null) {
+            throw Exception(response.error)
+        }
+
+        // คืนค่า true ถ้าลบสำเร็จ (ใช้ response.data หรือคืนค่า true ไปเลยก็ได้ครับ)
+        response.data ?: true
     }
 
 }

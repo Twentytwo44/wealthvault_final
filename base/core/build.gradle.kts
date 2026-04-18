@@ -48,7 +48,8 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-transitions:${voyagerVersion}")
                 implementation("cafe.adriel.voyager:voyager-navigator:${voyagerVersion}")
                 implementation("cafe.adriel.voyager:voyager-screenmodel:${voyagerVersion}")
-
+                implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
+                implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
             }
         }
     }

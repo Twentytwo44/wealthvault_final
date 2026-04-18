@@ -42,10 +42,7 @@ import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.financiallist.ui.FinancialListTemplate
-import com.wealthvault.financiallist.ui.component.ConfirmDeleteDialog
-import com.wealthvault.financiallist.ui.component.DetailDialog
-import com.wealthvault.financiallist.ui.component.DetailImageRow
-import com.wealthvault.financiallist.ui.component.DetailRow
+import com.wealthvault.core.components.ConfirmDeleteDialog
 import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
 import com.wealthvault.financiallist.ui.component.RealItemCard
 import com.wealthvault.financiallist.ui.component.SmartAssetDetailDialog

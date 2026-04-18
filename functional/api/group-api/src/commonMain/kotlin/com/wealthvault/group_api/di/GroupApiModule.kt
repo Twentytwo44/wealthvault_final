@@ -6,6 +6,8 @@ import com.wealthvault.group_api.addmember.AddMemberApi
 import com.wealthvault.group_api.addmember.AddMemberApiImpl
 import com.wealthvault.group_api.creategroup.CreateGroupApi
 import com.wealthvault.group_api.creategroup.CreateGroupApiImpl
+import com.wealthvault.group_api.deletegroup.DeleteGroupApi
+import com.wealthvault.group_api.deletegroup.DeleteGroupApiImpl
 import com.wealthvault.group_api.getgroupdetail.GetGroupApi
 import com.wealthvault.group_api.getgroupdetail.GetGroupApiImpl
 import com.wealthvault.group_api.getgrouplist.GetAllGroupApi
@@ -44,6 +46,8 @@ object GroupApiModule {
         single<GrantAccessApi> { GrantAccessApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<RemoveMemberApi> { RemoveMemberApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<LeaveGroupApi> { LeaveGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+
+        single<DeleteGroupApi> { DeleteGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
     }
 
     fun single(definition: Any) {}

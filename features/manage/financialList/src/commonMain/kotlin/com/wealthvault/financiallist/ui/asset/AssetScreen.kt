@@ -33,6 +33,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.account_api.model.AccountData
 import com.wealthvault.building_api.model.GetBuildingData
 import com.wealthvault.cash_api.model.GetCashData
+import com.wealthvault.core.components.ConfirmDeleteDialog
 import com.wealthvault.insurance_api.model.GetInsuranceData
 import com.wealthvault.investment_api.model.GetInvestmentData
 import com.wealthvault.land_api.model.GetLandData
@@ -50,7 +51,6 @@ import org.jetbrains.compose.resources.painterResource
 
 // Import Components ของฝั่ง Financial
 import com.wealthvault.financiallist.ui.FinancialListTemplate
-import com.wealthvault.financiallist.ui.component.ConfirmDeleteDialog
 import com.wealthvault.financiallist.ui.component.ExpandableCategoryCard
 import com.wealthvault.financiallist.ui.component.RealItemCard
 import com.wealthvault.financiallist.ui.component.SmartAssetDetailDialog

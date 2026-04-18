@@ -4,7 +4,7 @@ import com.wealthvault.social.data.SocialDataSource
 import com.wealthvault.social.data.SocialRepositoryImpl
 import com.wealthvault.social.ui.SocialScreenModel
 import com.wealthvault.social.ui.main_social.add_friend.AddFriendScreenModel
-import com.wealthvault.social.ui.main_social.form_group.CreateGroupScreenModel
+import com.wealthvault.social.ui.main_social.form_group.FormGroupScreenModel
 import com.wealthvault.social.ui.main_social.friend.FriendScreenModel
 import com.wealthvault.social.ui.main_social.group.GroupScreenModel
 import com.wealthvault.social.ui.manage_shared.SharedAssetManageScreenModel
@@ -24,7 +24,7 @@ object SocialModule {
                 get(), get(), get(), get(), get(), get(), get(),
                 get(), get(), get(), get(), get(),
                 get(), get(), get(), get(), get(),
-                get(), get(), get(), get()
+                get(), get(), get(), get(), get()
             )
         }
 
@@ -33,7 +33,7 @@ object SocialModule {
         single { SocialRepositoryImpl(get()) }
         factory { FriendScreenModel(repository = get()) }
         factory { GroupScreenModel(repository = get()) }
-        factory { CreateGroupScreenModel(repository = get()) }
+        factory { FormGroupScreenModel(repository = get()) }
         factory { AddFriendScreenModel(repository = get()) }
         factory { FriendSpaceScreenModel(repository = get()) }
         factory { FriendProfileScreenModel(repository = get()) }

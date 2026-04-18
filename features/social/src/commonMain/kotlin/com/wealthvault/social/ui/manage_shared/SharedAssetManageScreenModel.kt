@@ -19,7 +19,7 @@ class SharedAssetManageScreenModel(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val mocID = "844c4180-4c6a-438e-bfd3-0e78a24ec1b1"
+    private val mocID = "538bf1bf-484f-47aa-8028-63454b58d269"
 
     // 🌟 1. ฟังก์ชันดึงข้อมูลทรัพย์สินที่แชร์
     fun fetchSharedAssets(targetId: String, isGroup: Boolean) {
