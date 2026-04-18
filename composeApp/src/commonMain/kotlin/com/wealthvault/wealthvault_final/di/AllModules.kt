@@ -54,6 +54,7 @@ object AllModules {
         add(InsuranceApiModule.allModules)
         add(AccountApiModule.allModules)
         add(SocialModule.allModules)
+        add(ShareApiModule.allModules)
 
 
 

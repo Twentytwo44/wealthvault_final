@@ -35,11 +35,16 @@ class UpdateBuildingApiImpl(private val ktorfit: Ktorfit) : UpdateBuildingApi {
                         append("location.province", request.locationProvince ?: "")
                         append("location.postal_code", request.locationPostalCode ?: "")
                         request.insIds.forEach { insData ->
-                            append("reference_ids", insData.insId ?: "")
+                            append("ins_ids", insData.insId ?: "")
                         }
                         request.referenceIds.forEach { refData ->
                             append("reference_ids", refData.areaId ?: "")
                         }
+
+                        request.deleteListId.forEach { fileData ->
+                            append("delete_file_ids", fileData)
+                        }
+
 
                         request.files.forEach { fileData ->
                             append("files", fileData.bytes, Headers.build {

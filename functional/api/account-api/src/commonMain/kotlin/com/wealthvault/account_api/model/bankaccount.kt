@@ -1,6 +1,6 @@
 package com.wealthvault.account_api.model
 
-import com.wealthvault.core.model.HasImageUrl
+import com.wealthvault.core.model.FileDataModel
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -30,6 +30,9 @@ data class BankAccountRequest(
     @SerialName("files")
     val files:List<BankAccountFileUploadData> = emptyList(),
 
+    val deleteListId : List<String>? = emptyList()
+
+
 )
 
 // ตัวรับ Response (เพิ่ม Files และเปลี่ยน amount)
@@ -52,18 +55,12 @@ data class BankAccountData(
     @SerialName("description") val description: String,
 
     // 🌟 เพิ่มฟิลด์ใหม่จาก JSON
-    @SerialName("files") val files: List<FileData>? = emptyList(),
+    @SerialName("files") val files: List<FileDataModel>? = emptyList(),
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null
 )
 
 // 🌟 Shared Model สำหรับรูปภาพ
-@Serializable
-data class FileData(
-    @SerialName("id") val id: String = "",
-    @SerialName("url") override val url: String = "", // 🌟 ใส่ override หน้า val
-    @SerialName("file_type") override val fileType: String = ""
-) : HasImageUrl // 🌟 ตบเข้า Interface
 
 
 @Serializable

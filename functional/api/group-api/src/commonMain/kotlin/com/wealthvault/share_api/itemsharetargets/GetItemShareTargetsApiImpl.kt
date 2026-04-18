@@ -11,7 +11,7 @@ class GetItemShareTargetsApiImpl(private val ktorfit: Ktorfit) : GetItemShareTar
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.get("${Config.localhost_android}share/item/${type}/${id}/share-targets") {
+        return client.get("${Config.localhost_android}share/item/${type}/${id}/shared-targets") {
         }.body()
     }
 }

@@ -32,7 +32,9 @@ data class LiabilityRequest(
     val endedAt: String? = null,
 
     @SerialName("files")
-    val files: List<LiabilityUploadData> = emptyList()
+    val files: List<LiabilityUploadData> = emptyList(),
+
+    val deleteListId: List<String> = emptyList()
 
 
 

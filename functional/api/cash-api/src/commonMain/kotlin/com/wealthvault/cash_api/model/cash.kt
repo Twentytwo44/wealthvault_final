@@ -10,7 +10,8 @@ data class CashRequest(
     val name: String? = null,
     val ammount: Double? = null,
     val description: String? = null,
-    val files:List<CashFileUploadData> = emptyList(),
+    val files:List<CashFileUploadData>? = emptyList(),
+    val deleteListId : List<String>? = emptyList()
 
     )
 

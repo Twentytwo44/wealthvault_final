@@ -20,3 +20,4 @@ data class BuildingModel(
     val insIds: List<InsRefModel>,
 
     )
+

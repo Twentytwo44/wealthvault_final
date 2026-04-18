@@ -6,14 +6,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ItemShareTargetsResponse(
-    @SerialName("group")
+    @SerialName("groups")
     val groups: List<GroupDataList>? = null,
 
     @SerialName("friends")
-    val friends: Boolean? = null,
+    val friends:  List<FriendDataList>? = null,
 
     @SerialName("emails")
-    val emails: List<FriendDataList>? = null,
+    val emails: List<EmailDataList>? = null,
 
     @SerialName("error")
     val error: List<EmailDataList>? = null
@@ -33,13 +33,13 @@ data class GroupDataList(
     @SerialName("member_count")
     val memberCount: Int? = null,
 
-    @SerialName("share_at")
+    @SerialName("shared_at")
     val shareAt: String? = null,
 )
 
 @Serializable
 data class FriendDataList(
-    @SerialName("firend_id")
+    @SerialName("friend_id")
     val friendId: String? = null,
 
     @SerialName("username")
@@ -48,7 +48,7 @@ data class FriendDataList(
     @SerialName("profile_image")
     val profileImage: String? = null,
 
-    @SerialName("share_at")
+    @SerialName("shared_at")
     val shareAt: String? = null,
 )
 
@@ -57,7 +57,7 @@ data class EmailDataList(
     @SerialName("email")
     val email: String? = null,
 
-    @SerialName("share_at")
+    @SerialName("shared_at")
     val shareAt: String? = null,
 
     @SerialName("is_sent")

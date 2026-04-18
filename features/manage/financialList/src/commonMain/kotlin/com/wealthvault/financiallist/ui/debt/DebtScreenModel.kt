@@ -1,18 +1,21 @@
 package com.wealthvault.financiallist.ui.debt
 
+// 🌟 Import Data Class
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.wealthvault.financiallist.data.share.ShareTargetsRepositoryImpl
 import com.wealthvault.financiallist.usecase.FinanciallistUseCase
+import com.wealthvault.liability_api.model.GetLiabilityData
+import com.wealthvault.liability_api.model.LiabilityIdData
+import com.wealthvault.share_api.model.ItemShareTargetsResponse
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-// 🌟 Import Data Class
-import com.wealthvault.liability_api.model.GetLiabilityData
-import com.wealthvault.liability_api.model.LiabilityIdData
-
 class DebtScreenModel(
-    private val useCase: FinanciallistUseCase
+    private val useCase: FinanciallistUseCase,
+    private val shareTargetsRepository: ShareTargetsRepositoryImpl
 ) : ScreenModel {
 
     // 🌟 แยกเก็บ 2 หมวด
@@ -21,6 +24,10 @@ class DebtScreenModel(
 
     private val _expenses = MutableStateFlow<List<GetLiabilityData>>(emptyList())
     val expenses = _expenses.asStateFlow()
+
+    private val _shareTargets = MutableStateFlow<ItemShareTargetsResponse>(ItemShareTargetsResponse())
+    val shareTargets = _shareTargets.asStateFlow()
+
 
     fun fetchLiabilities() {
         screenModelScope.launch {
@@ -60,4 +67,21 @@ class DebtScreenModel(
             }
         }
     }
+
+    fun getShareTarget(id:String,type:String) {
+        screenModelScope.launch {
+            val shareTargetsResponse = async { shareTargetsRepository.shareTargets(id,type) }
+
+            // รอรับผลลัพธ์จากทั้ง 2 API
+            val shareTargetsResult = shareTargetsResponse.await()
+            shareTargetsResult.onSuccess { data ->
+                _shareTargets.value = data
+                println("[Asset ScreenModel Fetch Share Target ] sucess")
+
+
+            }.onFailure { error ->
+                println("[Asset ScreenModel Fetch Share Target fail] ${error}")
+            }
+
+        } }
 }
