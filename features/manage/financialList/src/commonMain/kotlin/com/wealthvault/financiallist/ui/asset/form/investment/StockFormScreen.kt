@@ -187,11 +187,11 @@ fun AssetInputForm(
                 onClick = {
                     val data = StockModel(
                         stockName = stockName,
-                        quantity = quantity.toDouble(),
+                        quantity = quantity.toDoubleOrNull() ?: 0.0,
                         description = description,
                         stockSymbol = stockSymbol,
                         brokerName = brokerName,
-                        costPerPrice = costPerPrice.toDouble(),
+                        costPerPrice = costPerPrice.toDoubleOrNull() ?: 0.0,
                         attachments = attachments
                     )
                     val addList = currentAssets.filter { it.id.isNullOrEmpty() }

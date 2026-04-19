@@ -160,7 +160,7 @@ fun CashInputForm(
                     val data = CashModel(
                         cashName = cashName,
                         description = description,
-                        amount = amount.toDouble(),
+                        amount = amount.toString().toDoubleOrNull() ?: 0.0,
                         attachments = attachments
                     )
                     println("data attachemnt: ${data.attachments}")

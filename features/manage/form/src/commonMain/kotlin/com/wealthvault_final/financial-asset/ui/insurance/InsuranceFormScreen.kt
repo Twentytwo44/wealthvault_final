@@ -181,7 +181,7 @@ fun InsuranceInputForm(
                         policyNumber = policyNumber,
                         type = type,
                         companyName = companyName,
-                        coverageAmount = coverageAmount.toDouble(),
+                        coverageAmount = coverageAmount.toString().toDoubleOrNull() ?: 0.0,
                         coveragePeriod = coveragePeriod,
                         expDate = expDate,
                         conDate = conDate,

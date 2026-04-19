@@ -156,7 +156,7 @@ fun LiabilityInputForm(
                     val data = LiabilityModel(
                         name = name,
                         type = type,
-                        principal = principal.toDouble(),
+                        principal = principal.toDoubleOrNull() ?: 0.0,
                         interestRate = "",
                         startedAt = statedAt,
                         endedAt = "",

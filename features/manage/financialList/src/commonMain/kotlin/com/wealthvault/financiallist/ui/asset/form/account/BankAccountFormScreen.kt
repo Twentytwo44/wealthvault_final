@@ -188,7 +188,7 @@ fun BankAccountInputForm(
                         bankName = bankName,
                         bankId = bankId,
                         description = description,
-                        amount = amount.toDouble(),
+                        amount = amount.toDoubleOrNull() ?: 0.0,
                         attachments = attachments
                     )
                     val addList = currentAssets.filter { it.id.isNullOrEmpty() }

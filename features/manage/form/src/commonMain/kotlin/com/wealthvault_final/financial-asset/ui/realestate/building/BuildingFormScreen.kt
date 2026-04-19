@@ -336,8 +336,8 @@ fun BuildingInputForm(
                     val data = BuildingModel(
                         type = type,
                         buildingName = buildingName,
-                        area = area.toDouble() ,
-                        amount = amount.toDouble(),
+                        area = area.toDoubleOrNull() ?: 0.0,
+                        amount = amount.toString().toDoubleOrNull() ?: 0.0,
                         description = description,
                         attachments = attachments,
                         referenceIds = referenceIds,

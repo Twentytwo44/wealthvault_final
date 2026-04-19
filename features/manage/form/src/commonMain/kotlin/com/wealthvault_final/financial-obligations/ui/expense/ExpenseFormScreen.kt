@@ -149,7 +149,7 @@ fun ExpenseInputForm(
                     val data = ExpenseModel(
                         name = name,
                         type = type,
-                        principal = principal.toDouble(),
+                        principal = principal.toDoubleOrNull() ?: 0.0,
                         interestRate = "",
                         startedAt = statedAt,
                         endedAt = "",

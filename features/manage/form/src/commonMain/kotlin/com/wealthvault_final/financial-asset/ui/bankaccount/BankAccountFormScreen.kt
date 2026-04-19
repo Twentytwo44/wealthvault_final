@@ -179,7 +179,7 @@ fun BankAccountInputForm(
                         bankName = bankName,
                         bankId = bankId,
                         description = description,
-                        amount = amount.toDouble(),
+                        amount = amount.toString().toDoubleOrNull() ?: 0.0,
                         attachments = attachments
                     )
                     println("data attachemnt: ${data.attachments}")

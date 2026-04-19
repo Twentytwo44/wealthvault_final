@@ -176,7 +176,7 @@ fun CashInputForm(
                     val data = CashModel(
                         cashName = cashName,
                         description = description,
-                        amount = amount.toDouble(),
+                        amount = amount.toDoubleOrNull() ?: 0.0,
                         attachments = attachments
                     )
                     val addList = currentAssets.filter { it.id.isNullOrEmpty() }

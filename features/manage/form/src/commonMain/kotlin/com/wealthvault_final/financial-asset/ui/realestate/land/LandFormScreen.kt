@@ -273,8 +273,8 @@ fun LandInputForm(
                     val data = LandModel(
                         deedNum = deedNum,
                         landName = landName,
-                        area = area.toDouble() ,
-                        amount = amount.toDouble(),
+                        area = area.toDoubleOrNull() ?: 0.0,
+                        amount = amount.toDoubleOrNull() ?: 0.0,
                         description = description,
                         attachments = attachments,
                         referenceIds = referenceIds,

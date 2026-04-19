@@ -173,7 +173,7 @@ fun AssetInputForm(
                 onClick = {
                     val data = StockModel(
                         stockName = stockName,
-                        quantity = quantity.toDouble(),
+                        quantity = quantity.toString().toDoubleOrNull() ?: 0.0,
                         description = description,
                         stockSymbol = stockSymbol,
                         brokerName = brokerName,
