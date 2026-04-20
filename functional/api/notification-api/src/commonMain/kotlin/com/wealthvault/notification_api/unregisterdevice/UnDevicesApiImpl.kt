@@ -1,4 +1,4 @@
-package com.wealthvault.investment_api.createcash
+package com.wealthvault.notification_api.unregisterdevice
 
 
 import com.wealthvault.config.Config

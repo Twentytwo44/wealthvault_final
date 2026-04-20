@@ -12,6 +12,8 @@ import com.wealthvault.investment_api.di.InvestmentApiModule
 import com.wealthvault.land_api.di.LandApiModule
 import com.wealthvault.liability_api.di.LiabilityApiModule
 import com.wealthvault.login.di.LoginModule
+import com.wealthvault.notification.di.NotificationModule
+import com.wealthvault.notification_api.di.NotificationApiModule
 import com.wealthvault.profile.di.ProfileModule
 import com.wealthvault.register.di.RegisterModule
 import com.wealthvault.share_api.di.ShareApiModule
@@ -55,6 +57,8 @@ object AllModules {
         add(AccountApiModule.allModules)
         add(SocialModule.allModules)
         add(ShareApiModule.allModules)
+        add(NotificationApiModule.allModules)
+        add(NotificationModule.allModules)
 
 
 

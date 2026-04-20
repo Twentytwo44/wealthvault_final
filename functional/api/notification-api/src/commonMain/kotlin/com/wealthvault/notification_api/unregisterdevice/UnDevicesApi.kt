@@ -1,4 +1,4 @@
-package com.wealthvault.investment_api.createcash
+package com.wealthvault.notification_api.unregisterdevice
 
 import com.wealthvault.notification_api.model.DeviceResponse
 import com.wealthvault.notification_api.model.UnDeviceRequest

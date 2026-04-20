@@ -18,10 +18,6 @@ fun ProfileScreenPreview() {
 @Composable
 fun MenuProfileSettingScreenPreview() {
     MenuProfileSettingScreen(
-        onBackClick = {},
-        onEditProfileClick = {},
-        onShareSettingClick = {},
-        onLogoutClick = {}
     )
 }
 
@@ -30,8 +26,7 @@ fun MenuProfileSettingScreenPreview() {
 @Composable
 fun EditProfileScreenPreview() {
     EditProfileScreen(
-        onBackClick = {},
-        onSaveClick = {}
+
     )
 }
 
@@ -40,7 +35,7 @@ fun EditProfileScreenPreview() {
 @Composable
 fun ShareSettingScreenPreview() {
     ShareSettingScreen(
-        onBackClick = {},
+
 //        onSaveClick = {}
     )
 }

@@ -40,6 +40,8 @@ import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.expenseTypes
 import com.wealthvault_final.`financial-asset`.ui.share.ShareAssetScreen
 import com.wealthvault_final.`financial-obligations`.model.ExpenseModel
 import com.wealthvault_final.`financial-obligations`.ui.expense.viewmodel.ExpenseScreenModel
@@ -102,7 +104,7 @@ fun ExpenseInputForm(
                 ),
                 title = {
                     Text(
-                        "ข้อมูลเงินสด",
+                        "ข้อมูลค่าใช้จ่าย",
                         color = Color(0xFF8D6E63),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
@@ -125,7 +127,12 @@ fun ExpenseInputForm(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ส่วนกรอกข้อมูลหลัก
-            AssetTextField(value = type, onValueChange = { type = it }, label = "ชนิด*", placeholder = "ชนิด")
+            DropdownInput(
+                label = "ประเภทหนี้สิน/ค่าใช้จ่าย",
+                options = expenseTypes,
+                selectedValue = type,
+                onValueChange = { type = it }
+            )
             AssetTextField(value = name, onValueChange = { name = it }, label = "ชื่อ*", placeholder = "กรอกชื่อ")
             AssetTextField(value = statedAt, onValueChange = { statedAt = it }, label = "วันที่เริ่มต้น*", placeholder = "กรอกวันที่")
             AssetTextField(value = principal, onValueChange = { principal = it }, label = "จำนวน*", placeholder = "0.00")

@@ -155,7 +155,7 @@ fun ExpenseInputForm(
                 onClick = {
                     val data = ExpenseModel(
                         name = name,
-                        type = type,
+                        type = "LIABILITY_TYPE_EXPENSE",
                         principal = principal.toDouble(),
                         interestRate = "",
                         startedAt = statedAt,

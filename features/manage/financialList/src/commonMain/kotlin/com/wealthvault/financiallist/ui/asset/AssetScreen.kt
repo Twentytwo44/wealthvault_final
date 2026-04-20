@@ -339,7 +339,7 @@ fun AssetContent(
                         val dataToSend = StockModel(
                             stockName = rawData.name, quantity = rawData.quantity, costPerPrice = rawData.costPerPrice,
                             description = rawData.description, attachments = attachments ?: emptyList(),
-                            stockSymbol = "", brokerName = rawData.brokerName
+                            stockSymbol = "", brokerName = rawData.brokerName,type = rawData.type
                         )
                         navigatorContent.push(StockFormScreen(rawData.id, dataToSend))
                     }

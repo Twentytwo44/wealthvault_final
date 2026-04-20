@@ -4,6 +4,7 @@ import com.wealthvault.`auth-api`.model.LoginData
 import com.wealthvault.`auth-api`.model.LoginRequest
 import com.wealthvault.data_store.AuthToken
 import com.wealthvault.data_store.TokenStore
+import com.wealthvault.data_store.UserId
 
 class AuthRepositoryImpl(
     private val networkDataSource: AuthNetworkDataSource,
@@ -15,6 +16,8 @@ class AuthRepositoryImpl(
             println("LoginResponse ${data}")
             val tokens = AuthToken(data.accessToken,data.refreshToken)
             localDataSource.saveAuthToken(tokens)
+            val userId = UserId(data.userId)
+            localDataSource.saveUserId(userId)
             data
 
         }

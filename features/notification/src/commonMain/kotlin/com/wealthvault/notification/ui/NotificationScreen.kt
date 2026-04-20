@@ -1,37 +1,87 @@
 package com.wealthvault.notification.ui
 
+//import androidx.compose.material.icons.Icons
+//import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
+// Import สีจาก Theme ของเรา (เช็ค import ให้ตรงกับโครงสร้างจริงนะครับ)
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
-
-// Import สีจาก Theme ของเรา (เช็ค import ให้ตรงกับโครงสร้างจริงนะครับ)
-import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSurface
+import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightMuted
-import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSurface
 import com.wealthvault.core.theme.LightText
+import com.wealthvault.core.utils.getScreenModel
+import com.wealthvault.notification.viewmodel.NotificationScreenModel
+import com.wealthvault.notification_api.model.NotificationData
 import org.jetbrains.compose.resources.painterResource
 
+
+class NotificationScreen : Screen {
+    @Composable
+    override fun  Content() {
+        val screenModel = getScreenModel<NotificationScreenModel>()
+        val navigator = LocalNavigator.currentOrThrow
+        val notificationData by screenModel.notificationData.collectAsState()
+        NotificationContent(onBackClick = {
+            navigator.pop()
+        },
+            onReadClick = { data ->
+                screenModel.readNotification(data)
+            },
+            onAcceptClick = { id, action ->
+                screenModel.acceptFriend(id,action)
+            },
+            notificationData = notificationData
+           )
+    }
+}
+
 @Composable
-fun NotificationScreen(
-    onBackClick: () -> Unit
+fun NotificationContent(
+    onBackClick: () -> Unit,
+    onAcceptClick: (String,String) -> Unit,
+    onReadClick: (String) -> Unit,
+    notificationData: List<NotificationData>,
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -61,57 +111,52 @@ fun NotificationScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- ส่วนรายการการแจ้งเตือน ---
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // 1. แจ้งเตือนประกัน
-            item {
-                StandardNotificationCard(
-                    title = "ประกัน ... ของคุณใกล้หมดอายุแล้ว",
-                    subtitleLeft = "วันหมดอายุ 08 ม.ค. 2580"
-                )
-            }
 
-            // 2. แจ้งเตือนวันผ่อนชำระ
-            item {
-                StandardNotificationCard(
-                    title = "ใกล้ถึงวันผ่อนชำระ ... แล้ว",
-                    subtitleLeft = "วันผ่อนชำระ 08 ม.ค. 2580"
-                )
-            }
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // 🌟 วนลูปตามจำนวนข้อมูลที่มีใน Array ของ API
+                    items(notificationData) { notification ->
 
-            // 3. แจ้งเตือนการแชร์ (มีข้อมูลขวา)
-            item {
-                StandardNotificationCard(
-                    title = "คุณได้แชร์ทรัพย์สินนี้กับ Twentytwo",
-                    subtitleLeft = "ชื่อสินทรัพย์ ...",
-                    subtitleRight = "..."
-                )
-            }
+                        when (notification.entityType) { // เช็กประเภทของการแจ้งเตือน
 
-            // 4. แจ้งเตือนการแชร์ (แบบมี 2 บรรทัดย่อย)
-            item {
-                StandardNotificationCard(
-                    title = "ใกล้ถึงเวลาที่คุณจะแชร์ทรัพย์สินนี้กับ Twentytwo แล้ว",
-                    subtitleLeft = "ชื่อสินทรัพย์ ...",
-                    subtitleRight = "...",
-                    secondLineLeft = "วันที่แชร์",
-                    secondLineRight = "08 ม.ค. 2580(อีก30วัน)"
-                )
-            }
+                            "FRIEND_REQUEST" -> {
+                                // ถ้าเป็นแอดเพื่อน ให้แสดงการ์ด Invite
+                                InviteNotificationCard(
+                                    title = notification.message ?: "", // ใช้ข้อความจาก API เช่น "👋 test ได้ส่งคำขอเป็นเพื่อนกับคุณ"
+                                    inviter = notification.senderId ?: "", // (ถ้าข้อความมีชื่อคนส่งมาแล้ว อาจจะเว้นว่างไว้ หรือใส่ชื่อ SenderID)
+                                    time = notification.createdAt ?: "",
+                                    onDeclineClick = {
+                                        // TODO: เรียกฟังก์ชันปฏิเสธ
+                                        onAcceptClick(notification.senderId ?: "","decline")
+                                        println("ปฏิเสธคำขอจาก: ${notification.senderId}")
+                                    },
+                                    onAcceptClick = {
+                                        // 🌟 เรียกใช้ฟังก์ชัน acceptFriend ที่เราทำไว้ใน ScreenModel
+                                        // screenModel.acceptFriend(AcceptFriendRequest(...))
+                                        onAcceptClick(notification.senderId ?: "","accept")
+                                        println("ยอมรับคำขอจาก: ${notification.senderId}")
+                                    },
+                                    onReadClick = {
+                                        onReadClick(notification.id ?: "")
+                                    }
+                                )
+                            }
 
-            // 5. แจ้งเตือนคำเชิญ (มีปุ่มกด)
-            item {
-                InviteNotificationCard(
-                    title = "มีคำเชิญเข้าร่วมกลุ่ม ... ถึงคุณ",
-                    inviter = "Twentytwo",
-                    onDeclineClick = { /* TODO: ปฏิเสธ */ },
-                    onAcceptClick = { /* TODO: เข้าร่วม */ }
-                )
-            }
-        }
+                            // ถ้าเป็นประเภทอื่นๆ (เช่น ประกัน, ผ่อนชำระ, แชร์)
+                            else -> {
+                                StandardNotificationCard(
+                                    title = notification.message ?: "",
+                                    time = notification.createdAt ?: "",
+                                    // ดึงวันที่จาก createdAt มาแสดง (สามารถเขียนฟังก์ชันแปลงรูปแบบวันที่ให้สวยขึ้นได้)
+                                    subtitleLeft = "วันที่: ${notification.createdAt?.take(10)}",
+                                    onReadClick = { onReadClick(notification.id ?: "") }
+                                )
+                            }
+                        }
+                    }
+                }
     }
 }
 
@@ -126,12 +171,14 @@ fun NotificationScreen(
 fun StandardNotificationCard(
     title: String,
     subtitleLeft: String,
+    time: String,
     subtitleRight: String? = null,
     secondLineLeft: String? = null,
-    secondLineRight: String? = null
+    secondLineRight: String? = null,
+    onReadClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { onReadClick() },
         colors = CardDefaults.cardColors(containerColor = LightSurface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -169,11 +216,13 @@ fun StandardNotificationCard(
 fun InviteNotificationCard(
     title: String,
     inviter: String,
+    time: String,
     onDeclineClick: () -> Unit,
-    onAcceptClick: () -> Unit
+    onAcceptClick: () -> Unit,
+    onReadClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { onReadClick() },
         colors = CardDefaults.cardColors(containerColor = LightSurface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -183,6 +232,7 @@ fun InviteNotificationCard(
             // หัวข้อหลัก
             Text(text = title, fontSize = 16.sp, color = LightText)
             Spacer(modifier = Modifier.height(8.dp))
+            Text(text = time.take(10), fontSize = 16.sp, color = LightText)
 
             // ผู้เชิญ
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

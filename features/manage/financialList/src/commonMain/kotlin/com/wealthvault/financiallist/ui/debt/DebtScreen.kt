@@ -50,6 +50,7 @@ import com.wealthvault.liability_api.model.LiabilityIdData
 import com.wealthvault_final.`financial-asset`.Imagepicker.toAttachment
 import com.wealthvault_final.`financial-obligations`.model.ExpenseModel
 import com.wealthvault_final.`financial-obligations`.model.LiabilityModel
+import com.wealthvault_final.`financial-obligations`.ui.menu.ObMenuScreen
 import org.jetbrains.compose.resources.painterResource
 
 class DebtScreen : Screen {
@@ -75,7 +76,7 @@ class DebtScreen : Screen {
         DebtContent(
             onAddClick = {
                 // สมมติว่ามี ObMenuScreen หรือเปลี่ยนเป็น MenuScreen ตามที่ใช้งานจริง
-                // rootNavigator.push(ObMenuScreen())
+                navigatorContent.push(ObMenuScreen())
             },
             loans = loans,
             expenses = expenses,
@@ -228,7 +229,7 @@ fun DebtContent(
                             name = rawData.name,
                             creditor = rawData.creditor,
                             principal = rawData.principal.toString().toDoubleOrNull() ?: 0.0,
-                            interestRate = rawData.interestRate.toString().toDoubleOrNull() ?: 0.0,
+                            interestRate = rawData.interestRate.toString(),
                             description = rawData.description,
                             attachments = attachments ?: emptyList(),
                             startedAt = rawData.startedAt ?: "",

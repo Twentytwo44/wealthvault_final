@@ -63,6 +63,8 @@ import com.wealthvault_final.`financial-asset`.model.InsRefModel
 import com.wealthvault_final.`financial-asset`.model.RefModel
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.buildingTypes
 
 
 class BuildingFormScreen(val id:String ,val buildingData: BuildingModel) : Screen {
@@ -195,11 +197,12 @@ fun BuildingInputForm(
             Spacer(modifier = Modifier.height(16.dp))
 
 
-            AssetTextField(
-                value = type,
+            DropdownInput(
+                label = "ประเภทที่อยู่อาศัย",
+                options = buildingTypes,
+                selectedValue = type,
                 onValueChange = { type = it },
-                label = "ชนิดอาคาร ตึก*",
-                placeholder = buildingData.type
+                data = buildingData.type
             )
             AssetTextField(
                 value = buildingName,

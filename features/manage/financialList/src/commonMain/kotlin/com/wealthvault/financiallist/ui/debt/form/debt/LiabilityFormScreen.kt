@@ -160,7 +160,7 @@ fun LiabilityInputForm(
                 onClick = {
                     val data = LiabilityModel(
                         name = name,
-                        type = type,
+                        type = "LIABILITY_TYPE_LOAN",
                         principal = principal.toDouble(),
                         interestRate = "",
                         startedAt = statedAt,

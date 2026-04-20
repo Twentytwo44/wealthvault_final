@@ -43,6 +43,8 @@ import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.model.StockModel
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.investmentTypes
 import com.wealthvault_final.`financial-asset`.ui.share.ShareAssetScreen
 import com.wealthvault_final.`financial-asset`.ui.stock.viewmodel.StockScreenModel
 
@@ -81,12 +83,13 @@ fun AssetInputForm(
 
 
     // variable
-    var stockName by remember { mutableStateOf("BTC") }
-    var description by remember { mutableStateOf("Test again") }
-    var stockSymbol by remember { mutableStateOf("BTC") }
-    var brokerName by remember { mutableStateOf("DIME") }
-    var quantity by remember { mutableStateOf("0.2") }
-    var costPerPrice by remember { mutableStateOf("1.0") }
+    var stockName by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var stockSymbol by remember { mutableStateOf("") }
+    var brokerName by remember { mutableStateOf("") }
+    var quantity by remember { mutableStateOf("") }
+    var costPerPrice by remember { mutableStateOf("") }
+    var type by remember {mutableStateOf("")}
     val attachments = remember { mutableStateListOf<Attachment>() }
 
     val filePicker = rememberFilePicker { newFiles ->
@@ -127,6 +130,12 @@ fun AssetInputForm(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ส่วนกรอกข้อมูลหลัก
+            DropdownInput(
+                label = "ประเภทการลงทุน",
+                options = investmentTypes,
+                selectedValue = type,
+                onValueChange = { type = it }
+            )
             AssetTextField(value = stockName, onValueChange = { stockName = it }, label = "ชื่อหุ้น กองทุน*", placeholder = "กรอกชื่อ")
 
             AssetTextField(
@@ -173,12 +182,13 @@ fun AssetInputForm(
                 onClick = {
                     val data = StockModel(
                         stockName = stockName,
-                        quantity = quantity.toString().toDoubleOrNull() ?: 0.0,
+                        quantity = quantity.toDoubleOrNull() ?: 0.0,
                         description = description,
                         stockSymbol = stockSymbol,
                         brokerName = brokerName,
                         costPerPrice = costPerPrice.toDouble(),
-                        attachments = attachments
+                        attachments = attachments,
+                        type = type
                     )
                     println("data attachemnt: ${data.attachments}")
                     onNextClick(data)

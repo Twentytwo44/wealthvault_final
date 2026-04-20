@@ -34,15 +34,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.model.InsuranceModel
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.insuranceTypes
 import com.wealthvault_final.`financial-asset`.ui.insurance.viewmodel.InsuranceScreenModel
 import com.wealthvault_final.`financial-asset`.ui.share.ShareAssetScreen
 
@@ -50,8 +52,7 @@ class InsuranceFormScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val screenModel = rememberScreenModel { InsuranceScreenModel() }
-
+        val screenModel = getScreenModel<InsuranceScreenModel>()
         InsuranceInputForm(
             onBackClick = { navigator.pop() } ,
             onNextClick = { data ->
@@ -132,10 +133,15 @@ fun InsuranceInputForm(
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(16.dp))
+            DropdownInput(
+                label = "ประเภทประกัน",
+                options = insuranceTypes,
+                selectedValue = type,
+                onValueChange = { type = it }
+            )
 
             AssetTextField(value = name, onValueChange = { name = it } , label = "ชื่อประกัน" , placeholder = "กรอกชื่อประกัน" )
             AssetTextField(value = policyNumber, onValueChange = { policyNumber = it }, label = "เลขประกัน*", placeholder = "กรอกเลขประกัน")
-            AssetTextField(value = type, onValueChange = { type = it }, label = "ชนิด*", placeholder = "กรอกชนิด")
             AssetTextField(value = companyName, onValueChange = { companyName = it }, label = "ชื่อบริษัทประกัน*", placeholder = "กรอกชื่อบริษัทประกัน")
 
             AssetTextField(

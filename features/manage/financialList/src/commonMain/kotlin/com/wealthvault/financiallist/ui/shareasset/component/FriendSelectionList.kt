@@ -125,7 +125,7 @@ fun FriendSelectionList(
                             ) {
                                 val hasDate = selectedItem?.date != null
                                 Text(
-                                    text = if (hasDate) selectedItem!!.date!! else "ว/ด/ป",
+                                    text = if (hasDate) selectedItem.date else "ว/ด/ป",
                                     fontSize = 14.sp,
                                     color = if (hasDate) Color.Black else Color.Gray
                                 )

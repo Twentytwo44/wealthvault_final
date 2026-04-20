@@ -9,7 +9,10 @@ import kotlinx.coroutines.flow.map
 
 
 data class AuthToken(val accessToken: String?, val refreshToken: String?)
-data class DeviceInfo(val userId: String?, val fcmToken: String?, val platform: String?, val deviceName: String?)
+
+data class UserId(val userId: String?)
+
+data class DeviceInfo( val fcmToken: String?, val platform: String?, val deviceName: String?)
 
 class TokenStore(
     private val dataStore: DataStore<Preferences>
@@ -31,6 +34,9 @@ class TokenStore(
     // token
     val accessToken: Flow<String?> = dataStore.data
         .map { preferences -> preferences[KEY_ACCESS_TOKEN] }
+
+    val fcmToken: Flow<String?> = dataStore.data
+        .map { preferences -> preferences[KEY_FCM_TOKEN] }
 
     val refreshToken: Flow<String?> = dataStore.data
         .map { preferences -> preferences[KEY_REFRESH_TOKEN] }
@@ -57,16 +63,21 @@ class TokenStore(
     // device info
     val deviceInfo: Flow<DeviceInfo> = dataStore.data.map { pref ->
         DeviceInfo(
-            userId = pref[KEY_USER_ID],
             fcmToken = pref[KEY_FCM_TOKEN],
             platform = pref[KEY_PLATFORM],
             deviceName = pref[KEY_DEVICE_NAME]
         )
     }
+    suspend fun saveUserId(device: UserId) {
+        dataStore.edit { pref ->
+            pref[KEY_USER_ID] = device.userId ?: ""
+
+        }
+    }
+
 
     suspend fun saveDeviceInfo(device: DeviceInfo) {
         dataStore.edit { pref ->
-            pref[KEY_USER_ID] = device.userId ?: ""
             pref[KEY_FCM_TOKEN] = device.fcmToken ?: ""
             pref[KEY_PLATFORM] = device.platform ?: ""
             pref[KEY_DEVICE_NAME] = device.deviceName ?: ""

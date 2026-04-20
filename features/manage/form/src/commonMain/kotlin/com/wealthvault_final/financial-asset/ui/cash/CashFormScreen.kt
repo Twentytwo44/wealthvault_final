@@ -103,7 +103,7 @@ fun CashInputForm(
                 ),
                 title = {
                     Text(
-                        "ข้อมูลเงินสด",
+                        "ข้อมูลเงินสด ทองคำ",
                         color = Color(0xFF8D6E63),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )

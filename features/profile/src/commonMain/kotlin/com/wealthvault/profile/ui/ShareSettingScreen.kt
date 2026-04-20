@@ -64,6 +64,7 @@ import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.theme.RedErr
+import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.profile.ui.components.ClosePersonItem
 import com.wealthvault.profile.ui.components.SelectPersonItem
@@ -73,7 +74,7 @@ import com.wealthvault.`user-api`.model.UserData
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 
-class ShareSettingScreen(private val onBackClick: () -> Unit) : Screen {
+class ShareSettingScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<ShareSettingScreenModel>()
@@ -82,7 +83,7 @@ class ShareSettingScreen(private val onBackClick: () -> Unit) : Screen {
             screenModel.fetchUser()
             screenModel.fetchCloseFriends()
         }
-
+        val rootNavigator = LocalRootNavigator.current
         val userData by screenModel.userState.collectAsState()
         val closeFriends by screenModel.closeFriends.collectAsState()
         val allFriends by screenModel.allFriends.collectAsState()
@@ -91,7 +92,9 @@ class ShareSettingScreen(private val onBackClick: () -> Unit) : Screen {
             userData = userData,
             closeFriends = closeFriends,
             allFriends = allFriends, // 🌟 ตัวนี้จะเป็น List<FriendData>
-            onBackClick = onBackClick,
+            onBackClick = {
+                rootNavigator.pop()
+            },
             onSettingsChanged = { newEnabled, newAge ->
                 screenModel.updateShareSettings(newEnabled, newAge)
             },

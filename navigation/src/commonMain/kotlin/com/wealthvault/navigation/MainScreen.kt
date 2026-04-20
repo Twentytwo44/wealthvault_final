@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
@@ -136,5 +137,12 @@ class MainScreen : Screen {
                 }
             }
         }
+    }
+}
+
+
+val mainScreenModule = screenModule {
+    register<SharedScreen.Main> {
+        MainScreen()
     }
 }

@@ -33,6 +33,8 @@ kotlin {
                 implementation(project(":functional:api:user-api"))
 
                 implementation(project(":features:manage:form"))
+                implementation(project(":features:notification"))
+
 
 
 

@@ -66,7 +66,7 @@ class SummaryScreenModel(
         return InvestmentRequest(
             name = current?.stockName ?: "",
             symbol = current?.stockSymbol ?: "",
-            type = "STOCK", // หรือถ้าในแอปคุณมีให้เลือกประเภท ก็ดึงจาก current?.type แทน
+            type = current?.type, // หรือถ้าในแอปคุณมีให้เลือกประเภท ก็ดึงจาก current?.type แทน
             brokerName = current?.brokerName ?: "",
             quantity = current?.quantity?.toString() ?: "0", // ใส่ Default กัน null
             costPerPrice = current?.costPerPrice?.toString() ?: "0",

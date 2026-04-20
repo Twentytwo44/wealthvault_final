@@ -22,7 +22,8 @@ class StockScreenModel(
         stockSymbol = "",
         brokerName = "",
         costPerPrice = 0.00,
-        attachments = emptyList()
+        attachments = emptyList(),
+        type = ""
     ))
 
 
@@ -40,7 +41,8 @@ class StockScreenModel(
             stockSymbol = data.stockSymbol,
             brokerName = data.brokerName,
             costPerPrice = data.costPerPrice,
-            attachments = data.attachments
+            attachments = data.attachments,
+            type = data.type
         ) }
     }
 
@@ -72,7 +74,7 @@ class StockScreenModel(
         return InvestmentRequest(
             name = current.stockName,
             symbol = current.stockSymbol,
-            type = current.brokerName,
+            type = current.type,
             quantity = current.quantity.toString(),
             costPerPrice = current.costPerPrice.toString(),
             brokerName = current.brokerName,

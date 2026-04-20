@@ -43,6 +43,8 @@ import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.model.InsuranceModel
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.insuranceTypes
 
 class InsuranceFormScreen(val id:String,val insuranceData: InsuranceModel) : Screen {
     @Composable
@@ -138,10 +140,15 @@ fun InsuranceInputForm(
             Spacer(modifier = Modifier.height(16.dp))
 
 
-
+            DropdownInput(
+                label = "ประเภทประกัน",
+                options = insuranceTypes,
+                selectedValue = type,
+                onValueChange = { type = it },
+                data = insuranceData?.type
+            )
             AssetTextField(value = name, onValueChange = { name = it }, label = "ชื่อประกัน", placeholder = insuranceData?.name ?: "")
             AssetTextField(value = policyNumber, onValueChange = { policyNumber = it }, label = "เลขประกัน*", placeholder = insuranceData?.policyNumber ?: "")
-            AssetTextField(value = type, onValueChange = { type = it }, label = "ชนิด*", placeholder = insuranceData?.type ?: "")
             AssetTextField(value = companyName, onValueChange = { companyName = it }, label = "ชื่อบริษัทประกัน*", placeholder = insuranceData?.companyName ?: "")
 
             AssetTextField(
@@ -187,7 +194,7 @@ fun InsuranceInputForm(
                         policyNumber = policyNumber,
                         type = type,
                         companyName = companyName,
-                        coverageAmount = coverageAmount.toDouble(),
+                        coverageAmount = coverageAmount.toDoubleOrNull() ?: 0.0,
                         coveragePeriod = coveragePeriod,
                         expDate = expDate,
                         conDate = conDate,

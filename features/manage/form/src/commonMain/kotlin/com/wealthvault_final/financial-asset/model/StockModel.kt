@@ -11,6 +11,7 @@ data class StockModel(
     val stockSymbol: String,
     val brokerName: String,
     val costPerPrice: Double,
-    val attachments: List<Attachment>
+    val attachments: List<Attachment>,
+    val type: String
 
 )

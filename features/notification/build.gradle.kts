@@ -26,6 +26,9 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 
                 implementation(project(":functional:api:auth-api"))
+                implementation(project(":functional:api:notification-api"))
+                implementation(project(":functional:api:user-api"))
+
                 implementation(project(":functional:data-store"))
                 implementation(project(":base:core"))
 

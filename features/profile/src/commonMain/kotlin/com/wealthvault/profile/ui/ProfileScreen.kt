@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
 import com.wealthvault.core.generated.resources.Res
@@ -44,6 +45,8 @@ import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
+import com.wealthvault.login.ui.LoginScreen
+import com.wealthvault.navigation.SharedScreen
 import com.wealthvault.profile.ui.components.ClosePersonItem
 import com.wealthvault.`user-api`.model.CloseFriendData
 import com.wealthvault.`user-api`.model.UserData
@@ -247,5 +250,10 @@ fun ProfileContent(
         }
 
         item { Spacer(modifier = Modifier.height(80.dp)) }
+    }
+}
+val profileScreenModule = screenModule {
+    register< SharedScreen.Profile> {
+        ProfileScreen()
     }
 }

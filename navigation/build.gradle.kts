@@ -85,7 +85,6 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 
                 implementation(project(":base:core"))
-                implementation(project(":features:auth:login"))
                 implementation(project(":features:auth:register"))
                 implementation(project(":features:dashboard"))
                 implementation(project(":features:notification"))

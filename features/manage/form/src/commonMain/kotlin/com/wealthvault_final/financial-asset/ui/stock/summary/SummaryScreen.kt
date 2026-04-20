@@ -208,6 +208,8 @@ fun SummaryCard(data: StockModel) {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            SummaryRow("ประเภทการลงทุน",data.type ?: "")
+
             SummaryRow("ชื่อหุ้น กองทุน",data.stockName ?: "")
             SummaryRow("จำนวนหุ้น กองทุน", data.quantity.toString() ?: "")
             SummaryRow("ราคาที่ซื้อ", data.costPerPrice.toString() ?: "")
