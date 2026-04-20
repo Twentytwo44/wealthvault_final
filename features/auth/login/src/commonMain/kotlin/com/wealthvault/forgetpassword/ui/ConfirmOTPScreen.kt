@@ -20,10 +20,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +51,7 @@ import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSurface
 import com.wealthvault.core.utils.getScreenModel
 import org.jetbrains.compose.resources.painterResource
+import kotlinx.coroutines.delay
 
 // 🌟 สร้าง Screen ครอบรับค่า Email มาจากหน้าแรก
 class ConfirmOTPScreen(private val email: String) : Screen {
@@ -67,9 +67,7 @@ class ConfirmOTPScreen(private val email: String) : Screen {
         val resetToken by screenModel.resetToken.collectAsState()
         val errorMessage by screenModel.errorMessage.collectAsState()
 
-        val snackbarHostState = remember { SnackbarHostState() }
-
-        // 🌟 ถ้ายืนยันสำเร็จ (Token มาแล้ว) ให้ไปหน้าตั้งรหัสผ่านใหม่
+        // ถ้ายืนยันสำเร็จ (Token มาแล้ว) ให้ไปหน้าตั้งรหัสผ่านใหม่
         LaunchedEffect(isOtpVerified) {
             if (isOtpVerified && resetToken.isNotEmpty()) {
                 screenModel.clearFlags()
@@ -77,18 +75,15 @@ class ConfirmOTPScreen(private val email: String) : Screen {
             }
         }
 
-        LaunchedEffect(errorMessage) {
-            errorMessage?.let { msg ->
-                snackbarHostState.showSnackbar(message = msg)
-                screenModel.resetState()
-            }
-        }
-
         Box(modifier = Modifier.fillMaxSize()) {
             ConfirmOTPContent(
                 emailSentTo = email,
                 otpCode = otpCode,
-                onOtpChange = { otpCode = it },
+                errorMessage = errorMessage, // 🌟 โยน Error ลงไปให้ UI
+                onOtpChange = {
+                    otpCode = it
+                    screenModel.resetState() // 🌟 ล้าง Error เมื่อเริ่มพิมพ์
+                },
                 onBackClick = { navigator.pop() },
                 onVerifyClick = { screenModel.verifyOtp(email, otpCode) },
                 onResendClick = { screenModel.sendOtp(email) }
@@ -102,21 +97,53 @@ class ConfirmOTPScreen(private val email: String) : Screen {
                     CircularProgressIndicator(color = LightPrimary)
                 }
             }
-            SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter))
         }
     }
 }
 
 @Composable
-fun ConfirmOTPContent(emailSentTo: String, otpCode: String, onOtpChange: (String) -> Unit, onBackClick: () -> Unit, onVerifyClick: () -> Unit, onResendClick: () -> Unit) {
+fun ConfirmOTPContent(
+    emailSentTo: String,
+    otpCode: String,
+    errorMessage: String?,
+    onOtpChange: (String) -> Unit,
+    onBackClick: () -> Unit,
+    onVerifyClick: () -> Unit,
+    onResendClick: () -> Unit
+) {
+    // 🌟 สร้าง State สำหรับจัดการเวลา 60 วินาที
+    var timeLeft by remember { mutableStateOf(60) }
+    var isResendEnabled by remember { mutableStateOf(false) }
+
+    // 🌟 ตัวนับถอยหลัง
+    LaunchedEffect(timeLeft) {
+        if (timeLeft > 0) {
+            delay(1000L) // รอ 1 วินาที
+            timeLeft--
+        } else {
+            isResendEnabled = true // เปิดปุ่มเมื่อเวลาหมด
+        }
+    }
+
     WavyBackground {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(24.dp)) {
             Icon(painter = painterResource(Res.drawable.ic_common_back), contentDescription = "Back", tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onBackClick() })
             Spacer(modifier = Modifier.height(40.dp))
-            Text(text = "ยืนยันรหัส OTP", color = LightPrimary, fontSize = 28.sp, modifier = Modifier.padding(horizontal = 8.dp))
+            Text(text = "ยืนยันรหัส OTP", color = LightPrimary, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "เราได้ส่งรหัส 6 หลักไปที่\n$emailSentTo", color = LightMuted, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 8.dp))
+            Text(text = "เราได้ส่งรหัส 6 หลักไปที่\n$emailSentTo", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
             Spacer(modifier = Modifier.height(48.dp))
+
+            // 🌟 1. โชว์ข้อความแจ้งเตือน Error (ถ้ามี)
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = Color(0xFFE53935),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    textAlign = TextAlign.End
+                )
+            }
 
             OutlinedTextField(
                 value = otpCode,
@@ -125,21 +152,54 @@ fun ConfirmOTPContent(emailSentTo: String, otpCode: String, onOtpChange: (String
                 shape = RoundedCornerShape(percent = 30), singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center, fontSize = 24.sp, letterSpacing = 16.sp, fontWeight = FontWeight.Bold),
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = LightSurface, unfocusedContainerColor = LightSurface, focusedBorderColor = LightPrimary, unfocusedBorderColor = LightBorder)
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = LightSurface,
+                    unfocusedContainerColor = LightSurface,
+                    focusedBorderColor = LightPrimary,
+                    unfocusedBorderColor = LightBorder,
+                    // 🌟 เปลี่ยนสีกรอบเป็นสีแดงตอนที่ Error
+                    errorBorderColor = Color(0xFFE53935),
+                    errorCursorColor = Color(0xFFE53935)
+                ),
+                isError = errorMessage != null // เปิดใช้งานโหมด Error
             )
 
             Spacer(modifier = Modifier.height(40.dp))
             Button(
-                onClick = onVerifyClick, modifier = Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(percent = 30),
+                onClick = onVerifyClick, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(percent = 30),
                 colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
             ) {
-                Text("ยืนยัน", fontSize = 18.sp, color = LightSurface)
+                Text("ยืนยัน", style = MaterialTheme.typography.titleMedium, color = LightSurface)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // 🌟 2. ปุ่มส่งรหัสอีกครั้ง + นับเวลาถอยหลัง
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "ไม่ได้รับรหัส? ", color = LightMuted, fontSize = 14.sp)
-                Text(text = "ส่งรหัสอีกครั้ง", color = LightPrimary, fontSize = 14.sp, textDecoration = TextDecoration.Underline, modifier = Modifier.clickable { onResendClick() })
+                Text(text = "ไม่ได้รับรหัส? ", color = LightMuted, style = MaterialTheme.typography.bodyMedium)
+
+                if (isResendEnabled) {
+                    // 🌟 กดได้ (เวลาหมดแล้ว)
+                    Text(
+                        text = "ส่งรหัสอีกครั้ง",
+                        color = LightPrimary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable {
+                            onResendClick()
+                            // 🌟 รีเซ็ตเวลาใหม่หลังจากกดส่งซ้ำ
+                            timeLeft = 60
+                            isResendEnabled = false
+                        }
+                    )
+                } else {
+                    // 🌟 กดไม่ได้ (กำลังนับถอยหลัง)
+                    Text(
+                        text = "ส่งรหัสอีกครั้ง ($timeLeft วิ)",
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }

@@ -23,14 +23,14 @@ data class LoginResponse(
 @Serializable
 data class LoginData(
     @SerialName("success")
-    val success: Boolean,
+    val success: Boolean? = null,
 
     @SerialName("access_token")
-    val accessToken: String,
+    val accessToken: String? = null,
 
     @SerialName("refresh_token")
-    val refreshToken: String,
+    val refreshToken: String? = null,
 
     @SerialName("user_id")
-    val userId: String
+    val userId: String? = null
 )

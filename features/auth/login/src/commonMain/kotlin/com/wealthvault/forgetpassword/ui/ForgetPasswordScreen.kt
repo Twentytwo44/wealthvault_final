@@ -2,8 +2,10 @@ package com.wealthvault.forgetpassword.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,8 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -61,38 +62,32 @@ class ForgetPasswordScreen : Screen {
 
         var emailText by remember { mutableStateOf("") }
 
-        // 🌟 ดึง State จาก ScreenModel
+        // ดึง State จาก ScreenModel
         val isLoading by screenModel.isLoading.collectAsState()
         val isOtpSent by screenModel.isOtpSent.collectAsState()
         val errorMessage by screenModel.errorMessage.collectAsState()
 
-        val snackbarHostState = remember { SnackbarHostState() }
-
-        // 🌟 ถ้ายิง API ขอ OTP สำเร็จ ให้ไปหน้าถัดไป
+        // ถ้ายิง API ขอ OTP สำเร็จ ให้ไปหน้าถัดไป
         LaunchedEffect(isOtpSent) {
             if (isOtpSent) {
-                screenModel.clearFlags() // เคลียร์ค่ากันเด้งซ้ำ
+                screenModel.clearFlags()
                 navigator.push(ConfirmOTPScreen(emailText))
-            }
-        }
-
-        // 🌟 ดักจับ Error เพื่อโชว์ Snackbar
-        LaunchedEffect(errorMessage) {
-            errorMessage?.let { msg ->
-                snackbarHostState.showSnackbar(message = msg)
-                screenModel.resetState()
             }
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
             ForgetPasswordContent(
                 email = emailText,
-                onEmailChange = { emailText = it },
+                errorMessage = errorMessage, // 🌟 ส่ง Error ไปให้ UI
+                onEmailChange = {
+                    emailText = it
+                    screenModel.resetState() // 🌟 ล้าง Error ทันทีที่เริ่มพิมพ์ใหม่
+                },
                 onBackClick = { navigator.pop() },
                 onSendOtpClick = { screenModel.sendOtp(emailText) }
             )
 
-            // 🌟 หน้าจอโหลดดิ้ง
+            // หน้าจอโหลดดิ้ง
             if (isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)).clickable(enabled = false) {},
@@ -101,14 +96,18 @@ class ForgetPasswordScreen : Screen {
                     CircularProgressIndicator(color = LightPrimary)
                 }
             }
-
-            SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter))
         }
     }
 }
 
 @Composable
-fun ForgetPasswordContent(email: String, onEmailChange: (String) -> Unit, onBackClick: () -> Unit, onSendOtpClick: () -> Unit) {
+fun ForgetPasswordContent(
+    email: String,
+    errorMessage: String?, // 🌟 รับ Error เข้ามา
+    onEmailChange: (String) -> Unit,
+    onBackClick: () -> Unit,
+    onSendOtpClick: () -> Unit
+) {
     WavyBackground {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(24.dp)) {
             Icon(painter = painterResource(Res.drawable.ic_common_back), contentDescription = "Back", tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onBackClick() })
@@ -118,12 +117,47 @@ fun ForgetPasswordContent(email: String, onEmailChange: (String) -> Unit, onBack
             Text(text = "กรุณากรอกอีเมลที่ลงทะเบียนไว้\nเพื่อรับรหัสยืนยัน (OTP)", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
             Spacer(modifier = Modifier.height(48.dp))
 
+            // 🌟 ปรับแต่งช่องกรอกอีเมลให้แสดง Error ได้
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(text = "อีเมล", color = LightPrimary, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp, start = 8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = "อีเมล",
+                        color = LightPrimary,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    // 🌟 โชว์ข้อความ Error เล็กๆ สีแดงด้านขวา
+                    if (errorMessage != null) {
+                        Text(
+                            text = errorMessage,
+                            color = Color(0xFFE53935), // สีแดงแจ้งเตือน
+                            style = MaterialTheme.typography.labelSmall,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.weight(1f).padding(start = 8.dp)
+                        )
+                    }
+                }
+
                 OutlinedTextField(
-                    value = email, onValueChange = onEmailChange, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(percent = 30), singleLine = true,
+                    value = email,
+                    onValueChange = onEmailChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(percent = 30),
+                    singleLine = true,
                     leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_auth_email), contentDescription = "email", tint = LightPrimary, modifier = Modifier.size(30.dp)) },
-                    colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = LightSurface, unfocusedContainerColor = LightSurface, focusedBorderColor = LightPrimary, unfocusedBorderColor = LightBorder)
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = LightSurface,
+                        unfocusedContainerColor = LightSurface,
+                        focusedBorderColor = LightPrimary,
+                        unfocusedBorderColor = LightBorder,
+                        errorBorderColor = Color(0xFFE53935), // 🌟 เส้นขอบแดง
+                        errorLeadingIconColor = Color(0xFFE53935) // 🌟 ไอคอนแดง
+                    ),
+                    isError = errorMessage != null // 🌟 แจ้งสถานะเปิดกรอบแดง
                 )
             }
             Spacer(modifier = Modifier.height(40.dp))

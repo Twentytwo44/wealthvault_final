@@ -77,5 +77,10 @@ data class MessageMetadata(
     val targetUserId: String? = null,
 
     @SerialName("type")
-    val type: String? = null // เช่น "GRANT_ACCESS_PROMPT"
+    val type: String? = null,
+
+    @SerialName("is_deleted")
+    val isDeleted: Boolean? = null
+
+
 )

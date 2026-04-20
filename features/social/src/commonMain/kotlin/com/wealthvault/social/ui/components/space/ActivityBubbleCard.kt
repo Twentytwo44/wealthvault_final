@@ -24,6 +24,7 @@ import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.theme.RedErr
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -33,10 +34,10 @@ fun ActivityBubbleCard(
     assetType: String,
     isMe: Boolean,
     profileImageUrl: String? = null,
+    isDeleted: Boolean = false, // 🌟 1. เพิ่ม Parameter นี้เข้ามา
     themeColor: Color = Color(0xFFC27A5A),
     onDetailClick: () -> Unit = {}
 ) {
-    // 🌟 1. ส่วนแปลง Type เป็นภาษาไทย
     val thaiAssetType = when {
         assetType.contains("account", ignoreCase = true) -> "บัญชีเงินฝาก"
         assetType.contains("cash", ignoreCase = true) -> "เงินสด ทองคำ"
@@ -46,7 +47,7 @@ fun ActivityBubbleCard(
         assetType.contains("land", ignoreCase = true) -> "ที่ดิน"
         assetType.contains("loan", ignoreCase = true) || assetType.contains("liability", ignoreCase = true) -> "หนี้สิน"
         assetType.contains("expense", ignoreCase = true) -> "ค่าใช้จ่ายระยะยาว"
-        else -> assetType // ถ้าไม่ตรงกับอะไรเลย ให้โชว์ค่าเดิมไว้ก่อน
+        else -> assetType
     }
 
     Row(
@@ -85,7 +86,7 @@ fun ActivityBubbleCard(
         Card(
             modifier = if (isMe) Modifier.fillMaxWidth(0.80f) else Modifier.fillMaxWidth(0.85f),
             colors = CardDefaults.cardColors(
-                containerColor = if (isMe) LightSoftWhite else LightSoftWhite
+                containerColor = if (isDeleted) LightBg else LightSoftWhite
             ),
             shape = RoundedCornerShape(
                 topStart = if (isMe) 16.dp else 4.dp,
@@ -96,7 +97,13 @@ fun ActivityBubbleCard(
             border = BorderStroke(1.dp, themeColor.copy(alpha = 0.2f))
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
-                Text(text = title, fontSize = 14.sp, color = Color(0xFF3A2F2A), fontWeight = FontWeight.Medium)
+                // 🌟 ปรับสีหัวข้อ ถ้าโดนลบไปแล้วให้ตัวหนังสือซีดลงหน่อย
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    color = if (isDeleted) Color.Gray else Color(0xFF3A2F2A),
+                    fontWeight = FontWeight.Medium
+                )
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -105,7 +112,9 @@ fun ActivityBubbleCard(
                     Text(
                         text = assetName,
                         fontSize = 12.sp,
-                        color = Color(0xFF3A2F2A),
+                        // 🌟 ถ้ายกเลิกแชร์แล้ว ให้ชื่อเป็นสีเทาและขีดฆ่า (Optional: ลบ textDecoration ออกได้ถ้าไม่อยากขีดฆ่าครับ)
+                        color = if (isDeleted) Color.Gray else Color(0xFF3A2F2A),
+                        textDecoration = if (isDeleted) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
                         textAlign = TextAlign.End,
                         modifier = Modifier.weight(1f)
                     )
@@ -116,38 +125,50 @@ fun ActivityBubbleCard(
                     Text(text = "ประเภท", fontSize = 12.sp, color = Color.Gray)
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        // 🌟 2. เปลี่ยนจาก assetType เป็น thaiAssetType
                         text = thaiAssetType,
                         fontSize = 12.sp,
-                        color = Color(0xFF3A2F2A),
+                        color = if (isDeleted) Color.Gray else Color(0xFF3A2F2A),
                         textAlign = TextAlign.End,
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { onDetailClick() }
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 🌟 2. เงื่อนไขซ่อน/โชว์ปุ่ม
+                if (isDeleted) {
                     Text(
-                        text = "รายละเอียด",
+                        text = "ทรัพย์สินนี้ถูกลบหรือยกเลิกการแชร์แล้ว",
                         fontSize = 12.sp,
-                        color = themeColor,
-                        fontWeight = FontWeight.Medium
+                        color = RedErr,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.align(Alignment.End).padding(vertical = 4.dp)
                     )
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { onDetailClick() }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "รายละเอียด",
+                            fontSize = 12.sp,
+                            color = themeColor,
+                            fontWeight = FontWeight.Medium
+                        )
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
 
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_common_solid_right),
-                        contentDescription = null,
-                        tint = themeColor,
-                        modifier = Modifier.size(14.dp)
-                    )
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_common_solid_right),
+                            contentDescription = null,
+                            tint = themeColor,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
                 }
             }
         }

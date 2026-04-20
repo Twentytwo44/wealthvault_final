@@ -76,7 +76,7 @@ class FriendSpaceScreen(
                             isGroup = false             // บอกว่าไม่ใช่กลุ่มนะ
                         )
                     )
-                               },
+                },
                 onManageClick = {
                     navigator.push(
                         SharedAssetManageScreen(
@@ -159,16 +159,22 @@ fun FriendSpaceContent(
 
                         ActivityBubbleCard(
                             title = titleText,
-                            assetName = msg.metadata?.itemName ?: "ไม่ระบุชื่อทรัพย์สิน",
+                            // 🌟 ดึง itemName ก่อน ถ้าไม่มีก็ดึง snapshotTitle เพื่อความชัวร์
+                            assetName = msg.metadata?.itemName ?: msg.metadata?.snapshotTitle ?: "ไม่ระบุชื่อทรัพย์สิน",
                             assetType = msg.metadata?.assetType ?: "ไม่ระบุประเภท",
                             isMe = isMe,
                             profileImageUrl = msg.senderImage,
+
+                            // 🌟 โยนสถานะ isDeleted ลงไปให้ Component
+                            isDeleted = msg.metadata?.isDeleted == true,
+
                             themeColor = themeColor,
                             onDetailClick = {
                                 selectedAssetId = msg.metadata?.assetId
                                 selectedAssetType = msg.metadata?.assetType
                             }
                         )
+
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }

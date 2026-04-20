@@ -27,21 +27,28 @@ import com.wealthvault.investment_api.getinvestmentbyid.GetInvestmentByIdApi
 import com.wealthvault.land_api.getlandbyid.GetLandByIdApi
 import com.wealthvault.liability_api.getliabilitybyid.GetLiabilityByIdApi
 import com.wealthvault.share_api.getitemtoshare.GetItemToShareApi
+import com.wealthvault.share_api.getsharefriend.GetShareFriendApi
 import com.wealthvault.share_api.getsharegroup.GetShareGroupApi
 import com.wealthvault.share_api.model.ItemToShareData
+import com.wealthvault.share_api.model.ShareFriendData
 import com.wealthvault.share_api.model.ShareGroupData
 import com.wealthvault.share_api.model.ShareItemRequest
 import com.wealthvault.share_api.shareitem.ShareItemApi
 import com.wealthvault.share_api.unsharefriend.UnShareFriendApi
 import com.wealthvault.share_api.unsharegroup.UnShareGroupApi
+import com.wealthvault.`user-api`.acceptfriend.AcceptFriendApi
 // 🌟 1. Import API 2 ตัวที่เพิ่งสร้างมา
 import com.wealthvault.`user-api`.getuserbyemail.GetUserByEmailApi
 import com.wealthvault.`user-api`.addfriend.AddFriendApi
 import com.wealthvault.`user-api`.deletefriend.DeleteFriendApi
 import com.wealthvault.`user-api`.friendmsg.GetFriendMsgApi
 import com.wealthvault.`user-api`.friendprofile.GetFriendProfileApi
+import com.wealthvault.`user-api`.model.AcceptFriendData
+import com.wealthvault.`user-api`.model.AcceptFriendRequest
 import com.wealthvault.`user-api`.model.FriendProfileData
 import com.wealthvault.`user-api`.model.MessageItem
+import com.wealthvault.`user-api`.model.PendingFriendData
+import com.wealthvault.`user-api`.pendingfriend.PendingFriendApi
 
 class SocialDataSource(
     private val friendApi: FriendApi,
@@ -60,6 +67,7 @@ class SocialDataSource(
     private val getLandByIdApi: GetLandByIdApi,
     private val getLiabilityByIdApi: GetLiabilityByIdApi,
     private val getGroupMsgApi: GetGroupMsgApi,
+    private val getShareFriendApi: GetShareFriendApi,
     private val getShareGroupApi: GetShareGroupApi,
     private val grantAccessApi: GrantAccessApi,
     private val getGroupApi: GetGroupApi,
@@ -74,7 +82,8 @@ class SocialDataSource(
     private val unShareFriendApi: UnShareFriendApi,
     private val unShareGroupApi: UnShareGroupApi,
     private val deleteGroupApi: DeleteGroupApi,
-
+    private val acceptFriendApi: AcceptFriendApi,
+    private val pendingFriendApi: PendingFriendApi
 
 
     ) {
@@ -154,6 +163,16 @@ class SocialDataSource(
             val response = getGroupMsgApi.getGroupMsg(groupId)
             if (response.error != null) throw Exception(response.error)
             response.data
+        }
+    }
+
+    suspend fun getShareFriendItems(friendId: String): Result<List<ShareFriendData>> {
+        return runCatching {
+            val response = getShareFriendApi.getShareFriend(friendId)
+            if (response.error != null) {
+                throw Exception(response.error)
+            }
+            response.data ?: emptyList()
         }
     }
     suspend fun getShareGroupItems(groupId: String): Result<List<ShareGroupData>> {
@@ -290,4 +309,21 @@ class SocialDataSource(
         response.data ?: true
     }
 
+    suspend fun acceptFriend(request: AcceptFriendRequest): Result<AcceptFriendData> {
+        return runCatching {
+            val result = acceptFriendApi.acceptFriend(request)
+            println("Notification Result: ${result.data}")
+            result.data ?: error("Error: Put notification failed")
+        }
+    }
+
+    suspend fun getPendingFriends(): Result<List<PendingFriendData>> {
+        return runCatching {
+            val response = pendingFriendApi.pendingFriend()
+            if (response.error != null) throw Exception(response.error)
+
+            // ดึง list ออกมา ถ้าไม่มีก็ส่ง List เปล่าๆ ไป
+            response.data?.friends ?: emptyList()
+        }
+    }
 }

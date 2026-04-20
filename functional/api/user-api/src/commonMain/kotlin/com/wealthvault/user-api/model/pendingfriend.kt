@@ -1,9 +1,7 @@
 package com.wealthvault.`user-api`.model
 
-
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
 
 @Serializable
 data class PendingFriendResponse(
@@ -11,54 +9,35 @@ data class PendingFriendResponse(
     val status: String? = null,
 
     @SerialName("data")
-    val data: FriendArray? = null,
+    val data: PendingFriendArray? = null,
 
     @SerialName("error")
     val error: String? = null
 )
 
-
 @Serializable
 data class PendingFriendArray(
-    @SerialName("friend")
-    val status: ArrayList<PendingFriendData>? = null
+    // 🌟 แก้ให้ตรงกับ JSON จริงที่เป็นคำว่า "friends" (มี s)
+    @SerialName("friends")
+    val friends: List<PendingFriendData>? = null
 )
+
 @Serializable
 data class PendingFriendData(
-    @SerialName("id")
-    val id: String? = null,
+    @SerialName("id") val id: String? = null,
+    @SerialName("username") val username: String? = null,
+    @SerialName("email") val email: String? = null,
+    @SerialName("first_name") val firstName: String? = null,
+    @SerialName("last_name") val lastName: String? = null,
+    @SerialName("phone_number") val phoneNumber: String? = null,
+    @SerialName("profile") val profile: String? = null,
+    @SerialName("birthday") val birthday: String? = null,
+    @SerialName("shared_age") val sharedAge: Int? = null,
+    @SerialName("shared_enabled") val sharedEnabled: Boolean? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
 
-    @SerialName("username")
-    val username: String? = null,
-
-    @SerialName("email")
-    val email: String? = null,
-
-    @SerialName("first_name")
-    val firstName: String? = null,
-
-    @SerialName("last_name")
-    val lastName: String? = null,
-
-    @SerialName("phone_number")
-    val phoneNumber: String? = null,
-
-    @SerialName("profile")
-    val profile: String? = null,
-
-    @SerialName("birthday")
-    val birthday: String? = null,
-
-    @SerialName("shared_age")
-    val sharedAge: Int? = null,
-
-    @SerialName("shared_enabled")
-    val sharedEnabled: Boolean? = null,
-
-    @SerialName("created_at")
-    val createdAt: String? = null,
-
-    @SerialName("updated_at")
-    val updatedAt: String? = null,
-
+    // 🌟 เพิ่ม 2 ฟิลด์ใหม่ที่ Backend ส่งมาให้
+    @SerialName("is_friend") val isFriend: Boolean? = null,
+    @SerialName("is_close") val isClose: Boolean? = null
 )

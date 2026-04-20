@@ -19,29 +19,48 @@ class SharedAssetManageScreenModel(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val mocID = "538bf1bf-484f-47aa-8028-63454b58d269"
+    private val mocID = "844c4180-4c6a-438e-bfd3-0e78a24ec1b1"
 
-    // 🌟 1. ฟังก์ชันดึงข้อมูลทรัพย์สินที่แชร์
+    // 🌟 ฟังก์ชันดึงข้อมูลทรัพย์สินที่แชร์
     fun fetchSharedAssets(targetId: String, isGroup: Boolean) {
         screenModelScope.launch {
             _isLoading.value = true
 
-            // 💡 อนาคตถ้ามี API getShareFriendItems ก็สามารถเอา isGroup มาเช็ค if/else ตรงนี้ได้ครับ
-            // แต่ตอนนี้ใช้ getShareGroupItems ไปก่อนตามโค้ดเดิมครับ
-            val result = repository.getShareGroupItems(targetId)
-            val allItems = result.getOrNull() ?: emptyList()
+            if (isGroup) {
+                // 🔹 กรณีเป้าหมายคือ Group
+                val result = repository.getShareGroupItems(targetId)
+                val allItems = result.getOrNull() ?: emptyList()
+                _assetList.value = allItems.filter { it.sharedBy == mocID }
+            } else {
+                // 🔹 กรณีเป้าหมายคือ Friend (เพื่อน)
+                val result = repository.getShareFriendItems(targetId)
+                val allFriendItems = result.getOrNull() ?: emptyList()
 
-            _assetList.value = allItems.filter { it.sharedBy == mocID }
+                // 🌟 ทำการแปลง ShareFriendData ให้กลายเป็น ShareGroupData
+                // เพื่อที่หน้า UI (SharedAssetManageContent) จะได้ใช้ข้อมูลประเภทเดียว จัดการง่ายๆ
+                val mappedItems = allFriendItems.map { friendData ->
+                    ShareGroupData(
+                        groupItemId = friendData.groupItemId, // ใน ShareFriendData มันคือ shared_item_id
+                        sharedBy = friendData.sharedBy,
+                        sharedAt = friendData.sharedAt,
+                        type = friendData.type,
+                        assetDetail = friendData.assetDetail
+                    )
+                }
+
+                _assetList.value = mappedItems.filter { it.sharedBy == mocID }
+            }
+
             _isLoading.value = false
         }
     }
 
-    // 🌟 2. ฟังก์ชันยกเลิกการแชร์ (ลบข้อมูล)
+    // 🌟 ฟังก์ชันยกเลิกการแชร์ (ลบข้อมูล)
     fun unShareAsset(assetId: String, isGroup: Boolean) {
         screenModelScope.launch {
             repository.unShareAsset(assetId, isGroup)
                 .onSuccess {
-                    // 🌟 ถ้าลบสำเร็จ ให้เตะ Asset นั้นออกจาก List ทันที (Optimistic Update)
+                    // ถ้าลบสำเร็จ ให้เตะ Asset นั้นออกจาก List ทันที (Optimistic Update)
                     _assetList.value = _assetList.value.filterNot { it.groupItemId == assetId }
                 }
                 .onFailure { error ->

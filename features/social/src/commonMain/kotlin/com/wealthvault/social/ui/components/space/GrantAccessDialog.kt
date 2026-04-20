@@ -81,7 +81,7 @@ fun InlineGrantAccessCard(
     var isLoading by remember { mutableStateOf(true) }
     var assetList by remember { mutableStateOf<List<ShareGroupData>>(emptyList()) }
     val selectedAssets = remember { mutableStateListOf<String>() }
-    val mocID = "538bf1bf-484f-47aa-8028-63454b58d269"
+    val mocID = "844c4180-4c6a-438e-bfd3-0e78a24ec1b1"
 
     val scrollState = rememberScrollState()
 

@@ -50,6 +50,10 @@ data class MessageMetadata(
     @SerialName("item_name")
     val itemName: String? = null,
 
+    @SerialName("is_deleted")
+    val isDeleted: Boolean? = null,
+
+
     @SerialName("snapshot_title")
     val snapshotTitle: String? = null
 )
