@@ -42,6 +42,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import cafe.adriel.voyager.core.registry.rememberScreen
+import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -63,15 +65,16 @@ import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientStart
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.forgetpassword.ui.ForgetPasswordScreen
+import com.wealthvault.main.SharedScreen
 import com.wealthvault.register.ui.RegisterScreen
 import org.jetbrains.compose.resources.painterResource
 
-class LoginScreen(private val navigateToScreen: Screen) : Screen {
+class LoginScreen() : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LoginScreenModel>()
-
+        val mainScreen = rememberScreen(SharedScreen.Main)
         LoginContent(
             username = screenModel.username,
             onUsernameChange = {
@@ -87,8 +90,9 @@ class LoginScreen(private val navigateToScreen: Screen) : Screen {
             errorMessage = screenModel.errorMessage,
             onLoginClick = {
                 screenModel.onLoginClick {
-                    navigator.replaceAll(navigateToScreen)
+                    navigator.replaceAll(mainScreen)
                 }
+                screenModel.onGetFCMToken()
             },
             onGoogleClick = { screenModel.onGoogleClick { /* TODO */ } },
             onForgotPasswordClick = { navigator.push(ForgetPasswordScreen()) },
@@ -326,5 +330,11 @@ fun WavyBackground(
             }
     ) {
         content()
+    }
+}
+
+val loginScreenModule = screenModule {
+    register<SharedScreen.Login> {
+        LoginScreen()
     }
 }
