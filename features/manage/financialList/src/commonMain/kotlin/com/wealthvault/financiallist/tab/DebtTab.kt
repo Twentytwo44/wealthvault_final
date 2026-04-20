@@ -1,12 +1,13 @@
-package com.wealthvault.navigation.tabs
+package com.wealthvault.financiallist.tab
 
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.navigator.Navigator // 🌟 1. นำเข้า Navigator
+import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_nav_debt
 import com.wealthvault.financiallist.ui.debt.DebtScreen
+import com.wealthvault.main.SharedScreen
 import org.jetbrains.compose.resources.painterResource
 
 object DebtTab : Tab {
@@ -21,6 +22,11 @@ object DebtTab : Tab {
     @Composable
     override fun Content() {
         // 🌟 2. ครอบด้วย Navigator
-        Navigator(DebtScreen())
+        cafe.adriel.voyager.navigator.Navigator(DebtScreen())
     }
 }
+
+val debtTabModule = screenModule {
+    register<SharedScreen.DebtTab> { DebtTab }
+}
+

@@ -55,9 +55,10 @@ include(":base:core")
 include(":base:config")
 //include(":build-logic")
 include(":features:profile")
-include(":navigation")
+include(":main")
 
 include(":features:manage:form")
 include(":features:manage:financialList")
 
 include(":features:social")
+include(":navigation-point")

@@ -39,7 +39,7 @@ kotlin {
                 implementation(project(":functional:api:line-auth"))
                 implementation(project(":functional:notification"))
                 implementation(project(":functional:api:notification-api"))
-                implementation(project(":navigation"))
+                implementation(project(":navigation-point"))
 
 
 

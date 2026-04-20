@@ -14,29 +14,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.CurrentTab
+import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.WealthVaultTheme
+import com.wealthvault.main.SharedScreen
 import com.wealthvault.navigation.components.BottomBarItem
-import com.wealthvault.navigation.tabs.AssetTab
-import com.wealthvault.navigation.tabs.DashboardTab
-import com.wealthvault.navigation.tabs.DebtTab
-import com.wealthvault.navigation.tabs.ProfileTab
-import com.wealthvault.navigation.tabs.SocialTab
 
 // ==========================================
 // 🌟 1. สร้างคลาสหน้าจอหลัก เพื่อให้ Voyager ตัวนอกสุดเรียกใช้ได้
 // ==========================================
-class MainAppDestination : Screen {
-    @Composable
-    override fun Content() {
-        // เรียกใช้ฟังก์ชัน MainScreen ที่มี Navbar ของคุณ Champ
-        MainScreen()
-    }
-}
+//class MainAppDestination : Screen {
+//    @Composable
+//    override fun Content() {
+//        // เรียกใช้ฟังก์ชัน MainScreen ที่มี Navbar ของคุณ Champ
+//        MainScreen()
+//    }
+//}
 
 // ==========================================
 // 🌟 2. โค้ด UI หน้าหลัก (ของเดิมของคุณ Champ เลยครับ)
@@ -92,14 +90,21 @@ class MainAppDestination : Screen {
 //        }
 //    }
 //}
-
+//
 
 class MainScreen : Screen {
 
     @Composable
     override fun Content() {
         // 🌟 สร้าง TabNavigator ไว้ข้างใน Screen นี้
-        TabNavigator(DashboardTab) { navigator ->
+        val dashboardTab = rememberScreen(SharedScreen.DashboardTab) as Tab
+        val assetTab = rememberScreen(SharedScreen.AssetTab) as Tab
+        val profileTab = rememberScreen(SharedScreen.ProfileTab) as Tab
+        val debtTab = rememberScreen(SharedScreen.DebtTab) as Tab
+        val socialTab = rememberScreen(SharedScreen.SocialTab) as Tab
+
+
+        TabNavigator(dashboardTab) { navigator ->
             Scaffold(
                 containerColor = LightBg,
                 bottomBar = {
@@ -117,11 +122,11 @@ class MainScreen : Screen {
                             horizontalArrangement = Arrangement.SpaceAround,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            BottomBarItem(DebtTab, navigator)
-                            BottomBarItem(AssetTab, navigator)
-                            BottomBarItem(DashboardTab, navigator)
-                            BottomBarItem(SocialTab, navigator)
-                            BottomBarItem(ProfileTab, navigator)
+                            BottomBarItem(debtTab, navigator)
+                            BottomBarItem(assetTab, navigator)
+                            BottomBarItem(dashboardTab, navigator)
+                            BottomBarItem(socialTab, navigator)
+                            BottomBarItem(profileTab, navigator)
                         }
                     }
                 }

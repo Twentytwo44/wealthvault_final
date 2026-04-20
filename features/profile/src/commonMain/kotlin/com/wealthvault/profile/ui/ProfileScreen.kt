@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
 import com.wealthvault.core.generated.resources.Res
@@ -43,16 +42,15 @@ import com.wealthvault.core.generated.resources.ic_profile_setting
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.WvWaveGradientEnd
+import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.login.ui.LoginScreen
-import com.wealthvault.navigation.SharedScreen
 import com.wealthvault.profile.ui.components.ClosePersonItem
 import com.wealthvault.`user-api`.model.CloseFriendData
 import com.wealthvault.`user-api`.model.UserData
 import org.jetbrains.compose.resources.painterResource
 
-class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
+class ProfileScreen() : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<ProfileScreenModel>()
@@ -61,7 +59,7 @@ class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
             screenModel.fetchUser()
              screenModel.fetchCloseFriends()
         }
-
+        val rootNavigator = LocalRootNavigator.current
         val userData by screenModel.userState.collectAsState()
         // 🌟 ดึงข้อมูลจาก State ใน ScreenModel มาใช้งาน
         val closeFriends by screenModel.closeFriends.collectAsState()
@@ -69,7 +67,9 @@ class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
         ProfileContent(
             userData = userData,
             closeFriends = closeFriends,
-            onSettingsClick = onSettingsClick
+            onSettingsClick = {
+                rootNavigator.push(MenuProfileSettingScreen())
+            }
         )
     }
 }
@@ -250,10 +250,5 @@ fun ProfileContent(
         }
 
         item { Spacer(modifier = Modifier.height(80.dp)) }
-    }
-}
-val profileScreenModule = screenModule {
-    register< SharedScreen.Profile> {
-        ProfileScreen()
     }
 }

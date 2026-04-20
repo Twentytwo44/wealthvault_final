@@ -60,7 +60,6 @@ kotlin {
 
 
             implementation(project(":functional:data-store"))
-            implementation(project(":navigation"))
             implementation(project(":base:core"))
             api(project(":features:auth:login"))
             implementation(project(":features:auth:login"))
@@ -70,6 +69,8 @@ kotlin {
             implementation(project(":features:manage:financialList"))
             implementation(project(":features:social"))
             implementation(project(":features:profile"))
+            implementation(project(":main"))
+
 
             implementation(project(":functional:api:account-api"))
             implementation(project(":functional:api:auth-api"))

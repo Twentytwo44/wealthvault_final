@@ -15,9 +15,11 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
+                implementation(libs.compose.components.resources)
+                implementation(libs.compose.ui)
+                implementation(libs.compose.foundation)
+                implementation(libs.compose.material3) // เรียกใช้ Material3 ได้แล้ว
 
-                implementation(libs.koin.core)
-                implementation(libs.koin.compose)
                 val voyagerVersion = "1.0.0"
                 implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
@@ -43,7 +45,7 @@ kotlin {
                 implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
                 implementation("io.github.onseok:peekaboo-image-picker:0.5.2")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-
+                implementation(project(":navigation-point"))
 
             }
         }

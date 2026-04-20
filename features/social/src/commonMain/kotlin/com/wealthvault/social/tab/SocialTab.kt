@@ -1,11 +1,12 @@
-package com.wealthvault.navigation.tabs
+package com.wealthvault.social.tab
 
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.navigator.Navigator // 🌟 1. อย่าลืม Import Navigator
+import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_nav_social
+import com.wealthvault.main.SharedScreen
 import com.wealthvault.social.ui.SocialScreen
 import org.jetbrains.compose.resources.painterResource
 
@@ -21,6 +22,11 @@ object SocialTab : Tab {
     @Composable
     override fun Content() {
         // 🌟 2. ครอบ SocialScreen ด้วย Navigator
-        Navigator(SocialScreen())
+        cafe.adriel.voyager.navigator.Navigator(SocialScreen())
     }
+}
+
+
+val socialTabModule = screenModule {
+    register<SharedScreen.SocialTab> { SocialTab }
 }

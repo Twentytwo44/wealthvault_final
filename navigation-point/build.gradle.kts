@@ -2,33 +2,19 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeMultiplatform)
-
 }
 
 kotlin {
-
 
     // Target declarations - add or remove as needed below. These define
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.navigation"
+        namespace = "com.wealthvault.main"
         compileSdk = 36
         minSdk = 24
 
-
-        withHostTestBuilder {
-        }
-
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }.configure {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
     }
-
 
     // For iOS targets, this is also where you should
     // configure native binary output. For more information, see:
@@ -37,7 +23,7 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "navigationKit"
+    val xcfName = "mainKit"
 
     iosX64 {
         binaries.framework {
@@ -64,7 +50,6 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
         commonMain {
-
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
@@ -85,17 +70,14 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 
                 implementation(project(":base:core"))
-                implementation(project(":features:auth:register"))
-                implementation(project(":features:dashboard"))
-                implementation(project(":features:notification"))
-                implementation(project(":features:manage:financialList"))
-                implementation(project(":features:social"))
-                implementation(project(":features:profile"))
+//                implementation(project(":navigation"))
 
 
 
 
 
+
+                // Add KMP dependencies here
             }
         }
 
@@ -113,13 +95,6 @@ kotlin {
             }
         }
 
-        getByName("androidDeviceTest") {
-            dependencies {
-                implementation(libs.androidx.runner)
-                implementation(libs.androidx.core)
-                implementation(libs.androidx.testExt.junit)
-            }
-        }
 
         iosMain {
             dependencies {
@@ -132,10 +107,4 @@ kotlin {
         }
     }
 
-}
-
-compose {
-    resources {
-        publicResClass = true
-    }
 }
