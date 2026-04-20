@@ -3,7 +3,9 @@ package com.wealthvault.social.ui.main_social.add_friend
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.wealthvault.social.data.SocialRepositoryImpl
+import com.wealthvault.`user-api`.model.AcceptFriendRequest
 import com.wealthvault.`user-api`.model.FriendData
+import com.wealthvault.`user-api`.model.PendingFriendData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -56,4 +58,45 @@ class AddFriendScreenModel(
             }
         }
     }
+    private val _pendingFriends = MutableStateFlow<List<PendingFriendData>>(emptyList())
+    val pendingFriends: StateFlow<List<PendingFriendData>> = _pendingFriends.asStateFlow()
+
+    // 🌟 ฟังก์ชันดึงคำขอเป็นเพื่อน (เอาไปเรียกตอนเปิดหน้าจอ)
+    fun fetchPendingFriends() {
+        screenModelScope.launch {
+            repository.getPendingFriends().onSuccess { friends ->
+                _pendingFriends.value = friends
+            }
+        }
+    }
+
+    // 🌟 ฟังก์ชันจัดการคำขอเป็นเพื่อน (รับ/ปฏิเสธ)
+    private val _popupMessage = MutableStateFlow<String?>(null)
+    val popupMessage: StateFlow<String?> = _popupMessage.asStateFlow()
+
+    // 🌟 2. ฟังก์ชันสำหรับปิด Popup
+    fun clearPopupMessage() {
+        _popupMessage.value = null
+    }
+
+    // 🌟 3. อัปเดตฟังก์ชันจัดการคำขอ ให้แจ้งเตือนเมื่อเสร็จสิ้น
+    fun respondToFriendRequest(requesterId: String, isAccept: Boolean) {
+        screenModelScope.launch {
+            val actionStr = if (isAccept) "ACCEPT" else "DECLINE"
+            val request = AcceptFriendRequest(requesterId = requesterId, action = actionStr)
+
+            repository.acceptFriend(request)
+                .onSuccess {
+                    // ลบคนนั้นออกจากหน้าจอ
+                    _pendingFriends.value = _pendingFriends.value.filterNot { it.id == requesterId }
+                    // 🌟 ตั้งค่าข้อความ Popup
+                    _popupMessage.value = if (isAccept) "เพิ่มเป็นเพื่อนสำเร็จแล้ว!" else "ลบคำขอเป็นเพื่อนเรียบร้อย"
+                }
+                .onFailure { error ->
+                    // 🌟 แจ้งเตือนกรณี Error
+                    _popupMessage.value = "เกิดข้อผิดพลาด: ${error.message}"
+                }
+        }
+    }
+
 }

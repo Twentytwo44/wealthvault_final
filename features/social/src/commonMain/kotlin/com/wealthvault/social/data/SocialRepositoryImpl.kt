@@ -14,10 +14,14 @@ import com.wealthvault.investment_api.model.InvestmentIdData
 import com.wealthvault.land_api.model.LandIdData
 import com.wealthvault.liability_api.model.LiabilityIdData
 import com.wealthvault.share_api.model.ItemToShareData
+import com.wealthvault.share_api.model.ShareFriendData
 import com.wealthvault.share_api.model.ShareGroupData
 import com.wealthvault.share_api.model.ShareItemRequest
+import com.wealthvault.`user-api`.model.AcceptFriendData
+import com.wealthvault.`user-api`.model.AcceptFriendRequest
 import com.wealthvault.`user-api`.model.FriendProfileData
 import com.wealthvault.`user-api`.model.MessageItem
+import com.wealthvault.`user-api`.model.PendingFriendData
 
 class SocialRepositoryImpl(
     private val dataSource: SocialDataSource
@@ -114,6 +118,14 @@ class SocialRepositoryImpl(
             println("🚨 Get Group Messages Failed: ${error.message}")
         }
     }
+
+    suspend fun getShareFriendItems(friendId: String): Result<List<ShareFriendData>> {
+        return dataSource.getShareFriendItems(friendId).onSuccess {
+            println("✅ Get Share Friend Items Success: ${it.size} items")
+        }.onFailure { error ->
+            println("🚨 Get Share Friend Items Failed: ${error.message}")
+        }
+    }
     suspend fun getShareGroupItems(groupId: String): Result<List<ShareGroupData>> {
         return dataSource.getShareGroupItems(groupId).onSuccess {
             println("✅ Get Share Group Items Success: ${it.size} items")
@@ -204,6 +216,15 @@ class SocialRepositoryImpl(
     }
     suspend fun deleteGroup(groupId: String): Result<Boolean> {
         return dataSource.deleteGroup(groupId)
+    }
+
+    suspend fun acceptFriend(request: AcceptFriendRequest): Result<AcceptFriendData> {
+        return dataSource.acceptFriend(request)
+    }
+    suspend fun getPendingFriends(): Result<List<PendingFriendData>> {
+        return dataSource.getPendingFriends()
+            .onSuccess { println("✅ ดึงรายการคำขอเป็นเพื่อนสำเร็จ: ${it.size} คน") }
+            .onFailure { println("🚨 ดึงรายการคำขอเป็นเพื่อนล้มเหลว: ${it.message}") }
     }
 
 

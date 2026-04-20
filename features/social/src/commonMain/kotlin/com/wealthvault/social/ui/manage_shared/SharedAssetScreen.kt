@@ -168,7 +168,6 @@ fun SharedAssetContent(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 12.dp)
                             .simpleVerticalScrollbar(state = scrollState, color = themeColor)
                             .verticalScroll(scrollState)
                     ) {
@@ -196,7 +195,7 @@ fun SharedAssetContent(
                                         model = imageUrl,
                                         contentDescription = assetName,
                                         contentScale = ContentScale.Crop,
-                                        modifier = Modifier.size(48.dp).background(LightBg, RoundedCornerShape(8.dp)),
+                                        modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)),
 
                                         )
                                 } else {
@@ -213,7 +212,7 @@ fun SharedAssetContent(
                                     }
 
                                     Box(
-                                        modifier = Modifier.size(48.dp).background(LightBg, CircleShape),
+                                        modifier = Modifier.size(48.dp).background(LightBg, RoundedCornerShape(8.dp)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         if (iconRes != null) {

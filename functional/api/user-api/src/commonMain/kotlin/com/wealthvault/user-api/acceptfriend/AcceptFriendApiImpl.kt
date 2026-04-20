@@ -14,7 +14,7 @@ class AcceptFriendApiImpl(private val ktorfit: Ktorfit) : AcceptFriendApi {
         val client = ktorfit.httpClient
 
         // ยิงเองตรงๆ แบบไม่ง้อ Generator
-        return client.post("${Config.localhost_ios}friend/accept") {
+        return client.post("${Config.localhost_android}friend/accept") {
             setBody(request)
         }.body()
     }

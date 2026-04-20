@@ -14,7 +14,7 @@ class OTPApiImpl(private val ktorfit: Ktorfit) : OTPApi {
 
         val client = ktorfit.httpClient
 
-        return client.post("${Config.localhost_ios}auth/forgot/otp") {
+        return client.post("${Config.localhost_android}auth/forgot/otp") {
             setBody(request)
         }.body()
     }

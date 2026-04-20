@@ -75,14 +75,13 @@ fun SharedAssetManageContent(
     ) {
         SpaceTopBar(title = "การจัดการทรัพย์สิน", onBackClick = onBackClick)
         HorizontalDivider(color = themeColor.copy(alpha = 0.3f), thickness = 1.dp)
-        Spacer(modifier = Modifier.height(24.dp))
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = themeColor)
             }
         } else {
-            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 24.dp)) {
                 item {
                     Text(
                         text = "ทรัพย์สินที่คุณแชร์",

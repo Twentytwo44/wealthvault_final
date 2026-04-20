@@ -32,7 +32,6 @@ class LoginScreenModel(
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
-
     fun onLoginClick(onSuccess: () -> Unit) {
         println("🚀 [LoginScreenModel] onLoginClick triggered")
 
@@ -47,18 +46,14 @@ class LoginScreenModel(
 
             val request = LoginRequest(username, password)
 
-            // ✅ แก้ไข: เรียกใช้ loginUseCase โดยส่ง request เข้าไปตรงๆ
-            // การเรียก loginUseCase(request) จะไปเรียก invoke operator ที่ส่งต่อไปยัง execute ให้อัตโนมัติ
             loginUseCase(request).collect { flowResult ->
                 when (flowResult) {
-                    // 1. จัดการเมื่อเริ่มทำงาน (Loading)
                     is FlowResult.Start -> {
                         println("⏳ [LoginScreenModel] UseCase Started...")
                         isLoading = true
                         errorMessage = null
                     }
 
-                    // 2. จัดการเมื่อทำงานสำเร็จ
                     is FlowResult.Continue -> {
                         if (flowResult.data) {
                             println("🎉 [LoginScreenModel] Login Success!")
@@ -67,40 +62,60 @@ class LoginScreenModel(
                         }
                     }
 
-                    // 3. จัดการเมื่อเกิด Error
+                    // 🌟 จัดการแจ้งเตือน Error ให้ครอบคลุม
                     is FlowResult.Failure -> {
                         println("❌ [LoginScreenModel] UseCase Error: ${flowResult.cause?.message}")
                         isLoading = false
 
-                        // 🌟 ดึงข้อความ Error ดิบๆ จาก Backend
-                        val rawError = flowResult.cause?.message ?: ""
+                        // ดึงข้อความ Error ดิบๆ มา (แปลงเป็นตัวเล็กให้หมดเพื่อเช็คง่ายๆ)
+                        val rawError = flowResult.cause?.message?.lowercase() ?: ""
 
-                        // 🌟 ดักจับข้อความ Error และแปลงเป็นภาษาไทยที่ User เข้าใจง่าย
                         errorMessage = when {
-                            rawError.contains("invalid email or password", ignoreCase = true) -> {
+                            // 1. รหัสผ่านหรืออีเมลผิด (อ้างอิงจาก JSON Error ของ Backend)
+                            rawError.contains("invalid email or password") -> {
                                 "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
                             }
-                            rawError.contains("user not found", ignoreCase = true) -> {
+
+                            // 2. ไม่พบผู้ใช้งาน
+                            rawError.contains("user not found") || rawError.contains("not exist") -> {
                                 "ไม่พบบัญชีผู้ใช้งานนี้ในระบบ"
                             }
-                            rawError.contains("network", ignoreCase = true) || rawError.contains("timeout", ignoreCase = true) -> {
+
+                            // 3. ปัญหาการเชื่อมต่อเครือข่าย หรือ Server ดาวน์
+                            rawError.contains("network") ||
+                                    rawError.contains("timeout") ||
+                                    rawError.contains("refused") ||
+                                    rawError.contains("failed to connect") -> {
                                 "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง"
                             }
-                            rawError.isNotBlank() -> {
-                                // ถ้ามี Error แปลกๆ นอกเหนือจากที่ดักไว้ ให้โชว์ออกมาเผื่อไว้ดีบัก
-                                "การเข้าสู่ระบบล้มเหลว: $rawError"
+
+                            // 4. กรณีกรอกข้อมูลมาในรูปแบบไม่ถูกต้อง (เช่น อีเมลไม่มี @)
+                            rawError.contains("bad request") || rawError.contains("invalid request") -> {
+                                "รูปแบบข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง"
                             }
-                            else -> {
-                                // ถ้าไม่มี Message อะไรมาเลย
+
+                            // 5. กรณี Server มีปัญหาภายใน (Internal Error แต่ไม่ใช่เรื่องรหัสผิด)
+                            rawError.contains("internal") || rawError.contains("500") -> {
+                                "ระบบขัดข้องชั่วคราว กรุณาลองใหม่ในภายหลัง"
+                            }
+
+                            // 6. ถ้ามี Error อะไรที่หลุดรอดมาได้ และมีข้อความ (กันไว้ก่อน)
+                            rawError.isNotBlank() -> {
+                                // พิมพ์ลง Log เพื่อให้นักพัฒนาดู
+                                println("⚠️ Unhandled Error: $rawError")
+                                // แต่โชว์ให้ User เห็นแบบซอฟต์ๆ
                                 "การเข้าสู่ระบบล้มเหลว กรุณาลองใหม่อีกครั้ง"
+                            }
+
+                            // 7. ไม่มี Error Message โผล่มาเลย
+                            else -> {
+                                "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ กรุณาลองใหม่อีกครั้ง"
                             }
                         }
                     }
 
-                    // 4. จัดการเมื่อจบการทำงาน (ไม่ว่าจะสำเร็จหรือพัง)
                     is FlowResult.Ended -> {
                         println("🏁 [LoginScreenModel] UseCase Finished.")
-                        // ปกติเรามักจะเช็ค isLoading = false ที่นี่เพื่อความชัวร์
                         isLoading = false
                     }
                 }
@@ -174,18 +189,12 @@ class LoginScreenModel(
 //        lineAuth.login()
     }
 
-    // 🟢 2. รับผลลัพธ์กลับมาเมื่อ LINE ล็อกอินสำเร็จ
     fun onLineSuccess(user: LineUser, onSuccess: () -> Unit) {
         println("🎉 [LoginScreenModel] LINE Success: ${user.displayName} (${user.userId})")
         isLoading = false
-
-        // 💡 ตรงนี้คุณสามารถเอา user.userId ไปยิงเข้า API Backend ของ WealthVault ได้เลย
-        // เช่น loginUseCase(LoginRequest(user.userId, ...))
-
-        onSuccess() // สั่งให้หน้าจอทำคำสั่งต่อไป (เช่น เด้งไปหน้า Home)
+        onSuccess()
     }
 
-    // 🟢 3. รับผลลัพธ์กลับมาเมื่อพัง หรือกดยกเลิก
     fun onLineError(error: String) {
         println("❌ [LoginScreenModel] LINE Error: $error")
         isLoading = false

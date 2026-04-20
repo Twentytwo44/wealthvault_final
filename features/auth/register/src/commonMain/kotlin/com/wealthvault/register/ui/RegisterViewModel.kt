@@ -5,14 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.wealthvault.`auth-api`.model.RegisterRequest // 🌟 นำเข้า Model
-import com.wealthvault.core.FlowResult // 🌟 นำเข้า FlowResult
-import com.wealthvault.register.usecase.RegisterUseCase // 🌟 นำเข้า UseCase
+import com.wealthvault.`auth-api`.model.RegisterRequest
+import com.wealthvault.core.FlowResult
+import com.wealthvault.register.usecase.RegisterUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class RegisterScreenModel(
-    private val registerUseCase: RegisterUseCase // 🌟 1. Inject UseCase เข้ามา
+    private val registerUseCase: RegisterUseCase
 ) : ScreenModel {
 
     var username by mutableStateOf("")
@@ -25,37 +25,35 @@ class RegisterScreenModel(
     fun onRegisterClick(onSuccess: () -> Unit) {
         if (isLoading) return
 
-        // ดักเคส: กรอกข้อมูลไม่ครบ
+        // 🌟 1. ดักเคส: กรอกข้อมูลไม่ครบ
         if (username.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
             errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"
             return
         }
 
-        // ดักเคส: รหัสผ่าน 2 ช่องไม่ตรงกัน
+        // 🌟 2. ดักเคส: รหัสผ่าน 2 ช่องไม่ตรงกัน
         if (password != confirmPassword) {
             errorMessage = "รหัสผ่านไม่ตรงกัน"
             return
         }
 
-        // 🌟 2. เรียกใช้ UseCase จริงแทนการ delay()
+        // เริ่มโหลดและล้าง Error เก่าทิ้ง
+        isLoading = true
+        errorMessage = null
+
         screenModelScope.launch {
-            // 💡 สร้าง Request (เช็คชื่อตัวแปร email/username ให้ตรงกับที่ RegisterRequest ต้องการนะครับ)
             val request = RegisterRequest(
                 email = username,
                 password = password
             )
 
-            // ยิง API ผ่าน UseCase
+            // 🌟 3. ยิง API ผ่าน UseCase
             registerUseCase(request).collect { flowResult ->
                 when (flowResult) {
-                    // ⏳ กำลังโหลด
                     is FlowResult.Start -> {
                         println("⏳ [RegisterScreenModel] กำลังส่งข้อมูลสมัครสมาชิก...")
                         isLoading = true
-                        errorMessage = null
                     }
-
-                    // 🎉 สำเร็จ
                     is FlowResult.Continue -> {
                         if (flowResult.data) {
                             println("🎉 [RegisterScreenModel] สมัครสมาชิกสำเร็จ! ย้ายไปหน้า Login")
@@ -63,18 +61,15 @@ class RegisterScreenModel(
                             onSuccess()
                         }
                     }
-
-                    // ❌ พัง / Error
                     is FlowResult.Failure -> {
                         println("❌ [RegisterScreenModel] สมัครล้มเหลว: ${flowResult.cause?.message}")
                         isLoading = false
+                        // 🌟 4. ดึง Error จาก Backend มาโชว์บนหน้าจอ
                         errorMessage = flowResult.cause?.message ?: "การสมัครสมาชิกล้มเหลว กรุณาลองใหม่"
                     }
-
-                    // 🏁 จบการทำงาน
                     is FlowResult.Ended -> {
                         println("🏁 [RegisterScreenModel] สิ้นสุดกระบวนการสมัครสมาชิก")
-                        isLoading = false
+                        // ไม่ต้องทำอะไรตรงนี้ เพราะ isLoading ถูกจัดการใน Continue/Failure ไปแล้ว
                     }
                 }
             }

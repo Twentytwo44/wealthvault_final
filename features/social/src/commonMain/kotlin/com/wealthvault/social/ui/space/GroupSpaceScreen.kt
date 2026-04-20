@@ -225,16 +225,22 @@ fun GroupSpaceContent(
 
                                 ActivityBubbleCard(
                                     title = titleText,
-                                    assetName = msg.metadata?.itemName ?: "ไม่ระบุชื่อทรัพย์สิน",
+                                    // ดึง itemName ก่อน ถ้าไม่มีก็ดึง snapshotTitle
+                                    assetName = msg.metadata?.itemName ?: msg.metadata?.snapshotTitle ?: "ไม่ระบุชื่อทรัพย์สิน",
                                     assetType = msg.metadata?.assetType ?: "ไม่ระบุประเภท",
                                     isMe = isMe,
                                     profileImageUrl = msg.senderImage,
+
+                                    // 🌟 3. โยนสถานะการลบเข้า Component
+                                    isDeleted = msg.metadata?.isDeleted == true,
+
                                     themeColor = themeColor,
                                     onDetailClick = {
                                         selectedAssetId = msg.metadata?.assetId
                                         selectedAssetType = msg.metadata?.assetType
                                     }
                                 )
+
                             }
                         }
                         Spacer(modifier = Modifier.height(16.dp))

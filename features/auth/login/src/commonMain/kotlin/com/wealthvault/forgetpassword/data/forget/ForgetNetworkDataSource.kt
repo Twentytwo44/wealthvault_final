@@ -1,4 +1,4 @@
-package com.wealthvault.forgetpassword.data
+package com.wealthvault.forgetpassword.data.forget
 
 import com.wealthvault.`auth-api`.fgpassword.ForgetApi
 import com.wealthvault.`auth-api`.model.ForgetPasswordRequest
@@ -14,8 +14,7 @@ class ForgetNetworkDataSource(
             if (result.data?.success == true) {
                 true // ส่งค่ากลับไปว่าสำเร็จ
             } else {
-                // ถ้าเป็น false หรือเป็น null ให้โยน Error ออกไป
-                throw IllegalArgumentException(result.error ?: "Forget password failed")
+                throw IllegalArgumentException(result.error ?: "Failed")
             }
         }
     }

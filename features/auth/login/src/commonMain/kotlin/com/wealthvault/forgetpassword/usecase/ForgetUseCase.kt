@@ -3,7 +3,7 @@ package com.wealthvault.forgetpassword.usecase
 import com.wealthvault.`auth-api`.model.ForgetPasswordRequest
 import com.wealthvault.core.FlowResult
 import com.wealthvault.core.FlowUseCase
-import com.wealthvault.forgetpassword.data.ForgetRepositoryImpl
+import com.wealthvault.forgetpassword.data.forget.ForgetRepositoryImpl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

@@ -40,17 +40,16 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
-// 🌟 Import ของที่เราต้องใช้
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.core.theme.*
 
-// 🌟 Import Resource สำหรับรูปภาพ
 import com.wealthvault.core.generated.resources.Res
 import org.jetbrains.compose.resources.painterResource
 import com.wealthvault.core.generated.resources.ic_auth_email
@@ -69,17 +68,17 @@ class RegisterScreen : Screen {
             username = screenModel.username,
             onUsernameChange = {
                 screenModel.username = it
-                screenModel.errorMessage = null // 🌟 ล้าง Error เมื่อพิมพ์
+                screenModel.errorMessage = null
             },
             password = screenModel.password,
             onPasswordChange = {
                 screenModel.password = it
-                screenModel.errorMessage = null // 🌟 ล้าง Error เมื่อพิมพ์
+                screenModel.errorMessage = null
             },
             confirmPassword = screenModel.confirmPassword,
             onConfirmPasswordChange = {
                 screenModel.confirmPassword = it
-                screenModel.errorMessage = null // 🌟 ล้าง Error เมื่อพิมพ์
+                screenModel.errorMessage = null
             },
             isLoading = screenModel.isLoading,
             errorMessage = screenModel.errorMessage,
@@ -111,8 +110,6 @@ fun RegisterContent(
     onGoogleClick: () -> Unit
 ) {
     WavyBackground {
-
-        // 🌟 1. Loading Dialog (วงกลมหมุนๆ) ยังคงเก็บไว้
         if (isLoading) {
             Dialog(onDismissRequest = {}) {
                 Box(
@@ -146,10 +143,8 @@ fun RegisterContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // --- 1. ช่องอีเมล ---
-                // --- 1. ช่องอีเมล ---
+                // --- 1. ช่องอีเมล (และ Error Message) ---
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // 🌟 ใช้ Row เพื่อจัดคำว่า "อีเมล" ไว้ซ้าย และ "Error" ไว้ขวา
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -162,12 +157,16 @@ fun RegisterContent(
                             color = LightPrimary,
                             style = MaterialTheme.typography.titleMedium
                         )
-                        // 🌟 ข้อความ Error จะมาโผล่ตรงนี้ในบรรทัดเดียวกัน
+                        // 🌟 ดึง Error Message กลับมาไว้มุมขวา และเพิ่ม weight ให้ตัดบรรทัดได้ถ้ายาวไป
                         if (errorMessage != null) {
                             Text(
                                 text = errorMessage,
                                 color = RedErr,
-                                style = MaterialTheme.typography.labelMedium
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.End,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 8.dp)
                             )
                         }
                     }
@@ -186,9 +185,10 @@ fun RegisterContent(
                             unfocusedContainerColor = LightSurface,
                             focusedBorderColor = LightPrimary,
                             unfocusedBorderColor = LightBorder,
-                            errorBorderColor = RedErr, // สีกรอบตอน Error
-                            errorLeadingIconColor = RedErr // สีไอคอนตอน Error
-                        )
+                            errorBorderColor = RedErr,
+                            errorLeadingIconColor = RedErr
+                        ),
+                        isError = errorMessage != null
                     )
                 }
 
@@ -224,7 +224,10 @@ fun RegisterContent(
                             unfocusedContainerColor = LightSurface,
                             focusedBorderColor = LightPrimary,
                             unfocusedBorderColor = LightBorder,
-                        )
+                            errorBorderColor = RedErr,
+                            errorLeadingIconColor = RedErr
+                        ),
+                        isError = errorMessage != null
                     )
                 }
 
@@ -260,13 +263,14 @@ fun RegisterContent(
                             unfocusedContainerColor = LightSurface,
                             focusedBorderColor = LightPrimary,
                             unfocusedBorderColor = LightBorder,
-                        )
+                            errorBorderColor = RedErr,
+                            errorLeadingIconColor = RedErr
+                        ),
+                        isError = errorMessage != null
                     )
                 }
 
-                // 🌟 โซนแสดง Error Message ก่อนถึงปุ่มสร้างบัญชี
                 Spacer(modifier = Modifier.height(34.dp))
-
 
                 // --- 4. ปุ่มสร้างบัญชี ---
                 Button(
@@ -323,6 +327,7 @@ fun RegisterContent(
         }
     }
 }
+
 
 @Composable
 fun WavyBackground(

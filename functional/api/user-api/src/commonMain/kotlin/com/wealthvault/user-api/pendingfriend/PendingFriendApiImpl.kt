@@ -12,7 +12,7 @@ class PendingFriendApiImpl(private val ktorfit: Ktorfit) : PendingFriendApi {
         val client = ktorfit.httpClient
 
         // ยิงเองตรงๆ แบบไม่ง้อ Generator
-        return client.get("${Config.localhost_android}/friend/pending") {
+        return client.get("${Config.localhost_android}friend/pending") {
             // สำหรับ GET ไม่ต้องใส่ setBody() ครับ
             // หากต้องการส่งค่าเพิ่ม ให้ใช้ parameter() แทน เช่น parameter("page", 1)
         }.body()

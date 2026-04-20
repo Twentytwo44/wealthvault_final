@@ -24,7 +24,7 @@ object SocialModule {
                 get(), get(), get(), get(), get(), get(), get(),
                 get(), get(), get(), get(), get(),
                 get(), get(), get(), get(), get(),
-                get(), get(), get(), get(), get()
+                get(), get(), get(), get(), get(), get(), get(), get()
             )
         }
 
