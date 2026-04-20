@@ -32,6 +32,7 @@ class InsuranceScreenModel(
     private val _addedAttachments = MutableStateFlow<List<Attachment>>(emptyList())
     private val _deleteAttachments = MutableStateFlow<List<Attachment>>(emptyList())
 
+ 
 
     fun updateForm(data: InsuranceModel) {
         println("data update succes " + data.name)
@@ -52,6 +53,8 @@ class InsuranceScreenModel(
     fun updateAttachment(addedList: List<Attachment>,deletedList: List<Attachment>) {
         _addedAttachments.update { addedList }
         _deleteAttachments.update { deletedList }
+
+
     }
 
     private fun asRequest(): InsuranceRequest {
@@ -85,7 +88,8 @@ class InsuranceScreenModel(
             expDate = current.expDate,
             description = current.description,
             files = allFiles,
-            deleteListId = _deleteAttachments.value.map { it.id ?: "" }
+            deleteListId = _deleteAttachments.value.map { it.id ?: "" } ,
+
         )
     }
 
