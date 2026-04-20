@@ -15,14 +15,15 @@ class StockScreenModel : ScreenModel {
         stockSymbol = "",
         brokerName = "",
         costPerPrice = 0.00,
-        attachments = emptyList()
+        attachments = emptyList(),
+        type = ""
     ))
     val state = _state.asStateFlow()
 
     // ✍️ ฟังก์ชันอัปเดตข้อมูลจากหน้าฟอร์ม
     fun updateForm(data: StockModel) {
         println("data update succes " + data.stockName)
-        _state.update { it.copy(stockName = data.stockName, quantity = data.quantity, description = data.description, stockSymbol = data.stockSymbol, brokerName = data.brokerName, costPerPrice = data.costPerPrice, attachments = data.attachments) }
+        _state.update { it.copy(stockName = data.stockName, quantity = data.quantity, description = data.description, stockSymbol = data.stockSymbol, brokerName = data.brokerName, costPerPrice = data.costPerPrice, attachments = data.attachments,type = data.type) }
     }
 
 }

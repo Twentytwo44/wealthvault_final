@@ -9,6 +9,6 @@ import com.wealthvault.notification.ui.NotificationScreen
 @Composable
 fun NotificationPreview() {
     NotificationScreen(
-        onBackClick = {}
+
     )
 }

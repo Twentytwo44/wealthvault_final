@@ -2,23 +2,62 @@ package com.wealthvault.profile.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.registry.rememberScreen
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
-import com.wealthvault.core.generated.resources.ic_common_next // 🌟 ดึงไอคอนลูกศรชี้ขวามาใช้
+import com.wealthvault.core.generated.resources.ic_common_next
 import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.utils.LocalRootNavigator
+import com.wealthvault.core.utils.getScreenModel
+import com.wealthvault.main.SharedScreen
 import org.jetbrains.compose.resources.painterResource
 
+
+class MenuProfileSettingScreen: Screen {
+    @Composable
+    override fun Content(){
+        val screenModel = getScreenModel<MenuProfileSettingScreenModel>()
+        val rootNavigator = LocalRootNavigator.current
+        val navigator = LocalNavigator.currentOrThrow
+        val screen = rememberScreen(SharedScreen.Login)
+        MenuProfileSettingContent(
+            onBackClick = { rootNavigator.pop() },
+            onEditProfileClick = { rootNavigator.push(EditProfileScreen()) },
+            onShareSettingClick = { rootNavigator.push(ShareSettingScreen()) },
+            onLogoutClick = {
+                screenModel.unRegisterDevice()
+                navigator.replaceAll(
+                    screen
+                )
+            }
+        )
+    }
+}
 @Composable
-fun MenuProfileSettingScreen(
+fun MenuProfileSettingContent(
     onBackClick: () -> Unit,
     onEditProfileClick: () -> Unit,
     onShareSettingClick: () -> Unit,

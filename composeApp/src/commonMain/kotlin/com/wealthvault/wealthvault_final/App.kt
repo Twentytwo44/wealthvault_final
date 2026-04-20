@@ -9,7 +9,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.wealthvault.core.theme.WealthVaultTheme
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.login.ui.LoginScreen
-import com.wealthvault.navigation.MainScreen
 
 //val LocalRootNavigator = staticCompositionLocalOf<Navigator> {
 //    error("ยังไม่ได้ Provide Root Navigator!")
@@ -20,7 +19,7 @@ fun App() {
     MaterialTheme {
         // 🌟 ใส่ปีกกาหลัง Navigator เพื่อดึงตัว navigator ออกมา
         WealthVaultTheme{
-        Navigator(LoginScreen(navigateToScreen = MainScreen())) { navigator ->
+        Navigator(LoginScreen()) { navigator ->
             // 🌟 ฝาก navigator ตัวแม่สุดไว้ใน LocalRootNavigator
             CompositionLocalProvider(LocalRootNavigator provides navigator) {
                 CurrentScreen() // คำสั่งวาดหน้าจอของ Voyager

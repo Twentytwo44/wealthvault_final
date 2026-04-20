@@ -42,6 +42,7 @@ import com.wealthvault.core.generated.resources.ic_profile_setting
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.WvWaveGradientEnd
+import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.profile.ui.components.ClosePersonItem
@@ -49,7 +50,7 @@ import com.wealthvault.`user-api`.model.CloseFriendData
 import com.wealthvault.`user-api`.model.UserData
 import org.jetbrains.compose.resources.painterResource
 
-class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
+class ProfileScreen() : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<ProfileScreenModel>()
@@ -58,7 +59,7 @@ class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
             screenModel.fetchUser()
              screenModel.fetchCloseFriends()
         }
-
+        val rootNavigator = LocalRootNavigator.current
         val userData by screenModel.userState.collectAsState()
         // 🌟 ดึงข้อมูลจาก State ใน ScreenModel มาใช้งาน
         val closeFriends by screenModel.closeFriends.collectAsState()
@@ -66,7 +67,9 @@ class ProfileScreen(private val onSettingsClick: () -> Unit) : Screen {
         ProfileContent(
             userData = userData,
             closeFriends = closeFriends,
-            onSettingsClick = onSettingsClick
+            onSettingsClick = {
+                rootNavigator.push(MenuProfileSettingScreen())
+            }
         )
     }
 }

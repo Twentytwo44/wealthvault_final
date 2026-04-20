@@ -38,6 +38,12 @@ kotlin {
                 implementation(project(":functional:api:google-auth"))
                 implementation(project(":functional:api:line-auth"))
                 implementation(project(":functional:notification"))
+                implementation(project(":functional:api:notification-api"))
+                implementation(project(":navigation-point"))
+                implementation(project(":functional:api:user-api"))
+
+
+
 
 
                 implementation(project(":features:auth:register"))

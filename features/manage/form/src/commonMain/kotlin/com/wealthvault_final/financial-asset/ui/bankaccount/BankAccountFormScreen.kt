@@ -44,6 +44,8 @@ import com.wealthvault_final.`financial-asset`.model.BankAccountModel
 import com.wealthvault_final.`financial-asset`.ui.bankaccount.viewmodel.BankAccountScreenModel
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.bankAccountTypes
 import com.wealthvault_final.`financial-asset`.ui.share.ShareAssetScreen
 
 
@@ -105,7 +107,7 @@ fun BankAccountInputForm(
                 ),
                 title = {
                     Text(
-                        "ข้อมูลเงินสด",
+                        "ข้อมูลบัญชีเงินฝาก",
                         color = Color(0xFF8D6E63),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
@@ -128,7 +130,12 @@ fun BankAccountInputForm(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ส่วนกรอกข้อมูลหลัก
-            AssetTextField(value = type, onValueChange = { type = it }, label = "ชนิด*", placeholder = "ชนิด")
+            DropdownInput(
+                label = "ประเภทบัญชีธนาคาร",
+                options = bankAccountTypes,
+                selectedValue = type,
+                onValueChange = { type = it }
+            )
             AssetTextField(value = name, onValueChange = { name = it }, label = "ชื่อ*", placeholder = "กรอกชื่อ")
             AssetTextField(value = bankName, onValueChange = { bankName = it }, label = "ธนาคาร*", placeholder = "กรอกธนาคาร")
 
@@ -179,7 +186,7 @@ fun BankAccountInputForm(
                         bankName = bankName,
                         bankId = bankId,
                         description = description,
-                        amount = amount.toDouble(),
+                        amount = amount.toString().toDoubleOrNull() ?: 0.0,
                         attachments = attachments
                     )
                     println("data attachemnt: ${data.attachments}")

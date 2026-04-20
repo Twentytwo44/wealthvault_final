@@ -90,7 +90,7 @@ class ShareScreenModel(
 
 
     fun submitShare(id: String,type: String) {
-        val shareToData =  _shareData.value ?: return
+        val shareToData =  _shareData.value
         screenModelScope.launch {
 
                     delay(10000)

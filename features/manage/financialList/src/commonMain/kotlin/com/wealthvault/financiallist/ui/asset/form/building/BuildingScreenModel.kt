@@ -218,7 +218,7 @@ class BuildingScreenModel(
                 if (buildingResult.isSuccess && buildingResponse != null) {
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Land
                     // สมมติว่า field id อยู่ใน landResponse.data.id หรือตาม Model ของคุณ
-                    val createdItemId = buildingResponse.id.toString()
+                    val createdItemId = buildingResponse.id
                     println("✅ [ScreenModel] building Created ID: $createdItemId")
 
                 }

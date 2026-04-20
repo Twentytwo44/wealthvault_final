@@ -5,7 +5,10 @@ import androidx.datastore.preferences.core.Preferences
 import com.wealthvault.data_store.TokenStore
 import com.wealthvault.profile.data.ProfileDataSource
 import com.wealthvault.profile.data.ProfileRepositoryImpl
+import com.wealthvault.profile.data.device.UnRegisterDeviceDataSource
+import com.wealthvault.profile.data.device.UnRegisterDeviceRepositoryImpl
 import com.wealthvault.profile.ui.EditProfileScreenModel
+import com.wealthvault.profile.ui.MenuProfileSettingScreenModel
 import com.wealthvault.profile.ui.ProfileScreenModel
 import com.wealthvault.profile.ui.ShareSettingScreenModel
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +25,7 @@ object ProfileModule {
 
         single<ProfileRepositoryImpl> {
             ProfileRepositoryImpl(
-                networkDataSource = get(),
+                get(),
             )
         }
         single { Dispatchers.IO }
@@ -30,5 +33,14 @@ object ProfileModule {
         factory { ProfileScreenModel(get()) }
         factory { EditProfileScreenModel(repository = get()) }
         factory { ShareSettingScreenModel(repository = get()) }
+
+        factory { UnRegisterDeviceDataSource(get()) }
+        single<UnRegisterDeviceRepositoryImpl> {
+            UnRegisterDeviceRepositoryImpl(
+                get(),
+            )
+        }
+
+        factory { MenuProfileSettingScreenModel(get(),get()) }
     }
 }

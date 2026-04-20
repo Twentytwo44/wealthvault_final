@@ -103,7 +103,7 @@ fun CashInputForm(
                 ),
                 title = {
                     Text(
-                        "ข้อมูลเงินสด",
+                        "ข้อมูลเงินสด ทองคำ",
                         color = Color(0xFF8D6E63),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
@@ -160,7 +160,7 @@ fun CashInputForm(
                     val data = CashModel(
                         cashName = cashName,
                         description = description,
-                        amount = amount.toDouble(),
+                        amount = amount.toString().toDoubleOrNull() ?: 0.0,
                         attachments = attachments
                     )
                     println("data attachemnt: ${data.attachments}")

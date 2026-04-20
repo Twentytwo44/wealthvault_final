@@ -43,6 +43,8 @@ import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.model.BankAccountModel
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.bankAccountTypes
 
 
 class BankAccountFormScreen(val id:String,val bankAccountData: BankAccountModel) : Screen {
@@ -134,6 +136,13 @@ fun BankAccountInputForm(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ส่วนกรอกข้อมูลหลัก
+            DropdownInput(
+                label = "ประเภทบัญชีธนาคาร",
+                options = bankAccountTypes,
+                selectedValue = type,
+                onValueChange = { type = it },
+                data = bankAccountData?.type
+            )
             AssetTextField(value = name, onValueChange = { name = it }, label = "ชื่อ*", placeholder = bankAccountData?.name ?: "")
             AssetTextField(value = bankName, onValueChange = { bankName = it }, label = "ธนาคาร*", placeholder = bankAccountData?.bankName ?: "")
 
@@ -188,7 +197,7 @@ fun BankAccountInputForm(
                         bankName = bankName,
                         bankId = bankId,
                         description = description,
-                        amount = amount.toDouble(),
+                        amount = amount.toDoubleOrNull() ?: 0.0,
                         attachments = attachments
                     )
                     val addList = currentAssets.filter { it.id.isNullOrEmpty() }

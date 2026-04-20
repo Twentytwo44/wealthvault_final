@@ -45,6 +45,10 @@ class UpdateBuildingApiImpl(private val ktorfit: Ktorfit) : UpdateBuildingApi {
                             append("delete_file_ids", fileData)
                         }
 
+                        request.deleteRefListId.forEach { data ->
+                            append("delete_reference_ids", data.areaId ?: "" )
+                        }
+
 
                         request.files.forEach { fileData ->
                             append("files", fileData.bytes, Headers.build {

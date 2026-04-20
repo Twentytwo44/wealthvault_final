@@ -16,7 +16,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
 import com.preat.peekaboo.image.picker.SelectionMode
@@ -31,6 +30,7 @@ import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.WvWaveGradientEnd
+import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
 import kotlinx.datetime.Instant
@@ -39,12 +39,11 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 
 class EditProfileScreen(
-    private val onBackClick: () -> Unit,
-    private val onSaveClick: () -> Unit
 ) : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<EditProfileScreenModel>()
+        val rootNavigator = LocalRootNavigator.current
 
         LaunchedEffect(Unit) {
             screenModel.resetSaveState()
@@ -53,8 +52,12 @@ class EditProfileScreen(
 
         EditProfileContent(
             screenModel = screenModel,
-            onBackClick = onBackClick,
-            onSaveClick = onSaveClick
+            onBackClick = {
+                rootNavigator.pop()
+            },
+            onSaveClick = {
+                rootNavigator.pop()
+            }
         )
     }
 }

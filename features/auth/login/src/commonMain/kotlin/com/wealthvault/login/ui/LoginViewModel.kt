@@ -5,10 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.wealthvault.google_auth.GoogleAuthRepository
 import com.wealthvault.`auth-api`.model.LoginRequest
 import com.wealthvault.core.FlowResult
+import com.wealthvault.data_store.DeviceInfo
+import com.wealthvault.data_store.TokenStore
+import com.wealthvault.google_auth.GoogleAuthRepository
+import com.wealthvault.login.data.device.RegisterDeviceRepositoryImpl
 import com.wealthvault.login.usecase.LoginUseCase
+import com.wealthvault.notification_api.model.DeviceRequest
 import com.wealthvault_final.line_auth.LineAuth
 import com.wealthvault_final.line_auth.model.LineUser
 import com.wealthvault_final.notification.PushNotificationHelper
@@ -17,7 +21,9 @@ import kotlinx.coroutines.launch
 class LoginScreenModel(
     private val loginUseCase: LoginUseCase,
     private val googelRepository: GoogleAuthRepository,
-    private val pushHelper: PushNotificationHelper
+    private val pushHelper: PushNotificationHelper,
+    private val addDeviceRepository: RegisterDeviceRepositoryImpl,
+    private val tokenStore: TokenStore
 ) : ScreenModel {
 
     // UI State
@@ -117,7 +123,43 @@ class LoginScreenModel(
         }
     }
 
-    // ... (ฟังก์ชันอื่นๆ ของ Google, LINE โครงสร้างยังเหมือนเดิมครับ) ...
+    fun onGetFCMToken(){
+        pushHelper.getDeviceTokenInfo(
+            onSuccess = { deviceInfo ->
+
+                println("============================================================")
+                println("Test FCM Token: ${deviceInfo.fcmToken}")
+                println("Platform: ${deviceInfo.platform}")
+                println("Device Name: ${deviceInfo.deviceName}")
+                println("============================================================")
+                // 3. 🟢 นำข้อมูลที่ดึงได้ ประกอบร่างยิง API ไปเก็บที่ Django
+                screenModelScope.launch {
+                    try {
+                        val request = DeviceRequest(
+                            token = deviceInfo.fcmToken,
+                            platform = deviceInfo.platform,
+                            deviceName = deviceInfo.deviceName
+                        )
+                        val info = DeviceInfo(
+                            fcmToken = deviceInfo.fcmToken,
+                            platform = deviceInfo.platform,
+                            deviceName = deviceInfo.deviceName,
+
+                            )
+                        tokenStore.saveDeviceInfo(info)
+                        addDeviceRepository.addDevice(request)
+                        println("✅ ส่ง Device Token ขึ้น Server สำเร็จ!")
+                    } catch (e: Exception) {
+                        println("❌ ส่ง Device Token ไม่สำเร็จ: ${e.message}")
+                    }
+                }
+            },
+            onError = { error ->
+                println("❌ ไม่สามารถดึง FCM Token จากเครื่องได้: $error")
+            }
+        )
+    }
+
     fun onGoogleClick(onSuccess: () -> Unit) {
         screenModelScope.launch {
             isLoading = true
@@ -140,18 +182,10 @@ class LoginScreenModel(
         isLoading = true
         errorMessage = null
 
-        pushHelper.getDeviceTokenInfo(
-            onSuccess = { deviceInfo ->
-                println("============================================================")
-                println("Test FCM Token: ${deviceInfo.fcmToken}")
-                println("Platform: ${deviceInfo.platform}")
-                println("Device Name: ${deviceInfo.deviceName}")
-                println("============================================================")
-            },
-            onError = { error ->
-                println("❌ ไม่สามารถดึง FCM Token จากเครื่องได้: $error")
-            }
-        )
+        // สั่งให้ตัวจัดการ LINE ที่หน้าจอส่งมา เริ่มทำงาน
+
+
+
 //        lineAuth.login()
     }
 

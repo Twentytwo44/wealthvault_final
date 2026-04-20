@@ -44,6 +44,10 @@ class UpdateLandApiImpl(private val ktorfit: Ktorfit) : UpdateLandApi {
                             append("reference_ids", refData.areaId ?: "")
                         }
 
+                        request.deleteRefListId.forEach { data ->
+                            append("delete_reference_ids", data.areaId ?: "" )
+                        }
+
                         request.files.forEach { fileData ->
                             append("files", fileData.bytes ?: byteArrayOf() , Headers.build {
 

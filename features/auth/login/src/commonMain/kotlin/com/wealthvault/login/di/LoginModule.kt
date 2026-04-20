@@ -2,6 +2,8 @@ package com.wealthvault.login.di
 import com.wealthvault.data_store.TokenStore
 import com.wealthvault.login.data.AuthNetworkDataSource
 import com.wealthvault.login.data.AuthRepositoryImpl
+import com.wealthvault.login.data.device.RegisterDeviceDataSource
+import com.wealthvault.login.data.device.RegisterDeviceRepositoryImpl
 import com.wealthvault.login.ui.LoginScreenModel
 import com.wealthvault.login.usecase.LoginUseCase
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +28,11 @@ object LoginModule {
 
         factory { LoginUseCase(get(),get(),get() )}
 
-        factory { LoginScreenModel(get(),get(),get()) }
+        factory { LoginScreenModel(get(),get(),get(),get(),get()) }
+
+        factory { RegisterDeviceDataSource(get()) }
+        single<RegisterDeviceRepositoryImpl>{
+            RegisterDeviceRepositoryImpl(get())
+        }
     }
 }
