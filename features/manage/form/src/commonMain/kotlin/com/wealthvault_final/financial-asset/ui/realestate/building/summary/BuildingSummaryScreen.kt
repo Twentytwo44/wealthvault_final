@@ -87,7 +87,9 @@ data class BuildingSummaryScreen(val request: BuildingModel, val shareTo: ShareT
 
         SummaryContent(
             onBackClick = { navigator.pop() },
-            onConfirmClick = { screenModel.submitBuilding() }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
+            onConfirmClick = { screenModel.submitBuilding(onSuccess = {
+                navigator.popUntilRoot()
+            }) }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
             data = state.buildingRequest,
             shareInfo = state.shareTo,
 

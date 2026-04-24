@@ -85,7 +85,11 @@ data class LiabilitySummaryScreen(val request: LiabilityModel, val shareTo: Shar
 
         SummaryContent(
             onBackClick = { navigator.pop() },
-            onConfirmClick = { screenModel.submitLiability() }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
+            onConfirmClick = { screenModel.submitLiability(
+                onSuccess = {
+                    navigator.popUntilRoot()
+                }
+            ) }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
             data = state.liabilityRequest,
             shareInfo = state.shareTo,
 

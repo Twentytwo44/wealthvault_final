@@ -88,7 +88,9 @@ data class LandSummaryScreen(val request: LandModel, val shareTo: ShareTo) : Scr
 
         SummaryContent(
             onBackClick = { navigator.pop() },
-            onConfirmClick = { screenModel.submitLand() }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
+            onConfirmClick = { screenModel.submitLand(onSuccess = {
+                navigator.popUntilRoot()
+            }) }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
             data = state.landRequest,
             shareInfo = state.shareTo,
 

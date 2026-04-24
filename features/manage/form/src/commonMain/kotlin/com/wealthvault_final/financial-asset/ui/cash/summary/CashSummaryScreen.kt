@@ -85,7 +85,11 @@ data class CashSummaryScreen(val request: CashModel, val shareTo: ShareTo) : Scr
 
         SummaryContent(
             onBackClick = { navigator.pop() },
-            onConfirmClick = { screenModel.submitCash() }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
+            onConfirmClick = { screenModel.submitCash(
+                onSuccess = {
+                // 🌟 เปลี่ยนเป็น popUntilRoot เพื่อเด้งกลับหน้าลิสต์ Asset ทันที
+                navigator.popUntilRoot()
+            }) }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
             data = state.cashRequest,
             shareInfo = state.shareTo,
             screenModel = screenModel

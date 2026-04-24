@@ -85,7 +85,9 @@ data class SummaryScreen(val request: StockModel, val shareTo: ShareTo) : Screen
 
         SummaryContent(
             onBackClick = { navigator.pop() },
-            onConfirmClick = { screenModel.submitStock() }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
+            onConfirmClick = { screenModel.submitStock(onSuccess = {
+                navigator.popUntilRoot()
+            }) }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
             data = state.investmentRequest,
             shareInfo = state.shareTo,
             screenModel = screenModel

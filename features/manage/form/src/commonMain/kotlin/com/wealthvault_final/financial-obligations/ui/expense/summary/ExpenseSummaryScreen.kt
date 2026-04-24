@@ -85,7 +85,11 @@ data class ExpenseSummaryScreen(val request: ExpenseModel, val shareTo: ShareTo)
 
         SummaryContent(
             onBackClick = { navigator.pop() },
-            onConfirmClick = { screenModel.submitExpense() }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
+            onConfirmClick = { screenModel.submitExpense(
+                onSuccess = {
+                    navigator.popUntilRoot()
+                }
+            ) }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
             data = state.expenseRequest,
             shareInfo = state.shareTo,
             screenModel = screenModel

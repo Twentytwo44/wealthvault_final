@@ -37,6 +37,9 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.RedErr
 import com.wealthvault.social.ui.SocialScreen
+import com.wealthvault.data_store.TokenStore // 🌟 เพิ่ม import
+import kotlinx.coroutines.flow.firstOrNull
+import org.koin.compose.koinInject
 
 // ==========================================
 // 🌟 1. ส่วน Screen (จัดการ Logic และ State)
@@ -48,22 +51,31 @@ class GroupProfileScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        val tokenStore = koinInject<TokenStore>() // 🌟 Inject TokenStore
+
+        var currentUserId by remember { mutableStateOf<String?>(null) }
+
+        // 🌟 อ่าน User ID จริงจากเครื่อง
+        LaunchedEffect(Unit) {
+            currentUserId = tokenStore.getUserId.firstOrNull()
+        }
 
         var rootNavigator = navigator
         while (rootNavigator.parent != null) {
             rootNavigator = rootNavigator.parent!!
         }
 
-        val mocID = "844c4180-4c6a-438e-bfd3-0e78a24ec1b1"
         val screenModel = getScreenModel<GroupProfileScreenModel>()
         val leaveSuccess by screenModel.leaveSuccess.collectAsState()
         val groupData by screenModel.groupData.collectAsState()
         val isLoading by screenModel.isLoading.collectAsState()
         val members by screenModel.members.collectAsState()
         var showLeaveDialog by remember { mutableStateOf(false) }
+
         LaunchedEffect(groupId) {
             screenModel.fetchGroupData(groupId)
         }
+
         LaunchedEffect(leaveSuccess) {
             if (leaveSuccess) {
                 navigator.popUntil { screen -> screen is SocialScreen }
@@ -75,15 +87,10 @@ class GroupProfileScreen(
                 groupData = groupData,
                 members = members,
                 isLoading = isLoading,
-                mocID = mocID,
+                currentUserId = currentUserId ?: "", // 🌟 ส่ง ID จริงไปแทน mocID
                 onBackClick = { navigator.pop() },
                 onFriendClick = { friendId, friendName ->
-                    rootNavigator.push(
-                        FriendProfileScreen(
-                            friendId = friendId,
-                            friendName = friendName
-                        )
-                    )
+                    rootNavigator.push(FriendProfileScreen(friendId, friendName))
                 },
                 onEditGroupClick = {
                     rootNavigator.push(
@@ -91,38 +98,25 @@ class GroupProfileScreen(
                             groupId = groupId,
                             initialGroupName = groupData?.groupName ?: "",
                             initialImageUrl = groupData?.groupProfile,
-                            initialMemberIds = members.mapNotNull { it.id } // ดึงเอาเฉพาะ List ของ ID สมาชิก
+                            initialMemberIds = members.mapNotNull { it.id }
                         )
                     )
                 },
-                onLeaveGroupClick = {
-                    showLeaveDialog = true
-                }
+                onLeaveGroupClick = { showLeaveDialog = true }
             )
 
-            // 🌟 4. วาด AlertDialog สำหรับยืนยันการออกจากกลุ่ม
+            // ... (AlertDialog ส่วนเดิม) ...
             if (showLeaveDialog) {
                 AlertDialog(
                     onDismissRequest = { showLeaveDialog = false },
                     containerColor = Color.White,
                     shape = RoundedCornerShape(20.dp),
-                    title = {
-                        Text(
-                            "ออกจากกลุ่ม?",
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF3A2F2A)
-                        )
-                    },
-                    text = {
-                        Text(
-                            "คุณแน่ใจหรือไม่ว่าต้องการออกจากกลุ่ม '${groupData?.groupName}'? คุณจะไม่สามารถเห็นข้อความในกลุ่มนี้ได้อีก",
-                            color = Color.Gray
-                        )
-                    },
+                    title = { Text("ออกจากกลุ่ม?", fontWeight = FontWeight.Bold, color = Color(0xFF3A2F2A)) },
+                    text = { Text("คุณแน่ใจหรือไม่ว่าต้องการออกจากกลุ่ม '${groupData?.groupName}'? คุณจะไม่สามารถเห็นข้อความในกลุ่มนี้ได้อีก", color = Color.Gray) },
                     confirmButton = {
                         TextButton(onClick = {
                             showLeaveDialog = false
-                            screenModel.leaveGroup(groupId) // 🌟 ยืนยันแล้วค่อยยิง API
+                            screenModel.leaveGroup(groupId)
                         }) {
                             Text("ออกจากกลุ่ม", color = Color(0xFFE55A5A), fontWeight = FontWeight.Bold)
                         }
@@ -138,37 +132,24 @@ class GroupProfileScreen(
     }
 }
 
-// ==========================================
-// 🌟 2. ส่วน Content (วาด UI ล้วนๆ)
-// ==========================================
 @Composable
 fun GroupProfileContent(
     groupData: GroupData?,
     members: List<GroupMemberItem>,
     isLoading: Boolean,
-    mocID: String,
+    currentUserId: String, // 🌟 เปลี่ยนชื่อจาก mocID เป็น currentUserId
     onBackClick: () -> Unit,
-    onFriendClick: (String, String) -> Unit, // ส่ง (friendId, friendName) ออกไป
+    onFriendClick: (String, String) -> Unit,
     onEditGroupClick: () -> Unit,
     onLeaveGroupClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
-    val bgColor = Color(0xFFFFF8F3)
-    val dangerActionColor = Color(0xFFE55A5A)
-
+    // ... (ส่วนหัวและ ProfileHeader เดิม) ...
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(LightBg)
-            .statusBarsPadding()
-            .padding(top = 24.dp)
+        modifier = Modifier.fillMaxSize().background(LightBg).statusBarsPadding().padding(top = 24.dp)
     ) {
-        SpaceTopBar(
-            title = "โปรไฟล์กลุ่ม",
-            onBackClick = onBackClick
-        )
+        SpaceTopBar(title = "โปรไฟล์กลุ่ม", onBackClick = onBackClick)
         HorizontalDivider(color = themeColor.copy(alpha = 0.3f), thickness = 1.dp)
-
         Spacer(modifier = Modifier.height(32.dp))
 
         if (isLoading) {
@@ -176,47 +157,29 @@ fun GroupProfileContent(
                 CircularProgressIndicator(color = themeColor)
             }
         } else {
-            ProfileHeader(
-                name = groupData?.groupName ?: "กำลังโหลด...",
-                subtitle = "",
-                profileImageUrl = groupData?.groupProfile
-            )
+            ProfileHeader(name = groupData?.groupName ?: "กำลังโหลด...", subtitle = "", profileImageUrl = groupData?.groupProfile)
         }
 
         val memberCountText = groupData?.memberCount?.let { " ($it)" } ?: ""
-        Text(
-            text = "สมาชิก$memberCountText",
-            color = Color.Gray,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 0.dp)
-        )
+        Text(text = "สมาชิก$memberCountText", color = Color.Gray, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 24.dp))
 
         LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
+            modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 24.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
             items(members) { member ->
-                val rawName = listOfNotNull(member.firstName, member.lastName)
-                    .joinToString(" ")
-                    .ifBlank { member.username ?: "ไม่ระบุชื่อ" }
+                val rawName = listOfNotNull(member.firstName, member.lastName).joinToString(" ").ifBlank { member.username ?: "ไม่ระบุชื่อ" }
 
-                // เปลี่ยนชื่อแสดงผลถ้าเป็นตัวเอง
-                val displayName = if (member.id == mocID) "$rawName (คุณ)" else rawName
-
-                // 🌟 ตรงนี้เลยครับ! เอา member.id มาเทียบกับ created_by จาก API Group Detail
+                // 🌟 ใช้ currentUserId เช็คว่าเป็นตัวเองไหม
+                val displayName = if (member.id == currentUserId) "$rawName (คุณ)" else rawName
                 val isGroupLeader = member.id == groupData?.createdBy
 
                 FriendListItem(
                     member = member,
-                    isLeader = isGroupLeader, // ส่ง true/false เข้าไปวาด Icon ต่อท้ายชื่อ
+                    isLeader = isGroupLeader,
                     onClick = {
                         member.id?.let { safeId ->
-                            if (safeId != mocID) {
-                                onFriendClick(safeId, rawName)
-                            }
+                            if (safeId != currentUserId) { onFriendClick(safeId, rawName) }
                         }
                     }
                 )
@@ -224,26 +187,19 @@ fun GroupProfileContent(
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 32.dp, top = 16.dp)
-                .navigationBarsPadding(),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp, top = 16.dp).navigationBarsPadding(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            // 🌟 ดักไว้ก่อน! ถ้ายังโหลดไม่เสร็จ หรือข้อมูลยังไม่มา ให้ปล่อยเป็นพื้นที่ว่างๆ ไว้ก่อน (ไม่วาดปุ่ม)
             if (!isLoading && groupData != null) {
-
-                if (groupData.createdBy == mocID) {
+                // 🌟 เช็คว่าเป็นเจ้าของกลุ่ม (Leader) หรือไม่
+                if (groupData.createdBy == currentUserId) {
                     Text(
                         text = "แก้ไขกลุ่ม",
                         color = LightPrimary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .clickable { onEditGroupClick() }
-                            .padding(8.dp)
+                        modifier = Modifier.clickable { onEditGroupClick() }.padding(8.dp)
                     )
                 } else {
                     Text(
@@ -251,14 +207,10 @@ fun GroupProfileContent(
                         color = RedErr,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .clickable { onLeaveGroupClick() }
-                            .padding(8.dp)
+                        modifier = Modifier.clickable { onLeaveGroupClick() }.padding(8.dp)
                     )
                 }
-
             }
-
         }
     }
 }

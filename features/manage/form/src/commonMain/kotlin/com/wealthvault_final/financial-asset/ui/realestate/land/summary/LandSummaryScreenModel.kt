@@ -87,7 +87,7 @@ class LandSummaryScreenModel(
 
 
 
-    fun submitLand() {
+    fun submitLand(onSuccess: () -> Unit) {
         val shareToData = _state.value.shareTo ?: return
         screenModelScope.launch {
             try {
@@ -137,7 +137,7 @@ class LandSummaryScreenModel(
                     // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
                     val shareResult = shareItemRepository.shareItem(requestShareItem)
                     println(" [SummaryScreenModel] Share result: $shareResult")
-
+                    onSuccess()
                 }
                 else {
                     println("❌ [ScreenModel] Create Land Failed")

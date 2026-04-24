@@ -81,7 +81,7 @@ class InsuranceSummaryScreenModel(
 
 
 
-    fun submitInsurance() {
+    fun submitInsurance(onSuccess: () -> Unit) {
         val shareToData = _state.value.shareTo ?: return
         screenModelScope.launch {
             try {
@@ -131,7 +131,7 @@ class InsuranceSummaryScreenModel(
                     // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
                     val shareResult = shareItemRepository.shareItem(requestShareItem)
                     println(" [SummaryScreenModel] Share result: $shareResult")
-
+                    onSuccess()
                 }
                 else {
                     println("❌ [ScreenModel] Create Insurance Failed")

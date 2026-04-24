@@ -40,7 +40,7 @@ object SocialModule {
         factory { GroupSpaceScreenModel(repository = get()) }
         factory { GroupProfileScreenModel(repository = get()) }
         factory { SharedAssetScreenModel(repository = get()) }
-        factory { SharedAssetManageScreenModel(get()) }
+        factory { SharedAssetManageScreenModel(get(), get()) }
 
 
 

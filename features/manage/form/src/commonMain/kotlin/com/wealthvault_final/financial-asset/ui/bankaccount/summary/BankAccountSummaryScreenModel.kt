@@ -76,7 +76,8 @@ class BankAccountSummaryScreenModel(
 
 
 
-    fun submitBankAccount() {
+    // 🌟 1. เติม onSuccess: () -> Unit เข้าไปในวงเล็บ
+    fun submitBankAccount(onSuccess: () -> Unit) {
         val shareToData = _state.value.shareTo ?: return
         screenModelScope.launch {
             try {
@@ -84,53 +85,37 @@ class BankAccountSummaryScreenModel(
                 errorMessage = null
 
                 // --- ขั้นตอนที่ 1: สร้าง BankAccount ก่อน ---
-
                 val requestBody = asRequest()
-
                 val bankAccountResult = bankAccountRepository.createBankAccount(requestBody)
-
-                // ดึงข้อมูลออกมาจาก Result Wrapper
                 val bankAccountResponse = bankAccountResult.getOrNull()
 
                 if (bankAccountResult.isSuccess && bankAccountResponse != null) {
-                    // ✅ ดึง ID ที่ได้จาก API ของการสร้าง BankAccount
-                    // สมมติว่า field id อยู่ใน bankAccountResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = bankAccountResponse.id.toString()
                     println("✅ [ScreenModel] BankAccount Created ID: $createdItemId")
 
-                    delay(10000)
+                    // 💡 แอบกระซิบ: delay(10000) คือ 10 วินาทีเลยนะครับ!
+                    // ถ้าแอปค้างหน้านี้นานๆ ตอนกดบันทึก เป็นเพราะบรรทัดนี้เลยครับ แนะนำให้เอาออกหรือลดเหลือ delay(500) พอครับ
+                    delay(1000) // ผมขอลดเหลือ 1 วินาทีพอนะครับ จะได้ไม่รอนานเกินไป
+
                     // --- ขั้นตอนที่ 2: เตรียมข้อมูลเพื่อ Share โดยใช้ ID ที่เพิ่งได้มา ---
                     val requestShareItem = ShareItemRequest(
-                        itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
+                        itemIds = createdItemId,
                         itemTypes = "bankAccount",
-                        emails = shareToData.email.map {
-                            TargetItem(
-                                id = it.name,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        friends = shareToData.friend.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        groups = shareToData.group.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        }
+                        emails = shareToData.email.map { TargetItem(id = it.name, shareAt = shareToData.shareAt) },
+                        friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) },
+                        groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) }
                     )
 
                     // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
                     val shareResult = shareItemRepository.shareItem(requestShareItem)
                     println(" [SummaryScreenModel] Share result: $shareResult")
 
-                }
-                else {
+                    // 🌟 2. เมื่อยิง API สร้างบัญชีและแชร์เสร็จหมดแล้ว ค่อยเรียก onSuccess() เพื่อเปลี่ยนหน้า!
+                    onSuccess()
+
+                } else {
                     println("❌ [ScreenModel] Create BankAccount Failed")
-            }
+                }
 
             } catch (e: Exception) {
                 println("❌ [ScreenModel] Exception: ${e.message}")

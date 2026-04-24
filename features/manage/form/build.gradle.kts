@@ -84,6 +84,7 @@ kotlin {
                 implementation(project(":functional:api:land-api"))
                 implementation(project(":functional:api:cash-api"))
                 implementation(project(":functional:api:liability-api"))
+                implementation(project(":navigation-point"))
 
 
 
@@ -107,7 +108,6 @@ kotlin {
                 implementation(libs.compose.components.resources)
                 implementation("io.coil-kt.coil3:coil-compose:3.0.0-alpha06")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
-
 
             }
 

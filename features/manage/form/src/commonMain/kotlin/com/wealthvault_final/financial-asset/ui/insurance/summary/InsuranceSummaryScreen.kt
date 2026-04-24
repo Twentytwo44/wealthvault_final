@@ -85,7 +85,10 @@ data class InsuranceSummaryScreen(val request: InsuranceModel, val shareTo: Shar
 
         InsuranceSummaryContent(
             onBackClick = { navigator.pop() },
-            onConfirmClick = { screenModel.submitInsurance() }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
+            onConfirmClick = { screenModel.submitInsurance(
+                onSuccess = {
+                navigator.popUntilRoot()
+            }) }, // ตอนนี้ ScreenModel จะมีข้อมูลพร้อมส่งแล้ว
             data = state.insuranceRequest,
             shareInfo = state.shareTo,
             screenModel = screenModel

@@ -46,7 +46,6 @@ kotlin {
                 implementation("io.github.onseok:peekaboo-image-picker:0.5.2")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
                 implementation(project(":navigation-point"))
-
             }
         }
         commonTest {
