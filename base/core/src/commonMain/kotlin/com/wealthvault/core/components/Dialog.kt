@@ -40,14 +40,13 @@ import com.wealthvault.core.generated.resources.*
 import com.wealthvault.core.model.HasImageUrl
 import com.wealthvault.core.theme.*
 import org.jetbrains.compose.resources.painterResource
-import kotlin.math.roundToInt
 
 @Composable
 fun DetailDialog(
-    subtitle: String = "",
-    title: String,
-    updatedAt: String = "",
-    themeType: String,
+    subtitle: String? = null, // 🌟 รองรับค่า null
+    title: String?, // 🌟 รองรับค่า null
+    updatedAt: String? = null, // 🌟 รองรับค่า null
+    themeType: String? = "asset",
     onDismiss: () -> Unit,
     onDelete: () -> Unit = {},
     onEdit: () -> Unit = {},
@@ -55,6 +54,12 @@ fun DetailDialog(
     showBottomMenu: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    // 🌟 ดักค่า null ให้กลายเป็น String เปล่าๆ หรือค่า default
+    val safeSubtitle = subtitle.orEmpty()
+    val safeTitle = if (title.isNullOrBlank() || title == "null") "-" else title
+    val safeUpdatedAt = updatedAt.orEmpty()
+    val safeThemeType = themeType ?: "asset"
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -97,10 +102,10 @@ fun DetailDialog(
                             Box(
                                 modifier = Modifier
                                     .width(5.dp)
-                                    .height(if (subtitle.isNotEmpty()) 36.dp else 24.dp)
+                                    .height(if (safeSubtitle.isNotEmpty()) 36.dp else 24.dp)
                                     .clip(RoundedCornerShape(50))
                                     .background(
-                                        if (themeType == "asset") {
+                                        if (safeThemeType == "asset") {
                                             Brush.linearGradient(colors = listOf(LightAsset, LightSecondary))
                                         } else {
                                             Brush.linearGradient(colors = listOf(LightDebt, LightSecondary))
@@ -109,18 +114,18 @@ fun DetailDialog(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                if (subtitle.isNotEmpty()) {
+                                if (safeSubtitle.isNotEmpty()) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = subtitle,
+                                            text = safeSubtitle,
                                             style = MaterialTheme.typography.labelSmall,
                                             color = LightMuted.copy(0.8f)
                                         )
-                                        if (updatedAt.isNotEmpty()) {
+                                        if (safeUpdatedAt.isNotEmpty()) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Icon(
                                                     painter = painterResource(Res.drawable.ic_common_update),
@@ -130,7 +135,7 @@ fun DetailDialog(
                                                 )
                                                 Spacer(modifier = Modifier.width(3.dp))
                                                 Text(
-                                                    text = updatedAt,
+                                                    text = safeUpdatedAt,
                                                     style = MaterialTheme.typography.bodySmall,
                                                     fontWeight = FontWeight.Medium,
                                                     color = LightMuted.copy(0.8f)
@@ -141,10 +146,10 @@ fun DetailDialog(
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
                                 Text(
-                                    text = title,
+                                    text = safeTitle,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = LightText
+                                    color = if (safeTitle == "-") Color.Gray else LightText
                                 )
                             }
                         }
@@ -237,10 +242,14 @@ fun DetailDialog(
 @Composable
 fun DetailRow(
     label: String,
-    value: String,
+    value: String?, // 🌟 รองรับค่า null ทันทีไม่ให้แอปเด้ง
     isHighlight: Boolean = false,
     isLast: Boolean = false
 ) {
+    // 🌟 ดักค่าว่าง, null, หรือ String ที่เขียนว่า "null"
+    val displayValue = if (value.isNullOrBlank() || value == "null") "-" else value
+    val isMissingData = displayValue == "-"
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -254,10 +263,11 @@ fun DetailRow(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = value.ifEmpty { "-" },
+            text = displayValue,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
-            color = if (isHighlight) Color(0xFFC27A5A) else Color(0xFF3A2F2A)
+            // 🌟 ถ้าข้อมูลแหว่ง (isMissingData) ให้โชว์เป็นสีเทา
+            color = if (isMissingData) Color.Gray else if (isHighlight) Color(0xFFC27A5A) else Color(0xFF3A2F2A)
         )
         if (!isLast) {
             HorizontalDivider(
@@ -270,20 +280,23 @@ fun DetailRow(
 }
 
 @Composable
-fun DetailImageRow(files: List<Any>?) {
+fun DetailImageRow(files: List<Any?>?) { // 🌟 ใส่ ? เพื่อรองรับ List ที่อาจจะมีสมาชิกเป็น null
     var selectedImageIndex by remember { mutableStateOf<Int?>(null) }
     val uriHandler = LocalUriHandler.current
 
     val images = mutableListOf<String>()
     val documents = mutableListOf<HasImageUrl>()
 
+    // 🌟 ป้องกันแอปพังถ้าไฟล์พังมา
     files?.forEach { file ->
-        when (file) {
-            is HasImageUrl -> {
-                if (file.fileType.startsWith("image/")) images.add(file.url)
-                else documents.add(file)
+        if (file != null) {
+            when (file) {
+                is HasImageUrl -> {
+                    if (file.fileType.startsWith("image/")) images.add(file.url)
+                    else documents.add(file)
+                }
+                is String -> images.add(file)
             }
-            is String -> images.add(file)
         }
     }
 
