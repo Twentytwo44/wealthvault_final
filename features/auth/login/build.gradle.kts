@@ -47,9 +47,11 @@ kotlin {
 
 
                 implementation(project(":features:auth:register"))
+                implementation(project(":features:auth:register"))
 
 
                 implementation(project(":base:core"))
+                implementation(project(":main"))
 
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
 

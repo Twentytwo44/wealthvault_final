@@ -7,7 +7,7 @@ import org.koin.dsl.module
 
 object GetUserModule {
     val allModules = module {
-            factory { SplashScreenModel(get()) }
+            factory { SplashScreenModel(get(),get()) }
             factory { UserDataSource(get()) }
             single<UserRepositoryImpl> {
                 UserRepositoryImpl(get())
