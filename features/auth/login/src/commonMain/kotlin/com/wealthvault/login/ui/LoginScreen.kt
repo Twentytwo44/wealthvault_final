@@ -92,6 +92,7 @@ class LoginScreen() : Screen {
                 screenModel.onLoginClick {
                     navigator.replaceAll(mainScreen)
                 }
+//                navigator.replaceAll(mainScreen)
                 screenModel.onGetFCMToken()
             },
             onGoogleClick = { screenModel.onGoogleClick { /* TODO */ } },

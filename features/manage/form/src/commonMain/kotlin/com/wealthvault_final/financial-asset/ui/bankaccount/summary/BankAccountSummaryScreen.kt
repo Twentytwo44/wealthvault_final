@@ -1,20 +1,51 @@
 package com.wealthvault_final.`financial-asset`.ui.bankaccount.summary
 
+// 🌟 Import ธีมของแอป และ Utils
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material3.*
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,18 +59,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
+import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightText
+import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.model.BankAccountModel
+import com.wealthvault_final.`financial-asset`.model.ShareInfo
 import com.wealthvault_final.`financial-asset`.model.ShareTo
-import com.wealthvault_final.`financial-asset`.ui.components.ShareItemCard
-
-val WealthVaultBrown = Color(0xFFB37E61)
-val WealthVaultBackground = Color(0xFFFFF8F3)
 
 data class BankAccountSummaryScreen(val request: BankAccountModel, val shareTo: ShareTo) : Screen {
 
@@ -61,13 +93,13 @@ data class BankAccountSummaryScreen(val request: BankAccountModel, val shareTo: 
             onConfirmClick = {
                 screenModel.submitBankAccount(
                     onSuccess = {
-                        // 🌟 เปลี่ยนเป็น popUntilRoot เพื่อเด้งกลับหน้าลิสต์ Asset ทันที
                         navigator.popUntilRoot()
                     }
                 )
             },
             data = state.bankAccountRequest,
-            shareInfo = state.shareTo
+            shareInfo = state.shareTo,
+            isSaving = state.isLoading // 🌟 รับสถานะโหลดจาก ScreenModel
         )
     }
 }
@@ -78,41 +110,42 @@ fun SummaryContent(
     onBackClick: () -> Unit = {},
     onConfirmClick: () -> Unit = {},
     data: BankAccountModel?,
-    shareInfo: ShareTo?
+    shareInfo: ShareTo?,
+    isSaving: Boolean = false
 ) {
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        containerColor = WealthVaultBackground,
+        modifier = Modifier.fillMaxSize(),
+        containerColor = LightBg, // 🌟 ใช้ LightBg เต็มจอ
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-                title = { Text("สรุปข้อมูล", color = WealthVaultBrown, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = WealthVaultBrown)
+            Column(modifier = Modifier.statusBarsPadding()) {
+                CenterAlignedTopAppBar(
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+                    title = {
+                        Text("สรุป", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = LightPrimary)
+                        }
                     }
-                }
-            )
+                )
+            }
         },
         bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = WealthVaultBackground,
-                shadowElevation = 8.dp
-            ) {
+            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
+                // 🌟 ปรับดีไซน์ปุ่มบันทึก
                 Button(
                     onClick = onConfirmClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .height(56.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = WealthVaultBrown)
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+                    enabled = !isSaving
                 ) {
-                    Text("ยืนยันการบันทึก", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    if (isSaving) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text("บันทึก", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    }
                 }
             }
         }
@@ -121,19 +154,19 @@ fun SummaryContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()) // เลื่อนทั้งหน้าจอ
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Text("รายละเอียดทรัพย์สิน", color = WealthVaultBrown, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text("รายละเอียดบัญชีเงินฝาก", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
             Spacer(modifier = Modifier.height(12.dp))
 
             SummaryCard(data ?: return@Column)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("การแชร์ข้อมูล", color = WealthVaultBrown, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text("แชร์", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
             Spacer(modifier = Modifier.height(12.dp))
 
             ShareSection(shareInfo)
@@ -147,30 +180,28 @@ fun SummaryContent(
 fun SummaryCard(data: BankAccountModel) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(0xFFF3E9D8))
+        border = BorderStroke(1.dp, LightBorder.copy(alpha = 0.6f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
+            // 🌟 นำ formatAmount มาใช้ และแสดงข้อมูลเป็นระเบียบ
             SummaryRow("ชื่อบัญชี", data.name)
             SummaryRow("ประเภท", data.type)
             SummaryRow("ธนาคาร", data.bankName)
             SummaryRow("เลขที่บัญชี", data.bankId)
-            SummaryRow("จำนวนเงิน", data.amount.toString())
-            SummaryRow("หมายเหตุ", data.description.ifBlank { "-" })
+            SummaryRow("จำนวนเงิน", "${formatAmount(data.amount)} บาท")
+            SummaryRow("คำอธิบาย", data.description.ifBlank { "ไม่มีคำอธิบาย" })
 
-            Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(color = WealthVaultBackground)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text("หลักฐานอ้างอิง", color = WealthVaultBrown, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Spacer(modifier = Modifier.height(24.dp))
+            Text("ข้อมูลอ้างอิง", style = MaterialTheme.typography.bodyMedium, color = LightText, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
 
             if (data.attachments.isEmpty()) {
-                Text("ไม่มีไฟล์แนบ", color = Color.LightGray, fontSize = 12.sp)
+                Text("ไม่มีไฟล์แนบ", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             } else {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(bottom = 4.dp)
                 ) {
                     items(data.attachments) { img ->
@@ -178,23 +209,23 @@ fun SummaryCard(data: BankAccountModel) {
 
                         Box(
                             modifier = Modifier
-                                .size(90.dp)
+                                .size(72.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(WealthVaultBackground)
-                                .border(1.dp, Color(0xFFF3E9D8), RoundedCornerShape(12.dp)),
+                                .background(Color.White)
+                                .border(1.dp, LightBorder, RoundedCornerShape(12.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             if (isPdf) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(Icons.Default.PictureAsPdf, contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(30.dp))
-                                    Text(img.name, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 4.dp))
+                                    Icon(Icons.Default.PictureAsPdf, contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(28.dp))
+                                    Text(img.name, style = MaterialTheme.typography.labelSmall, color = LightText, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 4.dp))
                                 }
                             } else {
                                 val imageData = img.platformData as? ByteArray
                                 if (imageData != null) {
-                                    AsyncImage(model = imageData, contentDescription = null, contentScale = ContentScale.Crop)
+                                    AsyncImage(model = imageData, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                                 } else {
-                                    Icon(Icons.Default.Image, contentDescription = null, tint = Color.LightGray)
+                                    Icon(Icons.Default.Image, contentDescription = null, tint = LightPrimary.copy(alpha = 0.3f), modifier = Modifier.size(28.dp))
                                 }
                             }
                         }
@@ -208,12 +239,12 @@ fun SummaryCard(data: BankAccountModel) {
 @Composable
 fun SummaryRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, color = WealthVaultBrown, fontSize = 14.sp)
-        Text(value, color = Color.DarkGray, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = LightText.copy(alpha = 0.8f))
+        Text(value, style = MaterialTheme.typography.bodyMedium, color = LightText, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -221,27 +252,128 @@ fun SummaryRow(label: String, value: String) {
 fun ShareSection(shareInfo: ShareTo?) {
     if (shareInfo == null) return
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(0xFFF3E5D8))
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            val isEmpty = shareInfo.friend.isEmpty() && shareInfo.group.isEmpty() && shareInfo.email.isEmpty()
+    val isEmpty = shareInfo.friend.isEmpty() && shareInfo.group.isEmpty() && shareInfo.email.isEmpty()
 
-            if (isEmpty) {
-                Text("ไม่ได้แชร์ข้อมูลให้ใคร", color = Color.Gray, modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp), textAlign = TextAlign.Center)
-            } else {
-                shareInfo.friend.forEach { ShareItemCard(name = it.name ?: "", date = it.date ?: "") }
-                shareInfo.group.forEach { ShareItemCard(name = it.name ?: "", groupCount = "5", date = it.date ?: "") }
+    if (isEmpty) {
+        Text(
+            text = "ไม่มีการแชร์ข้อมูล",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+            textAlign = TextAlign.Center
+        )
+    } else {
+        // 🌟 รวบทุกรายการไว้ใน Card สีขาวใบเดียว
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            border = BorderStroke(1.dp, LightBorder.copy(alpha = 0.6f))
+        ) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                var isFirst = true
 
-                if (shareInfo.email.isNotEmpty() && (shareInfo.friend.isNotEmpty() || shareInfo.group.isNotEmpty())) {
-                    HorizontalDivider(color = WealthVaultBackground, thickness = 1.dp)
+                shareInfo.friend.forEach { friend ->
+                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
+                    UserShareCard(friend)
+                    isFirst = false
                 }
 
-                shareInfo.email.forEach { ShareItemCard(name = it.name ?: "", isEmail = true, date = it.date ?: "") }
+                shareInfo.group.forEach { group ->
+                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
+                    GroupShareCard(group)
+                    isFirst = false
+                }
+
+                shareInfo.email.forEach { email ->
+                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
+                    EmailShareCard(email)
+                    isFirst = false
+                }
             }
         }
+    }
+}
+
+// ==========================================
+// 🌟 Custom UI Cards สำหรับการแชร์
+// ==========================================
+
+@Composable
+fun UserShareCard(friend: ShareInfo) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier.size(46.dp).clip(CircleShape).background(LightBg),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Outlined.Person, contentDescription = null, tint = LightText.copy(alpha = 0.4f), modifier = Modifier.size(24.dp))
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Text(
+            text = friend.name ?: "",
+            style = MaterialTheme.typography.bodyLarge,
+            color = LightText,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun GroupShareCard(group: ShareInfo) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier.size(46.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFE0E0E0)),
+            contentAlignment = Alignment.Center
+        ) {
+            // Placeholder กลุ่ม
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column {
+            Text(group.name ?: "", style = MaterialTheme.typography.bodyLarge, color = LightText, fontWeight = FontWeight.Medium)
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier
+                    .background(LightBg, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Outlined.Group, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(12.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("5", style = MaterialTheme.typography.labelSmall, color = LightPrimary, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+fun EmailShareCard(email: ShareInfo) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(46.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White)
+                .border(1.dp, LightPrimary.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Outlined.Email, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Text(email.name ?: "", style = MaterialTheme.typography.bodyLarge, color = LightText)
     }
 }

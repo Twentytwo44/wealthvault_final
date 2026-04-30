@@ -1,9 +1,12 @@
 package com.wealthvault.financiallist.ui.asset.form.building
 
+// 🌟 Import Theme
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -53,6 +57,11 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.insurance_api.model.GetInsuranceData
 import com.wealthvault.land_api.model.GetLandData
@@ -66,22 +75,19 @@ import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicke
 import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
 import com.wealthvault_final.`financial-asset`.ui.components.maptype.buildingTypes
 
-
-class BuildingFormScreen(val id:String ,val buildingData: BuildingModel) : Screen {
+class BuildingFormScreen(val id: String, val buildingData: BuildingModel) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-//        val screenModel = rememberScreenModel { BuildingScreenModel() }
         val screenModel = getScreenModel<BuildingScreenModel>()
         val landState by screenModel.LandState.collectAsState()
         val insState by screenModel.InsState.collectAsState()
 
         BuildingInputForm(
-            onBackClick = { navigator.pop() } ,
-            onNextClick = { data,addedList,deletedList,addRef,deleteRef,addIns,deleteIns ->
-                println("data asset input: ${data.attachments}")
+            onBackClick = { navigator.pop() },
+            onNextClick = { data, addedList, deletedList, addRef, deleteRef, addIns, deleteIns ->
                 screenModel.updateForm(data)
-                screenModel.updateAttachment(addedList,deletedList,addRef,deleteRef,addIns,deleteIns)
+                screenModel.updateAttachment(addedList, deletedList, addRef, deleteRef, addIns, deleteIns)
                 screenModel.submitLand(id)
             },
             landData = landState,
@@ -90,6 +96,7 @@ class BuildingFormScreen(val id:String ,val buildingData: BuildingModel) : Scree
         )
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BuildingInputForm(
@@ -99,92 +106,88 @@ fun BuildingInputForm(
     landData: List<GetLandData>,
     buildingData: BuildingModel
 ) {
+    // 🌟 1. ตั้งค่าเริ่มต้นจากข้อมูลเก่า (Edit Mode Support)
+    var type by remember { mutableStateOf(buildingData.type ?: "") }
+    var buildingName by remember { mutableStateOf(buildingData.buildingName ?: "") }
+    var area by remember { mutableStateOf(buildingData.area.toString()) }
+    var amount by remember { mutableStateOf(buildingData.amount) }
+    var description by remember { mutableStateOf(buildingData.description ?: "") }
+    var locationAddress by remember { mutableStateOf(buildingData.locationAddress ?: "") }
+    var locationSubDistrict by remember { mutableStateOf(buildingData.locationSubDistrict ?: "") }
+    var locationDistrict by remember { mutableStateOf(buildingData.locationDistrict ?: "") }
+    var locationProvince by remember { mutableStateOf(buildingData.locationProvince ?: "") }
+    var locationPostalCode by remember { mutableStateOf(buildingData.locationPostalCode ?: "") }
 
-    var type by remember { mutableStateOf("") }
-    var buildingName by remember { mutableStateOf("") }
-    var area by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf(0.0) }
-    var description by remember { mutableStateOf("") }
-    var locationAddress by remember { mutableStateOf("") }
-    var locationSubDistrict by remember { mutableStateOf("") }
-    var locationDistrict by remember { mutableStateOf("") }
-    var locationProvince by remember { mutableStateOf("") }
-    var locationPostalCode by remember { mutableStateOf("") }
+    // image state
+    val originalAssets = remember { mutableStateListOf<Attachment>().apply { addAll(buildingData.attachments) } }
+    val currentAssets = remember { mutableStateListOf<Attachment>().apply { addAll(buildingData.attachments) } }
+    val filePicker = rememberFilePicker { newFiles -> currentAssets.addAll(newFiles) }
 
+    // Building/Land ref state
+    val originalBuilding = remember { mutableStateListOf<RefModel>().apply { addAll(buildingData.referenceIds) } }
+    val currentBuilding = remember { mutableStateListOf<RefModel>().apply { addAll(buildingData.referenceIds) } }
 
-    // image
-    val originalAssets = remember {
-        mutableStateListOf<Attachment>().apply {
-            addAll(buildingData.attachments)
-        }
-    }
-
-    val currentAssets = remember {
-        mutableStateListOf<Attachment>().apply {
-            addAll(buildingData.attachments)
-        }
-    }
-    val attachments = remember { mutableStateListOf<Attachment>() }
-
-    val filePicker = rememberFilePicker { newFiles ->
-        currentAssets.addAll(newFiles)
-    }
-
-
-    // Building refids
-    val referenceIds = remember { mutableStateListOf<RefModel>() }
-    val originalBuilding = remember {
-        mutableStateListOf<RefModel>().apply {
-            addAll(buildingData.referenceIds )
-        }
-    }
-
-    val currentBuilding = remember {
-        mutableStateListOf<RefModel>().apply {
-            addAll(buildingData.referenceIds )
-        }
-    }
-
-    // ins
-    val insIds = remember { mutableStateListOf<InsRefModel>() }
-    val originalInsBuilding = remember {
-        mutableStateListOf<InsRefModel>().apply {
-            addAll(buildingData.insIds )
-        }
-    }
-
-    val currentInsBuilding = remember {
-        mutableStateListOf<InsRefModel>().apply {
-            addAll(buildingData.insIds )
-        }
-    }
-
+    // insurance ref state
+    val originalInsBuilding = remember { mutableStateListOf<InsRefModel>().apply { addAll(buildingData.insIds) } }
+    val currentInsBuilding = remember { mutableStateListOf<InsRefModel>().apply { addAll(buildingData.insIds) } }
 
     var showLandSheet by remember { mutableStateOf(false) }
     var showInsSheet by remember { mutableStateOf(false) }
 
-
-
     Scaffold(
-        containerColor = Color(0xFFFFF8F3),
+        modifier = Modifier.fillMaxSize(),
+        containerColor = LightBg,
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent
-                ),
-                title = {
-                    Text(
-                        "ข้อมูลอาคาร ตึก",
-                        color = Color(0xFF8D6E63),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color(0xFF8D6E63))
+            Column(modifier = Modifier.statusBarsPadding()) {
+                CenterAlignedTopAppBar(
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+                    title = { Text("ข้อมูลอาคาร ตึก", color = LightPrimary, style = MaterialTheme.typography.titleLarge) },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = LightPrimary)
+                        }
                     }
+                )
+            }
+        },
+        bottomBar = {
+            Box(modifier = Modifier.navigationBarsPadding().padding(24.dp)) {
+                Button(
+                    onClick = {
+                        val data = BuildingModel(
+                            type = type,
+                            buildingName = buildingName,
+                            area = area.toDoubleOrNull() ?: 0.0,
+                            amount = amount,
+                            description = description,
+                            attachments = currentAssets,
+                            referenceIds = currentBuilding,
+                            locationAddress = locationAddress,
+                            locationSubDistrict = locationSubDistrict,
+                            locationDistrict = locationDistrict,
+                            locationProvince = locationProvince,
+                            locationPostalCode = locationPostalCode,
+                            insIds = currentInsBuilding
+                        )
+
+                        val addList = currentAssets.filter { it.id.isNullOrEmpty() }
+                        val deleteList = originalAssets.filter { old -> currentAssets.none { it.id == old.id } }
+
+                        val addRefList = currentBuilding.filter { curr -> originalBuilding.none { it.areaId == curr.areaId } }
+                        val deleteRefList = originalBuilding.filter { old -> currentBuilding.none { it.areaId == old.areaId } }
+
+                        val addInsList = currentInsBuilding.filter { curr -> originalInsBuilding.none { it.insId == curr.insId } }
+                        val deleteInsList = originalInsBuilding.filter { old -> currentInsBuilding.none { it.insId == old.insId } }
+
+                        onNextClick(data, addList, deleteList, addRefList, deleteRefList, addInsList, deleteInsList)
+                    },
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("ยืนยันการแก้ไข", style = MaterialTheme.typography.titleMedium, color = Color.White)
                 }
-            )
+            }
         }
     ) { paddingValues ->
         Column(
@@ -196,242 +199,118 @@ fun BuildingInputForm(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-
             DropdownInput(
                 label = "ประเภทที่อยู่อาศัย",
                 options = buildingTypes,
                 selectedValue = type,
                 onValueChange = { type = it },
-                data = buildingData.type
+                placeholder = "กรุณาเลือกประเภท"
             )
-            AssetTextField(
-                value = buildingName,
-                onValueChange = { buildingName = it },
-                label = "ชื่ออาคาร ตึก",
-                placeholder = buildingData.buildingName
-            )
-            AssetTextField(
-                value = area,
-                onValueChange = { area = it }, // ✅ แก้บั๊กให้เป็น area = it
-                label = "ขนาดพื้นที่",
-                placeholder = buildingData.area.toString()
-            )
+
+            AssetTextField(value = buildingName, onValueChange = { buildingName = it }, label = "ชื่ออาคาร ตึก*", placeholder = "ระบุชื่ออาคาร")
+            AssetTextField(value = area, onValueChange = { area = it }, label = "ขนาดพื้นที่ (ตร.ว.)*", placeholder = "0.0")
+
+            // --- ส่วนของข้อมูลอ้างอิงที่ดิน ---
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "เพิ่มข้อมูลอ้างอิง",
-                    fontSize = 16.sp,
-                    color = Color.DarkGray
-                )
+                Text("อ้างอิงข้อมูลที่ดิน", style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
                 IconButton(onClick = { showLandSheet = true }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Reference",
-                        tint = Color.DarkGray
-                    )
+                    Icon(Icons.Default.Add, contentDescription = null, tint = LightPrimary)
                 }
             }
 
-            // 🔹 แสดงรายการที่ถูกเลือกแล้ว บนหน้าจอหลัก
             if (currentBuilding.isNotEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    currentBuilding.forEach { land ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color(0xFFFFF8F3), RoundedCornerShape(8.dp))
-                                .border(1.dp, Color(0xFFF0DFD3), RoundedCornerShape(8.dp))
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(land.areaName, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                                Text("โฉนด: ${land.areaId}", fontSize = 12.sp, color = Color.Gray)
-                            }
-                            // ปุ่มลบออกจากรายการที่เลือก
-                            IconButton(
-                                onClick = { referenceIds.removeAll { it.areaId == land.areaId } },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color.Red.copy(alpha = 0.6f))
-                            }
+                currentBuilding.forEach { land ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                            .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(land.areaName, style = MaterialTheme.typography.bodyLarge, color = LightText)
+                            Text("โฉนด: ${land.areaId}", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                        }
+                        // 🌟 แก้ BUG: ลบออกจาก currentBuilding เพื่อให้ UI อัปเดตทันที
+                        IconButton(onClick = { currentBuilding.remove(land) }, modifier = Modifier.size(24.dp)) {
+                            Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red.copy(alpha = 0.6f))
                         }
                     }
                 }
             }
 
-            AssetTextField(
-                value = locationAddress,
-                onValueChange = { locationAddress = it },
-                label = "ที่อยู่ (บ้านเลขที่, ซอย, ถนน)",
-                placeholder = buildingData.locationAddress
-            )
-            AssetTextField(
-                value = locationSubDistrict,
-                onValueChange = { locationSubDistrict = it },
-                label = "ตำบล / แขวง",
-                placeholder = buildingData.locationSubDistrict
-            )
-            AssetTextField(
-                value = locationDistrict,
-                onValueChange = { locationDistrict = it },
-                label = "อำเภอ / เขต",
-                placeholder = buildingData.locationDistrict
-            )
-            AssetTextField(
-                value = locationProvince,
-                onValueChange = { locationProvince = it },
-                label = "จังหวัด",
-                placeholder = buildingData.locationProvince
-            )
-            AssetTextField(
-                value = locationPostalCode,
-                onValueChange = { locationPostalCode = it },
-                label = "รหัสไปรษณีย์",
-                placeholder = buildingData.locationPostalCode
-            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("ที่ตั้งอาคาร", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
 
+            AssetTextField(value = locationAddress, onValueChange = { locationAddress = it }, label = "ที่อยู่", placeholder = "บ้านเลขที่, ซอย, ถนน")
+            AssetTextField(value = locationSubDistrict, onValueChange = { locationSubDistrict = it }, label = "ตำบล / แขวง", placeholder = "ระบุตำบล")
+            AssetTextField(value = locationDistrict, onValueChange = { locationDistrict = it }, label = "อำเภอ / เขต", placeholder = "ระบุอำเภอ")
+            AssetTextField(value = locationProvince, onValueChange = { locationProvince = it }, label = "จังหวัด", placeholder = "ระบุจังหวัด")
+            AssetTextField(value = locationPostalCode, onValueChange = { locationPostalCode = it }, label = "รหัสไปรษณีย์", placeholder = "ระบุรหัสไปรษณีย์")
 
+            // --- ส่วนของข้อมูลประกัน ---
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "เพิ่มข้อมูลประกัน",
-                    fontSize = 16.sp,
-                    color = Color.DarkGray
-                )
+                Text("อ้างอิงข้อมูลประกัน", style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
                 IconButton(onClick = { showInsSheet = true }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Insurace",
-                        tint = Color.DarkGray
-                    )
+                    Icon(Icons.Default.Add, contentDescription = null, tint = LightPrimary)
                 }
             }
 
-            // 🔹 แสดงรายการที่ถูกเลือกแล้ว บนหน้าจอหลัก
             if (currentInsBuilding.isNotEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    currentInsBuilding.forEach { ins ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color(0xFFFFF8F3), RoundedCornerShape(8.dp))
-                                .border(1.dp, Color(0xFFF0DFD3), RoundedCornerShape(8.dp))
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(ins.insName, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                                Text("เลขประกัน: ${ins.insId}", fontSize = 12.sp, color = Color.Gray)
-                            }
-                            // ปุ่มลบออกจากรายการที่เลือก
-                            IconButton(
-                                onClick = { insIds.removeAll { it.insId == ins.insId } },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color.Red.copy(alpha = 0.6f))
-                            }
+                currentInsBuilding.forEach { ins ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                            .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(ins.insName, style = MaterialTheme.typography.bodyLarge, color = LightText)
+                            Text("เลขกรมธรรม์: ${ins.insId}", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                        }
+                        // 🌟 แก้ BUG: ลบออกจาก currentInsBuilding เพื่อให้ UI อัปเดตทันที
+                        IconButton(onClick = { currentInsBuilding.remove(ins) }, modifier = Modifier.size(24.dp)) {
+                            Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red.copy(alpha = 0.6f))
                         }
                     }
                 }
             }
 
-            AssetTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = "รายละเอียดเพิ่มเติม",
-                placeholder = buildingData.description
-            )
+            AssetTextField(value = description, onValueChange = { description = it }, label = "รายละเอียดเพิ่มเติม", placeholder = "ระบุรายละเอียดเพิ่มเติม", isMultiLine = true)
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. ส่ง State และคำสั่ง Launch เข้าไปใน ReferenceSection
             ReferenceImagepicker(
-                attachments = attachments,
+                attachments = currentAssets,
                 onAddImage = { filePicker.launchImage() },
                 onAddPdf = { filePicker.launchPdf() },
-                onRemove = { item -> attachments.remove(item) }
+                onRemove = { item -> currentAssets.remove(item) }
             )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            Button(
-
-                onClick = {
-                    val data = BuildingModel(
-                        type = type,
-                        buildingName = buildingName,
-
-                        // 🚨 อัปเกรด: ป้องกันแอปแครชถ้า User ไม่ได้กรอกตัวเลข
-                        area = area.toDoubleOrNull() ?: 0.0,
-                        amount = amount.toString().toDoubleOrNull() ?: 0.0,
-
-                        description = description,
-                        attachments = attachments,
-                        referenceIds = referenceIds,
-                        locationAddress = locationAddress,
-                        locationSubDistrict = locationSubDistrict,
-                        locationDistrict = locationDistrict,
-                        locationProvince = locationProvince,
-                        locationPostalCode = locationPostalCode,
-                        insIds = insIds
-                    )
-                    val addList = currentAssets.filter { it.id.isNullOrEmpty() }
-
-                    val deleteList = originalAssets.filter { originalItem ->
-                        currentAssets.none { it.id == originalItem.id }
-                    }
-
-                    val addRefList = currentBuilding.filter { it.areaId.isNotEmpty() }
-
-                    val deleteRefList = originalBuilding.filter { originalItem ->
-                        currentBuilding.none { it.areaId == originalItem.areaId }
-                    }
-
-                    val addInsList = currentInsBuilding.filter { it.insId.isNotEmpty() }
-                    val deleteInsList = originalInsBuilding.filter { originalItem ->
-                        currentInsBuilding.none { it.insId == originalItem.insId }
-                    }
-
-                    println("Added List Size: ${addList.size} รายการ")
-                    println("Delete List Size: ${deleteList.size} รายการ")
-                    println("Delete ID: ${deleteList.map { it.id }}")
-                    println("Data Attachment: ${data.attachments}")
-                    onNextClick(data,addList,deleteList,addRefList,deleteRefList,addInsList,deleteInsList)
-
-                }, // อนาคตสามารถโยนค่า attachments ไปให้ ViewModel ตรงนี้ได้เลย
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFB08968)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text("ต่อไป", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Bottom Sheets
             if (showLandSheet) {
                 LandSelectionBottomSheet(
-                    alreadySelected = referenceIds, // โยนข้อมูลที่เคยเลือกแล้วเข้าไป
+                    alreadySelected = currentBuilding,
                     onDismiss = { showLandSheet = false },
                     onConfirm = { newSelection ->
-                        // อัปเดต List ใหม่เมื่อกดยืนยัน
+                        currentBuilding.clear()
                         currentBuilding.addAll(newSelection)
                         showLandSheet = false
                     },
@@ -441,11 +320,11 @@ fun BuildingInputForm(
 
             if (showInsSheet) {
                 InsSelectionBottomSheet(
-                    availableIns = insData, // โยนข้อมูลจาก API เข้าไป
-                    alreadySelected = currentInsBuilding, // โยนข้อมูลที่เคยเลือกแล้วเข้าไป
+                    availableIns = insData,
+                    alreadySelected = currentInsBuilding,
                     onDismiss = { showInsSheet = false },
                     onConfirm = { newSelection ->
-                        // อัปเดต List ใหม่เมื่อกดยืนยัน
+                        currentInsBuilding.clear()
                         currentInsBuilding.addAll(newSelection)
                         showInsSheet = false
                     }
@@ -455,7 +334,7 @@ fun BuildingInputForm(
     }
 }
 
-
+// 🌟 ปรับปรุง BottomSheet ให้ใช้ Theme เดียวกัน
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandSelectionBottomSheet(
@@ -465,178 +344,98 @@ fun LandSelectionBottomSheet(
     landData: List<GetLandData>
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val lands = remember(landData) { landData.map { RefModel(areaName = it.name ?: "", areaId = it.id ?: "") } }
+    val tempSelected = remember { mutableStateListOf<RefModel>().apply { addAll(alreadySelected) } }
 
-    val lands = remember(landData) {
-        landData.map { RefModel(areaName = it.name ?: "", areaId = it.id?: "") }
-    }
-
-    // สร้าง List ชั่วคราวไว้จัดการตอนติ๊ก Checkbox (ยังไม่เซฟจนกว่าจะกดยืนยัน)
-    val tempSelected = remember {
-        mutableStateListOf<RefModel>().apply { addAll(alreadySelected) }
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = Color.White
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .navigationBarsPadding() // เว้นที่ขอบล่างจอ
-        ) {
-            Text(
-                text = "เลือกข้อมูลที่ดินอ้างอิง",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFC08064)
-            )
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = Color.White) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding()) {
+            Text("เลือกที่ดินอ้างอิง", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ลิสต์รายการที่ดิน
-            LazyColumn(
-                modifier = Modifier.weight(1f, fill = false),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            LazyColumn(modifier = Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(lands) { land ->
                     val isChecked = tempSelected.any { it.areaId == land.areaId }
-
                     Surface(
                         onClick = {
                             if (isChecked) tempSelected.removeAll { it.areaId == land.areaId }
                             else tempSelected.add(land)
                         },
                         shape = RoundedCornerShape(12.dp),
-                        color = if (isChecked) Color(0xFFF2E8E1) else Color.White,
-                        border = BorderStroke(1.dp, if (isChecked) Color(0xFFC08064) else Color(0xFFEEEEEE)),
+                        color = if (isChecked) LightBg else Color.White,
+                        border = BorderStroke(1.dp, if (isChecked) LightPrimary else LightBorder),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(land.areaName, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                                Text("เลขที่โฉนด: ${land.areaId}", fontSize = 14.sp, color = Color.Gray)
+                                Text(land.areaName, fontWeight = FontWeight.Medium)
+                                Text("เลขโฉนด: ${land.areaId}", fontSize = 12.sp, color = Color.Gray)
                             }
-                            Checkbox(
-                                checked = isChecked,
-                                onCheckedChange = null, // ให้ Surface จัดการเรื่องกดแทน
-                                colors = CheckboxDefaults.colors(checkedColor = Color(0xFFC08064))
-                            )
+                            Checkbox(checked = isChecked, onCheckedChange = null, colors = CheckboxDefaults.colors(checkedColor = LightPrimary))
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ปุ่มยืนยัน
             Button(
                 onClick = { onConfirm(tempSelected.toList()) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(bottom = 16.dp),
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC08064))
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
             ) {
-                Text("ยืนยัน (${tempSelected.size}) รายการ", color = Color.White, fontSize = 16.sp)
+                Text("ตกลง (${tempSelected.size})", color = Color.White)
             }
         }
     }
 }
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsSelectionBottomSheet(
-    availableIns: List<GetInsuranceData>,   // 💡 เปลี่ยนชื่อจาก availableLands
+    availableIns: List<GetInsuranceData>,
     alreadySelected: List<InsRefModel>,
     onDismiss: () -> Unit,
     onConfirm: (List<InsRefModel>) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val insDatas = remember(availableIns) { availableIns.map { InsRefModel(insName = it.name ?: "", insId = it.id ?: "") } }
+    val tempInsSelected = remember { mutableStateListOf<InsRefModel>().apply { addAll(alreadySelected) } }
 
-    val tempInsSelected = remember {
-        mutableStateListOf<InsRefModel>().apply { addAll(alreadySelected) }
-    }
-
-    val insDatas = remember(availableIns) {
-        availableIns.map { InsRefModel(insName = it.name?: "", insId = it.id?: "") }
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = Color.White
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .navigationBarsPadding()
-        ) {
-            Text(
-                text = "เลือกข้อมูลประกันอ้างอิง", // 💡 แก้จาก "ที่ดิน" เป็น "ประกัน"
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFC08064)
-            )
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = Color.White) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding()) {
+            Text("เลือกประกันอ้างอิง", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ลิสต์รายการประกัน
-            LazyColumn(
-                modifier = Modifier.weight(1f, fill = false),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(insDatas) { ins -> // 💡 เปลี่ยนชื่อตัวแปรรันลูปจาก land เป็น ins
+            LazyColumn(modifier = Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(insDatas) { ins ->
                     val isChecked = tempInsSelected.any { it.insId == ins.insId }
-
                     Surface(
                         onClick = {
                             if (isChecked) tempInsSelected.removeAll { it.insId == ins.insId }
                             else tempInsSelected.add(ins)
                         },
                         shape = RoundedCornerShape(12.dp),
-                        color = if (isChecked) Color(0xFFF2E8E1) else Color.White,
-                        border = BorderStroke(1.dp, if (isChecked) Color(0xFFC08064) else Color(0xFFEEEEEE)),
+                        color = if (isChecked) LightBg else Color.White,
+                        border = BorderStroke(1.dp, if (isChecked) LightPrimary else LightBorder),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
-                                // 💡 สลับเอาชื่อ (insName) ขึ้นเป็นหัวข้อหลัก และเอา ID ไปไว้เป็นตัวรอง
-                                Text(ins.insName, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                                Text("เลขกรมธรรม์: ${ins.insId}", fontSize = 14.sp, color = Color.Gray)
+                                Text(ins.insName, fontWeight = FontWeight.Medium)
+                                Text("เลขกรมธรรม์: ${ins.insId}", fontSize = 12.sp, color = Color.Gray)
                             }
-                            Checkbox(
-                                checked = isChecked,
-                                onCheckedChange = null,
-                                colors = CheckboxDefaults.colors(checkedColor = Color(0xFFC08064))
-                            )
+                            Checkbox(checked = isChecked, onCheckedChange = null, colors = CheckboxDefaults.colors(checkedColor = LightPrimary))
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ปุ่มยืนยัน
             Button(
                 onClick = { onConfirm(tempInsSelected.toList()) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(bottom = 16.dp),
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC08064))
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
             ) {
-                Text("ยืนยัน (${tempInsSelected.size}) รายการ", color = Color.White, fontSize = 16.sp)
+                Text("ตกลง (${tempInsSelected.size})", color = Color.White)
             }
         }
     }

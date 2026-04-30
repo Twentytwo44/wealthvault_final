@@ -1,5 +1,7 @@
 package com.wealthvault_final.`financial-obligations`.ui.menu
 
+// 🌟 Import ธีมของแอป
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +22,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,6 +29,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,40 +43,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.bookbank
-import com.wealthvault.core.generated.resources.cashgold
 import com.wealthvault.core.generated.resources.debtpic
 import com.wealthvault.core.generated.resources.expensepic
+import com.wealthvault.core.generated.resources.ic_common_back
+import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightText
 import com.wealthvault_final.`financial-obligations`.ui.expense.ExpenseFormScreen
 import com.wealthvault_final.`financial-obligations`.ui.liability.LiabilityFormScreen
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.InternalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
-val WealthVaultBrown = Color(0xFFB37E61)
-val WealthVaultBackground = Color(0xFFFFF8F3)
-val WealthVaultCardHeader = Color(0xFF6D4C41)
+// 🌟 ลบสี Hardcode ออก ใช้ของ Theme แทน
 
 data class AssetCategory(
     val id: Int,
     val title: String,
-    val iconRes: DrawableResource, // ✅ กลับมาใช้ Resource Object
+    val iconRes: DrawableResource,
     val backgroundColor: Color,
     val borderColor: Color
 )
 
+// 🌟 คงดีไซน์ Card ไว้เหมือนเดิมเป๊ะ
 val assetCategories = listOf(
     AssetCategory(1, "หนี้สิน", Res.drawable.debtpic, Color(0xFFE3F2FD), Color(0xFF2196F3)),
-    AssetCategory(2, "ค่าใช้จ่ายต่อเนื่อง",Res.drawable.expensepic,Color(0xFFF1F8E9), Color(0xFF8BC34A)),
-
+    AssetCategory(2, "ค่าใช้จ่ายต่อเนื่อง", Res.drawable.expensepic, Color(0xFFF1F8E9), Color(0xFF8BC34A)),
 )
-
 
 class ObMenuScreen : Screen {
     @Composable
@@ -84,14 +83,12 @@ class ObMenuScreen : Screen {
         MenuScreen(
             onBackClick = { navigator.pop() },
             onNextClick = { selectedCategory ->
-                // ✅ ใช้ when เพื่อเช็ค id แล้วส่งไปหน้าต่างๆ
+                // 🌟 แก้ไขคอมเมนต์ให้ถูกต้อง จะได้ไม่งงกับฝั่ง Asset
                 when (selectedCategory?.id) {
-                    1 -> navigator.push(LiabilityFormScreen())        // ประเภทที่ 1: เงินสด
-                    2 -> navigator.push(ExpenseFormScreen())
-                    // ประเภทที่ 2: การลงทุน
+                    1 -> navigator.push(LiabilityFormScreen()) // ประเภทที่ 1: หนี้สิน
+                    2 -> navigator.push(ExpenseFormScreen())   // ประเภทที่ 2: ค่าใช้จ่ายต่อเนื่อง
                     else -> {
-                        // กรณีที่ไม่ได้เลือก หรือ id ไม่ตรงกับที่กำหนด
-                        println("กรุณาเลือกประเภททรัพย์สิน")
+                        println("กรุณาเลือกประเภทรายการ")
                     }
                 }
             }
@@ -105,42 +102,57 @@ fun MenuScreen(
     onBackClick: () -> Unit = {},
     onNextClick: (AssetCategory?) -> Unit = {}
 ) {
-    var selectedId by remember { mutableStateOf<Int?>(1) } // Default เลือกอันแรกตามรูป
-
+    var selectedId by remember { mutableStateOf<Int?>(1) }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding(),
-        containerColor = WealthVaultBackground,
+        // 🌟 แก้ไขตรงนี้: ลบ statusBarsPadding และ navigationBarsPadding ออก
+        modifier = Modifier.fillMaxSize(),
+        containerColor = LightBg,
         topBar = {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = WealthVaultBrown)
+            // 🌟 ย้ายมาใส่ statusBarsPadding ตรงนี้แทน เพื่อให้ TopBar เว้นระยะจากขอบบน
+            Column(modifier = Modifier.statusBarsPadding()) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_common_back),
+                            contentDescription = "Back",
+                            tint = LightPrimary,
+                            modifier = Modifier
+                                .size(24.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "ประเภทหนี้สิน",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LightPrimary
+                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("ประเภททรัพย์สิน", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WealthVaultBrown)
             }
         },
         bottomBar = {
-            Box(modifier = Modifier.padding(16.dp)) {
+            // 🌟 ย้ายมาใส่ navigationBarsPadding ตรงนี้ เพื่อให้ปุ่มเว้นระยะจากขอบล่าง (แถบ Home)
+            Box(modifier = Modifier.navigationBarsPadding().padding(16.dp)) {
                 Button(
                     onClick = { onNextClick(assetCategories.find { it.id == selectedId }) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = WealthVaultBrown)
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+                    enabled = selectedId != null
                 ) {
-                    Text("ต่อไป", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("ต่อไป", color = Color.White, style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
     ) { paddingValues ->
-        // ✅ ใช้ LazyVerticalGrid จัดเรียง 2 คอลัมน์
+        // ✅ ใช้ paddingValues ที่ได้จาก Scaffold เพื่อจัดการพื้นที่ตรงกลาง
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
-                .padding(paddingValues)
+                .padding(paddingValues) // จัดการพื้นที่ที่เหลือระหว่าง TopBar และ BottomBar
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -155,7 +167,9 @@ fun MenuScreen(
         }
     }
 }
-@OptIn(ExperimentalResourceApi::class, InternalResourceApi::class)
+
+// 🌟 ส่วนนี้คือ UI Card ที่คงไว้เหมือนเดิม 100%
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun AssetCard(
     category: AssetCategory,
@@ -192,21 +206,17 @@ fun AssetCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // ✅ 2. ส่ง imagePath ให้ AsyncImage
-                // Coil3 จะเข้าใจ Path นี้และไปดึงไฟล์จาก Resources มาวาดให้เอง
                 Image(
                     painter = painterResource(category.iconRes),
                     contentDescription = category.title,
                     modifier = Modifier.size(116.dp),
                 )
 
-
-
                 Text(
                     text = category.title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.bodyLarge, // 🌟 ปรับให้ใช้ Typography
                     fontWeight = FontWeight.Medium,
-                    color = Color.Black,
+                    color = LightText, // 🌟 ใช้ LightText จาก Theme แทน Color.Black
                     textAlign = TextAlign.Center
                 )
             }

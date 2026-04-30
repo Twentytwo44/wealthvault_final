@@ -1,6 +1,7 @@
 package com.wealthvault_final.`financial-asset`.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,108 +11,134 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.wealthvault_final.`financial-asset`.ui.bankaccount.summary.WealthVaultBrown
+
+// 🌟 Import Theme กลางของแอป
+import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightText
 
 @Composable
 fun ShareItemCard(
     name: String,
-    date:String,
+    date: String,
     groupCount: String? = null,
     isEmail: Boolean = false
 ) {
-    // แต่ละ Item มีพื้นหลังสีขาวและขอบมน
+    // 🌟 เปลี่ยนเป็นสีโปร่งใส (Transparent) เพื่อให้มันเนียนกลืนไปกับ Card แม่ในหน้า Summary
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ส่วนของ Icon Box
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(
-                        color = if (isEmail) Color(0xFFF2E8E1) else Color(0xFFD9D9D9),
-                        shape = RoundedCornerShape(16.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isEmail) {
-                    Icon(
-                        imageVector = Icons.Default.Email,
-                        contentDescription = null,
-                        tint = WealthVaultBrown,
-                        modifier = Modifier.size(28.dp)
-                    )
+
+            // =====================================
+            // 🌟 1. ส่วนของ Icon Box (แยกตามประเภท)
+            // =====================================
+            if (isEmail) {
+                // โหมดอีเมล: สี่เหลี่ยมขอบมน ขอบสีส้ม (รูปที่ 2)
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White)
+                        .border(1.dp, LightPrimary.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Outlined.Email, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
                 }
-                // ถ้าไม่ใช่ Email ในรูปจะเป็นพื้นที่สีเทาว่างๆ
+            } else if (groupCount != null) {
+                // โหมดกลุ่ม: สี่เหลี่ยมขอบมน สีเทา (รูปที่ 2)
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Outlined.Group, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(24.dp))
+                }
+            } else {
+                // โหมดเพื่อน: วงกลม (รูปที่ 3)
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(CircleShape)
+                        .background(LightBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Outlined.Person, contentDescription = null, tint = LightText.copy(alpha = 0.4f), modifier = Modifier.size(24.dp))
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Column {
+            // =====================================
+            // 🌟 2. ส่วนของข้อมูลข้อความและป้ายกำกับ
+            // =====================================
+            Column(modifier = Modifier.weight(1f)) {
+                // ชื่อ
                 Text(
                     text = name,
-                    fontSize = 18.sp,
-                    color = Color(0xFF4A4A4A)
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = LightText,
+                    fontWeight = if (isEmail) FontWeight.Normal else FontWeight.Medium
                 )
-                Text(
-                    text = date,
-                    fontSize = 18.sp,
-                    color = Color(0xFF4A4A4A)
-                )
-
 
                 // Badge สำหรับจำนวนคนในกลุ่ม
                 if (groupCount != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Surface(
-                        color = Color(0xFFF2E8E1),
-                        shape = RoundedCornerShape(12.dp)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier
+                            .background(LightBg, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Groups,
-                                contentDescription = null,
-                                // ✅ ต้องใช้ Modifier.size และหน่วยต้องเป็น .dp (ไม่ใช่ .sp)
-                                modifier = Modifier.size(16.dp),
-                                tint = WealthVaultBrown
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = groupCount,
-                                fontSize = 12.sp,
-                                color = WealthVaultBrown
-                            )
-                        }
+                        Icon(Icons.Outlined.Group, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = groupCount,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = LightPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
+                }
+
+                // วันที่เข้าถึงข้อมูล (ถ้ามี)
+                if (date.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = if (isEmail) "วันหมดอายุ: $date" else date,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.Gray
+                    )
                 }
             }
         }
     }
 }
-

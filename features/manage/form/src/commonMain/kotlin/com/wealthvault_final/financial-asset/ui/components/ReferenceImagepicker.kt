@@ -1,5 +1,7 @@
 package com.wealthvault_final.`financial-asset`.ui.components
 
+// 🌟 Import Theme ของแอป
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +32,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,11 +47,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.theme.LightText
 import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.AttachmentType
-
 
 @Composable
 fun ReferenceImagepicker(
@@ -59,6 +64,7 @@ fun ReferenceImagepicker(
 ) {
     val images = attachments.filter { it.type == AttachmentType.IMAGE }
     val pdfs = attachments.filter { it.type == AttachmentType.PDF }
+
     // สร้าง State สำหรับควบคุมการเปิด/ปิดเมนู Dropdown
     var expanded by remember { mutableStateOf(false) }
 
@@ -68,52 +74,62 @@ fun ReferenceImagepicker(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("เพิ่มข้อมูลอ้างอิง", color = Color(0xFF8D6E63), fontWeight = FontWeight.Medium)
+            // 🌟 ปรับสีและฟอนต์ของหัวข้อให้ตรงกับ Theme
+            Text(
+                text = "เพิ่มข้อมูลอ้างอิง",
+                color = LightPrimary,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
+            )
 
-            // ใช้ Box เพื่อให้ DropdownMenu ลอยอยู่ตำแหน่งเดียวกับปุ่ม +
             Box {
                 IconButton(onClick = { expanded = true }) {
                     Icon(
                         Icons.Default.Add,
                         contentDescription = "เพิ่ม",
-                        tint = Color(0xFF8D6E63),
+                        tint = LightPrimary, // 🌟 ใช้ LightPrimary
                         modifier = Modifier.size(28.dp)
                     )
                 }
 
-                // เมนูที่จะกางออกมาเมื่อ expanded = true
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                    modifier = Modifier.background(Color.White)
+                    modifier = Modifier.background(LightSoftWhite) // 🌟 ปรับพื้นหลังเมนู
                 ) {
-                    // ตัวเลือกที่ 1: รูปภาพ
                     DropdownMenuItem(
-                        text = { Text("รูปภาพ", color = Color(0xFF8D6E63)) },
+                        text = {
+                            Text("รูปภาพ", color = LightText, style = MaterialTheme.typography.bodyMedium)
+                        },
                         leadingIcon = {
-                            // ✅ เช็คว่ามีรูปภาพใน List หรือไม่
                             Icon(
                                 imageVector = Icons.Default.Image,
                                 contentDescription = null,
-                                tint = Color(0xFFE57373), // สีแดงสไตล์ PDF
+                                tint = LightPrimary, // 🌟 ปรับสีไอคอนให้ละมุน
                                 modifier = Modifier.size(24.dp)
                             )
                         },
                         onClick = {
                             expanded = false
-                            onAddImage() // เรียกฟังก์ชันเปิดรูป
+                            onAddImage()
                         }
                     )
 
-                    // ตัวเลือกที่ 2: ไฟล์ PDF
                     DropdownMenuItem(
-                        text = { Text("ไฟล์ PDF", color = Color(0xFF8D6E63)) },
+                        text = {
+                            Text("ไฟล์ PDF", color = LightText, style = MaterialTheme.typography.bodyMedium)
+                        },
                         leadingIcon = {
-                            Icon(Icons.Default.PictureAsPdf, contentDescription = null, tint = Color(0xFF8D6E63))
+                            Icon(
+                                imageVector = Icons.Default.PictureAsPdf,
+                                contentDescription = null,
+                                tint = Color(0xFFE57373), // 🌟 สีแดง PDF (คงไว้)
+                                modifier = Modifier.size(24.dp)
+                            )
                         },
                         onClick = {
                             expanded = false
-                            onAddPdf() // เรียกฟังก์ชันเปิด PDF
+                            onAddPdf()
                         }
                     )
                 }
@@ -122,51 +138,52 @@ fun ReferenceImagepicker(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // แถวรูปภาพ (แสดงเมื่อมีรูปภาพเท่านั้น)
+        // --- แถวรูปภาพ ---
         if (images.isNotEmpty()) {
             Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
                 images.forEach { img ->
-                    Box(modifier = Modifier.padding(end = 12.dp).size(80.dp)) {
+                    Box(modifier = Modifier.padding(end = 12.dp, top = 4.dp).size(80.dp)) {
                         Surface(
                             modifier = Modifier.fillMaxSize(),
-                            shape = RoundedCornerShape(16.dp),
-                            color = Color.White,
-                            border = BorderStroke(1.dp, Color(0xFFE0E0E0))
+                            shape = RoundedCornerShape(12.dp), // 🌟 ปรับความโค้งเป็น 12.dp ให้เข้ากับ Input
+                            color = LightSoftWhite, // 🌟 ใช้สีพื้นหลังของแอป
+                            border = BorderStroke(1.dp, LightBorder.copy(alpha = 0.5f)) // 🌟 กรอบจางๆ
                         ) {
-                            // ✅ เช็คว่าเป็นรูปภาพและมีข้อมูล Path/Uri หรือไม่
                             val imageBytes = img.platformData as? ByteArray
 
                             if (imageBytes != null) {
                                 AsyncImage(
-                                    // 2. โยน ByteArray เข้าไปตรงๆ ได้เลย (สำหรับ Coil 3 KMP)
-                                    // ⚠️ โน้ต: ถ้าใช้ Coil 2 บน Android แล้วรูปไม่ขึ้น ให้เปลี่ยนเป็น model = java.nio.ByteBuffer.wrap(imageBytes)
                                     model = imageBytes,
                                     contentDescription = null,
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
                                 )
                             } else {
-                                // โชว์ Placeholder เหมือนเดิม
                                 Icon(
                                     Icons.Default.Image,
                                     contentDescription = null,
-                                    tint = Color(0xFFD7CCC8),
+                                    tint = Color.LightGray,
                                     modifier = Modifier.padding(24.dp)
                                 )
                             }
                         }
 
-                        // ปุ่มกากบาทสำหรับลบ (เหมือนเดิม)
+                        // ปุ่มกากบาท
                         Surface(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .offset(x = 4.dp, y = (-4).dp)
-                                .size(20.dp)
+                                .offset(x = 6.dp, y = (-6).dp)
+                                .size(22.dp)
                                 .clickable { onRemove(img) },
                             shape = CircleShape,
-                            color = Color(0xFFE57373)
+                            color = Color(0xFFE57373) // สีแดงเตือนสำหรับการลบ
                         ) {
-                            Icon(Icons.Default.Close, contentDescription = "ลบ", tint = Color.White, modifier = Modifier.padding(4.dp))
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "ลบ",
+                                tint = Color.White,
+                                modifier = Modifier.padding(4.dp)
+                            )
                         }
                     }
                 }
@@ -174,49 +191,43 @@ fun ReferenceImagepicker(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        // แถว PDF (แสดงเรียงกันลงมา)
+        // --- แถว PDF ---
         pdfs.forEach { pdf ->
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .clickable {
-                        // 💡 ตรงนี้สามารถใช้ platformData เพื่อเปิดไฟล์ได้
-                        // val path = pdf.platformData as? String
-                        // openPdf(path)
-                    },
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.dp, Color(0xFFE0E0E0))
+                    .padding(bottom = 8.dp),
+                shape = RoundedCornerShape(12.dp), // 🌟 โค้ง 12.dp
+                colors = CardDefaults.cardColors(containerColor = LightSoftWhite), // 🌟 สีพื้นหลัง
+                border = BorderStroke(1.dp, LightBorder.copy(alpha = 0.5f)) // 🌟 กรอบบางๆ
             ) {
                 Row(
                     modifier = Modifier.padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // ✅ เปลี่ยนไอคอนให้ดูเป็น PDF มากขึ้น (ถ้าต้องการ)
                     Icon(
                         imageVector = Icons.Default.PictureAsPdf,
                         contentDescription = null,
-                        tint = Color(0xFFE57373) // สีแดงสไตล์ Adobe PDF
+                        tint = Color(0xFFE57373) // คงสีแดงไว้ให้รู้ว่าเป็น PDF
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                    // โชว์ชื่อไฟล์ที่ได้จาก Launcher
                     Text(
                         text = pdf.name,
                         modifier = Modifier.weight(1f),
-                        fontSize = 14.sp,
-                        maxLines = 1, // กันชื่อยาวเกินไปจนดันปุ่มลบ
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LightText, // 🌟 ใช้สีตัวหนังสือ Theme
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
 
                     Icon(
                         Icons.Default.Close,
                         contentDescription = "ลบ",
-                        tint = Color.LightGray,
+                        tint = Color.Gray,
                         modifier = Modifier
-                            .size(18.dp)
+                            .size(20.dp)
                             .clickable { onRemove(pdf) }
                     )
                 }
