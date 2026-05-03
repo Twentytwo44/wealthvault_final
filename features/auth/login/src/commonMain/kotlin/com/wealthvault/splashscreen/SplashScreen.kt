@@ -13,7 +13,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.introduction.ui.IntroScreen
 import com.wealthvault.login.ui.LoginScreen
 import com.wealthvault.navigation.MainScreen
 
@@ -28,7 +27,7 @@ class SplashScreen : Screen {
         LaunchedEffect(state) {
             when (state) {
                 is SplashState.GoToLogin -> navigator.replaceAll(LoginScreen())
-                is SplashState.GoToIntro -> navigator.replaceAll(IntroScreen())
+//                is SplashState.GoToIntro -> navigator.replaceAll(IntroScreen())
                 is SplashState.GoToMain -> navigator.replaceAll(MainScreen())
                 else -> {} // Loading
             }

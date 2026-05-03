@@ -28,7 +28,7 @@ object LoginModule {
 
         factory { LoginUseCase(get(),get(),get() )}
 
-        factory { LoginScreenModel(get(),get(),get(),get(),get()) }
+        factory { LoginScreenModel(get(),get(),get(),get(),get(),get()) }
 
         factory { RegisterDeviceDataSource(get()) }
         single<RegisterDeviceRepositoryImpl>{

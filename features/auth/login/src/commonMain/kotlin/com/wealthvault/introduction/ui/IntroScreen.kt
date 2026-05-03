@@ -33,6 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.WvBgGradientEnd
 import com.wealthvault.core.theme.WvBgGradientStart
@@ -44,10 +46,12 @@ import kotlinx.coroutines.launch
 class IntroScreen() : Screen {
     @Composable
     override fun Content(){
+        val navigator = LocalNavigator.currentOrThrow
+
         IntroContent(
             onBackClick = {},
             onFinish = {
-
+                navigator.push(IntroQuestionScreen())
             }
         )
     }

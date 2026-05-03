@@ -65,8 +65,11 @@ import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientStart
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.forgetpassword.ui.ForgetPasswordScreen
+import com.wealthvault.introduction.ui.IntroScreen
 import com.wealthvault.main.SharedScreen
+import com.wealthvault.navigation.MainScreen
 import com.wealthvault.register.ui.RegisterScreen
+import com.wealthvault.splashscreen.SplashState
 import org.jetbrains.compose.resources.painterResource
 
 class LoginScreen() : Screen {
@@ -89,8 +92,12 @@ class LoginScreen() : Screen {
             isLoading = screenModel.isLoading,
             errorMessage = screenModel.errorMessage,
             onLoginClick = {
-                screenModel.onLoginClick {
-                    navigator.replaceAll(mainScreen)
+                screenModel.onLoginClick { state ->
+                    when (state) {
+                        is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
+                        is LoginState.GoToMain -> navigator.replaceAll(MainScreen()) // หรือ SharedScreen.Main
+                        else -> {}
+                    }
                 }
                 screenModel.onGetFCMToken()
             },

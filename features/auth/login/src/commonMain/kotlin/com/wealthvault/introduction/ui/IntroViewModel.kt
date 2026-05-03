@@ -1,65 +1,69 @@
-package com.wealthvault.login.ui
+package com.wealthvault.introduction.ui
 
-//class LoginScreenModel(
-//    private val loginUseCase: LoginUseCase
-//) : ScreenModel {
-//
-//    // UI State
-//    var username by mutableStateOf("")
-//    var password by mutableStateOf("")
-//    var isLoading by mutableStateOf(false)
-//    var errorMessage by mutableStateOf<String?>(null)
-//
-//
-//    fun onLoginClick(onSuccess: () -> Unit) {
-//        println("🚀 [LoginScreenModel] onLoginClick triggered")
-//
-//        if (username.isBlank() || password.isBlank()) {
-//            errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"
-//            return
-//        }
-//
-//        screenModelScope.launch {
-//            isLoading = true
-//            errorMessage = null
-//
-//            val request = LoginRequest(username, password)
-//
-//            // ✅ แก้ไข: เรียกใช้ loginUseCase โดยส่ง request เข้าไปตรงๆ
-//            // การเรียก loginUseCase(request) จะไปเรียก invoke operator ที่ส่งต่อไปยัง execute ให้อัตโนมัติ
-//            loginUseCase(request).collect { flowResult ->
-//                when (flowResult) {
-//                    // 1. จัดการเมื่อเริ่มทำงาน (Loading)
-//                    is FlowResult.Start -> {
-//                        println("⏳ [LoginScreenModel] UseCase Started...")
-//                        isLoading = true
-//                        errorMessage = null
-//                    }
-//
-//                    // 2. จัดการเมื่อทำงานสำเร็จ
-//                    is FlowResult.Continue -> {
-//                        if (flowResult.data) {
-//                            println("🎉 [LoginScreenModel] Login Success!")
-//                            isLoading = false
-//                            onSuccess()
-//                        }
-//                    }
-//
-//                    // 3. จัดการเมื่อเกิด Error
-//                    is FlowResult.Failure -> {
-//                        println("❌ [LoginScreenModel] UseCase Error: ${flowResult.cause?.message}")
-//                        isLoading = false
-//                        errorMessage = flowResult.cause?.message ?: "การเข้าสู่ระบบล้มเหลว"
-//                    }
-//
-//                    // 4. จัดการเมื่อจบการทำงาน (ไม่ว่าจะสำเร็จหรือพัง)
-//                    is FlowResult.Ended -> {
-//                        println("🏁 [LoginScreenModel] UseCase Finished.")
-//                        // ปกติเรามักจะเช็ค isLoading = false ที่นี่เพื่อความชัวร์
-//                        isLoading = false
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
+import com.wealthvault.introduction.data.IntroRepositoryImpl
+import com.wealthvault.`user-api`.model.UpdateUserDataRequest
+import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
+
+class IntroScreenModel(
+    private val repository: IntroRepositoryImpl
+) : ScreenModel {
+
+    // --- UI State (Form Data) ---
+    var firstName by mutableStateOf("")
+    var lastName by mutableStateOf("")
+    var phoneNum by mutableStateOf("")
+    var birthday by mutableStateOf("") // แนะนำ Format: YYYY-MM-DD
+    var picture by mutableStateOf<ByteArray?>(null) // เก็บก้อนข้อมูลรูปภาพ
+
+    // --- UI State (Status) ---
+    var isLoading by mutableStateOf(false)
+    var errorMessage by mutableStateOf<String?>(null)
+
+    // ฟังก์ชันอัปเดตข้อมูล
+    fun updateProfile(onSuccess: () -> Unit) {
+        if (firstName.isBlank() || lastName.isBlank() || phoneNum.isBlank() || birthday.isBlank()) {
+            errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"
+            return
+        }
+
+        screenModelScope.launch {
+            isLoading = true
+            errorMessage = null
+
+            val request = UpdateUserDataRequest(
+                firstName = firstName,
+                lastName = lastName,
+                phoneNumber = phoneNum,
+                profileImage = picture,
+                birthday = birthday,
+                username = "",
+                sharedEnabled = null,
+                sharedAge = null
+            )
+
+            // 🚀 ยิง API และรอจนกว่าจะได้ Result (suspend function)
+            val result = repository.updateUser(request)
+
+            // เมื่อได้ Result มาแล้วค่อยจัดการต่อ
+            result.onSuccess {
+                isLoading = false
+                println("✅ Update Success")
+                onSuccess() // 🚩 เรียก callback เพื่อเปลี่ยนหน้า "หลังจาก" API สำเร็จแล้วเท่านั้น
+            }.onFailure { e ->
+                if (e is CancellationException) {
+                    println("⚠️ Job was cancelled, but we might not want to show this as an error to user")
+                } else {
+                    isLoading = false
+                    errorMessage = e.message ?: "เกิดข้อผิดพลาดในการอัปเดตข้อมูล"
+                    println("❌ Update Failure: ${e.message}")
+                }
+            }
+        }
+    }
+}

@@ -1,19 +1,16 @@
 package com.wealthvault.introduction.data
 
-import com.wealthvault.`auth-api`.model.LoginRequest
-import com.wealthvault.data_store.TokenStore
-import com.wealthvault.login.data.AuthNetworkDataSource
+import com.wealthvault.`user-api`.model.UpdateUserData
+import com.wealthvault.`user-api`.model.UpdateUserDataRequest
 
 class IntroRepositoryImpl(
-    private val networkDataSource: AuthNetworkDataSource,
-    private val localDataSource: TokenStore // สำหรับเซฟ Token ลงเครื่อง
+    private val networkDataSource: IntroNetworkDataSource,
+
 ) {
-    suspend fun login(request: LoginRequest): Result<Unit> {
-        return networkDataSource.login(request).map { token ->
-//            localDataSource.saveTokens(token) // บันทึกเก็บไว้ใช้ตรวจสอบสถานะ
-        }
+    suspend fun updateUser(request: UpdateUserDataRequest): Result<UpdateUserData> {
+        return networkDataSource.updateUser(request)
     }
 
-    // สร้าง Flow เพื่อตรวจสอบสถานะล็อกอิน (เลียนแบบ Flow ใน UseCase เดิม)
+
 
 }

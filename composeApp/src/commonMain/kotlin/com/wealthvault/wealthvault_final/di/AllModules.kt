@@ -8,6 +8,7 @@ import com.wealthvault.data_store.di.DataStoreModule
 import com.wealthvault.google_auth.di.GoogleAuthMainModule
 import com.wealthvault.group_api.di.GroupApiModule
 import com.wealthvault.insurance_api.di.InsuranceApiModule
+import com.wealthvault.introduction.di.IntroModule
 import com.wealthvault.investment_api.di.InvestmentApiModule
 import com.wealthvault.land_api.di.LandApiModule
 import com.wealthvault.liability_api.di.LiabilityApiModule
@@ -61,6 +62,7 @@ object AllModules {
         add(NotificationApiModule.allModules)
         add(NotificationModule.allModules)
         add(GetUserModule.allModules)
+        add(IntroModule.allModules)
 
 
 

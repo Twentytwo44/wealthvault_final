@@ -55,6 +55,14 @@ kotlin {
 
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
 
+                implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
+                implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
+
+                // 🌟 เช็คว่าตัวสะกดถูกต้องเป๊ะๆ
+                implementation("io.github.onseok:peekaboo-image-picker:0.5.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+
+
 
 
 
