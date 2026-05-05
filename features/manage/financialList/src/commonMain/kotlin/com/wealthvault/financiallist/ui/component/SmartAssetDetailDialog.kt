@@ -99,14 +99,14 @@ fun SmartAssetDetailDialog(
             is BankAccountData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = itemData.name, updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name) },
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") },
                     onEdit = { onEdit(itemData) }, // 🌟 ส่งค่าออกไป
                     onShare = onShare
                 ) {
                     DetailRow("ธนาคาร", itemData.bankName)
                     DetailRow("เลขบัญชี", itemData.bankAccount)
                     DetailRow("ประเภท", itemData.type)
-                    DetailRow("ยอดเงิน", "${formatAmount(itemData.amount)} บาท", isHighlight = true)
+                    DetailRow("ยอดเงิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
@@ -195,15 +195,41 @@ fun SmartAssetDetailDialog(
             }
 
             is LiabilityIdData -> {
+                // 🌟 ดักค่า null ให้ name ด้วย เผื่อมันตั้งเป็น String? ไว้
+                val safeName = itemData.name ?: "-"
+
                 DetailDialog(
-                    subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") },
-                    onEdit = { onEdit(itemData) }, // 🌟 ส่งค่าออกไป
+                    subtitle = subtitleText, title = safeName, updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(safeName) },
+                    onEdit = { onEdit(itemData) },
                     onShare = onShare
                 ) {
+                    val isLoan = itemData.type == "LIABILITY_TYPE_LOAN"
+
                     DetailRow("เจ้าหนี้", itemData.creditor)
-                    DetailRow("ประเภท", if (itemData.type == "LIABILITY_TYPE_LOAN") "หนี้สิน" else "รายจ่าย")
+                    DetailRow("ประเภท", if (isLoan) "หนี้สิน" else "รายจ่าย")
+
+                    // 🌟 แก้เส้นแดงที่ 1: เติม ?: 0.0 เพื่อให้ formatAmount ทำงานได้
                     DetailRow("เงินต้น/ยอดหนี้", "${formatAmount(itemData.principal ?: 0.0)} บาท", isHighlight = true)
+
+                    // 🌟 แก้เส้นแดงที่ 2: ดึงค่ามาใส่ตัวแปรก่อน (ดัก null เป็น 0.0) Kotlin จะได้ไม่งง
+                    val rate = itemData.interestRate ?: 0.0
+                    if (rate > 0) {
+                        DetailRow(label = "ดอกเบี้ย", value = "$rate %")
+                    }
+
+                    DetailRow(
+                        label = "วันที่เริ่มต้น",
+                        value = if (!itemData.startedAt.isNullOrBlank()) formatThaiDate(itemData.startedAt) else "-"
+                    )
+
+                    if (isLoan) { // ถ้าเป็นหนี้สินถึงโชว์วันสิ้นสุด (รายจ่ายอาจไม่มี)
+                        DetailRow(
+                            label = "วันที่สิ้นสุด",
+                            value = if (!itemData.endedAt.isNullOrBlank()) formatThaiDate(itemData.endedAt) else "-"
+                        )
+                    }
+
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }

@@ -1,39 +1,37 @@
 package com.wealthvault_final.`financial-asset`.ui.insurance
 
+// 🌟 Import Theme ของแอป
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +39,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
@@ -48,14 +47,15 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.wealthvault.core.utils.getScreenModel
-
-// 🌟 Import Theme ของแอป
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
+import com.wealthvault.core.generated.resources.ic_common_calendar
 import com.wealthvault.core.theme.LightBg
-import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
-
+import com.wealthvault.core.utils.formatThaiDate
+import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.model.InsuranceModel
@@ -64,9 +64,11 @@ import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInp
 import com.wealthvault_final.`financial-asset`.ui.components.maptype.insuranceTypes
 import com.wealthvault_final.`financial-asset`.ui.insurance.viewmodel.InsuranceScreenModel
 import com.wealthvault_final.`financial-asset`.ui.share.ShareAssetScreen
+import com.wealthvault_final.`financial-obligations`.ui.expense.CustomTextField
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 
 class InsuranceFormScreen : Screen {
     @Composable
@@ -125,18 +127,27 @@ fun InsuranceInputForm(
         modifier = Modifier.fillMaxSize(),
         containerColor = LightBg, // 🌟 ใช้ LightBg
         topBar = {
-            Column(modifier = Modifier.statusBarsPadding()) { // 🌟 กันขอบขาวด้านบน
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-                    title = {
-                        Text("ข้อมูลประกัน", color = LightPrimary, style = MaterialTheme.typography.titleLarge)
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = LightPrimary)
-                        }
-                    }
-                )
+            Column(modifier = Modifier.statusBarsPadding()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "ข้อมูลประกัน",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LightPrimary
+                    )
+                }
             }
         },
         bottomBar = {
@@ -207,10 +218,16 @@ fun InsuranceInputForm(
                 value = conDate,
                 onValueChange = { },
                 label = "วันที่เริ่มสัญญา*",
-                placeholder = "วว/ดด/ปปปป",
+                placeholder = "เลือกวันที่", // 🌟 ปรับ placeholder
                 readOnly = true,
                 trailingIcon = {
-                    Icon(Icons.Default.DateRange, contentDescription = "Calendar", tint = LightPrimary)
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_calendar),
+                        contentDescription = "Calendar",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                    )
                 },
                 onClick = { showConDatePicker = true }
             )
@@ -220,10 +237,16 @@ fun InsuranceInputForm(
                 value = expDate,
                 onValueChange = { },
                 label = "วันหมดอายุ*",
-                placeholder = "วว/ดด/ปปปป",
+                placeholder = "เลือกวันที่", // 🌟 ปรับ placeholder
                 readOnly = true,
                 trailingIcon = {
-                    Icon(Icons.Default.DateRange, contentDescription = "Calendar", tint = LightPrimary)
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_calendar),
+                        contentDescription = "Calendar",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                    )
                 },
                 onClick = { showExpDatePicker = true }
             )
@@ -257,8 +280,11 @@ fun InsuranceInputForm(
                             val month = localDate.monthNumber.toString().padStart(2, '0')
                             val engYear = localDate.year.toString()
 
-                            apiConDate = "$engYear-$month-$day" // สำหรับส่ง Backend
-                            conDate = "$day/$month/${localDate.year + 543}" // โชว์บน UI เป็น พ.ศ.
+                            // 1. เก็บค่า YYYY-MM-DD ไว้ส่ง API เบื้องหลัง
+                            apiConDate = "$engYear-$month-$day"
+
+                            // 2. เอา apiConDate โยนเข้า formatThaiDate ให้แสดงผลสวยงามบนหน้าจอ 🌟
+                            conDate = formatThaiDate(apiConDate)
                         }
                         showConDatePicker = false
                     }) {
@@ -297,8 +323,11 @@ fun InsuranceInputForm(
                             val month = localDate.monthNumber.toString().padStart(2, '0')
                             val engYear = localDate.year.toString()
 
-                            apiExpDate = "$engYear-$month-$day" // สำหรับส่ง Backend
-                            expDate = "$day/$month/${localDate.year + 543}" // โชว์บน UI เป็น พ.ศ.
+                            // 1. เก็บค่า YYYY-MM-DD ไว้ส่ง API เบื้องหลัง
+                            apiExpDate = "$engYear-$month-$day"
+
+                            // 2. เอา apiExpDate โยนเข้า formatThaiDate ให้แสดงผลสวยงามบนหน้าจอ 🌟
+                            expDate = formatThaiDate(apiExpDate)
                         }
                         showExpDatePicker = false
                     }) {

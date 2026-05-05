@@ -15,23 +15,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +39,10 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
+import com.wealthvault.core.generated.resources.ic_common_solid_down
+import com.wealthvault.core.generated.resources.ic_common_solid_up
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
@@ -51,6 +50,7 @@ import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.LightText
 import com.wealthvault_final.`financial-asset`.ui.realestate.building.BuildingFormScreen
 import com.wealthvault_final.`financial-asset`.ui.realestate.land.LandFormScreen
+import org.jetbrains.compose.resources.painterResource
 
 class RealEstateScreen : Screen {
     @Composable
@@ -72,47 +72,70 @@ fun RealEstateContent(
     onClickToLand: () -> Unit = {},
     onClickToBuilding: () -> Unit = {},
 ) {
+    // เก็บตัวเลือกไว้
+    val options = listOf("บ้าน ตึก อาคาร", "ที่ดิน")
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf(options[0]) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = LightBg, // 🌟 ใช้สีพื้นหลังหลัก
         topBar = {
             Column(modifier = Modifier.statusBarsPadding()) {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Color.Transparent
-                    ),
-                    title = {
-                        Text(
-                            "ข้อมูลอสังหาริมทรัพย์",
-                            color = LightPrimary,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = LightPrimary)
-                        }
-                    }
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp ถอด IconButton ออก
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "ข้อมูลอสังหาริมทรัพย์",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LightPrimary
+                    )
+                }
             }
         },
         bottomBar = {
-            // 🌟 ปรับปรุงปุ่มให้สูง 50.dp และโค้ง 12.dp ตามมาตรฐาน
-            Box(modifier = Modifier.navigationBarsPadding().padding(24.dp)) {
-                // ย้ายปุ่มลงมาข้างล่างเพื่อให้กดง่าย
+            // 🌟 2. ย้ายปุ่ม ต่อไป มาไว้ใน bottomBar เพื่อความเป๊ะของ Layout ขอบซ้ายขวาล่าง 24.dp
+            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 24.dp)) {
+                Button(
+                    onClick = {
+                        if (selectedOption == "บ้าน ตึก อาคาร") {
+                            onClickToBuilding()
+                        } else {
+                            onClickToLand()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp), // สูง 50.dp
+                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+                    shape = RoundedCornerShape(12.dp) // โค้ง 12.dp
+                ) {
+                    Text(
+                        text = "ต่อไป",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White
+                    )
+                }
             }
         }
     ) { paddingValues ->
-        // เก็บตัวเลือกไว้
-        val options = listOf("บ้าน ตึก อาคาร", "ที่ดิน")
-        var expanded by remember { mutableStateOf(false) }
-        var selectedOption by remember { mutableStateOf(options[0]) }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp) // 🌟 ขอบเนื้อหา 24.dp
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -146,9 +169,11 @@ fun RealEstateContent(
                         color = LightText
                     )
                     Icon(
-                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        painter  = if (expanded) painterResource(Res.drawable.ic_common_solid_up) else painterResource(Res.drawable.ic_common_solid_down),
                         contentDescription = null,
-                        tint = LightPrimary
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(18.dp)
                     )
                 }
 
@@ -156,7 +181,8 @@ fun RealEstateContent(
                 if (expanded) {
                     options.forEach { option ->
                         if (option != selectedOption) {
-                            Divider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg, thickness = 1.dp)
+                            // 🌟 3. ใช้ HorizontalDivider แทน Divider ตัวเก่า
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg, thickness = 1.dp)
                             Text(
                                 text = option,
                                 style = MaterialTheme.typography.bodyLarge,
@@ -173,32 +199,6 @@ fun RealEstateContent(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // 🌟 ปุ่มยืนยัน (ปรับดีไซน์ใหม่)
-            Button(
-                onClick = {
-                    if (selectedOption == "บ้าน ตึก อาคาร") {
-                        onClickToBuilding()
-                    } else {
-                        onClickToLand()
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp), // สูง 50.dp
-                colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
-                shape = RoundedCornerShape(12.dp) // โค้ง 12.dp
-            ) {
-                Text(
-                    text = "ต่อไป",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp).navigationBarsPadding())
         }
     }
 }

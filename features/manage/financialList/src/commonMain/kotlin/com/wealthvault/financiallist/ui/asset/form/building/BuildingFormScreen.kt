@@ -5,6 +5,7 @@ package com.wealthvault.financiallist.ui.asset.form.building
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,18 +18,14 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,7 +36,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -57,6 +53,10 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
+import com.wealthvault.core.generated.resources.ic_common_bin
+import com.wealthvault.core.generated.resources.ic_common_plus
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
@@ -74,6 +74,7 @@ import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
 import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
 import com.wealthvault_final.`financial-asset`.ui.components.maptype.buildingTypes
+import org.jetbrains.compose.resources.painterResource
 
 class BuildingFormScreen(val id: String, val buildingData: BuildingModel) : Screen {
     @Composable
@@ -139,15 +140,27 @@ fun BuildingInputForm(
         containerColor = LightBg,
         topBar = {
             Column(modifier = Modifier.statusBarsPadding()) {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-                    title = { Text("ข้อมูลอาคาร ตึก", color = LightPrimary, style = MaterialTheme.typography.titleLarge) },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = LightPrimary)
-                        }
-                    }
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    // 🌟 1. ปรับ Padding เป็น 24.dp ให้ขอบเท่ากัน
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
+                ) {
+                    // 🌟 ถอด IconButton ออก ใช้ Icon + clickable แทน เพื่อแก้ปัญหาขอบดัน
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "ข้อมูลอาคาร ตึก",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LightPrimary
+                    )
+                }
             }
         },
         bottomBar = {
@@ -218,7 +231,7 @@ fun BuildingInputForm(
             ) {
                 Text("อ้างอิงข้อมูลที่ดิน", style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
                 IconButton(onClick = { showLandSheet = true }) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = LightPrimary)
+                    Icon(painter = painterResource(Res.drawable.ic_common_plus), contentDescription = null, tint = LightPrimary)
                 }
             }
 
@@ -240,7 +253,7 @@ fun BuildingInputForm(
                         }
                         // 🌟 แก้ BUG: ลบออกจาก currentBuilding เพื่อให้ UI อัปเดตทันที
                         IconButton(onClick = { currentBuilding.remove(land) }, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red.copy(alpha = 0.6f))
+                            Icon(painter = painterResource(Res.drawable.ic_common_bin), contentDescription = null, tint = Color.Red.copy(alpha = 0.6f))
                         }
                     }
                 }
@@ -263,7 +276,7 @@ fun BuildingInputForm(
             ) {
                 Text("อ้างอิงข้อมูลประกัน", style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
                 IconButton(onClick = { showInsSheet = true }) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = LightPrimary)
+                    Icon(painter = painterResource(Res.drawable.ic_common_plus), contentDescription = null, tint = LightPrimary)
                 }
             }
 
@@ -285,7 +298,7 @@ fun BuildingInputForm(
                         }
                         // 🌟 แก้ BUG: ลบออกจาก currentInsBuilding เพื่อให้ UI อัปเดตทันที
                         IconButton(onClick = { currentInsBuilding.remove(ins) }, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red.copy(alpha = 0.6f))
+                            Icon(painter = painterResource(Res.drawable.ic_common_bin), contentDescription = null, tint = Color.Red.copy(alpha = 0.6f))
                         }
                     }
                 }

@@ -18,12 +18,12 @@ data class BuildingIdData(
     @SerialName("user_id") val userId: String? = null,
     @SerialName("type") val type: String? = null,
     @SerialName("name") val name: String? = null,
-    @SerialName("area") val area: Double? = null, // 🌟 เปลี่ยนเป็น Double
-    @SerialName("amount") val amount: Double? = null, // 🌟 เปลี่ยนเป็น Double
+    @SerialName("area") val area: Double? = null,
+    @SerialName("amount") val amount: Double? = null,
     @SerialName("description") val description: String? = null,
     @SerialName("location") val location: LocationDataById? = null,
     @SerialName("ins") val ins: List<InsDataById>? = emptyList(),
-    @SerialName("ref") val referenceIds: List<RefDataById>? = emptyList(), // 🌟 ตาม Postman
+    @SerialName("ref") val referenceIds: List<RefDataById>? = emptyList(),
 
     // 🌟 พระเอกของเรา เพิ่มตรงนี้ให้โหลดรูปได้
     @SerialName("files") val files: List<FileDataModel>? = emptyList(),

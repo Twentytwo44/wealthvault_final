@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -52,6 +51,8 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_plus
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.financiallist.ui.shareasset.component.AddEmailContent
 import com.wealthvault.financiallist.ui.shareasset.component.FriendSelectionList
@@ -61,6 +62,7 @@ import com.wealthvault.financiallist.ui.shareasset.model.GroupTargetModel
 import com.wealthvault.financiallist.ui.shareasset.model.ShareInfo
 import com.wealthvault.financiallist.ui.shareasset.model.ShareTo
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 
 val WealthVaultBrown = Color(0xFFB37E61)
 
@@ -366,7 +368,7 @@ fun SectionHeader(
             }
         }
         IconButton(onClick = onAddClick) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = WealthVaultBrown, modifier = Modifier.size(28.dp))
+            Icon(painter = painterResource(Res.drawable.ic_common_plus), contentDescription = null, tint = WealthVaultBrown, modifier = Modifier.size(28.dp))
         }
     }
 }

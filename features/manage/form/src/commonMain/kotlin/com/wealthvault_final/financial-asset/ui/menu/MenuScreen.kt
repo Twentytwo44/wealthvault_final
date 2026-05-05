@@ -1,9 +1,9 @@
 package com.wealthvault_final.`financial-asset`.ui.menu
 
 // 🌟 Import Theme และ Resources
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,14 +23,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -51,6 +49,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.bookbank
 import com.wealthvault.core.generated.resources.cashgold
+import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.insurance
 import com.wealthvault.core.generated.resources.land
 import com.wealthvault.core.generated.resources.stock
@@ -74,7 +73,6 @@ data class AssetCategory(
     val borderColor: Color
 )
 
-// 🌟 คง UI Card แบบเดิมตามที่ระบุ
 val assetCategories = listOf(
     AssetCategory(1, "บัญชีเงินฝาก", Res.drawable.bookbank, Color(0xFFE3F2FD), Color(0xFF2196F3)),
     AssetCategory(2, "เงินสด ทองคำ", Res.drawable.cashgold, Color(0xFFF1F8E9), Color(0xFF8BC34A)),
@@ -112,19 +110,25 @@ fun MenuContent(
     var selectedId by remember { mutableStateOf<Int?>(1) }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(), // 🌟 ลบ Padding ตรงนี้ออกเพื่อแก้ขอบขาว
+        modifier = Modifier.fillMaxSize(),
         containerColor = LightBg,
         topBar = {
-            // 🌟 ใส่ statusBarsPadding ที่ TopBar แทน
             Column(modifier = Modifier.statusBarsPadding()) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    // 🌟 1. ปรับ Padding เป็น 24.dp ให้ขอบเท่ากัน
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
                 ) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = LightPrimary)
-                    }
-                    Spacer(modifier = Modifier.width(4.dp))
+                    // 🌟 ถอด IconButton ออก ใช้ Icon + clickable แทน เพื่อแก้ปัญหาขอบดัน
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
                     Text(
                         text = "ประเภททรัพย์สิน",
                         style = MaterialTheme.typography.titleLarge,
@@ -134,12 +138,12 @@ fun MenuContent(
             }
         },
         bottomBar = {
-            // 🌟 ใส่ navigationBarsPadding ที่ปุ่ม เพื่อให้เว้นระยะจากขอบล่างพอดี
-            Box(modifier = Modifier.navigationBarsPadding().padding(16.dp)) {
+            // 🌟 2. ปรับ Padding ของปุ่มเป็น 24.dp
+            Box(modifier = Modifier.navigationBarsPadding().padding(horizontal = 24.dp, vertical = 24.dp)) {
                 Button(
                     onClick = { onNextClick(assetCategories.find { it.id == selectedId }) },
-                    modifier = Modifier.fillMaxWidth().height(50.dp), // 🌟 สูง 50.dp ตามสั่ง
-                    shape = RoundedCornerShape(12.dp), // 🌟 โค้ง 12.dp ตามสั่ง
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     enabled = selectedId != null
                 ) {
@@ -152,8 +156,9 @@ fun MenuContent(
             columns = GridCells.Fixed(2),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues) // 🌟 ใช้ paddingValues เพื่อไม่ให้ทับกับ Top/Bottom bar
-                .padding(horizontal = 16.dp),
+                .padding(paddingValues)
+                // 🌟 3. ปรับ Padding ขอบซ้ายขวาของการ์ดเป็น 24.dp
+                .padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)

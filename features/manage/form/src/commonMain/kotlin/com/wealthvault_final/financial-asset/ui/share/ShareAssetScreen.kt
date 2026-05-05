@@ -22,13 +22,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -70,6 +67,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_auth_email
+import com.wealthvault.core.generated.resources.ic_common_bin
+import com.wealthvault.core.generated.resources.ic_common_plus
+import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.group_api.model.GetAllGroupData
 import com.wealthvault.`user-api`.model.FriendData
@@ -95,6 +97,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 
 val WealthVaultBrown = Color(0xFFB37E61)
 val WealthVaultBackground = Color(0xFFFFF8F3)
@@ -406,7 +409,11 @@ fun SectionHeader(
             }
         }
         IconButton(onClick = onAddClick) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = WealthVaultBrown, modifier = Modifier.size(28.dp))
+            Icon(
+                painter = painterResource(Res.drawable.ic_common_plus),
+                contentDescription = null,
+                tint = WealthVaultBrown,
+                modifier = Modifier.size(28.dp))
         }
     }
 }
@@ -433,7 +440,7 @@ fun ShareItemWithDelete(
                 modifier = Modifier.size(48.dp).background(Color(0xFFD9D9D9), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (data.userId == "") Icon(Icons.Default.Email, null, tint = WealthVaultBrown)
+                if (data.userId == "") Icon(painter = painterResource(Res.drawable.ic_auth_email), null, tint = WealthVaultBrown)
                 else Icon(Icons.Default.Groups, null, tint = Color.Gray)
             }
 
@@ -448,9 +455,9 @@ fun ShareItemWithDelete(
             // ปุ่มลบ
             IconButton(onClick = onDelete) { // ✅ เรียกใช้ onDelete
                 Icon(
-                    imageVector = Icons.Outlined.Delete,
+                    painter = painterResource(Res.drawable.ic_common_bin),
                     contentDescription = null,
-                    tint = Color(0xFFD32F2F).copy(alpha = 0.7f)
+                    tint = RedErr
                 )
             }
         }

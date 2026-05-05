@@ -1,8 +1,11 @@
 package com.wealthvault_final.`financial-asset`.ui.cash.summary
 
+// 🌟 Import ธีมของแอป และ Utils
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,9 +27,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Person
@@ -34,16 +34,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,18 +58,20 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
-
-// 🌟 Import ธีมของแอป และ Utils
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
+import com.wealthvault.core.generated.resources.ic_common_pdf
+import com.wealthvault.core.generated.resources.ic_form_photo
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
-
 import com.wealthvault_final.`financial-asset`.model.CashModel
 import com.wealthvault_final.`financial-asset`.model.ShareInfo
 import com.wealthvault_final.`financial-asset`.model.ShareTo
+import org.jetbrains.compose.resources.painterResource
 
 data class CashSummaryScreen(val request: CashModel, val shareTo: ShareTo) : Screen {
 
@@ -117,19 +116,28 @@ fun SummaryContent(
         modifier = Modifier.fillMaxSize(),
         containerColor = LightBg,
         topBar = {
-            Column(modifier = Modifier.statusBarsPadding()) {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-                    title = {
-                        Text("สรุป", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = LightPrimary)
-                        }
+                Column(modifier = Modifier.statusBarsPadding()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
+                        modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_common_back),
+                            contentDescription = "Back",
+                            tint = LightPrimary,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable { onBackClick() }
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = "สรุป",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = LightPrimary
+                        )
                     }
-                )
-            }
+                }
         },
         bottomBar = {
             Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
@@ -188,10 +196,10 @@ fun SummaryCard(data: CashModel) {
             // 🌟 ปรับ Label และใช้ formatAmount
             SummaryRow("ชื่อรายการ", data.cashName)
             SummaryRow("มูลค่า / จำนวน", "${formatAmount(data.amount)} บาท")
-            SummaryRow("คำอธิบาย", data.description.ifBlank { "ไม่มีคำอธิบาย" })
+            SummaryRow("คำอธิบาย", data.description.ifBlank { "-" })
 
             Spacer(modifier = Modifier.height(24.dp))
-            Text("ข้อมูลอ้างอิง", style = MaterialTheme.typography.bodyMedium, color = LightText, fontWeight = FontWeight.Bold)
+            Text("ข้อมูลอ้างอิง (ไฟล์แนบ)", style = MaterialTheme.typography.bodyMedium, color = LightPrimary, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
 
             if (data.attachments.isEmpty()) {
@@ -214,7 +222,7 @@ fun SummaryCard(data: CashModel) {
                         ) {
                             if (isPdf) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(Icons.Default.PictureAsPdf, contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(28.dp))
+                                    Icon(painter = painterResource(Res.drawable.ic_common_pdf), contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(28.dp))
                                     Text(img.name, style = MaterialTheme.typography.labelSmall, color = LightText, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 4.dp))
                                 }
                             } else {
@@ -222,7 +230,7 @@ fun SummaryCard(data: CashModel) {
                                 if (imageData != null) {
                                     AsyncImage(model = imageData, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                                 } else {
-                                    Icon(Icons.Default.Image, contentDescription = null, tint = LightPrimary.copy(alpha = 0.3f), modifier = Modifier.size(28.dp))
+                                    Icon(painter = painterResource(Res.drawable.ic_form_photo), contentDescription = null, tint = LightPrimary.copy(alpha = 0.3f), modifier = Modifier.size(28.dp))
                                 }
                             }
                         }

@@ -1,11 +1,11 @@
 package com.wealthvault_final.`financial-obligations`.ui.liability
 
 // 🌟 Import Theme ของแอป
-
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,26 +14,24 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +39,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
@@ -56,12 +55,11 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.utils.formatThaiDate // 🌟 Import ฟังก์ชันแปลงวันที่แบบไทย
 import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
-import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
-import com.wealthvault_final.`financial-asset`.ui.components.maptype.liabilityTypes
 import com.wealthvault_final.`financial-asset`.ui.share.ShareAssetScreen
 import com.wealthvault_final.`financial-obligations`.model.LiabilityModel
 import com.wealthvault_final.`financial-obligations`.ui.liability.viewmodel.LiabilityScreenModel
@@ -93,7 +91,6 @@ fun LiabilityInputForm(
     onNextClick: (LiabilityModel) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf("") }
 
     // ยอดเงิน และ ดอกเบี้ย
     var principal by remember { mutableStateOf("") }
@@ -116,31 +113,33 @@ fun LiabilityInputForm(
     val attachments = remember { mutableStateListOf<Attachment>() }
     val filePicker = rememberFilePicker { newFiles -> attachments.addAll(newFiles) }
 
-    // 🌟 เช็คข้อมูลจำเป็น (ต้องกรอกครบถึงจะไปต่อได้)
-    val isFormValid = name.isNotBlank() && type.isNotBlank() && principal.isNotBlank() && interestRate.isNotBlank() && apiStartedAt.isNotBlank()
+    // 🌟 เช็คข้อมูลจำเป็น (เอาการเช็ค type ออกแล้ว เพราะเราล็อกค่าไว้แล้ว)
+    val isFormValid = name.isNotBlank() && principal.isNotBlank() && interestRate.isNotBlank() && apiStartedAt.isNotBlank()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = LightBg,
         topBar = {
             Column(modifier = Modifier.statusBarsPadding()) {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-                    title = {
-                        Text("ข้อมูลหนี้สิน", color = LightPrimary, style = MaterialTheme.typography.titleLarge)
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_common_back),
-                                contentDescription = "Back",
-                                tint = LightPrimary,
-                                modifier = Modifier
-                                    .size(24.dp)
-                            )
-                        }
-                    }
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "ข้อมูลหนี้สิน",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LightPrimary
+                    )
+                }
             }
         },
         bottomBar = {
@@ -149,11 +148,11 @@ fun LiabilityInputForm(
                     onClick = {
                         val data = LiabilityModel(
                             name = name,
-                            type = type,
+                            type = "LIABILITY_TYPE_LOAN", // 🌟 ฟิกซ์ค่านี้ส่งไปเลย
                             principal = principal.toDoubleOrNull() ?: 0.0,
-                            interestRate = interestRate, // โยนแค่ตัวเลขไป
-                            startedAt = apiStartedAt, // 🌟 ส่งตัว YYYY-MM-DD ให้ Backend
-                            endedAt = apiEndedAt,     // 🌟 ส่งตัว YYYY-MM-DD ให้ Backend
+                            interestRate = interestRate,
+                            startedAt = apiStartedAt, // ส่ง YYYY-MM-DD ให้ API
+                            endedAt = apiEndedAt,     // ส่ง YYYY-MM-DD ให้ API
                             creditor = creditor,
                             description = description,
                             attachments = attachments.toList()
@@ -163,7 +162,7 @@ fun LiabilityInputForm(
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = isFormValid // 🌟 เปิดปุ่มเฉพาะตอนกรอกครบ
+                    enabled = isFormValid
                 ) {
                     Text("ต่อไป", style = MaterialTheme.typography.titleMedium, color = Color.White)
                 }
@@ -179,16 +178,8 @@ fun LiabilityInputForm(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            DropdownInput(
-                label = "ประเภทหนี้สิน/ค่าใช้จ่าย*",
-                options = liabilityTypes,
-                selectedValue = type,
-                onValueChange = { type = it }
-            )
-
             AssetTextField(value = name, onValueChange = { name = it }, label = "ชื่อรายการ*", placeholder = "กรอกชื่อรายการ")
 
-            // 🌟 Custom TextField สำหรับดอกเบี้ย (มี % ต่อท้าย + กรอกได้แค่ทศนิยม)
             CustomTextField(
                 value = interestRate,
                 onValueChange = { if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) interestRate = it },
@@ -198,7 +189,6 @@ fun LiabilityInputForm(
                 trailingIcon = { Text("%", color = LightPrimary, modifier = Modifier.padding(end = 16.dp)) }
             )
 
-            // 🌟 ยอดเงินต้น (กรอกได้แค่ทศนิยม)
             CustomTextField(
                 value = principal,
                 onValueChange = { if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) principal = it },
@@ -207,12 +197,11 @@ fun LiabilityInputForm(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            // 🌟 วันที่เริ่มต้น
             CustomTextField(
                 value = statedAt,
                 onValueChange = { },
                 label = "วันที่เริ่มต้น*",
-                placeholder = "วว/ดด/ปปปป",
+                placeholder = "เลือกวันที่",
                 readOnly = true,
                 trailingIcon = {
                     Icon(
@@ -223,15 +212,14 @@ fun LiabilityInputForm(
                             .size(24.dp)
                     )
                 },
-                onClick = { showStartDatePicker = true } // เปิดปฏิทินเมื่อกด
+                onClick = { showStartDatePicker = true }
             )
 
-            // 🌟 วันที่สิ้นสุด
             CustomTextField(
                 value = endedAt,
                 onValueChange = { },
                 label = "วันที่สิ้นสุด",
-                placeholder = "วว/ดด/ปปปป",
+                placeholder = "เลือกวันที่",
                 readOnly = true,
                 trailingIcon = {
                     Icon(
@@ -242,7 +230,7 @@ fun LiabilityInputForm(
                             .size(24.dp)
                     )
                 },
-                onClick = { showEndDatePicker = true } // เปิดปฏิทินเมื่อกด
+                onClick = { showEndDatePicker = true }
             )
 
             AssetTextField(value = creditor, onValueChange = { creditor = it }, label = "ผู้รับผิดชอบ", placeholder = "กรอกผู้รับผิดชอบ")
@@ -260,9 +248,7 @@ fun LiabilityInputForm(
             Spacer(modifier = Modifier.height(32.dp))
         }
 
-        // =====================================
         // 📅 DatePicker วันที่เริ่มต้น
-        // =====================================
         if (showStartDatePicker) {
             DatePickerDialog(
                 onDismissRequest = { showStartDatePicker = false },
@@ -276,8 +262,11 @@ fun LiabilityInputForm(
                             val month = localDate.monthNumber.toString().padStart(2, '0')
                             val engYear = localDate.year.toString()
 
-                            apiStartedAt = "$engYear-$month-$day" // สำหรับส่ง Backend
-                            statedAt = "$day/$month/${localDate.year + 543}" // โชว์เป็น พ.ศ.
+                            // 1. เก็บค่า YYYY-MM-DD ไว้ส่ง API เบื้องหลัง
+                            apiStartedAt = "$engYear-$month-$day"
+
+                            // 2. เอา apiStartedAt โยนเข้า formatThaiDate ให้แสดงผลสวยงามบนหน้าจอ 🌟
+                            statedAt = formatThaiDate(apiStartedAt)
                         }
                         showStartDatePicker = false
                     }) {
@@ -301,9 +290,7 @@ fun LiabilityInputForm(
             }
         }
 
-        // =====================================
         // 📅 DatePicker วันที่สิ้นสุด
-        // =====================================
         if (showEndDatePicker) {
             DatePickerDialog(
                 onDismissRequest = { showEndDatePicker = false },
@@ -317,8 +304,11 @@ fun LiabilityInputForm(
                             val month = localDate.monthNumber.toString().padStart(2, '0')
                             val engYear = localDate.year.toString()
 
-                            apiEndedAt = "$engYear-$month-$day" // สำหรับส่ง Backend
-                            endedAt = "$day/$month/${localDate.year + 543}" // โชว์เป็น พ.ศ.
+                            // 1. เก็บค่า YYYY-MM-DD ไว้ส่ง API เบื้องหลัง
+                            apiEndedAt = "$engYear-$month-$day"
+
+                            // 2. เอา apiEndedAt โยนเข้า formatThaiDate ให้แสดงผลสวยงามบนหน้าจอ 🌟
+                            endedAt = formatThaiDate(apiEndedAt)
                         }
                         showEndDatePicker = false
                     }) {
@@ -344,7 +334,7 @@ fun LiabilityInputForm(
     }
 }
 
-// 🌟 สร้าง Component ย่อยในไฟล์นี้เพื่อใช้ทำกล่องที่มี % และ DatePicker (เพื่อไม่ให้กระทบไฟล์กลาง)
+// 🌟 Component ย่อย CustomTextField (คงเดิม)
 @Composable
 fun CustomTextField(
     value: String,
@@ -385,7 +375,6 @@ fun CustomTextField(
                 trailingIcon = trailingIcon
             )
 
-            // 🌟 ถ้ากล่องนี้ต้องกดเพื่อเปิดปฏิทิน ให้เอา Box ใสๆ มาครอบดักคลิกไว้
             if (onClick != null) {
                 Box(
                     modifier = Modifier

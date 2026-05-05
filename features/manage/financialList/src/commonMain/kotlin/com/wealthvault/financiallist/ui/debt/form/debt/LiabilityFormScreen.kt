@@ -35,12 +35,15 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
 import com.wealthvault_final.`financial-obligations`.model.LiabilityModel
+import org.jetbrains.compose.resources.painterResource
 
 
 class LiabilityFormScreen(val id:String,val debtData: LiabilityModel) : Screen {
@@ -119,7 +122,7 @@ fun LiabilityInputForm(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color(0xFF8D6E63))
+                        Icon(painter = painterResource(Res.drawable.ic_common_back), contentDescription = null, tint = Color(0xFF8D6E63))
                     }
                 }
             )

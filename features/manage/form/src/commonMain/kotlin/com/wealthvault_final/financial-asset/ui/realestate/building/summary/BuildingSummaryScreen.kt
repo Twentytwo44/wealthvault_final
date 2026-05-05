@@ -1,10 +1,10 @@
 package com.wealthvault_final.`financial-asset`.ui.realestate.building.summary
 
 // 🌟 Import Theme และ Utils
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,24 +24,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,6 +53,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
+import com.wealthvault.core.generated.resources.ic_common_pdf
+import com.wealthvault.core.generated.resources.ic_form_photo
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
@@ -69,6 +67,7 @@ import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.model.BuildingModel
 import com.wealthvault_final.`financial-asset`.model.ShareTo
 import com.wealthvault_final.`financial-asset`.ui.components.ShareItemCard
+import org.jetbrains.compose.resources.painterResource
 
 data class BuildingSummaryScreen(val request: BuildingModel, val shareTo: ShareTo) : Screen {
 
@@ -93,7 +92,7 @@ data class BuildingSummaryScreen(val request: BuildingModel, val shareTo: ShareT
             },
             data = state.buildingRequest,
             shareInfo = state.shareTo,
-            isSaving = state.isLoading // 🌟 ส่งสถานะการโหลด
+            isSaving = state.isLoading
         )
     }
 }
@@ -112,21 +111,31 @@ fun SummaryContent(
         containerColor = LightBg,
         topBar = {
             Column(modifier = Modifier.statusBarsPadding()) {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-                    title = {
-                        Text("สรุป", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = LightPrimary)
-                        }
-                    }
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "สรุป",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LightPrimary
+                    )
+                }
             }
         },
         bottomBar = {
-            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp)) {
+            // 🌟 ปรับ Padding ของปุ่มให้เป็น horizontal = 24.dp, bottom = 24.dp
+            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 24.dp)) {
                 Button(
                     onClick = onConfirmClick,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -147,7 +156,7 @@ fun SummaryContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp) // 🌟 ขอบซ้ายขวา 24.dp
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -189,11 +198,16 @@ fun SummaryCard(data: BuildingModel) {
             HorizontalDivider(color = LightBg)
             Spacer(modifier = Modifier.height(12.dp))
 
-            SummaryRow("ที่อยู่", data.locationAddress.ifBlank { "-" })
-            SummaryRow("ตำบล / แขวง", data.locationSubDistrict.ifBlank { "-" })
-            SummaryRow("อำเภอ / เขต", data.locationDistrict.ifBlank { "-" })
-            SummaryRow("จังหวัด", data.locationProvince.ifBlank { "-" })
-            SummaryRow("รหัสไปรษณีย์", data.locationPostalCode.ifBlank { "-" })
+            // 🌟 รวมที่อยู่ทุกช่องให้เป็นบรรทัดเดียว (ถ้าช่องไหนว่าง จะถูกข้ามไปอัตโนมัติ)
+            val fullAddress = listOf(
+                data.locationAddress,
+                data.locationSubDistrict,
+                data.locationDistrict,
+                data.locationProvince,
+                data.locationPostalCode
+            ).filter { it.isNotBlank() }.joinToString(" ")
+
+            SummaryRow("ที่อยู่", fullAddress.ifBlank { "-" })
 
             // --- ข้อมูลอ้างอิงที่ดิน ---
             if (data.referenceIds.isNotEmpty()) {
@@ -201,7 +215,9 @@ fun SummaryCard(data: BuildingModel) {
                 Text("ที่ดินอ้างอิง", style = MaterialTheme.typography.bodyMedium, color = LightPrimary, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 data.referenceIds.forEach { ref ->
-                    ReferenceItemCard(title = ref.areaName, subTitle = "เลขที่โฉนด: ${ref.areaId}")
+                    // 💡 โชว์เป็น รหัสอ้างอิง แทน เพราะข้อมูลที่พกมามีแค่ UUID
+                    val shortId = if (ref.areaId.length > 8) ref.areaId.take(8).uppercase() else ref.areaId
+                    ReferenceItemCard(title = ref.areaName, subTitle = "รหัสอ้างอิง: ${ref.deedNum}")
                 }
             }
 
@@ -211,11 +227,13 @@ fun SummaryCard(data: BuildingModel) {
                 Text("ประกันภัยอ้างอิง", style = MaterialTheme.typography.bodyMedium, color = LightPrimary, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 data.insIds.forEach { ins ->
-                    ReferenceItemCard(title = ins.insName, subTitle = "เลขกรมธรรม์: ${ins.insId}")
+                    // 💡 โชว์เป็น รหัสอ้างอิง แทน เพราะข้อมูลที่พกมามีแค่ UUID
+                    val shortId = if (ins.insId.length > 8) ins.insId.take(8).uppercase() else ins.insId
+                    ReferenceItemCard(title = ins.insName, subTitle = "รหัสอ้างอิง: ${ins.policyNum}")
                 }
             }
 
-            SummaryRow("คำอธิบาย", data.description.ifBlank { "ไม่มีคำอธิบาย" })
+            SummaryRow("คำอธิบาย", data.description.ifBlank { "-" })
 
             // --- รูปภาพหลักฐาน ---
             Spacer(modifier = Modifier.height(20.dp))
@@ -229,12 +247,16 @@ fun SummaryCard(data: BuildingModel) {
                     items(data.attachments) { img ->
                         val isPdf = img.name.lowercase().endsWith(".pdf") || img.type.name.equals("PDF", ignoreCase = true)
                         Box(
-                            modifier = Modifier.size(72.dp).clip(RoundedCornerShape(12.dp)).background(LightBg).border(1.dp, LightBorder, RoundedCornerShape(12.dp)),
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(LightBg)
+                                .border(1.dp, LightBorder, RoundedCornerShape(12.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             if (isPdf) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(Icons.Default.PictureAsPdf, contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(28.dp))
+                                    Icon(painter = painterResource(Res.drawable.ic_common_pdf), contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(28.dp))
                                     Text(img.name, style = MaterialTheme.typography.labelSmall, color = LightText, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 4.dp))
                                 }
                             } else {
@@ -242,7 +264,7 @@ fun SummaryCard(data: BuildingModel) {
                                 if (imageData != null) {
                                     AsyncImage(model = imageData, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                                 } else {
-                                    Icon(Icons.Default.Image, contentDescription = null, tint = LightPrimary.copy(alpha = 0.3f), modifier = Modifier.size(28.dp))
+                                    Icon(painter = painterResource(Res.drawable.ic_form_photo), contentDescription = null, tint = LightPrimary.copy(alpha = 0.3f), modifier = Modifier.size(28.dp))
                                 }
                             }
                         }
@@ -252,16 +274,32 @@ fun SummaryCard(data: BuildingModel) {
         }
     }
 }
-
 @Composable
 fun SummaryRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        // 🌟 เปลี่ยนจาก CenterVertically เป็น Top เพื่อให้ Label อยู่ด้านบนเสมอแม้ข้อความ Value จะยาวจนตัดบรรทัด
+        verticalAlignment = Alignment.Top
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = LightText.copy(alpha = 0.7f))
-        Text(value, style = MaterialTheme.typography.bodyMedium, color = LightText, fontWeight = FontWeight.Medium)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = LightText.copy(alpha = 0.7f),
+            modifier = Modifier.weight(1f) // 🌟 ให้ Label กินพื้นที่คงที่
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = LightText,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.End, // 🌟 ชิดขวาตามดีไซน์เดิม
+            modifier = Modifier.weight(2f), // 🌟 ให้พื้นที่ Value มากกว่าเพื่อให้ตัดบรรทัดได้สวย
+            softWrap = true, // 🌟 อนุญาตให้ตัดบรรทัด (Default คือ true อยู่แล้ว)
+            maxLines = 5 // 🌟 กำหนดบรรทัดสูงสุดเผื่อไว้ตามความเหมาะสม
+        )
     }
 }
 

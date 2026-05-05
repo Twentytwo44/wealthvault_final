@@ -4,6 +4,7 @@ package com.wealthvault_final.`financial-obligations`.ui.menu
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +29,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -105,26 +105,24 @@ fun MenuScreen(
     var selectedId by remember { mutableStateOf<Int?>(1) }
 
     Scaffold(
-        // 🌟 แก้ไขตรงนี้: ลบ statusBarsPadding และ navigationBarsPadding ออก
         modifier = Modifier.fillMaxSize(),
         containerColor = LightBg,
         topBar = {
-            // 🌟 ย้ายมาใส่ statusBarsPadding ตรงนี้แทน เพื่อให้ TopBar เว้นระยะจากขอบบน
             Column(modifier = Modifier.statusBarsPadding()) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
                 ) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_common_back),
-                            contentDescription = "Back",
-                            tint = LightPrimary,
-                            modifier = Modifier
-                                .size(24.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
                     Text(
                         text = "ประเภทหนี้สิน",
                         style = MaterialTheme.typography.titleLarge,
@@ -134,8 +132,8 @@ fun MenuScreen(
             }
         },
         bottomBar = {
-            // 🌟 ย้ายมาใส่ navigationBarsPadding ตรงนี้ เพื่อให้ปุ่มเว้นระยะจากขอบล่าง (แถบ Home)
-            Box(modifier = Modifier.navigationBarsPadding().padding(16.dp)) {
+            // 🌟 2. ปรับ Padding ของปุ่มด้านล่าง ขอบซ้าย-ขวา เป็น 24.dp (เว้นขอบล่าง 24.dp ด้วยให้ดูสมดุล)
+            Box(modifier = Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 32.dp)) {
                 Button(
                     onClick = { onNextClick(assetCategories.find { it.id == selectedId }) },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -148,12 +146,12 @@ fun MenuScreen(
             }
         }
     ) { paddingValues ->
-        // ✅ ใช้ paddingValues ที่ได้จาก Scaffold เพื่อจัดการพื้นที่ตรงกลาง
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
-                .padding(paddingValues) // จัดการพื้นที่ที่เหลือระหว่าง TopBar และ BottomBar
-                .padding(horizontal = 16.dp),
+                .padding(paddingValues)
+                // 🌟 3. ปรับ Padding ของ Content ตรงกลาง ขอบซ้าย-ขวา เป็น 24.dp
+                .padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {

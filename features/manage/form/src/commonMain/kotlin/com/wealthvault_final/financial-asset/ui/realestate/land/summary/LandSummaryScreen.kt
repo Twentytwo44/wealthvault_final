@@ -1,10 +1,10 @@
 package com.wealthvault_final.`financial-asset`.ui.realestate.land.summary
 
 // 🌟 Import Theme และ Utils
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,24 +24,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,6 +53,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
+import com.wealthvault.core.generated.resources.ic_common_pdf
+import com.wealthvault.core.generated.resources.ic_form_photo
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
@@ -69,6 +67,7 @@ import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.model.LandModel
 import com.wealthvault_final.`financial-asset`.model.ShareTo
 import com.wealthvault_final.`financial-asset`.ui.components.ShareItemCard
+import org.jetbrains.compose.resources.painterResource
 
 data class LandSummaryScreen(val request: LandModel, val shareTo: ShareTo) : Screen {
 
@@ -112,22 +111,32 @@ fun SummaryContent(
         modifier = Modifier.fillMaxSize(),
         containerColor = LightBg,
         topBar = {
-            Column(modifier = Modifier.statusBarsPadding()) {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-                    title = {
-                        Text("สรุป", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = LightPrimary)
-                        }
+                Column(modifier = Modifier.statusBarsPadding()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
+                        modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_common_back),
+                            contentDescription = "Back",
+                            tint = LightPrimary,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable { onBackClick() }
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = "สรุป",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = LightPrimary
+                        )
                     }
-                )
-            }
+                }
         },
         bottomBar = {
-            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp)) {
+            // 🌟 ปรับ Padding ของปุ่มให้เป็น horizontal = 24.dp, bottom = 24.dp
+            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 24.dp)) {
                 Button(
                     onClick = onConfirmClick,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -148,7 +157,7 @@ fun SummaryContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp) // 🌟 ขอบซ้ายขวา 24.dp
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -190,11 +199,16 @@ fun SummaryCard(data: LandModel) {
             HorizontalDivider(color = LightBg)
             Spacer(modifier = Modifier.height(12.dp))
 
-            SummaryRow("ที่อยู่", data.locationAddress.ifBlank { "-" })
-            SummaryRow("ตำบล / แขวง", data.locationSubDistrict.ifBlank { "-" })
-            SummaryRow("อำเภอ / เขต", data.locationDistrict.ifBlank { "-" })
-            SummaryRow("จังหวัด", data.locationProvince.ifBlank { "-" })
-            SummaryRow("รหัสไปรษณีย์", data.locationPostalCode.ifBlank { "-" })
+            // 🌟 รวมที่อยู่ทุกช่องให้เป็นบรรทัดเดียว
+            val fullAddress = listOf(
+                data.locationAddress,
+                data.locationSubDistrict,
+                data.locationDistrict,
+                data.locationProvince,
+                data.locationPostalCode
+            ).filter { it.isNotBlank() }.joinToString(" ")
+
+            SummaryRow("ที่อยู่", fullAddress.ifBlank { "-" })
 
             // --- อาคาร/ตึกที่ตั้งอยู่บนที่ดินนี้ ---
             if (data.referenceIds.isNotEmpty()) {
@@ -202,11 +216,13 @@ fun SummaryCard(data: LandModel) {
                 Text("อาคาร / สิ่งปลูกสร้างอ้างอิง", style = MaterialTheme.typography.bodyMedium, color = LightPrimary, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 data.referenceIds.forEach { ref ->
-                    ReferenceBuildingItem(title = ref.areaName, subTitle = "ID อาคาร: ${ref.areaId}")
+                    // 🌟 ตัด UUID ให้สั้นลงเหลือ 8 ตัวอักษร
+                    val shortId = if (ref.areaId.length > 8) ref.areaId.take(8).uppercase() else ref.areaId
+                    ReferenceBuildingItem(title = ref.areaName)
                 }
             }
 
-            SummaryRow("คำอธิบาย", data.description.ifBlank { "ไม่มีคำอธิบาย" })
+            SummaryRow("คำอธิบาย", data.description.ifBlank { "-" })
 
             // --- ไฟล์แนบหลักฐาน ---
             Spacer(modifier = Modifier.height(20.dp))
@@ -229,7 +245,7 @@ fun SummaryCard(data: LandModel) {
                         ) {
                             if (isPdf) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(Icons.Default.PictureAsPdf, contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(28.dp))
+                                    Icon(painter = painterResource(Res.drawable.ic_common_pdf), contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(28.dp))
                                     Text(img.name, style = MaterialTheme.typography.labelSmall, color = LightText, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 4.dp))
                                 }
                             } else {
@@ -237,7 +253,7 @@ fun SummaryCard(data: LandModel) {
                                 if (imageData != null) {
                                     AsyncImage(model = imageData, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                                 } else {
-                                    Icon(Icons.Default.Image, contentDescription = null, tint = LightPrimary.copy(alpha = 0.3f), modifier = Modifier.size(28.dp))
+                                    Icon(painter = painterResource(Res.drawable.ic_form_photo), contentDescription = null, tint = LightPrimary.copy(alpha = 0.3f), modifier = Modifier.size(28.dp))
                                 }
                             }
                         }
@@ -248,20 +264,37 @@ fun SummaryCard(data: LandModel) {
     }
 }
 
+// 🌟 อัปเดต SummaryRow ให้รองรับการตัดบรรทัดได้เหมือนหน้า Building
 @Composable
 fun SummaryRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top // 🌟 ให้ชิดบนเพื่อความสวยงามเวลาข้อความยาว
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = LightText.copy(alpha = 0.7f))
-        Text(value, style = MaterialTheme.typography.bodyMedium, color = LightText, fontWeight = FontWeight.Medium)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = LightText.copy(alpha = 0.7f),
+            modifier = Modifier.weight(1f) // 🌟 กินพื้นที่ฝั่งซ้าย
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = LightText,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.End, // 🌟 ชิดขวา
+            modifier = Modifier.weight(2f), // 🌟 ให้ฝั่ง Value กินพื้นที่มากกว่า
+            softWrap = true, // 🌟 รองรับการตัดบรรทัด
+            maxLines = 5
+        )
     }
 }
 
 @Composable
-fun ReferenceBuildingItem(title: String, subTitle: String) {
+fun ReferenceBuildingItem(title: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -273,9 +306,8 @@ fun ReferenceBuildingItem(title: String, subTitle: String) {
     ) {
         Icon(Icons.Default.Info, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(12.dp))
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(text = title, style = MaterialTheme.typography.bodyMedium, color = LightText, fontWeight = FontWeight.Bold)
-            Text(text = subTitle, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
         }
     }
 }
@@ -297,7 +329,6 @@ fun ShareSection(shareInfo: ShareTo?) {
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 var isFirst = true
-                // แสดงผลโดยใช้ ShareItemCard ตัวล่าสุด
                 shareInfo.friend.forEach {
                     if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
                     ShareItemCard(name = it.name ?: "", date = it.date ?: "")

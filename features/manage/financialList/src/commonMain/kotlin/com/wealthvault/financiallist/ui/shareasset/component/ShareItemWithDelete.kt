@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -25,8 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_auth_email
+import com.wealthvault.core.generated.resources.ic_nav_social
 import com.wealthvault.financiallist.ui.shareasset.WealthVaultBrown
 import com.wealthvault.financiallist.ui.shareasset.model.ShareInfo
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun ShareItemWithDelete(
@@ -47,8 +49,8 @@ fun ShareItemWithDelete(
                 modifier = Modifier.size(48.dp).background(Color(0xFFD9D9D9), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (data.userId == "") Icon(Icons.Default.Email, null, tint = WealthVaultBrown)
-                else Icon(Icons.Default.Groups, null, tint = Color.Gray)
+                if (data.userId == "") Icon(painter = painterResource(Res.drawable.ic_auth_email), null, tint = WealthVaultBrown)
+                else Icon(painter = painterResource(Res.drawable.ic_nav_social), null, tint = Color.Gray)
             }
 
             Spacer(modifier = Modifier.width(12.dp))

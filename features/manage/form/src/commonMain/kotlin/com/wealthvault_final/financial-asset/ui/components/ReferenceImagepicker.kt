@@ -21,11 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -48,12 +43,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_pdf
+import com.wealthvault.core.generated.resources.ic_common_plus
+import com.wealthvault.core.generated.resources.ic_form_cross
+import com.wealthvault.core.generated.resources.ic_form_photo
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.LightText
 import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.AttachmentType
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun ReferenceImagepicker(
@@ -85,7 +86,7 @@ fun ReferenceImagepicker(
             Box {
                 IconButton(onClick = { expanded = true }) {
                     Icon(
-                        Icons.Default.Add,
+                        painter = painterResource(Res.drawable.ic_common_plus),
                         contentDescription = "เพิ่ม",
                         tint = LightPrimary, // 🌟 ใช้ LightPrimary
                         modifier = Modifier.size(28.dp)
@@ -103,7 +104,7 @@ fun ReferenceImagepicker(
                         },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.Image,
+                                painter = painterResource(Res.drawable.ic_form_photo),
                                 contentDescription = null,
                                 tint = LightPrimary, // 🌟 ปรับสีไอคอนให้ละมุน
                                 modifier = Modifier.size(24.dp)
@@ -121,7 +122,7 @@ fun ReferenceImagepicker(
                         },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.PictureAsPdf,
+                                painter = painterResource(Res.drawable.ic_common_pdf),
                                 contentDescription = null,
                                 tint = Color(0xFFE57373), // 🌟 สีแดง PDF (คงไว้)
                                 modifier = Modifier.size(24.dp)
@@ -160,7 +161,7 @@ fun ReferenceImagepicker(
                                 )
                             } else {
                                 Icon(
-                                    Icons.Default.Image,
+                                    painter = painterResource(Res.drawable.ic_form_photo),
                                     contentDescription = null,
                                     tint = Color.LightGray,
                                     modifier = Modifier.padding(24.dp)
@@ -179,7 +180,7 @@ fun ReferenceImagepicker(
                             color = Color(0xFFE57373) // สีแดงเตือนสำหรับการลบ
                         ) {
                             Icon(
-                                Icons.Default.Close,
+                                painter = painterResource(Res.drawable.ic_form_cross),
                                 contentDescription = "ลบ",
                                 tint = Color.White,
                                 modifier = Modifier.padding(4.dp)
@@ -206,7 +207,7 @@ fun ReferenceImagepicker(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PictureAsPdf,
+                        painter = painterResource(Res.drawable.ic_common_pdf),
                         contentDescription = null,
                         tint = Color(0xFFE57373) // คงสีแดงไว้ให้รู้ว่าเป็น PDF
                     )
@@ -223,7 +224,7 @@ fun ReferenceImagepicker(
                     )
 
                     Icon(
-                        Icons.Default.Close,
+                        painter = painterResource(Res.drawable.ic_form_cross),
                         contentDescription = "ลบ",
                         tint = Color.Gray,
                         modifier = Modifier

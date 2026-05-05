@@ -13,7 +13,6 @@ import com.wealthvault_final.`financial-asset`.data.share.ShareItemRepositoryImp
 import com.wealthvault_final.`financial-asset`.model.ShareTo
 import com.wealthvault_final.`financial-obligations`.data.liability.LiabilityRepositoryImpl
 import com.wealthvault_final.`financial-obligations`.model.ExpenseModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -80,15 +79,15 @@ class ExpenseSummaryScreenModel(
 
     fun submitExpense(onSuccess: () -> Unit) {
         val shareToData = _state.value.shareTo ?: return
+
         screenModelScope.launch {
             try {
-                isLoading = true
+                // 🌟 1. อัปเดต StateFlow เพื่อให้ UI แสดง Spinner โหลดที่ปุ่มได้ถูกต้อง
+                _state.update { it.copy(isLoading = true) }
                 errorMessage = null
 
                 // --- ขั้นตอนที่ 1: สร้าง Expense ก่อน ---
-
                 val requestBody = asRequest()
-
                 val expenseResult = expenseRepository.createLiability(requestBody)
 
                 // ดึงข้อมูลออกมาจาก Result Wrapper
@@ -96,49 +95,43 @@ class ExpenseSummaryScreenModel(
 
                 if (expenseResult.isSuccess && expenseResponse != null) {
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Expense
-                    // สมมติว่า field id อยู่ใน expenseResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = expenseResponse.id.toString()
                     println("✅ [ScreenModel] Expense Created ID: $createdItemId")
 
-                    delay(10000)
-                    // --- ขั้นตอนที่ 2: เตรียมข้อมูลเพื่อ Share โดยใช้ ID ที่เพิ่งได้มา ---
-                    val requestShareItem = ShareItemRequest(
-                        itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
-                        itemTypes = "expense",
-                        emails = shareToData.email.map {
-                            TargetItem(
-                                id = it.name,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        friends = shareToData.friend.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        groups = shareToData.group.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        }
-                    )
+                    // 🚨 ลบ delay(10000) ทิ้งไปแล้ว! กดปุ๊บโหลดปั๊บ ไม่ต้องรอ 10 วิอีกต่อไป
 
-                    // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
-                    val shareResult = shareItemRepository.shareItem(requestShareItem)
-                    println(" [SummaryScreenModel] Share result: $shareResult")
+                    // --- ขั้นตอนที่ 2: เตรียมข้อมูลเพื่อ Share โดยใช้ ID ที่เพิ่งได้มา ---
+                    // 💡 เช็กก่อนว่ามีการเลือกคนแชร์หรือไม่ ถ้าไม่มีจะได้ข้าม API แชร์ไปเลย ช่วยให้เร็วขึ้นอีก
+                    val hasShareData = shareToData.email.isNotEmpty() ||
+                            shareToData.friend.isNotEmpty() ||
+                            shareToData.group.isNotEmpty()
+
+                    if (hasShareData) {
+                        val requestShareItem = ShareItemRequest(
+                            itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
+                            itemTypes = "expense",   // 💡 ส่งประเภทเป็น expense ตามเดิม
+                            emails = shareToData.email.map { TargetItem(id = it.name, shareAt = shareToData.shareAt) },
+                            friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) },
+                            groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) }
+                        )
+
+                        // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
+                        val shareResult = shareItemRepository.shareItem(requestShareItem)
+                        println(" [SummaryScreenModel] Share result: $shareResult")
+                    }
+
+                    // 🌟 ส่งสัญญาณกลับไปหน้า UI ให้เด้งกลับหน้าแรก
                     onSuccess()
-                }
-                else {
+                } else {
                     println("❌ [ScreenModel] Create Expense Failed")
-            }
+                }
 
             } catch (e: Exception) {
                 println("❌ [ScreenModel] Exception: ${e.message}")
                 errorMessage = e.message ?: "เกิดข้อผิดพลาดในการเชื่อมต่อ"
             } finally {
-                isLoading = false
+                // 🌟 2. อัปเดต StateFlow ปิดปุ่มโหลด
+                _state.update { it.copy(isLoading = false) }
                 println("🏁 [ScreenModel] Process Finished.")
             }
         }

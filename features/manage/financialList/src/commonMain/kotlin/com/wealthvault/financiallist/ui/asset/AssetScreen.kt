@@ -320,8 +320,8 @@ fun AssetContent(
                     is BankAccountData -> {
                         val attachments = rawData.files?.map { it.toAttachment() }
                         val dataToSend = BankAccountModel(
-                            type = rawData.type, name = rawData.name, bankName = rawData.bankName,
-                            bankId = rawData.bankAccount, amount = rawData.amount, description = rawData.description,
+                            type = rawData.type ?: "", name = rawData.name ?: "", bankName = rawData.bankName ?: "",
+                            bankId = rawData.bankAccount ?: "", amount = rawData.amount ?: 0.0, description = rawData.description ?: "",
                             attachments = attachments ?: emptyList()
                         )
                         navigatorContent.push(BankAccountFormScreen(rawData.id, dataToSend))
@@ -329,7 +329,7 @@ fun AssetContent(
                     is CashIdData -> {
                         val attachments = rawData.files?.map { it.toAttachment() }
                         val dataToSend = CashModel(
-                            cashName = rawData.name, amount = rawData.amount, description = rawData.description,
+                            cashName = rawData.name ?: "", amount = rawData.amount ?: 0.0, description = rawData.description ?: "",
                             attachments = attachments ?: emptyList()
                         )
                         navigatorContent.push(CashFormScreen(rawData.id, dataToSend))
@@ -337,19 +337,19 @@ fun AssetContent(
                     is InvestmentIdData -> {
                         val attachments = rawData.files?.map { it.toAttachment() }
                         val dataToSend = StockModel(
-                            stockName = rawData.name, quantity = rawData.quantity, costPerPrice = rawData.costPerPrice,
-                            description = rawData.description, attachments = attachments ?: emptyList(),
-                            stockSymbol = "", brokerName = rawData.brokerName,type = rawData.type
+                            stockName = rawData.name ?: "", quantity = rawData.quantity ?: 0.0, costPerPrice = rawData.costPerPrice ?: 0.0,
+                            description = rawData.description ?: "", attachments = attachments ?: emptyList(),
+                            stockSymbol = "", brokerName = rawData.brokerName ?: "",type = rawData.type ?: ""
                         )
                         navigatorContent.push(StockFormScreen(rawData.id, dataToSend))
                     }
                     is InsuranceIdData -> {
                         val attachments = rawData.files?.map { it.toAttachment() }
                         val dataToSend = InsuranceModel(
-                            type = rawData.type, name = rawData.name, policyNumber = rawData.policyNumber,
-                            companyName = rawData.companyName, coveragePeriod = rawData.coveragePeriod.toString(),
-                            coverageAmount = rawData.coverageAmount, conDate = rawData.conDate,
-                            expDate = rawData.expDate, description = rawData.description,
+                            type = rawData.type ?: "", name = rawData.name ?: "", policyNumber = rawData.policyNumber ?: "",
+                            companyName = rawData.companyName ?: "", coveragePeriod = rawData.coveragePeriod.toString(),
+                            coverageAmount = rawData.coverageAmount ?: 0.0, conDate = rawData.conDate ?: "",
+                            expDate = rawData.expDate ?: "", description = rawData.description ?: "",
                             attachments = attachments ?: emptyList()
                         )
                         navigatorContent.push(InsuranceFormScreen(rawData.id, dataToSend))
@@ -372,12 +372,12 @@ fun AssetContent(
                         val attachments = rawData.files?.map { it.toAttachment() }
                         val refData = rawData.ref?.map { RefModel(areaName = it.refName, areaId = it.refName) }
                         val dataToSend = LandModel(
-                            landName = rawData.name, area = rawData.area, amount = rawData.amount,
-                            description = rawData.description, attachments = attachments ?: emptyList(),
+                            landName = rawData.name ?: "", area = rawData.area ?: 0.0, amount = rawData.amount ?: 0.0,
+                            description = rawData.description ?: "", attachments = attachments ?: emptyList(),
                             locationAddress = rawData.location?.address ?: "", locationSubDistrict = rawData.location?.subDistrict ?: "",
                             locationDistrict = rawData.location?.district ?: "", locationProvince = rawData.location?.province ?: "",
                             locationPostalCode = rawData.location?.postalCode ?: "", referenceIds = refData ?: emptyList(),
-                            deedNum = rawData.deedNum
+                            deedNum = rawData.deedNum ?: ""
                         )
                         navigatorContent.push(LandFormScreen(rawData.id, dataToSend))
                     }
