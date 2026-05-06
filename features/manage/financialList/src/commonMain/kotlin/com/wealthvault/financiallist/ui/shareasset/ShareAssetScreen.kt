@@ -1,7 +1,10 @@
 package com.wealthvault.financiallist.ui.shareasset
 
-
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,6 +30,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -43,16 +46,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_plus
+import com.wealthvault.core.generated.resources.ic_form_check
+import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.financiallist.ui.shareasset.component.AddEmailContent
 import com.wealthvault.financiallist.ui.shareasset.component.FriendSelectionList
@@ -64,18 +73,38 @@ import com.wealthvault.financiallist.ui.shareasset.model.ShareTo
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
-val WealthVaultBrown = Color(0xFFB37E61)
+// 🌟 Component Custom Checkbox สำหรับใช้ร่วมกัน 🌟
+@Composable
+fun CustomCheckbox(isSelected: Boolean, onSelectedChange: (Boolean) -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(24.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (isSelected) LightPrimary else Color.Transparent)
+            .border(
+                width = 2.dp,
+                color = if (isSelected) LightPrimary else Color.LightGray,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable { onSelectedChange(!isSelected) },
+        contentAlignment = Alignment.Center
+    ) {
+        if (isSelected) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_form_check),
+                contentDescription = null,
+                tint = LightSoftWhite,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
 
-
-
-// 💡 1. เติม data class ให้สมบูรณ์
 data class ShareAssetScreen(val type: String, val id: String) : Screen {
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-
-        // 💡 2. เอา <ShareAssetState> ออก เหลือแค่นี้ครับ
         val screenModel = getScreenModel<ShareScreenModel>()
 
         val friendState by screenModel.friendState.collectAsState()
@@ -84,22 +113,29 @@ data class ShareAssetScreen(val type: String, val id: String) : Screen {
         LaunchedEffect(Unit) {
             println("Test: type=$type, id=$id")
             screenModel.initData(id, type)
-
         }
 
         ShareAssetContent(
             onBackClick = { navigator.pop() },
-            onNextClick = { shareTo -> // 🌟 รับค่า ShareTo เข้ามาตรงนี้
-                screenModel.initShareData(shareTo) // 🌟 ส่งต่อให้ initShareData
-                screenModel.submitShare(id, type)
-//                navigator.pop()
+            onNextClick = { shareTo ->
+                screenModel.initShareData(shareTo)
+                screenModel.submitShare(
+                    id = id,
+                    type = type,
+                    onSuccess = {
+                        // ถ้าอยากกลับไปหน้าก่อนหน้า 1 สเต็ป
+                        navigator.pop()
+
+                        // หรือถ้าอยากเด้งกลับไปหน้าแรกสุดของโมดูลเลย
+                        // navigator.popUntilRoot()
+                    }
+                )
             },
             friendData = friendState,
             groupData = groupState
         )
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,71 +145,100 @@ fun ShareAssetContent(
     friendData: List<FriendTargetModel> = emptyList(),
     groupData: List<GroupTargetModel> = emptyList(),
 ) {
-//    val bottomBarState = LocalBottomBarState.current
-//
-//    // 🌟 2. สั่งปิดตอนเข้ามา และสั่งเปิดคืนตอนกดออก
-//    DisposableEffect(Unit) {
-//        bottomBarState.value = false // หน้าแชร์โผล่ปุ๊บ สั่งปิดเมนูปั๊บ! (จอเต็มทันที)
-//
-//        onDispose {
-//            bottomBarState.value = true  // พอกด back หรือ pop ออกไป สั่งเปิดเมนูคืนด้วย
-//        }
-//    }
-
     val selectedFriends = remember { mutableStateListOf<ShareInfo>() }
+    val selectedEmails = remember { mutableStateListOf<ShareInfo>() }
 
-    val sheetState = rememberModalBottomSheetState()
+    // 🌟 1. เพิ่ม LaunchedEffect ตรงนี้: ดึงคนที่เคยแชร์แล้ว มาแสดงที่หน้าหลักทันทีที่โหลดเสร็จ
+    LaunchedEffect(friendData, groupData) {
+        val preSelected = mutableListOf<ShareInfo>()
+
+        // กรองเพื่อนที่ isShared == true
+        friendData.filter { it.isShared }.forEach { friend ->
+            preSelected.add(
+                ShareInfo(
+                    name = friend.friendName,
+                    userId = friend.friendId,
+                    typeData = "F",
+                    subText = friend.email, // โชว์อีเมล
+                    profileUrl = friend.profile,
+                    isShared = true
+                )
+            )
+        }
+
+        // กรองกลุ่มที่ isShared == true
+        groupData.filter { it.isShared }.forEach { group ->
+            preSelected.add(
+                ShareInfo(
+                    name = group.groupName,
+                    userId = group.groupId,
+                    typeData = "G",
+                    subText = "${group.memberCount}", // โชว์จำนวนสมาชิก
+                    profileUrl = group.groupProfile,
+                    isShared = true
+                )
+            )
+        }
+
+        // นำเข้า selectedFriends (เช็คไม่ให้ซ้ำเผื่อ Recompose)
+        preSelected.forEach { item ->
+            if (selectedFriends.none { it.userId == item.userId }) {
+                selectedFriends.add(item)
+            }
+        }
+    }
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
     val openSheet = { showBottomSheet = true }
 
     var showEmailSheet by remember { mutableStateOf(false) }
-    val selectedEmails = remember { mutableStateListOf<ShareInfo>() }
     val openInputEmail = { showEmailSheet = true }
 
+    var showEmailInfoTooltip by remember { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        containerColor = Color(0xFFFFF8F3),
+        modifier = Modifier.fillMaxSize(),
+        containerColor = LightBg,
         topBar = {
-            // ส่วน Header: ย้อนกลับ + หัวข้อ
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp), // ✅ ใส่ Gap ตรงนี้
-                modifier = Modifier.padding(14.dp)
-            ){
-                IconButton(onClick = onBackClick) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = WealthVaultBrown)
-                }
-                Column() {
-
-                    Text("แชร์ทรัพย์สิน", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WealthVaultBrown)
-                    Text("คุณต้องการให้ใครเห็นทรัพย์สินนี้ของคุณบ้าง?", fontSize = 14.sp, color = WealthVaultBrown.copy(alpha = 0.7f))
+            Column(modifier = Modifier.statusBarsPadding()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 20.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text("แชร์ทรัพย์สิน", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
+                        Text("คุณต้องการให้ใครเห็นทรัพย์สินนี้ของคุณบ้าง?", style = MaterialTheme.typography.bodyMedium, color = LightPrimary.copy(alpha = 0.7f))
+                    }
                 }
             }
         },
         bottomBar = {
-            // ปุ่ม "ต่อไป" แบบ Fixed
-            Box(modifier = Modifier.padding(16.dp)) {
+            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
                 Button(
                     onClick = {
-
                         val dataToSend = ShareTo(
-                            friend =selectedFriends.filter { it.typeData == "F" },
+                            friend = selectedFriends.filter { it.typeData == "F" },
                             email = selectedEmails.toList(),
                             group = selectedFriends.filter { it.typeData == "G" },
                         )
-                        print("data for share: ${dataToSend}")
                         onNextClick(dataToSend)
                     },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = WealthVaultBrown)
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
                 ) {
-                    Text("ยืนยัน", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("ยืนยัน", color = Color.White, style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
@@ -182,94 +247,87 @@ fun ShareAssetContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
-
+                .padding(horizontal = 24.dp)
         ) {
-            // --- ส่วนที่ 1: เลือกเพื่อนหรือกลุ่ม ---
             SectionHeader(title = "เลือกเพื่อนหรือกลุ่มที่ต้องการแชร์", onAddClick = openSheet)
 
-
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // ✅ กำหนดเพดานความสูงไว้ที่ 300.dp (ประมาณ 4 คน)
-                    // ถ้าข้อมูลยังไม่ถึง 300.dp กล่องจะเตี้ยตามจริง
-                    // ถ้าเกิน 300.dp มันจะหยุดขยายและเปิดให้เลื่อน (Scroll)
-                    .height(300.dp),
-                shape = RoundedCornerShape(24.dp),
-                border = BorderStroke(1.dp, Color(0xFFF0E0D6)),
+                modifier = Modifier.fillMaxWidth().height(300.dp),
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, LightBorder),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent)
             ) {
-                // ✅ ใช้ LazyColumn แทน Column + forEach
                 LazyColumn(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp) // ระยะห่างระหว่างไอเทม
+                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     if (selectedFriends.isEmpty()) {
                         item {
                             Text(
                                 "ยังไม่ได้เลือกเพื่อนหรือกลุ่ม",
-                                modifier = Modifier
-                                    .fillMaxWidth() // เพิ่มตัวนี้
-                                    .height(200.dp) // ลดจาก 350 เหลือ 200 จะดูดีกว่า
-                                    .padding(16.dp),
+                                modifier = Modifier.fillMaxWidth().height(200.dp).padding(16.dp),
                                 textAlign = TextAlign.Center,
                                 color = Color.Gray,
-                                fontSize = 14.sp
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     } else {
-                        // ✅ ใช้ items() เพื่อวนลูปรายการเพื่อน
                         items(selectedFriends) { friend ->
                             ShareItemWithDelete(
                                 data = friend,
-                                onDelete = { selectedFriends.remove(friend) }
+                                onDelete = { selectedFriends.remove(friend) } // ลบออกได้ตามปกติ
                             )
                         }
                     }
                 }
             }
 
-
-
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- ส่วนที่ 2: แชร์ให้คนไม่มีบัญชี ---
             SectionHeader(
                 title = "แชร์ให้คนที่ไม่มีบัญชี",
                 showInfo = true,
+                onInfoClick = { showEmailInfoTooltip = !showEmailInfoTooltip },
                 onAddClick = openInputEmail
             )
 
+            AnimatedVisibility(visible = showEmailInfoTooltip) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                        .background(Color.White, RoundedCornerShape(12.dp))
+                        .border(1.dp, LightBorder, RoundedCornerShape(20.dp))
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        text = "หากคนที่คุณต้องการให้เข้าถึงทรัพย์สินนี้\nยังไม่มีบัญชีของ Wealth & Vault\nหรือยังไม่ได้เพิ่มเพื่อน สามารถแชร์ผ่านอีเมลได้",
+                        color = LightPrimary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // ✅ กำหนดความสูงสูงสุด (ประมาณ 3-4 รายการ) ถ้าเกินนี้จะ Scroll ภายใน Card
-                    .height(240.dp),
-                shape = RoundedCornerShape(24.dp),
-                border = BorderStroke(1.dp, Color(0xFFF0E0D6)),
+                modifier = Modifier.fillMaxWidth().height(240.dp),
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, LightBorder),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent)
             ) {
-                // ✅ ใช้ LazyColumn แทน Column เพื่อให้ Scroll ได้ในตัว
                 LazyColumn(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp) // ระยะห่างระหว่างไอเทม
-                ){
+                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     if (selectedEmails.isEmpty()) {
                         item {
                             Box(
-                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                modifier = Modifier.fillMaxWidth().padding(16.dp).height(100.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("ยังไม่มีการเพิ่มอีเมล", color = Color.Gray)
+                                Text("ยังไม่มีการเพิ่มอีเมล", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     } else {
-                        // ✅ ใช้ items เพื่อแสดงรายการอีเมล
                         items(selectedEmails) { email ->
                             ShareItemWithDelete(
                                 data = email,
@@ -279,99 +337,88 @@ fun ShareAssetContent(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(10.dp)) // เผื่อที่ให้ scroll พ้นปุ่ม
+        }
 
-
-            Spacer(modifier = Modifier.height(100.dp)) // เผื่อที่ให้ scroll พ้นปุ่ม
-
-            if (showBottomSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = { showBottomSheet = false },
-                    sheetState = sheetState,
-                    containerColor = Color.White
-                ) {
-                    FriendSelectionList(
-                        // 1. ส่ง List ของ ShareInfo ไปตรงๆ (ไม่ต้อง map แค่ name)
-                        alreadySelected = selectedFriends.toList(),
-                        friendData = friendData,
-                        groupData = groupData,
-                        onConfirm = { selectedItems -> // selectedItems จะเป็น List<ShareInfo>
-                            // 2. ล้างค่าเก่าแล้วเพิ่มค่าใหม่จาก Object ที่ได้มา
-                            selectedFriends.clear()
-                            selectedFriends.addAll(selectedItems)
-
-                            // 3. ปิด Sheet ตามปกติ
-                            scope.launch {
-                                sheetState.hide()
-                            }.invokeOnCompletion {
-                                if (!sheetState.isVisible) {
-                                    showBottomSheet = false
-                                }
-                            }
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = sheetState,
+                containerColor = LightBg
+            ) {
+                FriendSelectionList(
+                    alreadySelected = selectedFriends.toList(),
+                    friendData = friendData,
+                    groupData = groupData,
+                    onConfirm = { selectedItems ->
+                        val newItems = selectedItems.filter { newItem ->
+                            selectedFriends.none { it.userId == newItem.userId }
                         }
-                    )
+                        selectedFriends.addAll(newItems)
 
-                }
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) showBottomSheet = false
+                        }
+                    }
+                )
             }
-            if (showEmailSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = { showEmailSheet = false },
-                    containerColor = Color.White
-                ) {
-                    AddEmailContent(
-                        onConfirm = { email, date ->
-                            if (email.isNotBlank()) {
-                                // 1. เช็กว่าอีเมลนี้เคยถูกเพิ่มไปหรือยัง (หาจาก userId ที่เราตั้งเป็นอีเมล)
-                                val isDuplicate = selectedEmails.any { it.userId == email }
+        }
 
-                                if (!isDuplicate) {
-                                    // 2. ถ้ายังไม่ซ้ำ ให้เพิ่มเข้าไปใน List โดยเก็บทั้งอีเมลและวันที่
-                                    selectedEmails.add(
-                                        ShareInfo(
-                                            name = email,    // ให้แสดงชื่อเป็นอีเมล
-                                            userId = email,  // ใช้ตัวอีเมลเป็น ID เพื่อไว้เช็กซ้ำ
-                                            date = date      // ✅ เซฟวันที่เก็บไว้ด้วย
-                                        )
+        if (showEmailSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showEmailSheet = false },
+                containerColor = LightBg
+            ) {
+                AddEmailContent(
+                    onConfirm = { email, date, apiDate ->
+                        if (email.isNotBlank()) {
+                            val isDuplicate = selectedEmails.any { it.userId == email }
+                            if (!isDuplicate) {
+                                selectedEmails.add(
+                                    ShareInfo(
+                                        name = email,
+                                        userId = email,
+                                        date = date,
+                                        apiDate = apiDate,
+                                        typeData = "E",
+                                        subText = email
                                     )
-                                }
+                                )
                             }
-                            showEmailSheet = false // ปิด BottomSheet
                         }
-                    )
-                }
+                        showEmailSheet = false
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun SectionHeader(
-    title: String,
-    showInfo: Boolean = false,
-    onAddClick: () -> Unit
-) {
+fun SectionHeader(title: String, showInfo: Boolean = false, onInfoClick: () -> Unit = {}, onAddClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(title, color = WealthVaultBrown, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(title, color = LightPrimary, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
             if (showInfo) {
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = WealthVaultBrown.copy(alpha = 0.5f)
+                    modifier = Modifier.size(18.dp).clickable { onInfoClick() },
+                    tint = LightPrimary.copy(alpha = 0.5f)
                 )
             }
         }
         IconButton(onClick = onAddClick) {
-            Icon(painter = painterResource(Res.drawable.ic_common_plus), contentDescription = null, tint = WealthVaultBrown, modifier = Modifier.size(28.dp))
+            Icon(
+                painter = painterResource(Res.drawable.ic_common_plus),
+                contentDescription = "Add",
+                tint = LightPrimary,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
-
-
-

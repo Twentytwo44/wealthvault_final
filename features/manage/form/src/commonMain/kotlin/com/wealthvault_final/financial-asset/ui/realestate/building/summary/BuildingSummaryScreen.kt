@@ -56,7 +56,10 @@ import coil3.compose.AsyncImage
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_pdf
+import com.wealthvault.core.generated.resources.ic_form_email_outline
 import com.wealthvault.core.generated.resources.ic_form_photo
+import com.wealthvault.core.generated.resources.ic_nav_profile
+import com.wealthvault.core.generated.resources.ic_nav_social
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
@@ -65,8 +68,8 @@ import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.model.BuildingModel
+import com.wealthvault_final.`financial-asset`.model.ShareInfo
 import com.wealthvault_final.`financial-asset`.model.ShareTo
-import com.wealthvault_final.`financial-asset`.ui.components.ShareItemCard
 import org.jetbrains.compose.resources.painterResource
 
 data class BuildingSummaryScreen(val request: BuildingModel, val shareTo: ShareTo) : Screen {
@@ -342,18 +345,108 @@ fun ShareSection(shareInfo: ShareTo?) {
                 var isFirst = true
                 shareInfo.friend.forEach {
                     if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
-                    ShareItemCard(name = it.name ?: "", date = it.date ?: "")
+                    SharedItemSummaryCard(it)
                     isFirst = false
                 }
                 shareInfo.group.forEach {
                     if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
-                    ShareItemCard(name = it.name ?: "", date = it.date ?: "", groupCount = "5")
+                    SharedItemSummaryCard(it)
                     isFirst = false
                 }
                 shareInfo.email.forEach {
                     if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
-                    ShareItemCard(name = it.name ?: "", date = it.date ?: "", isEmail = true)
+                    SharedItemSummaryCard(it)
                     isFirst = false
+                }
+            }
+        }
+    }
+}
+
+// ==========================================
+// 🌟 Custom UI Component แบบหน้าแชร์ (ไม่มีปุ่มลบ)
+// ==========================================
+@Composable
+fun SharedItemSummaryCard(data: ShareInfo) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Profile Image / Placeholder
+        Box(
+            modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(LightBg),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!data.profileUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = data.profileUrl,
+                    contentDescription = "Profile",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                val icon = when (data.typeData) {
+                    "E" -> painterResource(Res.drawable.ic_form_email_outline)
+                    "G" -> painterResource(Res.drawable.ic_nav_social)
+                    else -> painterResource(Res.drawable.ic_nav_profile)
+                }
+                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+            }
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = data.name ?: "",
+                style = MaterialTheme.typography.bodyLarge,
+                color = LightText,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            // 🌟 รวบเงื่อนไขให้ วันที่ ไปอยู่ฝั่งขวาเหมือนกันทั้งหมด
+            if ((data.typeData != "E" && data.subText.isNotBlank()) || data.date != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween // ดันวันที่ไปชิดขวา
+                ) {
+                    // Badge (อยู่ซ้าย - ซ่อนถ้าเป็น Email)
+                    if (data.typeData != "E" && data.subText.isNotBlank()) {
+                        Row(
+                            modifier = Modifier
+                                .weight(1f, fill = false) // กันข้อความยาวเกิน
+                                .background(LightBg, RoundedCornerShape(200.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val icon = if(data.typeData == "G") painterResource(Res.drawable.ic_nav_social) else painterResource(Res.drawable.ic_nav_profile)
+                            Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(12.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = data.subText,
+                                color = LightPrimary,
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.width(1.dp)) // ใส่ช่องว่างเปล่าๆ เพื่อดันให้ SpaceBetween ดันวันที่ไปชิดขวาได้
+                    }
+
+                    // วันที่แชร์ล่วงหน้า (อยู่ขวา)
+                    if (data.date != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = data.date!!,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.Gray,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }

@@ -1,5 +1,7 @@
 package com.wealthvault.financiallist.ui.shareasset.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,16 +12,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,112 +32,112 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_calendar
+import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.theme.LightText
+import com.wealthvault.financiallist.ui.shareasset.CustomCheckbox
+import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEmailContent(
-    onConfirm: (email: String, date: String?) -> Unit
+    onConfirm: (email: String, date: String?, apiDate: String?) -> Unit
 ) {
     var emailText by remember { mutableStateOf("") }
+    var isDateChecked by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<String?>(null) }
-
-    // 🕒 State ควบคุมการเปิด/ปิด ปฏิทิน
+    var selectedApiDate by remember { mutableStateOf<String?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .navigationBarsPadding() // เว้นพื้นที่คีย์บอร์ด
-    ) {
-        Text(
-            "เพิ่มอีเมลผู้รับ",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFFC08064) // WealthVaultBrown
-        )
-        Text(
-            "ระบบจะส่งคำเชิญไปยังอีเมลนี้เพื่อให้เข้าถึงข้อมูล",
-            fontSize = 14.sp,
-            color = Color.Gray
-        )
+    Column(modifier = Modifier.fillMaxWidth().padding(16.dp).navigationBarsPadding()) {
 
+        Text("เพิ่มอีเมลผู้รับ", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
+        Text("ระบบจะส่งคำเชิญไปยังอีเมลนี้เพื่อให้เข้าถึงข้อมูล", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 1. ช่องกรอกอีเมล
-        OutlinedTextField(
-            value = emailText,
-            onValueChange = { emailText = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("อีเมล (example@gmail.com)") },
-            placeholder = { Text("ระบุอีเมลผู้รับ") },
-            shape = RoundedCornerShape(16.dp),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFC08064),
-                focusedLabelColor = Color(0xFFC08064),
-                cursorColor = Color(0xFFC08064)
+        Column {
+            Text(text = "อีเมล", style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
+            Spacer(modifier = Modifier.height(8.dp))
+            TextField(
+                value = emailText,
+                onValueChange = { emailText = it },
+                modifier = Modifier.fillMaxWidth().border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
+                placeholder = { Text("example@gmail.com", color = Color.LightGray) },
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = LightSoftWhite,
+                    unfocusedContainerColor = LightSoftWhite,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = LightText
+                )
             )
-        )
-
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 2. กล่องจำลองสำหรับกดเลือกวันที่
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .border(
-                    1.dp,
-                    if (selectedDate != null) Color(0xFFC08064) else Color.Gray,
-                    RoundedCornerShape(16.dp)
-                )
-                .clickable { showDatePicker = true } // เปิดปฏิทิน
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable { isDateChecked = !isDateChecked }.padding(vertical = 4.dp)
         ) {
-            Text(
-                text = selectedDate ?: "เลือกวันที่ (ว/ด/ป)",
-                fontSize = 16.sp,
-                color = if (selectedDate != null) Color.Black else Color.Gray
+            CustomCheckbox(
+                isSelected = isDateChecked,
+                onSelectedChange = { isDateChecked = it }
             )
-            Icon(
-                imageVector = Icons.Default.DateRange,
-                contentDescription = "Select Date",
-                tint = Color(0xFFC08064)
-            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("ตั้งวันการแชร์ล่วงหน้า", color = LightPrimary, style = MaterialTheme.typography.bodyMedium)
+        }
+
+        AnimatedVisibility(visible = isDateChecked) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(1.dp, LightBorder, RoundedCornerShape(12.dp))
+                    .background(LightSoftWhite)
+                    .clickable { showDatePicker = true }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = selectedDate ?: "เลือกวันที่",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (selectedDate != null) LightText else Color.Gray.copy(0.7f)
+                )
+                Icon(painterResource(Res.drawable.ic_common_calendar), contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 3. ปุ่มเพิ่มรายชื่อ
         Button(
-            onClick = { onConfirm(emailText, selectedDate) },
-            enabled = emailText.contains("@") && emailText.contains(".") && selectedDate != null,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(28.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFC08064),
-                disabledContainerColor = Color(0xFFD7CCC8)
-            )
+            onClick = {
+                val finalDate = if (isDateChecked) selectedDate else null
+                val finalApiDate = if (isDateChecked) selectedApiDate else null
+                onConfirm(emailText, finalDate, finalApiDate)
+            },
+            enabled = emailText.contains("@") && emailText.contains("."),
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
         ) {
-            Text("เพิ่มรายชื่อ", color = Color.White, fontWeight = FontWeight.Bold)
+            Text("เพิ่ม", color = Color.White, style = MaterialTheme.typography.titleMedium)
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 
-    // 🕒 4. เรียกใช้ CustomDatePickerDialog แยกออกมาให้โค้ดคลีน
     if (showDatePicker) {
         CustomDatePickerDialog(
             onDismiss = { showDatePicker = false },
-            onDateConfirm = { dateStr ->
-                selectedDate = dateStr // รับวันที่มาใส่ State
-                showDatePicker = false // ปิดป๊อปอัพ
+            onDateConfirm = { apiStr, thaiStr ->
+                selectedApiDate = apiStr
+                selectedDate = thaiStr
+                showDatePicker = false
             }
         )
     }

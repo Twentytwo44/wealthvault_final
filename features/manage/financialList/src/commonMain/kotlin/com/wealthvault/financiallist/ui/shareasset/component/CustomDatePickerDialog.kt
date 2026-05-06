@@ -1,7 +1,7 @@
 package com.wealthvault.financiallist.ui.shareasset.component
 
-
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -9,6 +9,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.utils.formatThaiDate
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -17,27 +19,31 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun CustomDatePickerDialog(
     onDismiss: () -> Unit,
-    onDateConfirm: (String) -> Unit
+    onDateConfirm: (String, String) -> Unit // รับ 2 ค่า: apiDate และ thaiDate
 ) {
-    // ย้าย DatePickerState มาไว้ที่นี่ ทำให้ State ถูก Reset ใหม่ทุกครั้งที่เปิดป๊อปอัพ
     val datePickerState = rememberDatePickerState()
 
     DatePickerDialog(
         onDismissRequest = onDismiss,
+        colors = DatePickerDefaults.colors(containerColor = Color.White),
         confirmButton = {
             TextButton(onClick = {
                 val millis = datePickerState.selectedDateMillis
                 if (millis != null) {
-                    val dateStr = Instant.fromEpochMilliseconds(millis)
-                        .toLocalDateTime(TimeZone.currentSystemDefault())
-                        .date.toString()
+                    val localDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC)
+                    val day = localDate.dayOfMonth.toString().padStart(2, '0')
+                    val month = localDate.monthNumber.toString().padStart(2, '0')
+                    val engYear = localDate.year.toString()
 
-                    onDateConfirm(dateStr) // ส่งวันที่กลับไปให้หน้าจอหลัก
+                    val apiDateStr = "$engYear-$month-$day"
+                    val thaiDateStr = formatThaiDate(apiDateStr)
+
+                    onDateConfirm(apiDateStr, thaiDateStr)
                 } else {
                     onDismiss()
                 }
             }) {
-                Text("ตกลง", color = Color(0xFFC08064))
+                Text("ตกลง", color = LightPrimary)
             }
         },
         dismissButton = {
@@ -46,6 +52,13 @@ fun CustomDatePickerDialog(
             }
         }
     ) {
-        DatePicker(state = datePickerState)
+        DatePicker(
+            state = datePickerState,
+            colors = DatePickerDefaults.colors(
+                selectedDayContainerColor = LightPrimary,
+                todayDateBorderColor = LightPrimary,
+                todayContentColor = LightPrimary
+            )
+        )
     }
 }

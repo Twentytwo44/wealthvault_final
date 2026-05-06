@@ -27,22 +27,22 @@ data class AccountData(
     val userId: String,
 
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
 
     @SerialName("bank_name")
-    val bankName: String,
+    val bankName: String? = null,
 
     @SerialName("bank_account")
-    val bankAccount: String,
+    val bankAccount: String? = null,
 
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
 
     @SerialName("amount")
-    val amount: Int,
+    val amount: Int? = null,
 
     @SerialName("description")
-    val description: String
+    val description: String? = null
 
 
 

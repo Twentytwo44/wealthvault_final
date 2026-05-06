@@ -23,12 +23,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -60,8 +56,10 @@ import coil3.compose.AsyncImage
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_pdf
+import com.wealthvault.core.generated.resources.ic_form_email_outline
 import com.wealthvault.core.generated.resources.ic_form_photo
 import com.wealthvault.core.generated.resources.ic_nav_profile
+import com.wealthvault.core.generated.resources.ic_nav_social
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
@@ -117,28 +115,28 @@ fun SummaryContent(
         modifier = Modifier.fillMaxSize(),
         containerColor = LightBg,
         topBar = {
-                Column(modifier = Modifier.statusBarsPadding()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
-                        modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_common_back),
-                            contentDescription = "Back",
-                            tint = LightPrimary,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clickable { onBackClick() }
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            text = "สรุป",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = LightPrimary
-                        )
-                    }
+            Column(modifier = Modifier.statusBarsPadding()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "สรุป",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LightPrimary
+                    )
                 }
+            }
 
         },
         bottomBar = {
@@ -273,6 +271,7 @@ fun ShareSection(shareInfo: ShareTo?) {
             textAlign = TextAlign.Center
         )
     } else {
+        // 🌟 รวบทุกรายการไว้ใน Card สีขาวใบเดียว
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
@@ -285,19 +284,19 @@ fun ShareSection(shareInfo: ShareTo?) {
 
                 shareInfo.friend.forEach { friend ->
                     if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
-                    UserShareCard(friend)
+                    SharedItemSummaryCard(friend)
                     isFirst = false
                 }
 
                 shareInfo.group.forEach { group ->
                     if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
-                    GroupShareCard(group)
+                    SharedItemSummaryCard(group)
                     isFirst = false
                 }
 
                 shareInfo.email.forEach { email ->
                     if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
-                    EmailShareCard(email)
+                    SharedItemSummaryCard(email)
                     isFirst = false
                 }
             }
@@ -306,91 +305,91 @@ fun ShareSection(shareInfo: ShareTo?) {
 }
 
 // ==========================================
-// 🌟 Custom UI Cards สำหรับการแชร์ตามภาพต้นแบบ
+// 🌟 Custom UI Component แบบหน้าแชร์ (ไม่มีปุ่มลบ)
 // ==========================================
-
 @Composable
-fun UserShareCard(friend: ShareInfo) {
+fun SharedItemSummaryCard(data: ShareInfo) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // รูปโปรไฟล์วงกลม
+        // Profile Image / Placeholder
         Box(
-            modifier = Modifier.size(46.dp).clip(CircleShape).background(LightBg),
+            modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(LightBg),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_nav_profile),
-                contentDescription = null, tint = LightText.copy(alpha = 0.4f), modifier = Modifier.size(24.dp))
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // 🌟 เอา Column ออกและแสดงแค่ชื่อเพียวๆ แบบ CenterVertically
-        Text(
-            text = friend.name ?: "",
-            style = MaterialTheme.typography.bodyLarge,
-            color = LightText,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-@Composable
-fun GroupShareCard(group: ShareInfo) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // ไอคอนกลุ่มสี่เหลี่ยมขอบมนสีเทา
-        Box(
-            modifier = Modifier.size(46.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFE0E0E0)),
-            contentAlignment = Alignment.Center
-        ) {
-            // ปล่อยว่าง หรือใส่ Icon เล็กๆ ตามชอบ
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column {
-            Text(group.name ?: "", style = MaterialTheme.typography.bodyLarge, color = LightText, fontWeight = FontWeight.Medium)
-            Spacer(modifier = Modifier.height(6.dp))
-            // Badge จำนวนสมาชิกกลุ่ม
-            Row(
-                modifier = Modifier
-                    .background(LightBg, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(Icons.Outlined.Group, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(12.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("5", style = MaterialTheme.typography.labelSmall, color = LightPrimary, fontWeight = FontWeight.Bold)
+            if (!data.profileUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = data.profileUrl,
+                    contentDescription = "Profile",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                val icon = when (data.typeData) {
+                    "E" -> painterResource(Res.drawable.ic_form_email_outline)
+                    "G" -> painterResource(Res.drawable.ic_nav_social)
+                    else -> painterResource(Res.drawable.ic_nav_profile)
+                }
+                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
             }
         }
-    }
-}
 
-@Composable
-fun EmailShareCard(email: ShareInfo) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // ไอคอนอีเมลสี่เหลี่ยมขอบมน ขอบสีส้ม
-        Box(
-            modifier = Modifier
-                .size(46.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
-                .border(1.dp, LightPrimary.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Outlined.Email, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = data.name ?: "",
+                style = MaterialTheme.typography.bodyLarge,
+                color = LightText,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            // 🌟 รวบเงื่อนไขให้ วันที่ ไปอยู่ฝั่งขวาเหมือนกันทั้งหมด
+            if ((data.typeData != "E" && data.subText.isNotBlank()) || data.date != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween // ดันวันที่ไปชิดขวา
+                ) {
+                    // Badge (อยู่ซ้าย - ซ่อนถ้าเป็น Email)
+                    if (data.typeData != "E" && data.subText.isNotBlank()) {
+                        Row(
+                            modifier = Modifier
+                                .weight(1f, fill = false) // กันข้อความยาวเกิน
+                                .background(LightBg, RoundedCornerShape(200.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val icon = if(data.typeData == "G") painterResource(Res.drawable.ic_nav_social) else painterResource(Res.drawable.ic_nav_profile)
+                            Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(12.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = data.subText,
+                                color = LightPrimary,
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.width(1.dp)) // ใส่ช่องว่างเปล่าๆ เพื่อดันให้ SpaceBetween ดันวันที่ไปชิดขวาได้
+                    }
+
+                    // วันที่แชร์ล่วงหน้า (อยู่ขวา)
+                    if (data.date != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = data.date!!,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.Gray,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
         }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Text(email.name ?: "", style = MaterialTheme.typography.bodyLarge, color = LightText)
     }
 }

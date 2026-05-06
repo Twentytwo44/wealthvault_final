@@ -127,12 +127,12 @@ fun AssetContent(
     var showConfirmDelete by remember { mutableStateOf(false) }
     var itemNameToDelete by remember { mutableStateOf("") }
 
-    val filteredAccounts = accounts.filter { it.name.contains(searchQuery, ignoreCase = true) }
-    val filteredCashes = cashes.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
-    val filteredInvestments = investments.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
-    val filteredInsurances = insurances.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
-    val filteredBuildings = buildings.filter { it.name.contains(searchQuery, ignoreCase = true) }
-    val filteredLands = lands.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
+    val filteredAccounts = accounts.filter { (it.name ?: "").contains(searchQuery, ignoreCase = true) }
+    val filteredCashes = cashes.filter { (it.name ?: "").contains(searchQuery, ignoreCase = true) }
+    val filteredInvestments = investments.filter { (it.name ?: "").contains(searchQuery, ignoreCase = true) }
+    val filteredInsurances = insurances.filter { (it.name ?: "").contains(searchQuery, ignoreCase = true) }
+    val filteredBuildings = buildings.filter { (it.name ?: "").contains(searchQuery, ignoreCase = true) }
+    val filteredLands = lands.filter { (it.name ?: "").contains(searchQuery, ignoreCase = true) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         FinancialListTemplate(
@@ -156,9 +156,9 @@ fun AssetContent(
                         ExpandableCategoryCard(title = "บัญชีเงินฝาก", itemCount = filteredAccounts.size, themeColor = "asset", initiallyExpanded = true) {
                             filteredAccounts.forEach { account ->
                                 RealItemCard(
-                                    title = account.name,
-                                    subtitleLabel = "ธนาคาร", subtitleValue = account.bankName,
-                                    amountLabel = "ยอดเงิน", amountValue = "${formatAmount(account.amount)} บาท",
+                                    title = account.name ?: "",
+                                    subtitleLabel = "ธนาคาร", subtitleValue = account.bankName ?: "",
+                                    amountLabel = "ยอดเงิน", amountValue = "${formatAmount(account.amount ?: 0.0)} บาท",
                                     onClick = { selectedAssetId = account.id; selectedAssetType = "account" }
                                 )
                             }

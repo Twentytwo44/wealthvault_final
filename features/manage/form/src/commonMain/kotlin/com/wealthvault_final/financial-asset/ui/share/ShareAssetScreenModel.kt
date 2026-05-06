@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
+import com.wealthvault_final.`financial-asset`.model.ShareInfo
 
 data class ShareAssetState<T>(
     val request: T? = null,
