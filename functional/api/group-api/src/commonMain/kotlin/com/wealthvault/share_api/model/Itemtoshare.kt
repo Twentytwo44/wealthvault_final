@@ -36,5 +36,8 @@ data class ItemToShareData(
 
     // 🌟 เอาไว้เช็คว่าอันไหนติ๊กแชร์ไปแล้วบ้าง
     @SerialName("is_shared")
-    val isShared: Boolean? = null
+    val isShared: Boolean? = null,
+
+    @SerialName("shared_at")
+    val sharedAt: String? = null
 )

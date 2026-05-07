@@ -1,6 +1,7 @@
 package com.wealthvault.forgetpassword.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,15 +14,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,11 +36,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -50,6 +54,7 @@ import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightMuted
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSurface
+import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.getScreenModel
 import org.jetbrains.compose.resources.painterResource
 
@@ -127,7 +132,6 @@ fun ResetPasswordContent(
 
             // 🌟 1. ช่องรหัสผ่านใหม่
             Column(modifier = Modifier.fillMaxWidth()) {
-                // 🌟 เปลี่ยนมาใช้ Row เพื่อดึงข้อความ Error มาไว้มุมขวา
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -139,11 +143,10 @@ fun ResetPasswordContent(
                         style = MaterialTheme.typography.titleMedium
                     )
 
-                    // 🌟 แสดง Error Message เล็กๆ สีแดงด้านขวา
                     if (errorMessage != null) {
                         Text(
                             text = errorMessage,
-                            color = Color(0xFFE53935), // สีแดงแจ้งเตือน
+                            color = RedErr,
                             style = MaterialTheme.typography.labelSmall,
                             textAlign = TextAlign.End,
                             modifier = Modifier.weight(1f).padding(start = 8.dp)
@@ -151,70 +154,138 @@ fun ResetPasswordContent(
                     }
                 }
 
-                OutlinedTextField(
+                BasicTextField(
                     value = newPassword,
                     onValueChange = onNewPasswordChange,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(percent = 30),
                     singleLine = true,
-                    // 🌟 จัดการเปิด-ปิดตา
                     visualTransformation = if (isNewPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    leadingIcon = {
-                        Icon(painterResource(Res.drawable.ic_auth_lock), contentDescription = "lock", tint = LightPrimary, modifier = Modifier.size(26.dp))
-                    },
-                    trailingIcon = {
-                        val icon = if (isNewPasswordVisible) painterResource(Res.drawable.ic_auth_eye) else painterResource(Res.drawable.ic_auth_eye_slash)
-                        IconButton(onClick = { isNewPasswordVisible = !isNewPasswordVisible }) {
-                            Icon(painter = icon, contentDescription = "Toggle", tint = LightPrimary, modifier = Modifier.size(24.dp))
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    textStyle = LocalTextStyle.current.copy(color = Color.Black),
+                    cursorBrush = SolidColor(if (errorMessage != null) RedErr else LightPrimary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    decorationBox = { innerTextField ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(LightSurface, RoundedCornerShape(percent = 30))
+                                .border(
+                                    width = 1.dp,
+                                    color = if (errorMessage != null) RedErr else LightBorder,
+                                    shape = RoundedCornerShape(percent = 30)
+                                )
+                                .padding(start = 16.dp, end = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_auth_lock),
+                                contentDescription = "lock",
+                                tint = if (errorMessage != null) RedErr else LightPrimary,
+                                modifier = Modifier.size(26.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Box(modifier = Modifier.weight(1f)) {
+                                if (newPassword.isEmpty()) {
+                                    Text("รหัสผ่านใหม่", color = Color.Gray)
+                                }
+                                innerTextField()
+                            }
+
+                            val icon = if (isNewPasswordVisible) painterResource(Res.drawable.ic_auth_eye)
+                            else painterResource(Res.drawable.ic_auth_eye_slash)
+
+                            IconButton(
+                                onClick = { isNewPasswordVisible = !isNewPasswordVisible },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    painter = icon,
+                                    contentDescription = "Toggle",
+                                    tint = if (errorMessage != null) RedErr else LightPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = LightSurface,
-                        unfocusedContainerColor = LightSurface,
-                        focusedBorderColor = LightPrimary,
-                        unfocusedBorderColor = LightBorder,
-                        errorBorderColor = Color(0xFFE53935), // 🌟 สีกรอบตอน Error
-                        errorLeadingIconColor = Color(0xFFE53935)
-                    ),
-                    isError = errorMessage != null // 🌟
+                    }
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🌟 2. ช่องยืนยันรหัสผ่านใหม่
+            // 🌟 2. ช่องยืนยันรหัสผ่านใหม่ (อัปเดตเป็น BasicTextField)
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(text = "ยืนยันรหัสผ่านใหม่", color = LightPrimary, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp, start = 8.dp))
-                OutlinedTextField(
+                Text(
+                    text = "ยืนยันรหัสผ่านใหม่",
+                    color = LightPrimary,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
+                )
+
+                BasicTextField(
                     value = confirmPassword,
                     onValueChange = onConfirmPasswordChange,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(percent = 30),
                     singleLine = true,
-                    // 🌟 จัดการเปิด-ปิดตา
                     visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    leadingIcon = {
-                        Icon(painterResource(Res.drawable.ic_auth_lock), contentDescription = "lock", tint = LightPrimary, modifier = Modifier.size(26.dp))
-                    },
-                    trailingIcon = {
-                        val icon = if (isConfirmPasswordVisible) painterResource(Res.drawable.ic_auth_eye) else painterResource(Res.drawable.ic_auth_eye_slash)
-                        IconButton(onClick = { isConfirmPasswordVisible = !isConfirmPasswordVisible }) {
-                            Icon(painter = icon, contentDescription = "Toggle Confirm", tint = LightPrimary, modifier = Modifier.size(24.dp))
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    textStyle = LocalTextStyle.current.copy(color = Color.Black),
+                    cursorBrush = SolidColor(if (errorMessage != null) RedErr else LightPrimary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    decorationBox = { innerTextField ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(LightSurface, RoundedCornerShape(percent = 30))
+                                .border(
+                                    width = 1.dp,
+                                    color = if (errorMessage != null) RedErr else LightBorder,
+                                    shape = RoundedCornerShape(percent = 30)
+                                )
+                                .padding(start = 16.dp, end = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Leading Icon (แม่กุญแจ)
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_auth_lock),
+                                contentDescription = "lock",
+                                tint = if (errorMessage != null) RedErr else LightPrimary,
+                                modifier = Modifier.size(26.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            // ช่องพิมพ์ยืนยันรหัสผ่าน
+                            Box(modifier = Modifier.weight(1f)) {
+                                if (confirmPassword.isEmpty()) {
+                                    Text("ยืนยันรหัสผ่าน", color = Color.Gray)
+                                }
+                                innerTextField()
+                            }
+
+                            // Trailing Icon (ปุ่มลูกตา)
+                            val icon = if (isConfirmPasswordVisible) painterResource(Res.drawable.ic_auth_eye)
+                            else painterResource(Res.drawable.ic_auth_eye_slash)
+
+                            IconButton(
+                                onClick = { isConfirmPasswordVisible = !isConfirmPasswordVisible },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    painter = icon,
+                                    contentDescription = "Toggle Confirm",
+                                    tint = if (errorMessage != null) RedErr else LightPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = LightSurface,
-                        unfocusedContainerColor = LightSurface,
-                        focusedBorderColor = LightPrimary,
-                        unfocusedBorderColor = LightBorder,
-                        errorBorderColor = Color(0xFFE53935), // 🌟 สีกรอบตอน Error
-                        errorLeadingIconColor = Color(0xFFE53935)
-                    ),
-                    isError = errorMessage != null // 🌟
+                    }
                 )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-
 
             Button(
                 onClick = onSubmitClick,

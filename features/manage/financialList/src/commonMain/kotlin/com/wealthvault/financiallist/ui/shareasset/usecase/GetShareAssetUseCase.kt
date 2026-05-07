@@ -25,28 +25,31 @@ class GetShareAssetUseCase(
             val allGroups = groupDeferred.await().getOrNull() ?: emptyList()
             val allFriends = friendDeferred.await().getOrNull() ?: emptyList()
 
-            val sharedGroupIds = shareTargets?.groups?.map { it.groupId }?.toSet() ?: emptySet()
-            val sharedFriendIds = shareTargets?.friends?.map { it.friendId }?.toSet() ?: emptySet()
+            // 🌟 เปลี่ยนจาก .toSet() เป็นเอามาจับคู่เป็น Map(id -> data) เพื่อให้เข้าถึง sharedAt ได้
+            val sharedGroupsMap = shareTargets?.groups?.associateBy { it.groupId } ?: emptyMap()
+            val sharedFriendsMap = shareTargets?.friends?.associateBy { it.friendId } ?: emptyMap()
 
             val mappedGroups = allGroups.map { group ->
+                val sharedData = sharedGroupsMap[group.id] // ดูว่ากลุ่มนี้เคยแชร์หรือยัง
                 GroupTargetModel(
                     groupId = group.id ?: "",
                     groupName = group.groupName ?: "",
-                    // 🌟 2. ดึงรูปภาพและจำนวนคนมา Map ให้ UI ใช้ (เช็กชื่อตัวแปร group.memberCount ให้ตรงกับ API จริง)
                     memberCount = group.memberCount ?: 0,
                     groupProfile = group.groupProfile,
-                    isShared = sharedGroupIds.contains(group.id)
+                    isShared = sharedData != null, // ถ้ามีค่าแปลว่าแชร์แล้ว
+                    sharedAt = sharedData?.sharedAt // 🌟 ดึงค่า sharedAt จาก API มาใส่
                 )
             }
 
             val mappedFriends = allFriends.map { friend ->
+                val sharedData = sharedFriendsMap[friend.id] // ดูว่าเพื่อนคนนี้เคยแชร์หรือยัง
                 FriendTargetModel(
                     friendId = friend.id ?: "",
                     friendName = friend.username ?: "",
-                    // 🌟 3. ดึงอีเมลและรูปโปรไฟล์มา Map ให้ UI ใช้ (เช็กชื่อตัวแปร friend.email ให้ตรงกับ API จริง)
                     email = friend.email ?: "",
                     profile = friend.profile,
-                    isShared = sharedFriendIds.contains(friend.id)
+                    isShared = sharedData != null,
+                    sharedAt = sharedData?.sharedAt // 🌟 ดึงค่า sharedAt จาก API มาใส่
                 )
             }
 

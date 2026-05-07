@@ -159,9 +159,10 @@ fun ShareAssetContent(
                     name = friend.friendName,
                     userId = friend.friendId,
                     typeData = "F",
-                    subText = friend.email, // โชว์อีเมล
+                    subText = friend.email,
                     profileUrl = friend.profile,
-                    isShared = true
+                    isShared = true,
+                    date = friend.sharedAt // 🌟 ยัดค่า sharedAt ใส่ตรงนี้
                 )
             )
         }
@@ -173,9 +174,10 @@ fun ShareAssetContent(
                     name = group.groupName,
                     userId = group.groupId,
                     typeData = "G",
-                    subText = "${group.memberCount}", // โชว์จำนวนสมาชิก
+                    subText = "${group.memberCount}",
                     profileUrl = group.groupProfile,
-                    isShared = true
+                    isShared = true,
+                    date = group.sharedAt // 🌟 ยัดค่า sharedAt ใส่ตรงนี้
                 )
             )
         }

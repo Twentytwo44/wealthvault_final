@@ -3,6 +3,7 @@ package com.wealthvault.login.ui
 // Import ของที่เราต้องใช้
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,12 +17,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -38,7 +42,10 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -167,7 +174,7 @@ fun LoginContent(
                             Text(
                                 text = "อีเมล",
                                 color = LightPrimary, // 🌟 กลับไปใช้สีเดิม ไม่แดงแล้ว
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.bodyLarge
                             )
 
                             // 🌟 แสดง Error ตรงมุมขวาบน
@@ -180,22 +187,44 @@ fun LoginContent(
                             }
                         }
 
-                        OutlinedTextField(
+                        BasicTextField(
                             value = username,
                             onValueChange = onUsernameChange,
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(percent = 30),
                             singleLine = true,
-                            leadingIcon = {
-                                Icon(painterResource(Res.drawable.ic_auth_email), contentDescription = "email", tint = LightPrimary, modifier = Modifier.size(26.dp))
-                            },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = LightSurface,
-                                unfocusedContainerColor = LightSurface,
-                                focusedBorderColor = LightPrimary,
-                                unfocusedBorderColor = LightBorder
-                                // 🌟 เอาพวก errorBorderColor ออกหมดแล้ว
-                            )
+                            textStyle = LocalTextStyle.current.copy(color = Color.Black), // 🌟 สีตัวหนังสือ
+                            cursorBrush = SolidColor(LightPrimary), // 🌟 สีเคอร์เซอร์กระพริบ
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp), // 🌟 ล็อกความสูง 50.dp ได้สบายๆ
+                            decorationBox = { innerTextField ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(LightSurface, RoundedCornerShape(percent = 30))
+                                        .border(1.dp, LightBorder, RoundedCornerShape(percent = 30))
+                                        .padding(horizontal = 16.dp), // 🌟 ระยะห่างซ้าย-ขวา ด้านใน
+                                    verticalAlignment = Alignment.CenterVertically // 🌟 ดันทุกอย่างให้อยู่กึ่งกลางพอดีเป๊ะ
+                                ) {
+                                    // Leading Icon
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_auth_email),
+                                        contentDescription = "email",
+                                        tint = LightPrimary,
+                                        modifier = Modifier.size(26.dp)
+                                    )
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    // ช่องพิมพ์ข้อความ
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        if (username.isEmpty()) {
+                                            // Placeholder (ข้อความจางๆ ตอนยังไม่พิมพ์)
+                                            Text("อีเมล", color = Color.Gray)
+                                        }
+                                        innerTextField() // 🌟 ตัวควบคุมการพิมพ์ข้อความจะอยู่ตรงนี้
+                                    }
+                                }
+                            }
                         )
                     }
 
@@ -207,32 +236,65 @@ fun LoginContent(
                         Text(
                             text = "รหัสผ่าน",
                             color = LightPrimary, // 🌟 กลับไปใช้สีเดิม ไม่แดงแล้ว
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
                         )
-                        OutlinedTextField(
+                        BasicTextField(
                             value = password,
                             onValueChange = onPasswordChange,
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(percent = 30),
                             singleLine = true,
-                            visualTransformation = if (isPasswordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
-                            leadingIcon = {
-                                Icon(painterResource(Res.drawable.ic_auth_lock), contentDescription = "lock", tint = LightPrimary, modifier = Modifier.size(26.dp))
-                            },
-                            trailingIcon = {
-                                val icon = if (isPasswordVisible) painterResource(Res.drawable.ic_auth_eye) else painterResource(Res.drawable.ic_auth_eye_slash)
-                                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                                    Icon(painter = icon, contentDescription = "Toggle Password Visibility", tint = LightPrimary, modifier = Modifier.size(24.dp))
+                            // 🌟 ส่วนสำคัญ: จัดการการซ่อน/แสดงรหัสผ่าน
+                            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            textStyle = LocalTextStyle.current.copy(color = Color.Black),
+                            cursorBrush = SolidColor(LightPrimary),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp), // 🌟 สูง 50.dp ตามที่ต้องการ
+                            decorationBox = { innerTextField ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(LightSurface, RoundedCornerShape(percent = 30))
+                                        .border(1.dp, LightBorder, RoundedCornerShape(percent = 30))
+                                        .padding(start = 16.dp, end = 8.dp), // 🌟 ลด padding ขวาหน่อยเพื่อให้ปุ่มลูกตาไม่ห่างเกิน
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Leading Icon (แม่กุญแจ)
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_auth_lock),
+                                        contentDescription = "lock",
+                                        tint = LightPrimary,
+                                        modifier = Modifier.size(26.dp)
+                                    )
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    // ช่องกรอกรหัสผ่าน
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        if (password.isEmpty()) {
+                                            Text("รหัสผ่าน", color = Color.Gray)
+                                        }
+                                        innerTextField()
+                                    }
+
+                                    // Trailing Icon (ปุ่มลูกตา)
+                                    val icon = if (isPasswordVisible) painterResource(Res.drawable.ic_auth_eye)
+                                    else painterResource(Res.drawable.ic_auth_eye_slash)
+
+                                    IconButton(
+                                        onClick = { isPasswordVisible = !isPasswordVisible },
+                                        modifier = Modifier.size(48.dp) // ขนาดปุ่มมาตรฐานเพื่อให้กดง่าย
+                                    ) {
+                                        Icon(
+                                            painter = icon,
+                                            contentDescription = "Toggle Password Visibility",
+                                            tint = LightPrimary,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
                                 }
-                            },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = LightSurface,
-                                unfocusedContainerColor = LightSurface,
-                                focusedBorderColor = LightPrimary,
-                                unfocusedBorderColor = LightBorder
-                                // 🌟 เอาพวก errorBorderColor ออกหมดแล้ว
-                            )
+                            }
                         )
                     }
 

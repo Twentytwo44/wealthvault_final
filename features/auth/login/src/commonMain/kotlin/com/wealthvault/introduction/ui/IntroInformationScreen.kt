@@ -1,6 +1,5 @@
 package com.wealthvault.introduction.ui // ถ้าอยากย้าย package ไปโฟลเดอร์ ic_nav_profile ก็เปลี่ยนตรงนี้ได้นะครับ
 
-// Import Theme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,26 +16,35 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSurface
 import com.wealthvault.core.theme.WvBgGradientStart
-
+import org.jetbrains.compose.resources.painterResource
 
 class IntroQuestionScreen() : Screen {
     @Composable
@@ -52,10 +60,10 @@ class IntroQuestionScreen() : Screen {
             onDobChange = {},
             onBackClick = {},
             onNextClick = {}
-
         )
     }
 }
+
 @Composable
 fun IntroQuestionContent(
     firstName: String,
@@ -82,10 +90,18 @@ fun IntroQuestionContent(
                     .padding(horizontal = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // TODO: ใส่ Icon ย้อนกลับตรงนี้
+                // 🌟 ใส่ Icon ย้อนกลับให้เหมือนหน้าอื่นๆ
+                Icon(
+                    painter = painterResource(Res.drawable.ic_common_back),
+                    contentDescription = "Back",
+                    tint = LightPrimary,
+                    modifier = Modifier.size(24.dp).clickable { onBackClick() }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "< ย้อนกลับ",
+                    text = "ย้อนกลับ",
                     color = LightPrimary,
+                    fontSize = 16.sp,
                     modifier = Modifier.clickable { onBackClick() }
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -93,13 +109,13 @@ fun IntroQuestionContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- ส่วนเนื้อหาฟอร์ม (ใส่ Scroll เผื่อคีย์บอร์ดบังจอ) ---
+            // --- ส่วนเนื้อหาฟอร์ม ---
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .verticalScroll(rememberScrollState()), // 💡 เพิ่ม Scroll ป้องกันคีย์บอร์ดบังปุ่ม
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -138,30 +154,14 @@ fun IntroQuestionContent(
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // ช่องกรอกข้อมูลต่างๆ
+                // 🌟 เปลี่ยนมาเรียกใช้ InputField ตัวใหม่
                 InputField(label = "ชื่อจริง", value = firstName, onValueChange = onFirstNameChange, primaryColor = LightPrimary, inputBgColor = LightSurface, borderColor = LightBorder)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputField(label = "นามสกุล", value = lastName, onValueChange = onLastNameChange, primaryColor = LightPrimary, inputBgColor = LightSurface, borderColor = LightBorder)
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "วันเกิด", color = LightPrimary, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp, start = 8.dp))
-                    OutlinedTextField(
-                        value = dob,
-                        onValueChange = onDobChange,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(percent = 30),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = LightSurface, unfocusedContainerColor = LightSurface,
-                            focusedBorderColor = LightPrimary, unfocusedBorderColor = LightBorder,
-                        )
-                    )
-                }
-
+                InputField(label = "วันเกิด", value = dob, onValueChange = onDobChange, primaryColor = LightPrimary, inputBgColor = LightSurface, borderColor = LightBorder)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InputField(label = "เบอร์โทร", value = phoneNum, onValueChange = onPhoneNumChange, primaryColor = LightPrimary, inputBgColor = LightSurface, borderColor = LightBorder)
@@ -191,24 +191,43 @@ fun IntroQuestionContent(
     }
 }
 
-// Widget ช่วยสร้างช่องกรอกข้อความ
+// 🌟 อัปเดต Widget ช่วยสร้างช่องกรอกข้อความ เป็น BasicTextField
 @Composable
 fun InputField(label: String, value: String, onValueChange: (String) -> Unit, primaryColor: Color, inputBgColor: Color, borderColor: Color) {
+    // State สำหรับจับว่าช่องนี้กำลังถูกกดพิมพ์อยู่หรือเปล่า (เพื่อเปลี่ยนสีกรอบ)
+    var isFocused by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = label, color = primaryColor, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp, start = 8.dp))
-        OutlinedTextField(
+
+        BasicTextField(
             value = value,
             onValueChange = onValueChange,
+            singleLine = true,
+            textStyle = LocalTextStyle.current.copy(color = Color.Black, fontSize = 16.sp),
+            cursorBrush = SolidColor(primaryColor),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(percent = 30),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = inputBgColor, unfocusedContainerColor = inputBgColor,
-                focusedBorderColor = primaryColor, unfocusedBorderColor = borderColor,
-            )
+                .height(50.dp) // 🌟 ล็อกความสูง 50.dp ไม่ให้จม
+                .onFocusChanged { isFocused = it.isFocused },
+            decorationBox = { innerTextField ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(inputBgColor, RoundedCornerShape(percent = 30))
+                        .border(
+                            width = 1.dp,
+                            color = if (isFocused) primaryColor else borderColor, // 🌟 เปลี่ยนสีกรอบตอนกดพิมพ์
+                            shape = RoundedCornerShape(percent = 30)
+                        )
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically // 🌟 จัดตัวหนังสือให้อยู่กึ่งกลางเป๊ะ
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        innerTextField()
+                    }
+                }
+            }
         )
     }
 }
-

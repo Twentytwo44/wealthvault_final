@@ -1,6 +1,7 @@
 package com.wealthvault.forgetpassword.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,14 +14,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +37,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -108,6 +111,8 @@ fun ForgetPasswordContent(
     onBackClick: () -> Unit,
     onSendOtpClick: () -> Unit
 ) {
+    val errorColor = Color(0xFFE53935)
+
     WavyBackground {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(24.dp)) {
             Icon(painter = painterResource(Res.drawable.ic_common_back), contentDescription = "Back", tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onBackClick() })
@@ -117,7 +122,7 @@ fun ForgetPasswordContent(
             Text(text = "กรุณากรอกอีเมลที่ลงทะเบียนไว้\nเพื่อรับรหัสยืนยัน (OTP)", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
             Spacer(modifier = Modifier.height(48.dp))
 
-            // 🌟 ปรับแต่งช่องกรอกอีเมลให้แสดง Error ได้
+            // 🌟 ปรับแต่งช่องกรอกอีเมลให้แสดง Error ได้ และไม่จมขอบ
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
@@ -134,7 +139,7 @@ fun ForgetPasswordContent(
                     if (errorMessage != null) {
                         Text(
                             text = errorMessage,
-                            color = Color(0xFFE53935), // สีแดงแจ้งเตือน
+                            color = errorColor, // สีแดงแจ้งเตือน
                             style = MaterialTheme.typography.labelSmall,
                             textAlign = TextAlign.End,
                             modifier = Modifier.weight(1f).padding(start = 8.dp)
@@ -142,22 +147,45 @@ fun ForgetPasswordContent(
                     }
                 }
 
-                OutlinedTextField(
+                BasicTextField(
                     value = email,
                     onValueChange = onEmailChange,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(percent = 30),
                     singleLine = true,
-                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_auth_email), contentDescription = "email", tint = LightPrimary, modifier = Modifier.size(30.dp)) },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = LightSurface,
-                        unfocusedContainerColor = LightSurface,
-                        focusedBorderColor = LightPrimary,
-                        unfocusedBorderColor = LightBorder,
-                        errorBorderColor = Color(0xFFE53935), // 🌟 เส้นขอบแดง
-                        errorLeadingIconColor = Color(0xFFE53935) // 🌟 ไอคอนแดง
-                    ),
-                    isError = errorMessage != null // 🌟 แจ้งสถานะเปิดกรอบแดง
+                    textStyle = LocalTextStyle.current.copy(color = Color.Black),
+                    cursorBrush = SolidColor(if (errorMessage != null) errorColor else LightPrimary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp), // 🌟 ล็อกความสูง 50.dp
+                    decorationBox = { innerTextField ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(LightSurface, RoundedCornerShape(percent = 30))
+                                .border(
+                                    width = 1.dp,
+                                    color = if (errorMessage != null) errorColor else LightBorder, // 🌟 สลับสีตอนมี Error
+                                    shape = RoundedCornerShape(percent = 30)
+                                )
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically // 🌟 คุมตัวหนังสือให้อยู่ตรงกลาง ไม่จมขอบ
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_auth_email),
+                                contentDescription = "email",
+                                tint = if (errorMessage != null) errorColor else LightPrimary, // 🌟 สลับสีไอคอนตอนมี Error
+                                modifier = Modifier.size(26.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Box(modifier = Modifier.weight(1f)) {
+                                if (email.isEmpty()) {
+                                    Text("อีเมล", color = Color.Gray)
+                                }
+                                innerTextField()
+                            }
+                        }
+                    }
                 )
             }
             Spacer(modifier = Modifier.height(40.dp))
