@@ -34,6 +34,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +56,7 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.core.utils.formatThaiDate // 🌟 Import ฟังก์ชันแปลงวันที่แบบไทย
+import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
@@ -73,10 +74,15 @@ class ExpenseFormScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { ExpenseScreenModel() }
 
+        // 🌟 1. ดึง State ออกมา
+        val state by screenModel.state.collectAsState()
+
         ExpenseInputForm(
+            initialData = state, // 🌟 2. โยนค่าเริ่มต้นเข้าไปในฟอร์ม
             onBackClick = { navigator.pop() },
             onNextClick = { data ->
                 screenModel.updateForm(data)
+                // 🌟 ส่ง data ที่อัปเดตแล้วไปเลยเพื่อความชัวร์
                 navigator.push(ShareAssetScreen(request = data))
             }
         )
@@ -86,20 +92,26 @@ class ExpenseFormScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseInputForm(
+    initialData: ExpenseModel, // 🌟 รับ initialData เข้ามา
     onBackClick: () -> Unit = {},
     onNextClick: (ExpenseModel) -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var principal by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    // 🌟 ดึงค่าจาก initialData มาใส่ตั้งต้น
+    var name by remember { mutableStateOf(initialData.name) }
+    var description by remember { mutableStateOf(initialData.description) }
+
+    // เรื่องตัวเลข ถ้าเป็น 0.0 ให้แสดงหน้าว่างๆ
+    var principal by remember { mutableStateOf(if (initialData.principal == 0.0) "" else initialData.principal.toString()) }
 
     // 🌟 จัดการ State ปฏิทิน
-    var statedAt by remember { mutableStateOf("") } // โชว์บน UI (พ.ศ.)
-    var apiStartedAt by remember { mutableStateOf("") } // ส่ง Backend (YYYY-MM-DD)
+    var apiStartedAt by remember { mutableStateOf(initialData.startedAt) } // ส่ง Backend
+    var statedAt by remember { mutableStateOf(if (initialData.startedAt.isNotBlank()) formatThaiDate(initialData.startedAt) else "") } // โชว์บน UI
+
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
-    val attachments = remember { mutableStateListOf<Attachment>() }
+    // 🌟 ดึงไฟล์แนบเดิมกลับมา
+    val attachments = remember { mutableStateListOf<Attachment>().apply { addAll(initialData.attachments) } }
     val filePicker = rememberFilePicker { newFiles -> attachments.addAll(newFiles) }
 
     // 🌟 เช็คข้อมูลจำเป็น
@@ -139,7 +151,7 @@ fun ExpenseInputForm(
                             name = name,
                             type = "LIABILITY_TYPE_EXPENSE",
                             principal = principal.toDoubleOrNull() ?: 0.0,
-                            interestRate = "", // ค่าใช้จ่ายอาจจะไม่มีดอกเบี้ย ส่งว่างไว้ตามโครงสร้างเดิม
+                            interestRate = "",
                             startedAt = apiStartedAt, // 🌟 ส่งตัว YYYY-MM-DD ให้ Backend
                             endedAt = "",
                             creditor = "",
@@ -151,7 +163,7 @@ fun ExpenseInputForm(
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = isFormValid // 🌟 เปิดปุ่มเฉพาะตอนกรอกครบ
+                    enabled = isFormValid
                 ) {
                     Text("ต่อไป", style = MaterialTheme.typography.titleMedium, color = Color.White)
                 }
@@ -169,7 +181,6 @@ fun ExpenseInputForm(
 
             CustomTextField(value = name, onValueChange = { name = it }, label = "ผู้ให้บริการ / ชื่อรายการ*", placeholder = "กรอกชื่อรายการ")
 
-            // 🌟 จำนวนเงิน (กรอกได้แค่ตัวเลขและทศนิยม)
             CustomTextField(
                 value = principal,
                 onValueChange = { if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) principal = it },
@@ -178,23 +189,21 @@ fun ExpenseInputForm(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            // 🌟 วันที่เริ่มต้น
             CustomTextField(
                 value = statedAt,
                 onValueChange = { },
                 label = "วันที่เริ่มสัญญา*",
-                placeholder = "เลือกวันที่", // 🌟 เปลี่ยน placeholder ให้น่าใช้ขึ้น
+                placeholder = "เลือกวันที่",
                 readOnly = true,
                 trailingIcon = {
                     Icon(
                         painter = painterResource(Res.drawable.ic_common_calendar),
                         contentDescription = "Calendar",
                         tint = LightPrimary,
-                        modifier = Modifier
-                            .size(24.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 },
-                onClick = { showDatePicker = true } // เปิดปฏิทินเมื่อกด
+                onClick = { showDatePicker = true }
             )
 
             CustomTextField(value = description, onValueChange = { description = it }, label = "คำอธิบาย", placeholder = "รายละเอียดเพิ่มเติม", isMultiLine = true)
@@ -257,7 +266,7 @@ fun ExpenseInputForm(
     }
 }
 
-// 🌟 Component ย่อย CustomTextField สร้างไว้ในไฟล์เพื่อป้องกันผลกระทบกับไฟล์อื่น
+// 🌟 Component ย่อย CustomTextField
 @Composable
 fun CustomTextField(
     value: String,

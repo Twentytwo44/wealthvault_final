@@ -50,13 +50,9 @@ class ExpenseSummaryScreenModel(
         // ✅ Map ข้อมูลให้มีทั้ง Byte, MimeType และ ชื่อไฟล์
         val allFiles = current?.attachments?.mapNotNull { attachment ->
             val bytes = attachment.platformData as? ByteArray ?: return@mapNotNull null
-
-            // เช็กว่าเป็น PDF หรือ รูปภาพ
             val isPdf = attachment.name.endsWith(".pdf", ignoreCase = true) || attachment.type.toString().contains("PDF")
             val mimeType = if (isPdf) "application/pdf" else "image/jpeg"
             val extension = if (isPdf) "pdf" else "jpg"
-
-            // ตั้งชื่อไฟล์ (เอา symbol มาต่อกับ index หรือเวลาเพื่อไม่ให้ซ้ำ)
             val fileName = "${current.name}.$extension"
 
             LiabilityUploadData(bytes = bytes, mimeType = mimeType, fileName = fileName)
@@ -65,72 +61,76 @@ class ExpenseSummaryScreenModel(
         return LiabilityRequest(
             name = current?.name ?: "",
             type = "LIABILITY_TYPE_EXPENSE",
-            description = current?.description ?: "",
-            startedAt = current?.startedAt ?: "",
-            endedAt ="",
-            creditor = "",
-            interestRate = "",
+
+            // 🌟 กันเหนียวด้วย .takeIf เผื่อ Backend ไม่รับค่าว่าง String ("")
+            description = current?.description?.takeIf { it.isNotBlank() },
+            startedAt = current?.startedAt?.takeIf { it.isNotBlank() },
+            endedAt = null,
+            creditor = null,
+            interestRate = null,
+
             principal = current?.principal ?: 0.0,
             files = allFiles
         )
     }
-
-
 
     fun submitExpense(onSuccess: () -> Unit) {
         val shareToData = _state.value.shareTo ?: return
 
         screenModelScope.launch {
             try {
-                // 🌟 1. อัปเดต StateFlow เพื่อให้ UI แสดง Spinner โหลดที่ปุ่มได้ถูกต้อง
                 _state.update { it.copy(isLoading = true) }
                 errorMessage = null
 
-                // --- ขั้นตอนที่ 1: สร้าง Expense ก่อน ---
+                // --- ขั้นตอนที่ 1: สร้าง Expense ---
                 val requestBody = asRequest()
                 val expenseResult = expenseRepository.createLiability(requestBody)
-
-                // ดึงข้อมูลออกมาจาก Result Wrapper
                 val expenseResponse = expenseResult.getOrNull()
 
                 if (expenseResult.isSuccess && expenseResponse != null) {
-                    // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Expense
                     val createdItemId = expenseResponse.id.toString()
                     println("✅ [ScreenModel] Expense Created ID: $createdItemId")
 
-                    // 🚨 ลบ delay(10000) ทิ้งไปแล้ว! กดปุ๊บโหลดปั๊บ ไม่ต้องรอ 10 วิอีกต่อไป
-
-                    // --- ขั้นตอนที่ 2: เตรียมข้อมูลเพื่อ Share โดยใช้ ID ที่เพิ่งได้มา ---
-                    // 💡 เช็กก่อนว่ามีการเลือกคนแชร์หรือไม่ ถ้าไม่มีจะได้ข้าม API แชร์ไปเลย ช่วยให้เร็วขึ้นอีก
+                    // --- ขั้นตอนที่ 2: เตรียมข้อมูล Share ---
                     val hasShareData = shareToData.email.isNotEmpty() ||
                             shareToData.friend.isNotEmpty() ||
                             shareToData.group.isNotEmpty()
 
                     if (hasShareData) {
                         val requestShareItem = ShareItemRequest(
-                            itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
-                            itemTypes = "expense",   // 💡 ส่งประเภทเป็น expense ตามเดิม
-                            emails = shareToData.email.map { TargetItem(id = it.name, shareAt = shareToData.shareAt) },
-                            friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) },
-                            groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) }
+                            itemIds = createdItemId,
+
+                            // 🌟 แก้ตรงนี้เลยครับ! เปลี่ยนจาก "expense" เป็น "liability"
+                            itemTypes = "liability",
+
+                            emails = shareToData.email.map { TargetItem(id = it.userId, shareAt = it.apiDate) },
+                            friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = it.apiDate) },
+                            groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = it.apiDate) }
                         )
 
                         // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
                         val shareResult = shareItemRepository.shareItem(requestShareItem)
-                        println(" [SummaryScreenModel] Share result: $shareResult")
+
+                        // 🌟 เช็กผลลัพธ์การแชร์ให้ชัดเจน
+                        if (shareResult.isSuccess) {
+                            println("✅ [ScreenModel] Share Success!")
+                        } else {
+                            val shareErr = shareResult.exceptionOrNull()?.message ?: "Unknown Error"
+                            println("❌ [ScreenModel] Share Failed!: $shareErr")
+                        }
                     }
 
-                    // 🌟 ส่งสัญญาณกลับไปหน้า UI ให้เด้งกลับหน้าแรก
+                    // ส่งสัญญาณกลับไปหน้า UI
                     onSuccess()
                 } else {
-                    println("❌ [ScreenModel] Create Expense Failed")
+                    val createErr = expenseResult.exceptionOrNull()?.message ?: "Unknown Error"
+                    println("❌ [ScreenModel] Create Expense Failed: $createErr")
                 }
 
             } catch (e: Exception) {
                 println("❌ [ScreenModel] Exception: ${e.message}")
                 errorMessage = e.message ?: "เกิดข้อผิดพลาดในการเชื่อมต่อ"
             } finally {
-                // 🌟 2. อัปเดต StateFlow ปิดปุ่มโหลด
                 _state.update { it.copy(isLoading = false) }
                 println("🏁 [ScreenModel] Process Finished.")
             }

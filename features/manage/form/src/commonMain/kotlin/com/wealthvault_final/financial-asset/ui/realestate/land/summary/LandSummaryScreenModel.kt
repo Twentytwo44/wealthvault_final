@@ -71,20 +71,22 @@ class LandSummaryScreenModel(
             name = current?.landName ?: "",
             area = current?.area ?: 0.0,
             amount = current?.amount ?: 0.0,
-            description = current?.description ?: "",
-            locationAddress = current?.locationAddress ?: "",
-            locationSubDistrict = current?.locationSubDistrict ?: "",
-            locationDistrict = current?.locationDistrict ?: "",
-            locationProvince = current?.locationProvince ?: "",
-            locationPostalCode = current?.locationPostalCode ?: "",
-            files = allFiles,
-            referenceIds = allRefIds,
-            deedNum = current?.deedNum ?: ""
 
+            // 🌟 ใช้ .takeIf { it.isNotBlank() } เพื่อถ้าเป็นค่าว่างให้เปลี่ยนเป็น null
+            description = current?.description?.takeIf { it.isNotBlank() },
+            locationAddress = current?.locationAddress?.takeIf { it.isNotBlank() },
+            locationSubDistrict = current?.locationSubDistrict?.takeIf { it.isNotBlank() },
+            locationDistrict = current?.locationDistrict?.takeIf { it.isNotBlank() },
+            locationProvince = current?.locationProvince?.takeIf { it.isNotBlank() },
+            locationPostalCode = current?.locationPostalCode?.takeIf { it.isNotBlank() },
+
+            // เลขโฉนดก็อาจจะว่างได้ ถ้าไม่ได้บังคับให้กรอกก็ใส่ไว้ด้วยครับ
+            deedNum = current?.deedNum?.takeIf { it.isNotBlank() },
+
+            files = allFiles,
+            referenceIds = allRefIds
         )
     }
-
-
 
     fun submitLand(onSuccess: () -> Unit) {
         val shareToData = _state.value.shareTo ?: return
@@ -107,21 +109,19 @@ class LandSummaryScreenModel(
                     val createdItemId = landResponse.id.toString()
                     println("✅ [ScreenModel] Land Created ID: $createdItemId")
 
-                    // 🚨 ลบ delay(10000) ทิ้งไปแล้ว! กดปุ๊บโหลดปั๊บ ไม่ค้าง 10 วิอีกแล้ว
-
                     // --- ขั้นตอนที่ 2: เตรียมข้อมูลเพื่อ Share โดยใช้ ID ที่เพิ่งได้มา ---
-                    // 💡 เช็กก่อนว่ามีการเลือกคนแชร์หรือไม่ ถ้าไม่มีจะได้ข้าม API แชร์ไปเลย
                     val hasShareData = shareToData.email.isNotEmpty() ||
                             shareToData.friend.isNotEmpty() ||
                             shareToData.group.isNotEmpty()
 
                     if (hasShareData) {
                         val requestShareItem = ShareItemRequest(
-                            itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
-                            itemTypes = "land", // 💡 ส่งประเภทเป็น land
-                            emails = shareToData.email.map { TargetItem(id = it.name, shareAt = shareToData.shareAt) },
-                            friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) },
-                            groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) }
+                            itemIds = createdItemId,
+                            itemTypes = "land",
+
+                            emails = shareToData.email.map { TargetItem(id = it.userId, shareAt = it.apiDate) },
+                            friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = it.apiDate) },
+                            groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = it.apiDate) }
                         )
 
                         // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
@@ -132,7 +132,10 @@ class LandSummaryScreenModel(
                     // 🌟 ส่งสัญญาณกลับไปหน้า UI ให้เด้งกลับหน้าแรก
                     onSuccess()
                 } else {
-                    println("❌ [ScreenModel] Create Land Failed")
+                    // 🌟 ดึงข้อความ Error จริงๆ จากระบบออกมาดูเผื่อมีปัญหาอื่นอีก
+                    val errorDetail = landResult.exceptionOrNull()?.message ?: "ไม่ทราบสาเหตุ"
+                    println("❌ [ScreenModel] Create Land Failed!")
+                    println("🚨 รายละเอียด Error: $errorDetail")
                 }
 
             } catch (e: Exception) {
@@ -144,6 +147,7 @@ class LandSummaryScreenModel(
                 println("🏁 [ScreenModel] Process Finished.")
             }
         }
+
     }
 
 

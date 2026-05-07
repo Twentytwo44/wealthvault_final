@@ -49,18 +49,13 @@ class BuildingSummaryScreenModel(
     private fun asRequest(): BuildingRequest {
         val current = _state.value.buildingRequest
 
-        // ✅ Map ข้อมูลให้มีทั้ง Byte, MimeType และ ชื่อไฟล์
+        // ✅ Map ข้อมูลไฟล์
         val allFiles = current?.attachments?.mapNotNull { attachment ->
             val bytes = attachment.platformData as? ByteArray ?: return@mapNotNull null
-
-            // เช็กว่าเป็น PDF หรือ รูปภาพ
             val isPdf = attachment.name.endsWith(".pdf", ignoreCase = true) || attachment.type.toString().contains("PDF")
             val mimeType = if (isPdf) "application/pdf" else "image/jpeg"
             val extension = if (isPdf) "pdf" else "jpg"
-
-            // ตั้งชื่อไฟล์ (เอา symbol มาต่อกับ index หรือเวลาเพื่อไม่ให้ซ้ำ)
             val fileName = "${current.buildingName}.$extension"
-
             BuildingFileUploadData(bytes = bytes, mimeType = mimeType, fileName = fileName)
         } ?: emptyList()
 
@@ -76,12 +71,15 @@ class BuildingSummaryScreenModel(
             type = current?.type ?: "",
             area = current?.area ?: 0.0,
             amount = current?.amount ?: 0.0,
-            description = current?.description ?: "",
-            locationAddress = current?.locationAddress ?: "",
-            locationSubDistrict = current?.locationSubDistrict ?: "",
-            locationDistrict = current?.locationDistrict ?: "",
-            locationProvince = current?.locationProvince ?: "",
-            locationPostalCode = current?.locationPostalCode ?: "",
+
+            // 🌟 ใช้ .takeIf { it.isNotBlank() } เพื่อบอกว่า "ถ้าว่าง = ไม่ต้องส่ง (null)"
+            description = current?.description?.takeIf { it.isNotBlank() },
+            locationAddress = current?.locationAddress?.takeIf { it.isNotBlank() },
+            locationSubDistrict = current?.locationSubDistrict?.takeIf { it.isNotBlank() },
+            locationDistrict = current?.locationDistrict?.takeIf { it.isNotBlank() },
+            locationProvince = current?.locationProvince?.takeIf { it.isNotBlank() },
+            locationPostalCode = current?.locationPostalCode?.takeIf { it.isNotBlank() },
+
             insIds = allInsRefIds,
             files = allFiles,
             referenceIds = allRefIds
@@ -121,11 +119,23 @@ class BuildingSummaryScreenModel(
 
                     if (hasShareData) {
                         val requestShareItem = ShareItemRequest(
-                            itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
-                            itemTypes = "building", // 💡 ประเภทส่งเป็น building ถูกต้องแล้ว
-                            emails = shareToData.email.map { TargetItem(id = it.name, shareAt = shareToData.shareAt) },
-                            friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) },
-                            groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) }
+                            itemIds = createdItemId,
+                            itemTypes = "building",
+
+                            // 🌟 1. แก้ email ให้ส่ง it.userId (ถ้า userId เก็บชื่ออีเมลไว้) และใช้วันที่ของแต่ละคน (it.apiDate)
+                            emails = shareToData.email.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 2. ดึงวันที่ของเพื่อนแต่ละคน (it.apiDate) แบบเจาะจง
+                            friends = shareToData.friend.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 3. ดึงวันที่ของกลุ่มแต่ละกลุ่ม (it.apiDate)
+                            groups = shareToData.group.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            }
                         )
 
                         // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---

@@ -24,9 +24,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -87,14 +84,19 @@ class BuildingFormScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<BuildingScreenModel>()
+
+        // 🌟 1. ดึง State ออกมา
+        val state by screenModel.state.collectAsState()
         val landState by screenModel.LandState.collectAsState()
         val insState by screenModel.InsState.collectAsState()
 
         BuildingInputForm(
+            initialData = state, // 🌟 2. โยนค่าเริ่มต้นเข้าไปในฟอร์ม
             onBackClick = { navigator.pop() },
             onNextClick = { data ->
                 screenModel.updateForm(data)
-                navigator.push(ShareAssetScreen(request = screenModel.state.value))
+                // 🌟 ส่ง data ไปโดยตรงเพื่อความชัวร์ว่าข้อมูลล่าสุดจะถูกส่งไป
+                navigator.push(ShareAssetScreen(request = data))
             },
             landData = landState,
             insData = insState
@@ -105,31 +107,45 @@ class BuildingFormScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BuildingInputForm(
+    initialData: BuildingModel, // 🌟 รับ initialData เข้ามา
     onBackClick: () -> Unit = {},
     onNextClick: (BuildingModel) -> Unit,
     insData: List<GetInsuranceData>,
     landData: List<GetLandData>
 ) {
-    var type by remember { mutableStateOf("") }
-    var buildingName by remember { mutableStateOf("") }
-    var area by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var locationAddress by remember { mutableStateOf("") }
-    var locationSubDistrict by remember { mutableStateOf("") }
-    var locationDistrict by remember { mutableStateOf("") }
-    var locationProvince by remember { mutableStateOf("") }
-    var locationPostalCode by remember { mutableStateOf("") }
+    // 🌟 ดึงค่าจาก initialData มาใส่ตั้งต้น
+    var type by remember { mutableStateOf(initialData.type) }
+    var buildingName by remember { mutableStateOf(initialData.buildingName) }
 
-    val insIds = remember { mutableStateListOf<InsRefModel>() }
-    val referenceIds = remember { mutableStateListOf<RefModel>() }
-    val attachments = remember { mutableStateListOf<Attachment>() }
+    // เรื่องตัวเลข ถ้าเป็น 0.0 ให้แสดงหน้าว่างๆ
+    var area by remember { mutableStateOf(if (initialData.area == 0.0) "" else initialData.area.toString()) }
+    var amount by remember { mutableStateOf(if (initialData.amount == 0.0) "" else initialData.amount.toString()) }
+
+    var description by remember { mutableStateOf(initialData.description) }
+    var locationAddress by remember { mutableStateOf(initialData.locationAddress) }
+    var locationSubDistrict by remember { mutableStateOf(initialData.locationSubDistrict) }
+    var locationDistrict by remember { mutableStateOf(initialData.locationDistrict) }
+    var locationProvince by remember { mutableStateOf(initialData.locationProvince) }
+    var locationPostalCode by remember { mutableStateOf(initialData.locationPostalCode) }
+
+    // 🌟 ดึงค่า List ต่างๆ กลับมาใส่ใน State
+    val insIds = remember { mutableStateListOf<InsRefModel>().apply { addAll(initialData.insIds) } }
+    val referenceIds = remember { mutableStateListOf<RefModel>().apply { addAll(initialData.referenceIds) } }
+    val attachments = remember { mutableStateListOf<Attachment>().apply { addAll(initialData.attachments) } }
 
     val filePicker = rememberFilePicker { newFiles -> attachments.addAll(newFiles) }
     var showLandSheet by remember { mutableStateOf(false) }
     var showInsSheet by remember { mutableStateOf(false) }
 
-    val isFormValid = type.isNotBlank() && buildingName.isNotBlank() && area.isNotBlank()
+    // 🌟 บังคับว่าต้องกรอกข้อมูลที่อยู่ให้ครบถึงจะให้ผ่าน
+    val isFormValid = type.isNotBlank() &&
+            buildingName.isNotBlank() &&
+            area.isNotBlank() &&
+            locationAddress.isNotBlank() &&
+            locationSubDistrict.isNotBlank() &&
+            locationDistrict.isNotBlank() &&
+            locationProvince.isNotBlank() &&
+            locationPostalCode.isNotBlank()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -179,11 +195,18 @@ fun BuildingInputForm(
                         onNextClick(data)
                     },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = LightPrimary,
+                        disabledContainerColor = LightBorder
+                    ),
                     shape = RoundedCornerShape(12.dp),
                     enabled = isFormValid
                 ) {
-                    Text("ต่อไป", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                    Text(
+                        text = "ต่อไป",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (isFormValid) Color.White else Color.Gray
+                    )
                 }
             }
         }
@@ -223,19 +246,20 @@ fun BuildingInputForm(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            AssetTextField(value = locationAddress, onValueChange = { locationAddress = it }, label = "ที่อยู่", placeholder = "บ้านเลขที่, ซอย, ถนน")
-            AssetTextField(value = locationSubDistrict, onValueChange = { locationSubDistrict = it }, label = "ตำบล / แขวง", placeholder = "ระบุตำบล")
-            AssetTextField(value = locationDistrict, onValueChange = { locationDistrict = it }, label = "อำเภอ / เขต", placeholder = "ระบุอำเภอ")
-            AssetTextField(value = locationProvince, onValueChange = { locationProvince = it }, label = "จังหวัด", placeholder = "ระบุจังหวัด")
+            // 🌟 ใส่ดอกจันให้ผู้ใช้รู้ว่าต้องกรอก
+            AssetTextField(value = locationAddress, onValueChange = { locationAddress = it }, label = "ที่อยู่*", placeholder = "บ้านเลขที่, ซอย, ถนน")
+            AssetTextField(value = locationSubDistrict, onValueChange = { locationSubDistrict = it }, label = "ตำบล / แขวง*", placeholder = "ระบุตำบล")
+            AssetTextField(value = locationDistrict, onValueChange = { locationDistrict = it }, label = "อำเภอ / เขต*", placeholder = "ระบุอำเภอ")
+            AssetTextField(value = locationProvince, onValueChange = { locationProvince = it }, label = "จังหวัด*", placeholder = "ระบุจังหวัด")
             AssetTextField(
                 value = locationPostalCode,
                 onValueChange = { if (it.isEmpty() || it.all { char -> char.isDigit() }) locationPostalCode = it },
-                label = "รหัสไปรษณีย์",
+                label = "รหัสไปรษณีย์*",
                 placeholder = "ระบุรหัสไปรษณีย์",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            // 🌟 ส่วนอ้างอิงข้อมูลที่ดิน (ปรับ Spacing ให้เป๊ะ)
+            // ส่วนอ้างอิงข้อมูลที่ดิน
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                 ReferenceSectionHeader(title = "ที่ดินอ้างอิง (โฉนด)", onAddClick = { showLandSheet = true })
                 Spacer(modifier = Modifier.height(8.dp))
@@ -268,7 +292,7 @@ fun BuildingInputForm(
                 }
             }
 
-            // 🌟 ส่วนอ้างอิงประกัน (ปรับ Spacing ให้เป๊ะ)
+            // ส่วนอ้างอิงประกัน
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                 ReferenceSectionHeader(title = "ประกันภัยอ้างอิง", onAddClick = { showInsSheet = true })
                 Spacer(modifier = Modifier.height(8.dp))
@@ -303,7 +327,6 @@ fun BuildingInputForm(
 
             AssetTextField(value = description, onValueChange = { description = it }, label = "รายละเอียดเพิ่มเติม", placeholder = "ระบุรายละเอียดเพิ่มเติม", isMultiLine = true)
 
-            // 🌟 ปรับส่วน เพิ่มข้อมูลอ้างอิง (ลบ Header ซ้ำซ้อนออก)
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                 ReferenceImagepicker(
                     attachments = attachments,

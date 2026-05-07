@@ -115,6 +115,7 @@ class ShareAssetScreen<T>(val request: T? = null) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<ShareAssetScreenModel<T>>()
 
+        val formState by screenModel.formState.collectAsState() // 🌟 ดึง State หลักมา
         val friendState by screenModel.friendState.collectAsState()
         val groupState by screenModel.groupState.collectAsState()
 
@@ -123,8 +124,10 @@ class ShareAssetScreen<T>(val request: T? = null) : Screen {
         }
 
         ShareAssetContent(
+            initialShareTo = formState.shareTo, // 🌟 โยนค่าเดิมเข้าไป
             onBackClick = { navigator.pop() },
             onNextClick = { shareTo ->
+                screenModel.saveShareInfo(shareTo) // 🌟 บันทึกคนที่เราเลือกก่อนไปหน้าสรุป
                 navigateToSummary(navigator, request, shareTo)
             },
             friendData = friendState,
@@ -177,13 +180,22 @@ fun CustomCheckbox(isSelected: Boolean, onSelectedChange: (Boolean) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShareAssetContent(
+    initialShareTo: ShareTo? = null,
     onBackClick: () -> Unit = {},
     onNextClick: (ShareTo) -> Unit = {},
     friendData: List<FriendData>,
     groupData: List<GetAllGroupData>
 ) {
-    val selectedFriends = remember { mutableStateListOf<ShareInfo>() }
-    val selectedEmails = remember { mutableStateListOf<ShareInfo>() }
+    val selectedFriends = remember {
+        mutableStateListOf<ShareInfo>().apply {
+            initialShareTo?.let { addAll(it.friend + it.group) }
+        }
+    }
+    val selectedEmails = remember {
+        mutableStateListOf<ShareInfo>().apply {
+            initialShareTo?.let { addAll(it.email) }
+        }
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -195,6 +207,7 @@ fun ShareAssetContent(
 
     // 🌟 1. State ควบคุมการแสดงผล Info Tooltip ของ "แชร์ให้คนที่ไม่มีบัญชี"
     var showEmailInfoTooltip by remember { mutableStateOf(false) }
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

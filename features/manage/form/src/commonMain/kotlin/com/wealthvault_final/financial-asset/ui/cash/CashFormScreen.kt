@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,15 +61,20 @@ class CashFormScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { CashScreenModel() }
 
+        // 🌟 1. ดึง State ปัจจุบันออกมา
+        val state by screenModel.state.collectAsState()
+
         CashInputForm(
+            initialData = state, // 🌟 2. โยนค่าเดิมเข้าไปตั้งต้นให้ฟอร์ม
             onBackClick = { navigator.pop() },
             onNextClick = { data ->
                 println("data asset input: ${data.attachments}")
-                // 1. อัปเดตข้อมูลที่รับมาจาก Form เข้าไปใน Model ก่อน
+
+                // อัปเดตข้อมูลที่รับมาจาก Form เข้าไปใน Model ก่อน
                 screenModel.updateForm(data)
 
-                // 🌟 2. แก้ BUG: ส่ง `data` (CashModel) ไปตรงๆ แทนการส่ง state.value
-                navigator.push(ShareAssetScreen(request = data))
+                // ส่งไปหน้า ShareAssetScreen ด้วย state.value ตามโครงสร้างที่ถูกต้อง
+                navigator.push(ShareAssetScreen(request = screenModel.state.value))
             }
         )
     }
@@ -77,15 +83,19 @@ class CashFormScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CashInputForm(
+    initialData: CashModel, // 🌟 รับค่าเริ่มต้น
     onBackClick: () -> Unit = {},
     onNextClick: (CashModel) -> Unit
 ) {
-    // variables
-    var cashName by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
+    // 🌟 ดึงค่าจาก initialData มาใส่ตอนเริ่มต้น แทนที่จะเริ่มด้วย ""
+    var cashName by remember { mutableStateOf(initialData.cashName) }
+    var description by remember { mutableStateOf(initialData.description) }
 
-    val attachments = remember { mutableStateListOf<Attachment>() }
+    // เรื่องตัวเลข ถ้าเป็น 0.0 ให้แสดงหน้าว่างๆ
+    var amount by remember { mutableStateOf(if (initialData.amount == 0.0) "" else initialData.amount.toString()) }
+
+    // สำหรับลิสต์ ดึงค่าเก่ามายัดใส่แบบนี้
+    val attachments = remember { mutableStateListOf<Attachment>().apply { addAll(initialData.attachments) } }
 
     val filePicker = rememberFilePicker { newFiles ->
         attachments.addAll(newFiles)

@@ -306,7 +306,7 @@ fun BuildingSelectionBottomSheet(
     BuildingData: List<GetBuildingData>
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val buildings = remember(BuildingData) { BuildingData.map { RefModel(areaName = it.name, areaId = it.id) } }
+    val buildings = remember(BuildingData) { BuildingData.map { RefModel(areaName = it.name?:"", areaId = it.id?:"") } }
     val tempSelected = remember { mutableStateListOf<RefModel>().apply { addAll(alreadySelected) } }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = Color.White) {

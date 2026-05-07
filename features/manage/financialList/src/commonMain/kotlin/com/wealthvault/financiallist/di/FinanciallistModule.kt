@@ -26,6 +26,8 @@ import com.wealthvault.financiallist.data.share.ShareItemNetworkDataSource
 import com.wealthvault.financiallist.data.share.ShareItemRepositoryImpl
 import com.wealthvault.financiallist.data.share.ShareTargetsNetworkDatasource
 import com.wealthvault.financiallist.data.share.ShareTargetsRepositoryImpl
+import com.wealthvault.financiallist.data.share.UnshareNetworkDataSource
+import com.wealthvault.financiallist.data.share.UnshareRepositoryImpl
 import com.wealthvault.financiallist.ui.asset.AssetScreenModel
 import com.wealthvault.financiallist.ui.asset.form.account.BankAccountScreenModel
 import com.wealthvault.financiallist.ui.asset.form.building.BuildingScreenModel
@@ -60,7 +62,7 @@ val financiallistModule = module {
 
 
     // share
-    factory { ShareScreenModel(get(), get()) }
+    factory { ShareScreenModel(get(), get(), get()) }
     factory { GetShareAssetUseCase(get(), get(), get()) }
 
     // friend
@@ -156,8 +158,8 @@ val financiallistModule = module {
             networkDataSource = get(),
         )
     }
-
-
+    factory { UnshareNetworkDataSource(get(), get()) }
+    single { UnshareRepositoryImpl(get(), get(), get(), get()) }
 
 
 

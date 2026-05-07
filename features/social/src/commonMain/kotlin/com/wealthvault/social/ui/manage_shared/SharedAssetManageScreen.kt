@@ -45,14 +45,11 @@ class SharedAssetManageScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        // 🌟 1. ดึง ScreenModel มาใช้
         val screenModel = getScreenModel<SharedAssetManageScreenModel>()
 
-        // 🌟 2. ติดตาม State จาก ScreenModel
         val assetList by screenModel.assetList.collectAsState()
         val isLoading by screenModel.isLoading.collectAsState()
 
-        // 🌟 3. โหลดข้อมูลเมื่อเปิดหน้าจอ
         LaunchedEffect(targetId) {
             screenModel.fetchSharedAssets(targetId, isGroup)
         }
@@ -64,14 +61,12 @@ class SharedAssetManageScreen(
             isLoading = isLoading,
             onBackClick = { navigator.pop() },
             onUnShareClick = { assetId ->
-                // 🌟 4. ส่งคำสั่งลบไปให้ ScreenModel จัดการ
                 screenModel.unShareAsset(assetId, isGroup)
             }
         )
     }
 }
 
-// 🌟 ตัว UI หลัก (เบาและสะอาดขึ้นเยอะครับ)
 @Composable
 fun SharedAssetManageContent(
     targetName: String,
@@ -79,7 +74,7 @@ fun SharedAssetManageContent(
     assetList: List<ShareGroupData>,
     isLoading: Boolean,
     onBackClick: () -> Unit,
-    onUnShareClick: (String) -> Unit // รับ Event การกดลบ
+    onUnShareClick: (String) -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
     var openedAssetId by remember { mutableStateOf<String?>(null) }
@@ -89,7 +84,6 @@ fun SharedAssetManageContent(
             .fillMaxSize()
             .statusBarsPadding()
             .padding(top = 20.dp)
-
     ) {
         SpaceTopBar(title = "การจัดการทรัพย์สิน", onBackClick = onBackClick)
         HorizontalDivider(color = themeColor.copy(alpha = 0.3f), thickness = 1.dp)
@@ -126,7 +120,8 @@ fun SharedAssetManageContent(
                         val assetName = asset.assetDetail?.name ?: "ไม่ระบุชื่อ"
                         val assetType = asset.type ?: ""
                         val imageUrl = asset.assetDetail?.image
-                        val assetValue = asset.assetDetail?.amount
+                        val assetValue = asset.assetDetail?.amount ?: asset.assetDetail?.principal
+                        val sharedAt = asset.sharedAt // 🌟 ดึงค่า sharedAt จากโมเดลส่งไปให้ Component
 
                         SharedAssetItem(
                             assetId = assetId,
@@ -134,18 +129,16 @@ fun SharedAssetManageContent(
                             assetType = assetType,
                             imageUrl = imageUrl,
                             value = assetValue,
+                            sharedAt = sharedAt, // 🌟 ส่งค่าเข้าไปที่นี่
                             showDelete = true,
                             isFirstItem = (index == 0),
                             themeColor = themeColor,
-
                             isOpened = (openedAssetId == assetId),
                             onOpenRequested = { openedAssetId = assetId },
                             onCloseRequested = { if (openedAssetId == assetId) openedAssetId = null },
-
-                            // 🌟 5. พอกดปุ่มลบ ก็เรียกฟังก์ชันส่งต่อ ID ไปให้ข้างบน
                             onDeleteClick = {
                                 onUnShareClick(assetId)
-                                openedAssetId = null // รีเซ็ตการ์ดที่เปิดอยู่ให้หดกลับด้วย
+                                openedAssetId = null
                             }
                         )
                     }

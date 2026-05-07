@@ -34,6 +34,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +56,7 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.core.utils.formatThaiDate // 🌟 Import ฟังก์ชันแปลงวันที่แบบไทย
+import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
@@ -74,10 +75,15 @@ class LiabilityFormScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { LiabilityScreenModel() }
 
+        // 🌟 1. ดึง State ออกมา
+        val state by screenModel.state.collectAsState()
+
         LiabilityInputForm(
+            initialData = state, // 🌟 2. โยนค่าเริ่มต้นเข้าไปในฟอร์ม
             onBackClick = { navigator.pop() },
             onNextClick = { data ->
                 screenModel.updateForm(data)
+                // 🌟 ส่ง Request ไปหน้าถัดไปโดยใช้ data ที่อัปเดตแล้ว
                 navigator.push(ShareAssetScreen(request = data))
             }
         )
@@ -87,33 +93,36 @@ class LiabilityFormScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiabilityInputForm(
+    initialData: LiabilityModel, // 🌟 รับ initialData เข้ามา
     onBackClick: () -> Unit = {},
     onNextClick: (LiabilityModel) -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
+    // 🌟 ดึงค่าจาก initialData มาใส่ตั้งต้น
+    var name by remember { mutableStateOf(initialData.name) }
 
     // ยอดเงิน และ ดอกเบี้ย
-    var principal by remember { mutableStateOf("") }
-    var interestRate by remember { mutableStateOf("") }
-    var creditor by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    var principal by remember { mutableStateOf(if (initialData.principal == 0.0) "" else initialData.principal.toString()) }
+    var interestRate by remember { mutableStateOf(initialData.interestRate) }
+    var creditor by remember { mutableStateOf(initialData.creditor) }
+    var description by remember { mutableStateOf(initialData.description) }
 
     // 🌟 จัดการ State ปฏิทิน วันที่เริ่มต้น
-    var statedAt by remember { mutableStateOf("") } // โชว์บน UI (พ.ศ.)
-    var apiStartedAt by remember { mutableStateOf("") } // ส่ง Backend (YYYY-MM-DD)
+    var apiStartedAt by remember { mutableStateOf(initialData.startedAt) } // ส่ง Backend
+    var statedAt by remember { mutableStateOf(if (initialData.startedAt.isNotBlank()) formatThaiDate(initialData.startedAt) else "") } // โชว์บน UI
     var showStartDatePicker by remember { mutableStateOf(false) }
     val startDatePickerState = rememberDatePickerState()
 
     // 🌟 จัดการ State ปฏิทิน วันที่สิ้นสุด
-    var endedAt by remember { mutableStateOf("") } // โชว์บน UI (พ.ศ.)
-    var apiEndedAt by remember { mutableStateOf("") } // ส่ง Backend (YYYY-MM-DD)
+    var apiEndedAt by remember { mutableStateOf(initialData.endedAt) } // ส่ง Backend
+    var endedAt by remember { mutableStateOf(if (initialData.endedAt.isNotBlank()) formatThaiDate(initialData.endedAt) else "") } // โชว์บน UI
     var showEndDatePicker by remember { mutableStateOf(false) }
     val endDatePickerState = rememberDatePickerState()
 
-    val attachments = remember { mutableStateListOf<Attachment>() }
+    // 🌟 ดึงข้อมูลไฟล์แนบเดิมกลับมา
+    val attachments = remember { mutableStateListOf<Attachment>().apply { addAll(initialData.attachments) } }
     val filePicker = rememberFilePicker { newFiles -> attachments.addAll(newFiles) }
 
-    // 🌟 เช็คข้อมูลจำเป็น (เอาการเช็ค type ออกแล้ว เพราะเราล็อกค่าไว้แล้ว)
+    // 🌟 เช็คข้อมูลจำเป็น
     val isFormValid = name.isNotBlank() && principal.isNotBlank() && interestRate.isNotBlank() && apiStartedAt.isNotBlank()
 
     Scaffold(
@@ -148,7 +157,7 @@ fun LiabilityInputForm(
                     onClick = {
                         val data = LiabilityModel(
                             name = name,
-                            type = "LIABILITY_TYPE_LOAN", // 🌟 ฟิกซ์ค่านี้ส่งไปเลย
+                            type = "LIABILITY_TYPE_LOAN",
                             principal = principal.toDoubleOrNull() ?: 0.0,
                             interestRate = interestRate,
                             startedAt = apiStartedAt, // ส่ง YYYY-MM-DD ให้ API
@@ -262,10 +271,7 @@ fun LiabilityInputForm(
                             val month = localDate.monthNumber.toString().padStart(2, '0')
                             val engYear = localDate.year.toString()
 
-                            // 1. เก็บค่า YYYY-MM-DD ไว้ส่ง API เบื้องหลัง
                             apiStartedAt = "$engYear-$month-$day"
-
-                            // 2. เอา apiStartedAt โยนเข้า formatThaiDate ให้แสดงผลสวยงามบนหน้าจอ 🌟
                             statedAt = formatThaiDate(apiStartedAt)
                         }
                         showStartDatePicker = false
@@ -304,10 +310,7 @@ fun LiabilityInputForm(
                             val month = localDate.monthNumber.toString().padStart(2, '0')
                             val engYear = localDate.year.toString()
 
-                            // 1. เก็บค่า YYYY-MM-DD ไว้ส่ง API เบื้องหลัง
                             apiEndedAt = "$engYear-$month-$day"
-
-                            // 2. เอา apiEndedAt โยนเข้า formatThaiDate ให้แสดงผลสวยงามบนหน้าจอ 🌟
                             endedAt = formatThaiDate(apiEndedAt)
                         }
                         showEndDatePicker = false
@@ -334,7 +337,7 @@ fun LiabilityInputForm(
     }
 }
 
-// 🌟 Component ย่อย CustomTextField (คงเดิม)
+// 🌟 Component ย่อย CustomTextField
 @Composable
 fun CustomTextField(
     value: String,

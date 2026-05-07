@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,12 +63,16 @@ class StockFormScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { StockScreenModel() }
 
+        // 🌟 1. ดึง State ออกมา
+        val state by screenModel.state.collectAsState()
+
         AssetInputForm(
+            initialData = state, // 🌟 2. โยนค่าเริ่มต้นเข้าไปในฟอร์ม
             onBackClick = { navigator.pop() },
             onNextClick = { data ->
                 screenModel.updateForm(data)
-                // 🌟 ส่ง Request ไปหน้าถัดไป
-                navigator.push(ShareAssetScreen(request = screenModel.state.value))
+                // 🌟 ส่ง Request ไปหน้าถัดไปโดยใช้ data ที่อัปเดตแล้ว
+                navigator.push(ShareAssetScreen(request = data))
             }
         )
     }
@@ -76,18 +81,23 @@ class StockFormScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetInputForm(
+    initialData: StockModel, // 🌟 รับ initialData เข้ามา
     onBackClick: () -> Unit = {},
     onNextClick: (StockModel) -> Unit
 ) {
-    var stockName by remember { mutableStateOf("") }
-    var stockSymbol by remember { mutableStateOf("") } // สัญลักษณ์หุ้น (ถ้ามี)
-    var description by remember { mutableStateOf("") }
-    var brokerName by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
-    var costPerPrice by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf("") }
+    // 🌟 ดึงค่าจาก initialData มาใส่ตั้งต้น
+    var type by remember { mutableStateOf(initialData.type) }
+    var stockName by remember { mutableStateOf(initialData.stockName) }
+    var stockSymbol by remember { mutableStateOf(initialData.stockSymbol) }
+    var description by remember { mutableStateOf(initialData.description) }
+    var brokerName by remember { mutableStateOf(initialData.brokerName) }
 
-    val attachments = remember { mutableStateListOf<Attachment>() }
+    // เรื่องตัวเลข ถ้าเป็น 0.0 ให้แสดงหน้าว่างๆ
+    var quantity by remember { mutableStateOf(if (initialData.quantity == 0.0) "" else initialData.quantity.toString()) }
+    var costPerPrice by remember { mutableStateOf(if (initialData.costPerPrice == 0.0) "" else initialData.costPerPrice.toString()) }
+
+    // 🌟 ดึงข้อมูลไฟล์แนบเดิมกลับมา
+    val attachments = remember { mutableStateListOf<Attachment>().apply { addAll(initialData.attachments) } }
     val filePicker = rememberFilePicker { newFiles -> attachments.addAll(newFiles) }
 
     // 🌟 Validation: ตรวจสอบว่ากรอกข้อมูลจำเป็นครบหรือยัง
@@ -100,7 +110,6 @@ fun AssetInputForm(
             Column(modifier = Modifier.statusBarsPadding()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
                     modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
                 ) {
                     Icon(

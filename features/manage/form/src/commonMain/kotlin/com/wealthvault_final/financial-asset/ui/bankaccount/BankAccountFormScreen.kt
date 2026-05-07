@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -61,8 +62,10 @@ class BankAccountFormScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { BankAccountScreenModel() }
+        val state by screenModel.state.collectAsState()
 
         BankAccountInputForm(
+            initialData = state,
             onBackClick = { navigator.pop() } ,
             onNextClick = { data ->
                 println("data asset input: ${data.attachments}")
@@ -81,17 +84,22 @@ class BankAccountFormScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BankAccountInputForm(
+    initialData: BankAccountModel,
     onBackClick: () -> Unit = {},
     onNextClick: (BankAccountModel) -> Unit
 ) {
     // variables
-    var name by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf("") }
-    var bankName by remember { mutableStateOf("") }
-    var bankId by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
-    val attachments = remember { mutableStateListOf<Attachment>() }
+    var name by remember { mutableStateOf(initialData.name) }
+    var type by remember { mutableStateOf(initialData.type) }
+    var bankName by remember { mutableStateOf(initialData.bankName) }
+    var bankId by remember { mutableStateOf(initialData.bankId) }
+    var description by remember { mutableStateOf(initialData.description) }
+
+    // เรื่องตัวเลข ถ้าเป็น 0.0 ให้แสดงหน้าว่างๆ ดีกว่าครับ
+    var amount by remember { mutableStateOf(if (initialData.amount == 0.0) "" else initialData.amount.toString()) }
+
+    // สำหรับลิสต์ ดึงค่าเก่ามายัดใส่แบบนี้
+    val attachments = remember { mutableStateListOf<Attachment>().apply { addAll(initialData.attachments) } }
 
     val filePicker = rememberFilePicker { newFiles ->
         attachments.addAll(newFiles)

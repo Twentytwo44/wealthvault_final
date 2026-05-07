@@ -3,15 +3,32 @@ package com.wealthvault.social.ui.components.space
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -19,12 +36,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_clock
 import com.wealthvault.core.generated.resources.ic_common_solid_right
 import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightMuted
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.RedErr
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -34,7 +56,8 @@ fun ActivityBubbleCard(
     assetType: String,
     isMe: Boolean,
     profileImageUrl: String? = null,
-    isDeleted: Boolean = false, // 🌟 1. เพิ่ม Parameter นี้เข้ามา
+    isDeleted: Boolean = false,
+    shareAtDisplay: String? = null, // 🌟 เพิ่ม Parameter รับวันที่ "2026-05-28T00:00:00Z"
     themeColor: Color = Color(0xFFC27A5A),
     onDetailClick: () -> Unit = {}
 ) {
@@ -48,6 +71,21 @@ fun ActivityBubbleCard(
         assetType.contains("loan", ignoreCase = true) || assetType.contains("liability", ignoreCase = true) -> "หนี้สิน"
         assetType.contains("expense", ignoreCase = true) -> "ค่าใช้จ่ายระยะยาว"
         else -> assetType
+    }
+
+    // 🌟 เช็กว่าวันที่แชร์อยู่ล่วงหน้า (อนาคต) หรือไม่
+    val isFutureShare = remember(shareAtDisplay, isDeleted) {
+        if (isDeleted || shareAtDisplay.isNullOrBlank()) {
+            false
+        } else {
+            try {
+                val datePart = shareAtDisplay.substringBefore("T")
+                val todayStr = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
+                datePart > todayStr
+            } catch (e: Exception) {
+                false
+            }
+        }
     }
 
     Row(
@@ -84,7 +122,23 @@ fun ActivityBubbleCard(
 
         // --- ตัวการ์ด ---
         Card(
-            modifier = if (isMe) Modifier.fillMaxWidth(0.80f) else Modifier.fillMaxWidth(0.85f),
+            modifier = (if (isMe) Modifier.fillMaxWidth(0.80f) else Modifier.fillMaxWidth(0.85f))
+                .then(
+                    // 🌟 ถ้าเป็นแชร์ล่วงหน้า ให้วาดเส้นขอบแบบ "เส้นประ" (Dashed Border)
+                    if (isFutureShare) {
+                        Modifier.drawWithContent {
+                            drawContent()
+                            drawRoundRect(
+                                color = themeColor.copy(alpha = 0.5f),
+                                style = Stroke(
+                                    width = 1.dp.toPx(),
+                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                                ),
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(16.dp.toPx())
+                            )
+                        }
+                    } else Modifier
+                ),
             colors = CardDefaults.cardColors(
                 containerColor = if (isDeleted) LightBg else LightSoftWhite
             ),
@@ -94,10 +148,11 @@ fun ActivityBubbleCard(
                 bottomStart = 16.dp,
                 bottomEnd = if (isMe) 4.dp else 16.dp
             ),
-            border = BorderStroke(1.dp, themeColor.copy(alpha = 0.2f))
+            // ปิดขอบปกติถ้าใช้เส้นประไปแล้ว
+            border = if (isFutureShare) null else BorderStroke(1.dp, themeColor.copy(alpha = 0.2f))
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
-                // 🌟 ปรับสีหัวข้อ ถ้าโดนลบไปแล้วให้ตัวหนังสือซีดลงหน่อย
+                // 🌟 หัวข้อ
                 Text(
                     text = title,
                     fontSize = 14.sp,
@@ -112,7 +167,6 @@ fun ActivityBubbleCard(
                     Text(
                         text = assetName,
                         fontSize = 12.sp,
-                        // 🌟 ถ้ายกเลิกแชร์แล้ว ให้ชื่อเป็นสีเทาและขีดฆ่า (Optional: ลบ textDecoration ออกได้ถ้าไม่อยากขีดฆ่าครับ)
                         color = if (isDeleted) Color.Gray else Color(0xFF3A2F2A),
                         textDecoration = if (isDeleted) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
                         textAlign = TextAlign.End,
@@ -135,7 +189,7 @@ fun ActivityBubbleCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 🌟 2. เงื่อนไขซ่อน/โชว์ปุ่ม
+                // 🌟 จัดการปุ่มด้านล่าง
                 if (isDeleted) {
                     Text(
                         text = "ทรัพย์สินนี้ถูกลบหรือยกเลิกการแชร์แล้ว",
@@ -146,28 +200,51 @@ fun ActivityBubbleCard(
                     )
                 } else {
                     Row(
-                        modifier = Modifier
-                            .align(Alignment.End)
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { onDetailClick() }
-                            .padding(vertical = 4.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = if (isFutureShare) Arrangement.SpaceBetween else Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "รายละเอียด",
-                            fontSize = 12.sp,
-                            color = themeColor,
-                            fontWeight = FontWeight.Medium
-                        )
+                        // 🌟 โชว์สถานะอัปเดตล่วงหน้า (อยู่ฝั่งซ้าย)
+                        if (isFutureShare && !shareAtDisplay.isNullOrBlank()) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_common_clock),
+                                    contentDescription = null,
+                                    tint = LightMuted,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    // ตรงนี้ถ้าอยากใช้ formatThaiDate(shareAtDisplay) ของคุณแชมป์ ก็เปลี่ยนได้เลยนะครับ
+                                    text = " ${shareAtDisplay.substringBefore("T")}",
+                                    fontSize = 12.sp,
+                                    color = LightMuted
+                                )
+                            }
+                        }
 
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_common_solid_right),
-                            contentDescription = null,
-                            tint = themeColor,
-                            modifier = Modifier.size(14.dp)
-                        )
+                        // ปุ่มรายละเอียด (อยู่ฝั่งขวา)
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { onDetailClick() }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "รายละเอียด",
+                                fontSize = 12.sp,
+                                color = themeColor,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_common_solid_right),
+                                contentDescription = null,
+                                tint = themeColor,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
                     }
                 }
             }

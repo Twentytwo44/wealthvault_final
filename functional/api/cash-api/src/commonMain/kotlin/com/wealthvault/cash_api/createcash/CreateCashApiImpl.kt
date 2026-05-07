@@ -17,7 +17,7 @@ class CreateCashApiImpl(private val ktorfit: Ktorfit) : CreateCashApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.post("${Config.localhost_android}/asset/cash/") {
+        return client.post("${Config.localhost_android}asset/cash/") {
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -25,7 +25,7 @@ class CreateCashApiImpl(private val ktorfit: Ktorfit) : CreateCashApi {
 
                         append("name", request.name ?: "")
                         append("description", request.description?: "")
-                        append("amount", request.ammount.toString())
+                        append("amount", request.amount.toString())
 
                         request.files?.forEach { fileData ->
                             append("files", fileData.bytes ?: byteArrayOf(), Headers.build {

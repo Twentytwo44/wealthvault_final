@@ -73,7 +73,6 @@ import com.wealthvault.financiallist.ui.shareasset.model.ShareTo
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
-// 🌟 Component Custom Checkbox สำหรับใช้ร่วมกัน 🌟
 @Composable
 fun CustomCheckbox(isSelected: Boolean, onSelectedChange: (Boolean) -> Unit) {
     Box(
@@ -111,23 +110,25 @@ data class ShareAssetScreen(val type: String, val id: String) : Screen {
         val groupState by screenModel.groupState.collectAsState()
 
         LaunchedEffect(Unit) {
-            println("Test: type=$type, id=$id")
             screenModel.initData(id, type)
         }
 
         ShareAssetContent(
             onBackClick = { navigator.pop() },
-            onNextClick = { shareTo ->
+            // 🌟 1. ส่งท่อ onPrepareUnshare เชื่อมเข้ากับ ScreenModel
+            onPrepareUnshare = { itemToUnshare, onReadyCallback ->
+                screenModel.prepareUnshareItem(itemToUnshare, id) { preparedItem ->
+                    onReadyCallback(preparedItem)
+                }
+            },
+            onNextClick = { shareTo, unshareList ->
                 screenModel.initShareData(shareTo)
                 screenModel.submitShare(
                     id = id,
                     type = type,
+                    unshareList = unshareList,
                     onSuccess = {
-                        // ถ้าอยากกลับไปหน้าก่อนหน้า 1 สเต็ป
                         navigator.pop()
-
-                        // หรือถ้าอยากเด้งกลับไปหน้าแรกสุดของโมดูลเลย
-                        // navigator.popUntilRoot()
                     }
                 )
             },
@@ -141,18 +142,21 @@ data class ShareAssetScreen(val type: String, val id: String) : Screen {
 @Composable
 fun ShareAssetContent(
     onBackClick: () -> Unit = {},
-    onNextClick: (ShareTo) -> Unit = {},
+    // 🌟 2. ประกาศรับ Callback สำหรับการสืบหา shared_item_id
+    onPrepareUnshare: (ShareInfo, (ShareInfo) -> Unit) -> Unit = { _, _ -> },
+    onNextClick: (ShareTo, List<ShareInfo>) -> Unit = { _, _ -> },
     friendData: List<FriendTargetModel> = emptyList(),
     groupData: List<GroupTargetModel> = emptyList(),
 ) {
     val selectedFriends = remember { mutableStateListOf<ShareInfo>() }
     val selectedEmails = remember { mutableStateListOf<ShareInfo>() }
 
-    // 🌟 1. เพิ่ม LaunchedEffect ตรงนี้: ดึงคนที่เคยแชร์แล้ว มาแสดงที่หน้าหลักทันทีที่โหลดเสร็จ
+    // List เก็บ "คนที่โดนกดลบ (แต่ยังไม่ลบจริง)"
+    val itemsToUnshare = remember { mutableStateListOf<ShareInfo>() }
+
     LaunchedEffect(friendData, groupData) {
         val preSelected = mutableListOf<ShareInfo>()
 
-        // กรองเพื่อนที่ isShared == true
         friendData.filter { it.isShared }.forEach { friend ->
             preSelected.add(
                 ShareInfo(
@@ -162,12 +166,11 @@ fun ShareAssetContent(
                     subText = friend.email,
                     profileUrl = friend.profile,
                     isShared = true,
-                    date = friend.sharedAt // 🌟 ยัดค่า sharedAt ใส่ตรงนี้
+                    date = friend.sharedAt
                 )
             )
         }
 
-        // กรองกลุ่มที่ isShared == true
         groupData.filter { it.isShared }.forEach { group ->
             preSelected.add(
                 ShareInfo(
@@ -177,12 +180,11 @@ fun ShareAssetContent(
                     subText = "${group.memberCount}",
                     profileUrl = group.groupProfile,
                     isShared = true,
-                    date = group.sharedAt // 🌟 ยัดค่า sharedAt ใส่ตรงนี้
+                    date = group.sharedAt
                 )
             )
         }
 
-        // นำเข้า selectedFriends (เช็คไม่ให้ซ้ำเผื่อ Recompose)
         preSelected.forEach { item ->
             if (selectedFriends.none { it.userId == item.userId }) {
                 selectedFriends.add(item)
@@ -234,7 +236,8 @@ fun ShareAssetContent(
                             email = selectedEmails.toList(),
                             group = selectedFriends.filter { it.typeData == "G" },
                         )
-                        onNextClick(dataToSend)
+                        // โยนก้อนข้อมูลไปทั้ง 2 อัน (ที่แชร์ใหม่ + ที่รอถอนการแชร์)
+                        onNextClick(dataToSend, itemsToUnshare.toList())
                     },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     shape = RoundedCornerShape(12.dp),
@@ -277,7 +280,17 @@ fun ShareAssetContent(
                         items(selectedFriends) { friend ->
                             ShareItemWithDelete(
                                 data = friend,
-                                onDelete = { selectedFriends.remove(friend) } // ลบออกได้ตามปกติ
+                                onDelete = {
+                                    // 🌟 3. ถ้าเพื่อนคนนี้เคยกดแชร์ไปแล้ว (isShared == true)
+                                    if (friend.isShared == true) {
+                                        // เรียกใช้ onPrepareUnshare เพื่อวิ่งไปหา shared_item_id ก่อนโยนลงถังขยะ
+                                        onPrepareUnshare(friend) { preparedItem ->
+                                            itemsToUnshare.add(preparedItem)
+                                        }
+                                    }
+                                    // ไม่ว่าจะเคยแชร์หรือไม่ ก็ลบออกจากหน้าจอ UI ทันที
+                                    selectedFriends.remove(friend)
+                                }
                             )
                         }
                     }
@@ -333,7 +346,13 @@ fun ShareAssetContent(
                         items(selectedEmails) { email ->
                             ShareItemWithDelete(
                                 data = email,
-                                onDelete = { selectedEmails.remove(email) }
+                                onDelete = {
+                                    if (email.isShared == true) {
+                                        // สำหรับ email ถ้ามี API สำหรับลบ email โดยเฉพาะ ค่อยทำเหมือนเพื่อนก็ได้ครับ
+                                        itemsToUnshare.add(email)
+                                    }
+                                    selectedEmails.remove(email)
+                                }
                             )
                         }
                     }

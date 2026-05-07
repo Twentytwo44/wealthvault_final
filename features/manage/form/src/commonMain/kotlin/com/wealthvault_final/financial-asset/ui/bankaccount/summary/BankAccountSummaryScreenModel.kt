@@ -106,10 +106,22 @@ class BankAccountSummaryScreenModel(
                     if (hasShareData) {
                         val requestShareItem = ShareItemRequest(
                             itemIds = createdItemId,
-                            itemTypes = "account", // 💡 ปรับเป็น "account" ให้ตรงกับ Type กลางของระบบ
-                            emails = shareToData.email.map { TargetItem(id = it.name, shareAt = shareToData.shareAt) },
-                            friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) },
-                            groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) }
+                            itemTypes = "account",
+
+                            // 🌟 1. แก้ email ให้ส่ง it.userId (ถ้า userId เก็บชื่ออีเมลไว้) และใช้วันที่ของแต่ละคน (it.apiDate)
+                            emails = shareToData.email.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 2. ดึงวันที่ของเพื่อนแต่ละคน (it.apiDate) แบบเจาะจง
+                            friends = shareToData.friend.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 3. ดึงวันที่ของกลุ่มแต่ละกลุ่ม (it.apiDate)
+                            groups = shareToData.group.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            }
                         )
 
                         // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---

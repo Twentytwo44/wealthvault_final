@@ -221,9 +221,9 @@ fun AssetContent(
                         ExpandableCategoryCard(title = "บ้าน ตึก อาคาร", itemCount = filteredBuildings.size, themeColor = "asset") {
                             filteredBuildings.forEach { building ->
                                 RealItemCard(
-                                    title = building.name,
-                                    subtitleLabel = "พื้นที่", subtitleValue = "${formatAmount(building.area)} ตร.ม.",
-                                    amountLabel = "มูลค่าประเมิน", amountValue = "${formatAmount(building.amount)} บาท",
+                                    title = building.name?:"",
+                                    subtitleLabel = "พื้นที่", subtitleValue = "${formatAmount(building.area?:0.0)} ตร.ม.",
+                                    amountLabel = "มูลค่าประเมิน", amountValue = "${formatAmount(building.amount?:0.0)} บาท",
                                     onClick = { selectedAssetId = building.id; selectedAssetType = "building" }
                                 )
                             }

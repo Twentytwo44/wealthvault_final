@@ -37,5 +37,7 @@ data class ShareInfo(
     val profileUrl: String? = null, // URL รูปภาพโปรไฟล์
 
     @SerialName("is_shared")
-    val isShared: Boolean? = false
+    val isShared: Boolean? = false,
+
+    var sharedItemId: String = ""
 )

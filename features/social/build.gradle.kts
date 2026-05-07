@@ -44,8 +44,8 @@ kotlin {
                 implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
                 implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
                 implementation("io.github.onseok:peekaboo-image-picker:0.5.2")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
                 implementation(project(":navigation-point"))
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
             }
         }
         commonTest {
@@ -57,4 +57,7 @@ kotlin {
         }
     }
 
+}
+configurations.all {
+    resolutionStrategy.force("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 }

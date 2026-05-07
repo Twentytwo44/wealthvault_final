@@ -64,7 +64,7 @@ class CashSummaryScreenModel(
 
         return CashRequest(
             name = current?.cashName ?: "",
-            ammount = current?.amount ?: 0.0,
+            amount = current?.amount ?: 0.0,
             description = current?.description ?: "",
             files = allFiles
         )
@@ -103,11 +103,23 @@ class CashSummaryScreenModel(
 
                     if (hasShareData) {
                         val requestShareItem = ShareItemRequest(
-                            itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
-                            itemTypes = "cash", // 💡 ประเภทส่งเป็น cash
-                            emails = shareToData.email.map { TargetItem(id = it.name, shareAt = shareToData.shareAt) },
-                            friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) },
-                            groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = shareToData.shareAt) }
+                            itemIds = createdItemId,
+                            itemTypes = "cash",
+
+                            // 🌟 1. แก้ email ให้ส่ง it.userId (ถ้า userId เก็บชื่ออีเมลไว้) และใช้วันที่ของแต่ละคน (it.apiDate)
+                            emails = shareToData.email.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 2. ดึงวันที่ของเพื่อนแต่ละคน (it.apiDate) แบบเจาะจง
+                            friends = shareToData.friend.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 3. ดึงวันที่ของกลุ่มแต่ละกลุ่ม (it.apiDate)
+                            groups = shareToData.group.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            }
                         )
 
                         // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
@@ -118,7 +130,11 @@ class CashSummaryScreenModel(
                     // 🌟 ส่งสัญญาณกลับไปหน้า UI ให้เด้งกลับหน้าแรก
                     onSuccess()
                 } else {
-                    println("❌ [ScreenModel] Create Cash Failed")
+                    val errorDetail = cashResult.exceptionOrNull()?.message ?: "ไม่ทราบสาเหตุ"
+                    val errorCause = cashResult.exceptionOrNull()?.cause?.message ?: ""
+                    println("❌ [ScreenModel] Create Cash Failed!")
+                    println("🚨 รายละเอียด Error: $errorDetail")
+                    println("🚨 สาเหตุเชิงลึก: $errorCause")
                 }
 
             } catch (e: Exception) {

@@ -73,6 +73,9 @@ data class MessageMetadata(
     @SerialName("is_completed")
     val isCompleted: Boolean? = null,
 
+    @SerialName("share_at_display")
+    val shareAtDisplay: String? = null,
+
     @SerialName("target_user_id")
     val targetUserId: String? = null,
 

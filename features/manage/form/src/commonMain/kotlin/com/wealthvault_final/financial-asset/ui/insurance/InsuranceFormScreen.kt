@@ -34,6 +34,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -76,13 +77,17 @@ class InsuranceFormScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<InsuranceScreenModel>()
 
+        // 🌟 1. ดึง State ปัจจุบันออกมา
+        val state by screenModel.state.collectAsState()
+
         InsuranceInputForm(
+            initialData = state, // 🌟 2. โยนค่าเดิมเข้าไปตั้งต้นให้ฟอร์ม
             onBackClick = { navigator.pop() },
             onNextClick = { data ->
                 println("data asset input: ${data.attachments}")
                 screenModel.updateForm(data)
 
-                // 🌟 แก้ BUG: ส่งข้อมูลก้อนที่อัปเดตแล้ว (data) ไปให้ ShareAssetScreen โดยตรง
+                // 🌟 ส่งข้อมูลก้อนที่อัปเดตแล้ว (data) ไปให้ ShareAssetScreen โดยตรง
                 navigator.push(ShareAssetScreen(request = data))
             }
         )
@@ -92,30 +97,32 @@ class InsuranceFormScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsuranceInputForm(
+    initialData: InsuranceModel, // 🌟 รับค่าเริ่มต้น
     onBackClick: () -> Unit = {},
     onNextClick: (InsuranceModel) -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf("") }
-    var policyNumber by remember { mutableStateOf("") }
-    var companyName by remember { mutableStateOf("") }
-    var coverageAmount by remember { mutableStateOf("") }
-    var coveragePeriod by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    // 🌟 ดึงค่าจาก initialData มาใส่ตอนเริ่มต้น
+    var name by remember { mutableStateOf(initialData.name) }
+    var type by remember { mutableStateOf(initialData.type) }
+    var policyNumber by remember { mutableStateOf(initialData.policyNumber) }
+    var companyName by remember { mutableStateOf(initialData.companyName) }
+    var coverageAmount by remember { mutableStateOf(if (initialData.coverageAmount == 0.0) "" else initialData.coverageAmount.toString()) }
+    var coveragePeriod by remember { mutableStateOf(initialData.coveragePeriod) }
+    var description by remember { mutableStateOf(initialData.description) }
 
     // 🌟 จัดการ State ปฏิทิน สำหรับวันที่ทำสัญญา
-    var conDate by remember { mutableStateOf("") } // โชว์บน UI (พ.ศ.)
-    var apiConDate by remember { mutableStateOf("") } // ส่ง Backend (YYYY-MM-DD)
+    var apiConDate by remember { mutableStateOf(initialData.conDate) } // ส่ง Backend
+    var conDate by remember { mutableStateOf(if (initialData.conDate.isNotBlank()) formatThaiDate(initialData.conDate) else "") } // โชว์บน UI
     var showConDatePicker by remember { mutableStateOf(false) }
     val conDatePickerState = rememberDatePickerState()
 
     // 🌟 จัดการ State ปฏิทิน สำหรับวันหมดอายุ
-    var expDate by remember { mutableStateOf("") } // โชว์บน UI (พ.ศ.)
-    var apiExpDate by remember { mutableStateOf("") } // ส่ง Backend (YYYY-MM-DD)
+    var apiExpDate by remember { mutableStateOf(initialData.expDate) } // ส่ง Backend
+    var expDate by remember { mutableStateOf(if (initialData.expDate.isNotBlank()) formatThaiDate(initialData.expDate) else "") } // โชว์บน UI
     var showExpDatePicker by remember { mutableStateOf(false) }
     val expDatePickerState = rememberDatePickerState()
 
-    val attachments = remember { mutableStateListOf<Attachment>() }
+    val attachments = remember { mutableStateListOf<Attachment>().apply { addAll(initialData.attachments) } }
     val filePicker = rememberFilePicker { newFiles -> attachments.addAll(newFiles) }
 
     // 🌟 เช็คข้อมูลจำเป็น
@@ -125,12 +132,11 @@ fun InsuranceInputForm(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = LightBg, // 🌟 ใช้ LightBg
+        containerColor = LightBg,
         topBar = {
             Column(modifier = Modifier.statusBarsPadding()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
                     modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
                 ) {
                     Icon(
@@ -151,7 +157,6 @@ fun InsuranceInputForm(
             }
         },
         bottomBar = {
-            // 🌟 ย้ายปุ่มมาไว้ BottomBar ให้ใช้งานง่ายขึ้น
             Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
                 Button(
                     onClick = {
@@ -161,18 +166,18 @@ fun InsuranceInputForm(
                             companyName = companyName,
                             coverageAmount = coverageAmount.toDoubleOrNull() ?: 0.0,
                             coveragePeriod = coveragePeriod,
-                            expDate = apiExpDate, // 🌟 ส่งตัว YYYY-MM-DD ไป
-                            conDate = apiConDate, // 🌟 ส่งตัว YYYY-MM-DD ไป
+                            expDate = apiExpDate,
+                            conDate = apiConDate,
                             description = description,
                             name = name,
-                            attachments = attachments.toList() // ใช้ toList เพื่อความปลอดภัย
+                            attachments = attachments.toList()
                         )
                         onNextClick(data)
                     },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = isFormValid // 🌟 ปุ่มจะสว่างเมื่อกรอกครบ
+                    enabled = isFormValid
                 ) {
                     Text("ต่อไป", style = MaterialTheme.typography.titleMedium, color = Color.White)
                 }
@@ -213,39 +218,35 @@ fun InsuranceInputForm(
 
             CustomTextField(value = coveragePeriod, onValueChange = { coveragePeriod = it }, label = "ระยะเวลาคุ้มครอง", placeholder = "เช่น 10 ปี, ตลอดชีพ")
 
-            // 🌟 วันที่เริ่มสัญญา
             CustomTextField(
                 value = conDate,
                 onValueChange = { },
                 label = "วันที่เริ่มสัญญา*",
-                placeholder = "เลือกวันที่", // 🌟 ปรับ placeholder
+                placeholder = "เลือกวันที่",
                 readOnly = true,
                 trailingIcon = {
                     Icon(
                         painter = painterResource(Res.drawable.ic_common_calendar),
                         contentDescription = "Calendar",
                         tint = LightPrimary,
-                        modifier = Modifier
-                            .size(24.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 onClick = { showConDatePicker = true }
             )
 
-            // 🌟 วันหมดอายุ
             CustomTextField(
                 value = expDate,
                 onValueChange = { },
                 label = "วันหมดอายุ*",
-                placeholder = "เลือกวันที่", // 🌟 ปรับ placeholder
+                placeholder = "เลือกวันที่",
                 readOnly = true,
                 trailingIcon = {
                     Icon(
                         painter = painterResource(Res.drawable.ic_common_calendar),
                         contentDescription = "Calendar",
                         tint = LightPrimary,
-                        modifier = Modifier
-                            .size(24.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 onClick = { showExpDatePicker = true }
@@ -280,10 +281,7 @@ fun InsuranceInputForm(
                             val month = localDate.monthNumber.toString().padStart(2, '0')
                             val engYear = localDate.year.toString()
 
-                            // 1. เก็บค่า YYYY-MM-DD ไว้ส่ง API เบื้องหลัง
                             apiConDate = "$engYear-$month-$day"
-
-                            // 2. เอา apiConDate โยนเข้า formatThaiDate ให้แสดงผลสวยงามบนหน้าจอ 🌟
                             conDate = formatThaiDate(apiConDate)
                         }
                         showConDatePicker = false
@@ -323,10 +321,7 @@ fun InsuranceInputForm(
                             val month = localDate.monthNumber.toString().padStart(2, '0')
                             val engYear = localDate.year.toString()
 
-                            // 1. เก็บค่า YYYY-MM-DD ไว้ส่ง API เบื้องหลัง
                             apiExpDate = "$engYear-$month-$day"
-
-                            // 2. เอา apiExpDate โยนเข้า formatThaiDate ให้แสดงผลสวยงามบนหน้าจอ 🌟
                             expDate = formatThaiDate(apiExpDate)
                         }
                         showExpDatePicker = false
@@ -353,7 +348,7 @@ fun InsuranceInputForm(
     }
 }
 
-// 🌟 Component ย่อย CustomTextField (นำมาไว้ในไฟล์นี้เพื่อใช้สร้างกล่องพิมพ์ข้อความ)
+// 🌟 Component ย่อย CustomTextField
 @Composable
 fun CustomTextField(
     value: String,

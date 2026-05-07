@@ -79,14 +79,18 @@ class LandFormScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LandScreenModel>()
+
+        // 🌟 1. ดึง State ออกมา
+        val state by screenModel.state.collectAsState()
         val buildState by screenModel.BuildingState.collectAsState()
 
         LandInputForm(
+            initialData = state, // 🌟 2. โยนค่าเริ่มต้นเข้าไปในฟอร์ม
             onBackClick = { navigator.pop() },
             onNextClick = { data ->
                 screenModel.updateForm(data)
-                // 🌟 ส่ง state ล่าสุดไปหน้าแชร์
-                navigator.push(ShareAssetScreen(request = screenModel.state.value))
+                // 🌟 ส่ง data ที่อัปเดตล่าสุดไปหน้าแชร์โดยตรง
+                navigator.push(ShareAssetScreen(request = data))
             },
             buildingData = buildState
         )
@@ -96,28 +100,41 @@ class LandFormScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandInputForm(
+    initialData: LandModel, // 🌟 รับ initialData เข้ามา
     onBackClick: () -> Unit = {},
     onNextClick: (LandModel) -> Unit,
     buildingData: List<GetBuildingData>
 ) {
-    var deedNum by remember { mutableStateOf("") }
-    var landName by remember { mutableStateOf("") }
-    var area by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var locationAddress by remember { mutableStateOf("") }
-    var locationSubDistrict by remember { mutableStateOf("") }
-    var locationDistrict by remember { mutableStateOf("") }
-    var locationProvince by remember { mutableStateOf("") }
-    var locationPostalCode by remember { mutableStateOf("") }
+    // 🌟 ดึงค่าจาก initialData มาใส่ตั้งต้น
+    var deedNum by remember { mutableStateOf(initialData.deedNum) }
+    var landName by remember { mutableStateOf(initialData.landName) }
 
-    val referenceIds = remember { mutableStateListOf<RefModel>() }
-    val attachments = remember { mutableStateListOf<Attachment>() }
+    // เรื่องตัวเลข ถ้าเป็น 0.0 ให้แสดงหน้าว่างๆ
+    var area by remember { mutableStateOf(if (initialData.area == 0.0) "" else initialData.area.toString()) }
+    var amount by remember { mutableStateOf(if (initialData.amount == 0.0) "" else initialData.amount.toString()) }
+
+    var description by remember { mutableStateOf(initialData.description) }
+    var locationAddress by remember { mutableStateOf(initialData.locationAddress) }
+    var locationSubDistrict by remember { mutableStateOf(initialData.locationSubDistrict) }
+    var locationDistrict by remember { mutableStateOf(initialData.locationDistrict) }
+    var locationProvince by remember { mutableStateOf(initialData.locationProvince) }
+    var locationPostalCode by remember { mutableStateOf(initialData.locationPostalCode) }
+
+    // 🌟 ดึงค่า List ต่างๆ กลับมาใส่ใน State
+    val referenceIds = remember { mutableStateListOf<RefModel>().apply { addAll(initialData.referenceIds) } }
+    val attachments = remember { mutableStateListOf<Attachment>().apply { addAll(initialData.attachments) } }
     val filePicker = rememberFilePicker { newFiles -> attachments.addAll(newFiles) }
     var showBuildingsheet by remember { mutableStateOf(false) }
 
-    // 🌟 Validation: เช็กข้อมูลจำเป็น
-    val isFormValid = deedNum.isNotBlank() && landName.isNotBlank() && area.isNotBlank()
+    // 🌟 Validation: เช็กข้อมูลจำเป็น รวมที่อยู่ด้วย
+    val isFormValid = deedNum.isNotBlank() &&
+            landName.isNotBlank() &&
+            area.isNotBlank() &&
+            locationAddress.isNotBlank() &&
+            locationSubDistrict.isNotBlank() &&
+            locationDistrict.isNotBlank() &&
+            locationProvince.isNotBlank() &&
+            locationPostalCode.isNotBlank()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -166,11 +183,18 @@ fun LandInputForm(
                         onNextClick(data)
                     },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = LightPrimary,
+                        disabledContainerColor = LightBorder
+                    ),
                     shape = RoundedCornerShape(12.dp),
                     enabled = isFormValid
                 ) {
-                    Text("ต่อไป", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                    Text(
+                        text = "ต่อไป",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (isFormValid) Color.White else Color.Gray
+                    )
                 }
             }
         }
@@ -203,22 +227,22 @@ fun LandInputForm(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            AssetTextField(value = locationAddress, onValueChange = { locationAddress = it }, label = "ที่อยู่", placeholder = "ซอย, ถนน")
-            AssetTextField(value = locationSubDistrict, onValueChange = { locationSubDistrict = it }, label = "ตำบล / แขวง", placeholder = "ระบุตำบล")
-            AssetTextField(value = locationDistrict, onValueChange = { locationDistrict = it }, label = "อำเภอ / เขต", placeholder = "ระบุอำเภอ")
-            AssetTextField(value = locationProvince, onValueChange = { locationProvince = it }, label = "จังหวัด", placeholder = "ระบุจังหวัด")
+            // 🌟 เติมดอกจันให้รู้ว่าบังคับกรอก
+            AssetTextField(value = locationAddress, onValueChange = { locationAddress = it }, label = "ที่อยู่*", placeholder = "ซอย, ถนน")
+            AssetTextField(value = locationSubDistrict, onValueChange = { locationSubDistrict = it }, label = "ตำบล / แขวง*", placeholder = "ระบุตำบล")
+            AssetTextField(value = locationDistrict, onValueChange = { locationDistrict = it }, label = "อำเภอ / เขต*", placeholder = "ระบุอำเภอ")
+            AssetTextField(value = locationProvince, onValueChange = { locationProvince = it }, label = "จังหวัด*", placeholder = "ระบุจังหวัด")
             AssetTextField(
                 value = locationPostalCode,
                 onValueChange = { if (it.isEmpty() || it.all { char -> char.isDigit() }) locationPostalCode = it },
-                label = "รหัสไปรษณีย์",
+                label = "รหัสไปรษณีย์*",
                 placeholder = "ระบุรหัสไปรษณีย์",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            // 🌟 ปรับระยะห่างให้เป๊ะเท่ากับกรอบ 1 (ใช้ Column ครอบและเว้นบนล่าง 8.dp แบบ AssetTextField)
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                 ReferenceSectionHeader(title = "อาคาร / สิ่งปลูกสร้างบนที่ดินนี้", onAddClick = { showBuildingsheet = true })
-                Spacer(modifier = Modifier.height(8.dp)) // ระยะห่าง 8.dp ระหว่าง Label กับ กล่อง
+                Spacer(modifier = Modifier.height(8.dp))
 
                 if (referenceIds.isEmpty()) {
                     Box(
@@ -251,8 +275,6 @@ fun LandInputForm(
 
             AssetTextField(value = description, onValueChange = { description = it }, label = "รายละเอียดเพิ่มเติม", placeholder = "ระบุรายละเอียดเพิ่มเติม", isMultiLine = true)
 
-            // 🌟 แก้ปัญหาหัวข้อซ้ำ: ลบ ReferenceSectionHeader อันนอกออก
-            // ให้เหลือแค่ตัว ImagePicker เพราะมันมี Header ในตัวอยู่แล้ว (จากรูปที่ส่งมามันขึ้นเบิ้ล 2 อัน)
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                 ReferenceImagepicker(
                     attachments = attachments,
@@ -284,12 +306,11 @@ fun LandInputForm(
 @Composable
 fun ReferenceSectionHeader(title: String, onAddClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(), // 🌟 ลบ Padding ส่วนเกินออก เพื่อไม่ให้ดันกล่องลงไปข้างล่าง
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(title, style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
-        // 🌟 เปลี่ยนจาก IconButton เป็น Icon เพื่อเอาพื้นที่ทัช 48.dp ของระบบออก (ทำให้ระยะห่างเป๊ะขึ้น)
         Icon(
             painter = painterResource(Res.drawable.ic_common_plus),
             contentDescription = null,

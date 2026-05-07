@@ -58,7 +58,7 @@ class CashScreenModel(
 
         return CashRequest(
             name = current.cashName,
-            ammount = current.amount ,
+            amount = current.amount ,
             description = current.description,
             files = allFiles,
             deleteListId = _deleteAttachments.value.map { it.id ?: "" }

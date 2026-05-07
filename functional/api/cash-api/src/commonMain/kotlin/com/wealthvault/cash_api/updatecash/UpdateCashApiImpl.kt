@@ -25,7 +25,7 @@ class UpdateCashApiImpl(private val ktorfit: Ktorfit) : UpdateCashApi {
 
                         append("name", request.name?: "")
                         append("description", request.description?: "")
-                        append("amount", request.ammount.toString())
+                        append("amount", request.amount.toString())
 
                         request.deleteListId?.forEach { fileData ->
                             append("delete_file_ids", fileData)
