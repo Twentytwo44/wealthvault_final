@@ -55,6 +55,7 @@ import coil3.compose.AsyncImage
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_calendar
 import com.wealthvault.core.generated.resources.ic_common_pen
 import com.wealthvault.core.generated.resources.ic_nav_profile
@@ -65,7 +66,7 @@ import com.wealthvault.core.theme.LightSurface
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.navigation.MainScreen
-import kotlinx.datetime.Instant // ✅ ต้องใช้ตัวนี้
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
@@ -152,21 +153,26 @@ fun IntroQuestionContent(
         ) {
             // --- แถบบนสุด: ปุ่มย้อนกลับ ---
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                // TODO: ใส่ Icon ย้อนกลับตรงนี้
-                Text(
-                    text = "< ย้อนกลับ",
-                    color = LightPrimary,
-                    modifier = Modifier.clickable { onBackClick() }
+                Icon(
+                    painter = painterResource(Res.drawable.ic_common_back),
+                    contentDescription = "Back",
+                    tint = LightPrimary,
+                    modifier = Modifier.size(24.dp).clickable { onBackClick() }
                 )
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "เพิ่มข้อมูลส่วนตัว",
+                    fontSize = 24.sp,
+                    color = LightPrimary,
+                    fontWeight = FontWeight.Medium
+                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
 
             // --- ส่วนเนื้อหาฟอร์ม (ใส่ Scroll เผื่อคีย์บอร์ดบังจอ) ---
             Column(

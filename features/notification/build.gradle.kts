@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.wealth.vault.lib)
     alias(libs.plugins.wealth.vault.compose)
+    alias(libs.plugins.kotlin.serialization)
+
 }
 
 kotlin {
@@ -33,6 +35,8 @@ kotlin {
                 implementation(project(":base:core"))
 
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
+                implementation(libs.ktor.serialization.json)
+
 
 
             }

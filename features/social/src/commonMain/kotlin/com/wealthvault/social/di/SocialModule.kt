@@ -1,5 +1,6 @@
 package com.wealthvault.social.di
 
+import com.wealthvault.core.KoinConst
 import com.wealthvault.social.data.SocialDataSource
 import com.wealthvault.social.data.SocialRepositoryImpl
 import com.wealthvault.social.ui.SocialScreenModel
@@ -13,6 +14,7 @@ import com.wealthvault.social.ui.profile.FriendProfileScreenModel
 import com.wealthvault.social.ui.profile.GroupProfileScreenModel
 import com.wealthvault.social.ui.space.FriendSpaceScreenModel
 import com.wealthvault.social.ui.space.GroupSpaceScreenModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 object SocialModule {
@@ -37,7 +39,14 @@ object SocialModule {
         factory { AddFriendScreenModel(repository = get()) }
         factory { FriendSpaceScreenModel(repository = get()) }
         factory { FriendProfileScreenModel(repository = get()) }
-        factory { GroupSpaceScreenModel(repository = get()) }
+        factory<GroupSpaceScreenModel> {
+            GroupSpaceScreenModel(
+                repository = get(),
+                webSocketService = get(),
+                json = get(named(KoinConst.KotlinSerialization.WEBSOCKET)),
+                tokenStore = get()
+            )
+        }
         factory { GroupProfileScreenModel(repository = get()) }
         factory { SharedAssetScreenModel(repository = get()) }
         factory { SharedAssetManageScreenModel(get()) }

@@ -69,7 +69,6 @@ import com.wealthvault.introduction.ui.IntroScreen
 import com.wealthvault.main.SharedScreen
 import com.wealthvault.navigation.MainScreen
 import com.wealthvault.register.ui.RegisterScreen
-import com.wealthvault.splashscreen.SplashState
 import org.jetbrains.compose.resources.painterResource
 
 class LoginScreen() : Screen {
@@ -92,6 +91,7 @@ class LoginScreen() : Screen {
             isLoading = screenModel.isLoading,
             errorMessage = screenModel.errorMessage,
             onLoginClick = {
+                screenModel.onGetFCMToken()
                 screenModel.onLoginClick { state ->
                     when (state) {
                         is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
@@ -99,7 +99,6 @@ class LoginScreen() : Screen {
                         else -> {}
                     }
                 }
-                screenModel.onGetFCMToken()
             },
             onGoogleClick = { screenModel.onGoogleClick { /* TODO */ } },
             onForgotPasswordClick = { navigator.push(ForgetPasswordScreen()) },
