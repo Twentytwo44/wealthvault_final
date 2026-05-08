@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
@@ -30,12 +31,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -220,21 +220,30 @@ fun ShareSettingContent(
             Text(text = "เปิดให้เห็นทรัพย์สินเมื่อถึงอายุ", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A2F2A))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
+                BasicTextField(
                     value = sharedAgeText,
                     onValueChange = { if (it.all { char -> char.isDigit() }) sharedAgeText = it },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(70.dp).height(50.dp).border(1.dp, LightBorder, RoundedCornerShape(12.dp)),
+                    singleLine = true,
                     textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center, color = Color(0xFF3A2F2A)),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = LightSoftWhite,
-                        unfocusedContainerColor = LightSoftWhite,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    singleLine = true
+                    cursorBrush = SolidColor(themeColor),
+                    modifier = Modifier
+                        .width(70.dp)
+                        .height(44.dp), // ล็อกความสูง
+                    decorationBox = { innerTextField ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                                .border(1.dp, LightBorder, RoundedCornerShape(12.dp)),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically // ตัวหนังสือไม่จม
+                        ) {
+                            innerTextField()
+                        }
+                    }
                 )
+
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = "ปี", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
             }

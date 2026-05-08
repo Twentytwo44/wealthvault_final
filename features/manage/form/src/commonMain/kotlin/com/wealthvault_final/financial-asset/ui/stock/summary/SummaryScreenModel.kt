@@ -13,7 +13,6 @@ import com.wealthvault_final.`financial-asset`.data.share.ShareItemRepositoryImp
 import com.wealthvault_final.`financial-asset`.data.stock.AssetRepositoryImpl
 import com.wealthvault_final.`financial-asset`.model.ShareTo
 import com.wealthvault_final.`financial-asset`.model.StockModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -79,17 +78,17 @@ class SummaryScreenModel(
 
 
 
-    fun submitStock() {
+    fun submitStock(onSuccess: () -> Unit) {
         val shareToData = _state.value.shareTo ?: return
+
         screenModelScope.launch {
             try {
-                isLoading = true
+                // 🌟 1. อัปเดต StateFlow เพื่อให้ UI แสดง Spinner โหลดที่ปุ่ม
+                _state.update { it.copy(isLoading = true) }
                 errorMessage = null
 
                 // --- ขั้นตอนที่ 1: สร้าง Stock ก่อน ---
-
                 val requestBody = asRequest()
-
                 val stockResult = stockRepository.create(requestBody)
 
                 // ดึงข้อมูลออกมาจาก Result Wrapper
@@ -97,49 +96,55 @@ class SummaryScreenModel(
 
                 if (stockResult.isSuccess && stockResponse != null) {
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Stock
-                    // สมมติว่า field id อยู่ใน stockResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = stockResponse.id.toString()
                     println("✅ [ScreenModel] Stock Created ID: $createdItemId")
 
-                    delay(10000)
+                    // 🚨 ลบ delay(10000) ออกไปแล้วครับ!
+
                     // --- ขั้นตอนที่ 2: เตรียมข้อมูลเพื่อ Share โดยใช้ ID ที่เพิ่งได้มา ---
-                    val requestShareItem = ShareItemRequest(
-                        itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
-                        itemTypes = "investment",
-                        emails = shareToData.email.map {
-                            TargetItem(
-                                id = it.name,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        friends = shareToData.friend.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        groups = shareToData.group.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        }
-                    )
+                    // 💡 เช็กก่อนว่ามีการเลือกคนแชร์หรือไม่
+                    val hasShareData = shareToData.email.isNotEmpty() ||
+                            shareToData.friend.isNotEmpty() ||
+                            shareToData.group.isNotEmpty()
 
-                    // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
-                    val shareResult = shareItemRepository.shareItem(requestShareItem)
-                    println(" [SummaryScreenModel] Share result: $shareResult")
+                    if (hasShareData) {
+                        val requestShareItem = ShareItemRequest(
+                            itemIds = createdItemId,
+                            itemTypes = "investment",
 
-                }
-                else {
+                            // 🌟 1. แก้ email ให้ส่ง it.userId (ถ้า userId เก็บชื่ออีเมลไว้) และใช้วันที่ของแต่ละคน (it.apiDate)
+                            emails = shareToData.email.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 2. ดึงวันที่ของเพื่อนแต่ละคน (it.apiDate) แบบเจาะจง
+                            friends = shareToData.friend.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 3. ดึงวันที่ของกลุ่มแต่ละกลุ่ม (it.apiDate)
+                            groups = shareToData.group.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            }
+                        )
+
+                        // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
+                        val shareResult = shareItemRepository.shareItem(requestShareItem)
+                        println(" [SummaryScreenModel] Share result: $shareResult")
+                    }
+
+                    // 🌟 ส่งสัญญาณกลับไปหน้า UI ให้เด้งกลับหน้าแรก
+                    onSuccess()
+                } else {
                     println("❌ [ScreenModel] Create Stock Failed")
-            }
+                }
 
             } catch (e: Exception) {
                 println("❌ [ScreenModel] Exception: ${e.message}")
                 errorMessage = e.message ?: "เกิดข้อผิดพลาดในการเชื่อมต่อ"
             } finally {
-                isLoading = false
+                // 🌟 2. อัปเดต StateFlow ปิดปุ่มโหลด
+                _state.update { it.copy(isLoading = false) }
                 println("🏁 [ScreenModel] Process Finished.")
             }
         }

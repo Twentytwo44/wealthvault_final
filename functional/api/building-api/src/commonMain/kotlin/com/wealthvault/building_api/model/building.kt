@@ -70,13 +70,13 @@ data class BuildingResponse(
 
 @Serializable
 data class BuildingData(
-    @SerialName("id") val id: String,
-    @SerialName("user_id") val userId: String,
-    @SerialName("type") val type: String,
-    @SerialName("name") val name: String,
-    @SerialName("area") val area: Double,
-    @SerialName("amount") val amount: Double,
-    @SerialName("description") val description: String,
+    @SerialName("id") val id: String? = null,
+    @SerialName("user_id") val userId: String? = null,
+    @SerialName("type") val type: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("area") val area: Double? = null,
+    @SerialName("amount") val amount: Double? = null,
+    @SerialName("description") val description: String? = null,
     @SerialName("location") val location: LocationData? = null,
     @SerialName("ins") val ins: List<InsData>? = emptyList(),
     @SerialName("reference_ids") val referenceIds: List<String>? = emptyList(),

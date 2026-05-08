@@ -34,7 +34,7 @@ data class GroupDataList(
     val memberCount: Int? = null,
 
     @SerialName("shared_at")
-    val shareAt: String? = null,
+    val sharedAt: String? = null,
 )
 
 @Serializable
@@ -49,7 +49,7 @@ data class FriendDataList(
     val profileImage: String? = null,
 
     @SerialName("shared_at")
-    val shareAt: String? = null,
+    val sharedAt: String? = null,
 )
 
 @Serializable
@@ -58,7 +58,7 @@ data class EmailDataList(
     val email: String? = null,
 
     @SerialName("shared_at")
-    val shareAt: String? = null,
+    val sharedAt: String? = null,
 
     @SerialName("is_sent")
     val isSent: Boolean? = null

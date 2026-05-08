@@ -255,6 +255,7 @@ fun GroupSpaceContent(
 
                                     // 🌟 3. โยนสถานะการลบเข้า Component
                                     isDeleted = msg.metadata?.isDeleted == true,
+                                    shareAtDisplay = msg.metadata?.shareAtDisplay,
 
                                     themeColor = themeColor,
                                     onDetailClick = {

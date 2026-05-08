@@ -45,7 +45,7 @@ fun BottomBarItem(
                     color = if (selected) LightBGNavbar else Color.Transparent,
                     shape = RoundedCornerShape(18.dp)
                 )
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal =10.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val iconPainter = tab.options.icon
@@ -55,7 +55,7 @@ fun BottomBarItem(
                     painter = it,
                     contentDescription = tab.options.title,
                     tint = if (selected) LightPrimary else UnselectedColor,
-                    modifier = Modifier.size(26.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
 

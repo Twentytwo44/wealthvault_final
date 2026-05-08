@@ -50,13 +50,36 @@ class AssetScreenModel(
 
 
     fun fetchAllAssets() {
+        // โหลดข้อมูลทุกหมวดพร้อมๆ กัน (ขนานกัน) เพื่อความรวดเร็ว
         screenModelScope.launch {
-            useCase.getAccounts().onSuccess { _accounts.value = it }
-            useCase.getCashes().onSuccess { _cashes.value = it }
-            useCase.getInvestments().onSuccess { _investments.value = it }
-            useCase.getInsurances().onSuccess { _insurances.value = it }
-            useCase.getBuildings().onSuccess { _buildings.value = it }
-            useCase.getLands().onSuccess { _lands.value = it }
+            useCase.getAccounts()
+                .onSuccess { _accounts.value = it }
+                .onFailure { println("🚨 [AssetScreenModel] โหลด Accounts พัง: ${it.message}") }
+        }
+        screenModelScope.launch {
+            useCase.getCashes()
+                .onSuccess { _cashes.value = it }
+                .onFailure { println("🚨 [AssetScreenModel] โหลด Cashes พัง: ${it.message}") }
+        }
+        screenModelScope.launch {
+            useCase.getInvestments()
+                .onSuccess { _investments.value = it }
+                .onFailure { println("🚨 [AssetScreenModel] โหลด Investments พัง: ${it.message}") }
+        }
+        screenModelScope.launch {
+            useCase.getInsurances()
+                .onSuccess { _insurances.value = it }
+                .onFailure { println("🚨 [AssetScreenModel] โหลด Insurances พัง: ${it.message}") }
+        }
+        screenModelScope.launch {
+            useCase.getBuildings()
+                .onSuccess { _buildings.value = it }
+                .onFailure { println("🚨 [AssetScreenModel] โหลด Buildings พัง: ${it.message}") }
+        }
+        screenModelScope.launch {
+            useCase.getLands()
+                .onSuccess { _lands.value = it }
+                .onFailure { println("🚨 [AssetScreenModel] โหลด Lands พัง: ${it.message}") }
         }
     }
 

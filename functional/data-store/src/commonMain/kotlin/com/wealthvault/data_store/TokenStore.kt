@@ -35,6 +35,9 @@ class TokenStore(
     val accessToken: Flow<String?> = dataStore.data
         .map { preferences -> preferences[KEY_ACCESS_TOKEN] }
 
+    val getUserId: Flow<String?> = dataStore.data
+        .map { preferences -> preferences[KEY_USER_ID] }
+
     val fcmToken: Flow<String?> = dataStore.data
         .map { preferences -> preferences[KEY_FCM_TOKEN] }
 

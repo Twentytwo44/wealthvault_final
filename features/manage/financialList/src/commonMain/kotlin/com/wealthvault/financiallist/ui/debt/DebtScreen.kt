@@ -75,7 +75,6 @@ class DebtScreen : Screen {
 
         DebtContent(
             onAddClick = {
-                // สมมติว่ามี ObMenuScreen หรือเปลี่ยนเป็น MenuScreen ตามที่ใช้งานจริง
                 navigatorContent.push(ObMenuScreen())
             },
             loans = loans,
@@ -101,8 +100,9 @@ fun DebtContent(
     var showConfirmDelete by remember { mutableStateOf(false) }
     var itemNameToDelete by remember { mutableStateOf("") }
 
-    val filteredExpenses = expenses.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
-    val filteredLoans = loans.filter { it.name.toString().contains(searchQuery, ignoreCase = true) }
+    // ค้นหารายการ (แก้ให้ .name ไม่เป็น nullable เพราะใน Data Class เราตั้งให้เป็นค่า non-null แล้ว)
+    val filteredExpenses = expenses.filter { (it.name ?: "").contains(searchQuery, ignoreCase = true) }
+    val filteredLoans = loans.filter { (it.name ?: "").contains(searchQuery, ignoreCase = true) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -128,7 +128,7 @@ fun DebtContent(
                             filteredLoans.forEach { loan ->
                                 RealItemCard(
                                     title = loan.name ?: "",
-                                    subtitleLabel = "เจ้าหนี้", subtitleValue = loan.creditor ?: "",
+                                    subtitleLabel = "เจ้าหนี้", subtitleValue = loan.creditor ?: "-",
                                     amountLabel = "ยอดหนี้", amountValue = "${formatAmount(loan.principal ?: 0.0)} บาท",
                                     onClick = { selectedLiabilityId = loan.id }
                                 )
@@ -144,8 +144,8 @@ fun DebtContent(
                             filteredExpenses.forEach { exp ->
                                 RealItemCard(
                                     title = exp.name ?: "",
-                                    subtitleLabel = "จ่ายให้", subtitleValue = exp.creditor ?: "",
-                                    amountLabel = "ยอดหนี้", amountValue = "${formatAmount(exp.principal ?: 0.0)} บาท",
+                                    subtitleLabel = "จ่ายให้", subtitleValue = exp.creditor ?: "-",
+                                    amountLabel = "ยอดชำระ", amountValue = "${formatAmount(exp.principal ?: 0.0)} บาท",
                                     onClick = { selectedLiabilityId = exp.id }
                                 )
                             }
@@ -221,32 +221,34 @@ fun DebtContent(
             onEdit = { rawData ->
                 if (rawData is LiabilityIdData) {
                     val isLoan = rawData.type == "LIABILITY_TYPE_LOAN"
-                    val attachments = rawData.files?.map { it.toAttachment() }
+                    val attachments = rawData.files?.map { it.toAttachment() } ?: emptyList()
 
                     if (isLoan) {
+                        // 🌟 ส่งข้อมูลทั้งหมดไปให้ครบถ้วน สำหรับ "หนี้สิน"
                         val dataToSend = LiabilityModel(
-                            type = rawData.type,
-                            name = rawData.name,
-                            creditor = rawData.creditor,
-                            principal = rawData.principal.toString().toDoubleOrNull() ?: 0.0,
+                            type = rawData.type ?: "",
+                            name = rawData.name ?: "",
+                            creditor = rawData.creditor ?: "",
+                            principal = rawData.principal ?: 0.0,
                             interestRate = rawData.interestRate.toString(),
-                            description = rawData.description,
-                            attachments = attachments ?: emptyList(),
+                            description = rawData.description ?: "",
+                            attachments = attachments,
                             startedAt = rawData.startedAt ?: "",
                             endedAt = rawData.endedAt ?: ""
                         )
                         navigatorContent.push(LiabilityFormScreen(rawData.id, dataToSend))
                     } else {
+                        // 🌟 ส่งข้อมูลทั้งหมดไปให้ครบถ้วน สำหรับ "ค่าใช้จ่าย" (เอาค่าเก่ามาถมไว้ก่อน เผื่อมีการแก้ Data Class อนาคต)
                         val dataToSend = ExpenseModel(
-                            type = rawData.type,
-                            name = rawData.name,
-                            creditor = "",
-                            principal = rawData.principal.toString().toDoubleOrNull() ?: 0.0,
-                            interestRate = "",
-                            description = rawData.description,
-                            attachments = attachments ?: emptyList(),
+                            type = rawData.type ?: "",
+                            name = rawData.name ?: "",
+                            creditor = rawData.creditor ?: "",
+                            principal = rawData.principal ?: 0.0,
+                            interestRate = rawData.interestRate.toString(),
+                            description = rawData.description ?: "",
+                            attachments = attachments,
                             startedAt = rawData.startedAt ?: "",
-                            endedAt = ""
+                            endedAt = rawData.endedAt ?: ""
                         )
                         navigatorContent.push(ExpenseFormScreen(rawData.id, dataToSend))
                     }

@@ -15,11 +15,11 @@ data class LandIdResponse(
 data class LandIdData(
     @SerialName("id") val id: String,
     @SerialName("user_id") val userId: String,
-    @SerialName("name") val name: String,
-    @SerialName("deed_num") val deedNum: String,
-    @SerialName("area") val area: Double,   // 🌟 เปลี่ยนเป็น Double
-    @SerialName("amount") val amount: Double, // 🌟 เปลี่ยนเป็น Double
-    @SerialName("description") val description: String,
+    @SerialName("name") val name: String? = null,
+    @SerialName("deed_num") val deedNum: String? = null,
+    @SerialName("area") val area: Double? = null,   // 🌟 เปลี่ยนเป็น Double
+    @SerialName("amount") val amount: Double? = null, // 🌟 เปลี่ยนเป็น Double
+    @SerialName("description") val description: String? = null,
 
     // 🌟 ใส่ ? (Nullable) เผื่อบางทีหลังบ้านไม่ได้ส่งมาจะได้ไม่แครช
     @SerialName("location") val location: LocationById? = null,

@@ -14,7 +14,6 @@ import com.wealthvault_final.`financial-asset`.data.land.LandRepositoryImpl
 import com.wealthvault_final.`financial-asset`.data.share.ShareItemRepositoryImpl
 import com.wealthvault_final.`financial-asset`.model.LandModel
 import com.wealthvault_final.`financial-asset`.model.ShareTo
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -72,32 +71,34 @@ class LandSummaryScreenModel(
             name = current?.landName ?: "",
             area = current?.area ?: 0.0,
             amount = current?.amount ?: 0.0,
-            description = current?.description ?: "",
-            locationAddress = current?.locationAddress ?: "",
-            locationSubDistrict = current?.locationSubDistrict ?: "",
-            locationDistrict = current?.locationDistrict ?: "",
-            locationProvince = current?.locationProvince ?: "",
-            locationPostalCode = current?.locationPostalCode ?: "",
-            files = allFiles,
-            referenceIds = allRefIds,
-            deedNum = current?.deedNum ?: ""
 
+            // 🌟 ใช้ .takeIf { it.isNotBlank() } เพื่อถ้าเป็นค่าว่างให้เปลี่ยนเป็น null
+            description = current?.description?.takeIf { it.isNotBlank() },
+            locationAddress = current?.locationAddress?.takeIf { it.isNotBlank() },
+            locationSubDistrict = current?.locationSubDistrict?.takeIf { it.isNotBlank() },
+            locationDistrict = current?.locationDistrict?.takeIf { it.isNotBlank() },
+            locationProvince = current?.locationProvince?.takeIf { it.isNotBlank() },
+            locationPostalCode = current?.locationPostalCode?.takeIf { it.isNotBlank() },
+
+            // เลขโฉนดก็อาจจะว่างได้ ถ้าไม่ได้บังคับให้กรอกก็ใส่ไว้ด้วยครับ
+            deedNum = current?.deedNum?.takeIf { it.isNotBlank() },
+
+            files = allFiles,
+            referenceIds = allRefIds
         )
     }
 
-
-
-    fun submitLand() {
+    fun submitLand(onSuccess: () -> Unit) {
         val shareToData = _state.value.shareTo ?: return
+
         screenModelScope.launch {
             try {
-                isLoading = true
+                // 🌟 1. อัปเดต StateFlow เพื่อให้ UI แสดง Spinner โหลดที่ปุ่มได้ถูกต้อง
+                _state.update { it.copy(isLoading = true) }
                 errorMessage = null
 
                 // --- ขั้นตอนที่ 1: สร้าง Land ก่อน ---
-
                 val requestBody = asRequest()
-
                 val landResult = landRepository.create(requestBody)
 
                 // ดึงข้อมูลออกมาจาก Result Wrapper
@@ -105,52 +106,48 @@ class LandSummaryScreenModel(
 
                 if (landResult.isSuccess && landResponse != null) {
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Land
-                    // สมมติว่า field id อยู่ใน landResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = landResponse.id.toString()
                     println("✅ [ScreenModel] Land Created ID: $createdItemId")
 
-                    delay(10000)
                     // --- ขั้นตอนที่ 2: เตรียมข้อมูลเพื่อ Share โดยใช้ ID ที่เพิ่งได้มา ---
-                    val requestShareItem = ShareItemRequest(
-                        itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
-                        itemTypes = "land",
-                        emails = shareToData.email.map {
-                            TargetItem(
-                                id = it.name,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        friends = shareToData.friend.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        groups = shareToData.group.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        }
-                    )
+                    val hasShareData = shareToData.email.isNotEmpty() ||
+                            shareToData.friend.isNotEmpty() ||
+                            shareToData.group.isNotEmpty()
 
-                    // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
-                    val shareResult = shareItemRepository.shareItem(requestShareItem)
-                    println(" [SummaryScreenModel] Share result: $shareResult")
+                    if (hasShareData) {
+                        val requestShareItem = ShareItemRequest(
+                            itemIds = createdItemId,
+                            itemTypes = "land",
 
+                            emails = shareToData.email.map { TargetItem(id = it.userId, shareAt = it.apiDate) },
+                            friends = shareToData.friend.map { TargetItem(id = it.userId, shareAt = it.apiDate) },
+                            groups = shareToData.group.map { TargetItem(id = it.userId, shareAt = it.apiDate) }
+                        )
+
+                        // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
+                        val shareResult = shareItemRepository.shareItem(requestShareItem)
+                        println(" [SummaryScreenModel] Share result: $shareResult")
+                    }
+
+                    // 🌟 ส่งสัญญาณกลับไปหน้า UI ให้เด้งกลับหน้าแรก
+                    onSuccess()
+                } else {
+                    // 🌟 ดึงข้อความ Error จริงๆ จากระบบออกมาดูเผื่อมีปัญหาอื่นอีก
+                    val errorDetail = landResult.exceptionOrNull()?.message ?: "ไม่ทราบสาเหตุ"
+                    println("❌ [ScreenModel] Create Land Failed!")
+                    println("🚨 รายละเอียด Error: $errorDetail")
                 }
-                else {
-                    println("❌ [ScreenModel] Create Land Failed")
-            }
 
             } catch (e: Exception) {
                 println("❌ [ScreenModel] Exception: ${e.message}")
                 errorMessage = e.message ?: "เกิดข้อผิดพลาดในการเชื่อมต่อ"
             } finally {
-                isLoading = false
+                // 🌟 2. อัปเดต StateFlow ปิดปุ่มโหลด
+                _state.update { it.copy(isLoading = false) }
                 println("🏁 [ScreenModel] Process Finished.")
             }
         }
+
     }
 
 

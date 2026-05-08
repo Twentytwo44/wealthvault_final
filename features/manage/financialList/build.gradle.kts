@@ -50,7 +50,7 @@ kotlin {
                 implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
                 implementation("org.jetbrains.kotlinx:atomicfu:0.23.2")
                 implementation(project(":features:manage:form"))
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
                 implementation(project(":navigation-point"))
 
 
@@ -62,7 +62,6 @@ kotlin {
                 implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")
                 implementation(libs.compose.components.resources)
                 implementation("io.coil-kt.coil3:coil-compose:3.0.0-alpha06")
-
             }
         }
         commonTest {
@@ -74,4 +73,8 @@ kotlin {
         }
     }
 
+}
+
+configurations.all {
+    resolutionStrategy.force("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 }

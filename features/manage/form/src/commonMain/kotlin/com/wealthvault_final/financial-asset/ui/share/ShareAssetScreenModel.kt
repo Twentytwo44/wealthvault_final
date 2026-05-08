@@ -6,15 +6,16 @@ import com.wealthvault.group_api.model.GetAllGroupData
 import com.wealthvault.`user-api`.model.FriendData
 import com.wealthvault_final.`financial-asset`.data.friend.FriendRepositoryImpl
 import com.wealthvault_final.`financial-asset`.data.group.GroupRepositoryImpl
+import com.wealthvault_final.`financial-asset`.model.ShareTo
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-
 data class ShareAssetState<T>(
     val request: T? = null,
+    val shareTo: ShareTo? = null,
     val isLoading: Boolean = false
 )
 class ShareAssetScreenModel<T>(
@@ -38,6 +39,9 @@ class ShareAssetScreenModel<T>(
     fun initData(request: T?) {
         _formState.update { it.copy(request = request) }
         println("✅ State Updated: ${_formState.value}")
+    }
+    fun saveShareInfo(shareTo: ShareTo) {
+        _formState.update { it.copy(shareTo = shareTo) }
     }
 
 

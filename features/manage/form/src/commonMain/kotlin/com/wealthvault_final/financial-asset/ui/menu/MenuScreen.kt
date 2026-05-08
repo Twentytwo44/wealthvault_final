@@ -1,10 +1,13 @@
 package com.wealthvault_final.`financial-asset`.ui.menu
 
+// 🌟 Import Theme และ Resources
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,14 +23,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,16 +43,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.bookbank
 import com.wealthvault.core.generated.resources.cashgold
+import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.insurance
 import com.wealthvault.core.generated.resources.land
 import com.wealthvault.core.generated.resources.stock
+import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightText
 import com.wealthvault_final.`financial-asset`.ui.bankaccount.BankAccountFormScreen
 import com.wealthvault_final.`financial-asset`.ui.cash.CashFormScreen
 import com.wealthvault_final.`financial-asset`.ui.insurance.InsuranceFormScreen
@@ -58,29 +63,23 @@ import com.wealthvault_final.`financial-asset`.ui.realestate.RealEstateScreen
 import com.wealthvault_final.`financial-asset`.ui.stock.StockFormScreen
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.InternalResourceApi
 import org.jetbrains.compose.resources.painterResource
-
-val WealthVaultBrown = Color(0xFFB37E61)
-val WealthVaultBackground = Color(0xFFFFF8F3)
-val WealthVaultCardHeader = Color(0xFF6D4C41)
 
 data class AssetCategory(
     val id: Int,
     val title: String,
-    val iconRes: DrawableResource, // ✅ กลับมาใช้ Resource Object
+    val iconRes: DrawableResource,
     val backgroundColor: Color,
     val borderColor: Color
 )
 
 val assetCategories = listOf(
     AssetCategory(1, "บัญชีเงินฝาก", Res.drawable.bookbank, Color(0xFFE3F2FD), Color(0xFF2196F3)),
-    AssetCategory(2, "เงินสด ทองคำ",Res.drawable.cashgold,Color(0xFFF1F8E9), Color(0xFF8BC34A)),
-    AssetCategory(3, "ลงทุน หุ้น กองทุน",Res.drawable.stock,  Color(0xFFE8F5E9), Color(0xFF4CAF50)),
-    AssetCategory(4, "ประกัน",Res.drawable.insurance, Color(0xFFF3E5F5), Color(0xFF9C27B0)),
-    AssetCategory(5, "อสังหาริมทรัพย์",Res.drawable.land, Color(0xFFFFF3E0), Color(0xFFFF9800))
+    AssetCategory(2, "เงินสด ทองคำ", Res.drawable.cashgold, Color(0xFFF1F8E9), Color(0xFF8BC34A)),
+    AssetCategory(3, "ลงทุน หุ้น กองทุน", Res.drawable.stock, Color(0xFFE8F5E9), Color(0xFF4CAF50)),
+    AssetCategory(4, "ประกัน", Res.drawable.insurance, Color(0xFFF3E5F5), Color(0xFF9C27B0)),
+    AssetCategory(5, "อสังหาริมทรัพย์", Res.drawable.land, Color(0xFFFFF3E0), Color(0xFFFF9800))
 )
-
 
 class MenuScreen : Screen {
     @Composable
@@ -90,68 +89,79 @@ class MenuScreen : Screen {
         MenuContent(
             onBackClick = { navigator.pop() },
             onNextClick = { selectedCategory ->
-                // ✅ ใช้ when เพื่อเช็ค id แล้วส่งไปหน้าต่างๆ
                 when (selectedCategory?.id) {
-                    1 -> navigator.push(BankAccountFormScreen())        // ประเภทที่ 1: เงินสด
-                    2 -> navigator.push(CashFormScreen())      // ประเภทที่ 2: การลงทุน
-                    3 -> navigator.push(StockFormScreen())       // ประเภทที่ 3: ประกัน
-                    4 -> navigator.push(InsuranceFormScreen())      // ประเภทที่ 4: อสังหาริมทรัพย์
-                    5 -> navigator.push(RealEstateScreen())      // ประเภทที่ 5: อื่นๆ
-                    else -> {
-                        // กรณีที่ไม่ได้เลือก หรือ id ไม่ตรงกับที่กำหนด
-                        println("กรุณาเลือกประเภททรัพย์สิน")
-                    }
+                    1 -> navigator.push(BankAccountFormScreen())
+                    2 -> navigator.push(CashFormScreen())
+                    3 -> navigator.push(StockFormScreen())
+                    4 -> navigator.push(InsuranceFormScreen())
+                    5 -> navigator.push(RealEstateScreen())
                 }
             }
         )
     }
 }
 
-@OptIn(org.jetbrains.compose.resources.ExperimentalResourceApi::class)
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun MenuContent(
     onBackClick: () -> Unit = {},
     onNextClick: (AssetCategory?) -> Unit = {}
 ) {
-    var selectedId by remember { mutableStateOf<Int?>(1) } // Default เลือกอันแรกตามรูป
-
+    var selectedId by remember { mutableStateOf<Int?>(1) }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding(),
-        containerColor = WealthVaultBackground,
+        modifier = Modifier.fillMaxSize(),
+        containerColor = LightBg,
         topBar = {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = WealthVaultBrown)
+            Column(modifier = Modifier.statusBarsPadding()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    // 🌟 1. ปรับ Padding เป็น 24.dp ให้ขอบเท่ากัน
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
+                ) {
+                    // 🌟 ถอด IconButton ออก ใช้ Icon + clickable แทน เพื่อแก้ปัญหาขอบดัน
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_back),
+                        contentDescription = "Back",
+                        tint = LightPrimary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "ประเภททรัพย์สิน",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LightPrimary
+                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("ประเภททรัพย์สิน", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WealthVaultBrown)
             }
         },
         bottomBar = {
-            Box(modifier = Modifier.padding(16.dp)) {
+            // 🌟 2. ปรับ Padding ของปุ่มเป็น 24.dp
+            Box(modifier = Modifier.navigationBarsPadding().padding(horizontal = 24.dp, vertical = 24.dp)) {
                 Button(
                     onClick = { onNextClick(assetCategories.find { it.id == selectedId }) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = WealthVaultBrown)
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+                    enabled = selectedId != null
                 ) {
-                    Text("ต่อไป", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("ต่อไป", color = Color.White, style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
     ) { paddingValues ->
-        // ✅ ใช้ LazyVerticalGrid จัดเรียง 2 คอลัมน์
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
+                .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
+                // 🌟 3. ปรับ Padding ขอบซ้ายขวาของการ์ดเป็น 24.dp
+                .padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)
         ) {
             items(assetCategories) { category ->
                 AssetCard(
@@ -163,7 +173,8 @@ fun MenuContent(
         }
     }
 }
-@OptIn(ExperimentalResourceApi::class, InternalResourceApi::class)
+
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun AssetCard(
     category: AssetCategory,
@@ -190,31 +201,29 @@ fun AssetCard(
                     tint = category.borderColor,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(20.dp)
+                        .padding(12.dp)
+                        .size(22.dp)
                 )
             }
 
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // ✅ 2. ส่ง imagePath ให้ AsyncImage
-                // Coil3 จะเข้าใจ Path นี้และไปดึงไฟล์จาก Resources มาวาดให้เอง
                 Image(
                     painter = painterResource(category.iconRes),
                     contentDescription = category.title,
-                    modifier = Modifier.size(116.dp),
+                    modifier = Modifier.size(100.dp),
                 )
 
-
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = category.title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
-                    color = Color.Black,
+                    color = LightText,
                     textAlign = TextAlign.Center
                 )
             }

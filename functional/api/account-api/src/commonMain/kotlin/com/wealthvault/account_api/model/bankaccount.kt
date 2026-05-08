@@ -47,14 +47,12 @@ data class BankAccountResponse(
 data class BankAccountData(
     @SerialName("id") val id: String,
     @SerialName("user_id") val userId: String,
-    @SerialName("name") val name: String,
-    @SerialName("bank_name") val bankName: String,
-    @SerialName("bank_account") val bankAccount: String,
-    @SerialName("type") val type: String,
-    @SerialName("amount") val amount: Double, // 🌟 เปลี่ยนเป็น Double
-    @SerialName("description") val description: String,
-
-    // 🌟 เพิ่มฟิลด์ใหม่จาก JSON
+    @SerialName("name") val name: String? = null,
+    @SerialName("bank_name") val bankName: String? = null,
+    @SerialName("bank_account") val bankAccount: String? = null,
+    @SerialName("type") val type: String? = null,
+    @SerialName("amount") val amount: Double? = null,
+    @SerialName("description") val description: String? = null,
     @SerialName("files") val files: List<FileDataModel>? = emptyList(),
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null

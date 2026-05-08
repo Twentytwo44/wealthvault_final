@@ -1,5 +1,8 @@
 package com.wealthvault.social.ui.components.profile // หรือโฟลเดอร์ที่คุณ Champ ต้องการในฝั่ง Social
 
+// 🌟 Import UI จาก Core
+
+// 🌟 Import Utils & Models
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -9,32 +12,33 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import org.koin.compose.koinInject
-
-// 🌟 Import UI จาก Core
+import com.wealthvault.account_api.model.BankAccountData
+import com.wealthvault.building_api.model.BuildingIdData
+import com.wealthvault.cash_api.model.CashIdData
 import com.wealthvault.core.components.DetailDialog
-import com.wealthvault.core.components.DetailRow
 import com.wealthvault.core.components.DetailImageRow
+import com.wealthvault.core.components.DetailRow
 import com.wealthvault.core.theme.LightPrimary
-
-// 🌟 Import Utils & Models
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
-import com.wealthvault.social.data.SocialRepositoryImpl
-import com.wealthvault.account_api.model.BankAccountData
-import com.wealthvault.cash_api.model.CashIdData
-import com.wealthvault.investment_api.model.InvestmentIdData
 import com.wealthvault.insurance_api.model.InsuranceIdData
-import com.wealthvault.building_api.model.BuildingIdData
+import com.wealthvault.investment_api.model.InvestmentIdData
 import com.wealthvault.land_api.model.LandIdData
 import com.wealthvault.liability_api.model.LiabilityIdData
+import com.wealthvault.social.data.SocialRepositoryImpl
+import org.koin.compose.koinInject
 
 @Composable
 fun SmartAssetDetailDialog(
@@ -99,7 +103,7 @@ fun SmartAssetDetailDialog(
             is BankAccountData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = itemData.name, updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name) }, onEdit = onEdit, onShare = onShare
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
                 ) {
                     DetailRow("ธนาคาร", itemData.bankName)
                     DetailRow("เลขบัญชี", itemData.bankAccount)
@@ -183,17 +187,47 @@ fun SmartAssetDetailDialog(
             }
 
             is LiabilityIdData -> {
+                // 🌟 ดักค่า null ให้ name ด้วย เผื่อมันตั้งเป็น String? ไว้
+                val safeName = itemData.name ?: "-"
+
                 DetailDialog(
-                    subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
+                    subtitle = subtitleText, title = safeName, updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
+                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") },
+                    onEdit = onEdit,
+                    onShare = onShare
                 ) {
+                    val isLoan = itemData.type == "LIABILITY_TYPE_LOAN"
+
                     DetailRow("เจ้าหนี้", itemData.creditor)
-                    DetailRow("ประเภท", if (itemData.type == "LIABILITY_TYPE_LOAN") "หนี้สิน" else "รายจ่าย")
+                    DetailRow("ประเภท", if (isLoan) "หนี้สิน" else "รายจ่าย")
+
+                    // 🌟 แก้เส้นแดงที่ 1: เติม ?: 0.0 เพื่อให้ formatAmount ทำงานได้
                     DetailRow("เงินต้น/ยอดหนี้", "${formatAmount(itemData.principal ?: 0.0)} บาท", isHighlight = true)
+
+                    // 🌟 แก้เส้นแดงที่ 2: ดึงค่ามาใส่ตัวแปรก่อน (ดัก null เป็น 0.0) Kotlin จะได้ไม่งง
+                    val rate = itemData.interestRate ?: 0.0
+                    if (rate > 0) {
+                        DetailRow(label = "ดอกเบี้ย", value = "$rate %")
+                    }
+
+                    DetailRow(
+                        label = "วันที่เริ่มต้น",
+                        value = if (!itemData.startedAt.isNullOrBlank()) formatThaiDate(itemData.startedAt) else "-"
+                    )
+
+                    if (isLoan) { // ถ้าเป็นหนี้สินถึงโชว์วันสิ้นสุด (รายจ่ายอาจไม่มี)
+                        DetailRow(
+                            label = "วันที่สิ้นสุด",
+                            value = if (!itemData.endedAt.isNullOrBlank()) formatThaiDate(itemData.endedAt) else "-"
+                        )
+                    }
+
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
             }
+
+
         }
 
     }else {

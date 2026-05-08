@@ -15,20 +15,15 @@ data class LiabilityIdResponse(
 data class LiabilityIdData(
     @SerialName("id") val id: String,
     @SerialName("user_id") val userId: String,
-    @SerialName("type") val type: String,
-    @SerialName("name") val name: String,
-    @SerialName("creditor") val creditor: String,
-    @SerialName("principal") val principal: Double, // 🌟 เปลี่ยนเป็น Double เผื่อมีสตางค์
-    @SerialName("interest_rate") val interestRate: Double,
-    @SerialName("description") val description: String,
-
-    // 🌟 ใส่ ? (Nullable) เผื่อบางเคสไม่มี
+    @SerialName("type") val type: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("creditor") val creditor: String? = null,
+    @SerialName("principal") val principal: Double? = null,
+    @SerialName("interest_rate") val interestRate: Double? = null,
+    @SerialName("description") val description: String? = null,
     @SerialName("started_at") val startedAt: String? = null,
     @SerialName("ended_at") val endedAt: String? = null,
-
-    // 🌟 เติม files เผื่อมีรูปสัญญากู้ยืม
     @SerialName("files") val files: List<FileDataModel>? = emptyList(),
-
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null
 )

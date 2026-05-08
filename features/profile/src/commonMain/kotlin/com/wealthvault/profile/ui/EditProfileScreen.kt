@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -37,6 +38,17 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 class EditProfileScreen(
 ) : Screen {
@@ -320,46 +332,65 @@ fun EditProfileContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileTextField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
     readOnly: Boolean = false,
+    placeholder: String = "",
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
     Column {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = LightPrimary
+        )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+
+        BasicTextField(
             value = value,
             onValueChange = onValueChange,
             readOnly = readOnly,
+            singleLine = true,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF3A2F2A)),
+            cursorBrush = SolidColor(LightPrimary),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = LightBorder.copy(alpha = 0.5f), // ปรับให้จางลงนิดนึงจะสวยมากครับ
-                    shape = RoundedCornerShape(12.dp)
-                ),
-            shape = RoundedCornerShape(12.dp),
-            colors = TextFieldDefaults.colors(
-                // 🌟 เปลี่ยนสีพื้นหลังช่อง Input เป็น LightSoftWhite
-                focusedContainerColor = LightSoftWhite,
-                unfocusedContainerColor = LightSoftWhite,
+                .height(45.dp),
+            // 🌟 decorationBox คือจุดที่ทำให้เราวาดกรอบเองได้
+            decorationBox = { innerTextField ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                        .border(
+                            width = 1.dp,
+                            color = LightBorder.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (value.isEmpty()) {
+                            Text(
+                                text = placeholder,
+                                color = Color.LightGray,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        // 🌟 นี่คือจุดที่ตัวหนังสือที่เราพิมพ์จะไปปรากฏ
+                        innerTextField()
+                    }
 
-                // ปิดเส้นขีดด้านล่าง (Indicator) เพราะเราใช้ Border แทนแล้ว
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-
-                // ปรับสีตัวหนังสือให้เข้ากับธีม
-                focusedTextColor = Color(0xFF3A2F2A),
-                unfocusedTextColor = Color(0xFF3A2F2A)
-            ),
-            trailingIcon = trailingIcon,
-            singleLine = true,
+                    if (trailingIcon != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        trailingIcon()
+                    }
+                }
+            }
         )
     }
 }

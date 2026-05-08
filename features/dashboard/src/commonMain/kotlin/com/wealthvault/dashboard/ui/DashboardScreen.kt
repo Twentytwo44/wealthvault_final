@@ -151,7 +151,7 @@ fun DashboardContent(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 val isAsset = selectedTab == DashboardTab.ASSET
-                val headerTitle = if (isAsset) "มูลค่าทรัพย์สิน≈" else "มูลค่าหนี้สิน≈"
+                val headerTitle = if (isAsset) "มูลค่าทรัพย์สิน" else "มูลค่าหนี้สิน"
                 val headerAmountValue = if (isAsset) (data.netWorth?.totalAssets ?: 0.0) else (data.netWorth?.totalLiabilities ?: 0.0)
                 val headerAmount = formatAmount(headerAmountValue) + " บาท"
                 val headerColor = if (isAsset) Color(0xFF398A1E) else Color(0xFFDC4A3C)
@@ -162,7 +162,7 @@ fun DashboardContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = headerTitle, style = MaterialTheme.typography.titleMedium, color = Color(0xFFC27A5A))
-                    Text(text = headerAmount, style = MaterialTheme.typography.titleMedium, color = headerColor)
+                    Text(text = "≈"+headerAmount, style = MaterialTheme.typography.titleMedium, color = headerColor)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -272,8 +272,8 @@ fun DashboardGridCards(
                 modifier = Modifier.weight(1f),
                 bgBrush = Brush.linearGradient(colors = listOf(Color(0xFF6BC591), Color(0xFF26A65B))),
                 icon = painterResource(Res.drawable.ic_dashboard_money_bag),
-                title = formatAmount(assetsValue),
-                subtitle = "มูลค่าทรัพย์สิน≈",
+                title = "≈"+formatAmount(assetsValue),
+                subtitle = "มูลค่าทรัพย์สิน",
                 isSelected = selectedTab == DashboardTab.ASSET,
                 onClick = onAssetClick
             )
@@ -285,8 +285,8 @@ fun DashboardGridCards(
                 modifier = Modifier.weight(1f),
                 bgBrush = Brush.linearGradient(colors = listOf(Color(0xFFD15E51), Color(0xFFC63A2C))),
                 icon = painterResource(Res.drawable.ic_nav_debt),
-                title = formatAmount(debtsValue),
-                subtitle = "มูลค่าหนี้สิน≈",
+                title = "≈"+formatAmount(debtsValue),
+                subtitle = "มูลค่าหนี้สิน",
                 isSelected = selectedTab == DashboardTab.DEBT,
                 onClick = onDebtClick
             )

@@ -53,6 +53,9 @@ data class MessageMetadata(
     @SerialName("is_deleted")
     val isDeleted: Boolean? = null,
 
+    @SerialName("share_at_display")
+    val shareAtDisplay: String? = null,
+
 
     @SerialName("snapshot_title")
     val snapshotTitle: String? = null

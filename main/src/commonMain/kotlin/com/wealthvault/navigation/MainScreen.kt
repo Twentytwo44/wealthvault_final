@@ -21,6 +21,7 @@ import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.WealthVaultTheme
 import com.wealthvault.main.SharedScreen
 import com.wealthvault.navigation.components.BottomBarItem
@@ -111,7 +112,7 @@ class MainScreen : Screen {
                     // วาด BottomBar ตามปกติ ไม่ต้องมี if เช็คสถานะแล้ว
                     Surface(
                         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                        color = Color.White,
+                        color = LightSoftWhite,
                         shadowElevation = 8.dp,
                         modifier = Modifier.fillMaxWidth()
                     ) {

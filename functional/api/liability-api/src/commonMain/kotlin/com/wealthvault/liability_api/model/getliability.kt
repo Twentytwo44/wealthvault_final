@@ -37,7 +37,7 @@ data class GetLiabilityData(
     val creditor: String? = null,
 
     @SerialName("principal")
-    val principal: Int? = null,
+    val principal: Double? = null,
 
     @SerialName("interest_rate")
     val interestRate: Double? = null,

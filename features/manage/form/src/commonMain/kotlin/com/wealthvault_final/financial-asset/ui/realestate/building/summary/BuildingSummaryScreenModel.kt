@@ -15,7 +15,6 @@ import com.wealthvault_final.`financial-asset`.data.building.BuildingRepositoryI
 import com.wealthvault_final.`financial-asset`.data.share.ShareItemRepositoryImpl
 import com.wealthvault_final.`financial-asset`.model.BuildingModel
 import com.wealthvault_final.`financial-asset`.model.ShareTo
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -50,18 +49,13 @@ class BuildingSummaryScreenModel(
     private fun asRequest(): BuildingRequest {
         val current = _state.value.buildingRequest
 
-        // ✅ Map ข้อมูลให้มีทั้ง Byte, MimeType และ ชื่อไฟล์
+        // ✅ Map ข้อมูลไฟล์
         val allFiles = current?.attachments?.mapNotNull { attachment ->
             val bytes = attachment.platformData as? ByteArray ?: return@mapNotNull null
-
-            // เช็กว่าเป็น PDF หรือ รูปภาพ
             val isPdf = attachment.name.endsWith(".pdf", ignoreCase = true) || attachment.type.toString().contains("PDF")
             val mimeType = if (isPdf) "application/pdf" else "image/jpeg"
             val extension = if (isPdf) "pdf" else "jpg"
-
-            // ตั้งชื่อไฟล์ (เอา symbol มาต่อกับ index หรือเวลาเพื่อไม่ให้ซ้ำ)
             val fileName = "${current.buildingName}.$extension"
-
             BuildingFileUploadData(bytes = bytes, mimeType = mimeType, fileName = fileName)
         } ?: emptyList()
 
@@ -77,12 +71,15 @@ class BuildingSummaryScreenModel(
             type = current?.type ?: "",
             area = current?.area ?: 0.0,
             amount = current?.amount ?: 0.0,
-            description = current?.description ?: "",
-            locationAddress = current?.locationAddress ?: "",
-            locationSubDistrict = current?.locationSubDistrict ?: "",
-            locationDistrict = current?.locationDistrict ?: "",
-            locationProvince = current?.locationProvince ?: "",
-            locationPostalCode = current?.locationPostalCode ?: "",
+
+            // 🌟 ใช้ .takeIf { it.isNotBlank() } เพื่อบอกว่า "ถ้าว่าง = ไม่ต้องส่ง (null)"
+            description = current?.description?.takeIf { it.isNotBlank() },
+            locationAddress = current?.locationAddress?.takeIf { it.isNotBlank() },
+            locationSubDistrict = current?.locationSubDistrict?.takeIf { it.isNotBlank() },
+            locationDistrict = current?.locationDistrict?.takeIf { it.isNotBlank() },
+            locationProvince = current?.locationProvince?.takeIf { it.isNotBlank() },
+            locationPostalCode = current?.locationPostalCode?.takeIf { it.isNotBlank() },
+
             insIds = allInsRefIds,
             files = allFiles,
             referenceIds = allRefIds
@@ -91,17 +88,17 @@ class BuildingSummaryScreenModel(
 
 
 
-    fun submitBuilding() {
+    fun submitBuilding(onSuccess: () -> Unit) {
         val shareToData = _state.value.shareTo ?: return
+
         screenModelScope.launch {
             try {
-                isLoading = true
+                // 🌟 1. อัปเดต StateFlow เพื่อให้ UI แสดง Spinner โหลดที่ปุ่มได้ถูกต้อง
+                _state.update { it.copy(isLoading = true) }
                 errorMessage = null
 
                 // --- ขั้นตอนที่ 1: สร้าง Building ก่อน ---
-
                 val requestBody = asRequest()
-
                 val buildingResult = buildingRepository.createBuilding(requestBody)
 
                 // ดึงข้อมูลออกมาจาก Result Wrapper
@@ -109,49 +106,56 @@ class BuildingSummaryScreenModel(
 
                 if (buildingResult.isSuccess && buildingResponse != null) {
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Building
-                    // สมมติว่า field id อยู่ใน buildingResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = buildingResponse.id.toString()
                     println("✅ [ScreenModel] Building Created ID: $createdItemId")
 
-                    delay(10000)
+                    // 🚨 ลบ delay(10000) ทิ้งเรียบร้อยครับ!
+
                     // --- ขั้นตอนที่ 2: เตรียมข้อมูลเพื่อ Share โดยใช้ ID ที่เพิ่งได้มา ---
-                    val requestShareItem = ShareItemRequest(
-                        itemIds = createdItemId, // 👈 ใส่ ID ที่ได้จากขั้นตอนที่ 1
-                        itemTypes = "building",
-                        emails = shareToData.email.map {
-                            TargetItem(
-                                id = it.name,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        friends = shareToData.friend.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        },
-                        groups = shareToData.group.map {
-                            TargetItem(
-                                id = it.userId,
-                                shareAt = shareToData.shareAt
-                            )
-                        }
-                    )
+                    // 💡 เช็กก่อนว่ามีการเลือกคนแชร์หรือไม่
+                    val hasShareData = shareToData.email.isNotEmpty() ||
+                            shareToData.friend.isNotEmpty() ||
+                            shareToData.group.isNotEmpty()
 
-                    // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
-                    val shareResult = shareItemRepository.shareItem(requestShareItem)
-                    println(" [SummaryScreenModel] Share result: $shareResult")
+                    if (hasShareData) {
+                        val requestShareItem = ShareItemRequest(
+                            itemIds = createdItemId,
+                            itemTypes = "building",
 
+                            // 🌟 1. แก้ email ให้ส่ง it.userId (ถ้า userId เก็บชื่ออีเมลไว้) และใช้วันที่ของแต่ละคน (it.apiDate)
+                            emails = shareToData.email.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 2. ดึงวันที่ของเพื่อนแต่ละคน (it.apiDate) แบบเจาะจง
+                            friends = shareToData.friend.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            },
+
+                            // 🌟 3. ดึงวันที่ของกลุ่มแต่ละกลุ่ม (it.apiDate)
+                            groups = shareToData.group.map {
+                                TargetItem(id = it.userId, shareAt = it.apiDate)
+                            }
+                        )
+
+                        // --- ขั้นตอนที่ 3: ยิง API แชร์ทรัพย์สิน ---
+                        val shareResult = shareItemRepository.shareItem(requestShareItem)
+                        println(" [SummaryScreenModel] Share result: $shareResult")
+                    }
+
+                    // 🌟 ส่งสัญญาณกลับไปหน้า UI ให้เด้งกลับหน้าแรก
+                    onSuccess()
                 }
                 else {
                     println("❌ [ScreenModel] Create Building Failed ${buildingResult}")
-            }
+                }
 
             } catch (e: Exception) {
                 println("❌ [ScreenModel] Exception: ${e.message}")
                 errorMessage = e.message ?: "เกิดข้อผิดพลาดในการเชื่อมต่อ"
             } finally {
-                isLoading = false
+                // 🌟 2. อัปเดต StateFlow ปิดปุ่มโหลด
+                _state.update { it.copy(isLoading = false) }
                 println("🏁 [ScreenModel] Process Finished.")
             }
         }

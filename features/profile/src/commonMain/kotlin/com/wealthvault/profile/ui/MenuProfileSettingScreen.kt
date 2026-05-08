@@ -102,11 +102,11 @@ fun MenuProfileSettingContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         // 🌟 สมมติว่าภาษา/ธีม ยังไม่ทำ ก็ใส่คอมเมนต์ไว้ก่อนได้ครับ
-        SettingMenuItem(title = "ภาษา", onClick = { /* TODO */ }, showArrow = false)
-        Spacer(modifier = Modifier.height(24.dp))
-
-        SettingMenuItem(title = "ธีม", onClick = { /* TODO */ }, showArrow = false)
-        Spacer(modifier = Modifier.height(32.dp))
+//        SettingMenuItem(title = "ภาษา", onClick = { /* TODO */ }, showArrow = false)
+//        Spacer(modifier = Modifier.height(24.dp))
+//
+//        SettingMenuItem(title = "ธีม", onClick = { /* TODO */ }, showArrow = false)
+//        Spacer(modifier = Modifier.height(32.dp))
 
         // --- Logout Button ---
         Text(

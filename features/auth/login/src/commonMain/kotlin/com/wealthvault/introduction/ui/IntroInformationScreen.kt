@@ -1,6 +1,5 @@
 package com.wealthvault.introduction.ui // ถ้าอยากย้าย package ไปโฟลเดอร์ ic_nav_profile ก็เปลี่ยนตรงนี้ได้นะครับ
 
-// Import Theme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,6 +29,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -43,8 +45,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,6 +63,8 @@ import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_calendar
 import com.wealthvault.core.generated.resources.ic_common_pen
 import com.wealthvault.core.generated.resources.ic_nav_profile
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
@@ -71,6 +77,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 
+import com.wealthvault.core.theme.WvBgGradientStart
+import org.jetbrains.compose.resources.painterResource
 
 class IntroQuestionScreen : Screen {
     @Composable
@@ -110,6 +118,7 @@ class IntroQuestionScreen : Screen {
         }
     }
 }
+
 @Composable
 fun IntroQuestionContent(
     firstName: String,
@@ -174,13 +183,13 @@ fun IntroQuestionContent(
             Spacer(modifier = Modifier.height(24.dp))
 
 
-            // --- ส่วนเนื้อหาฟอร์ม (ใส่ Scroll เผื่อคีย์บอร์ดบังจอ) ---
+            // --- ส่วนเนื้อหาฟอร์ม ---
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .verticalScroll(rememberScrollState()), // 💡 เพิ่ม Scroll ป้องกันคีย์บอร์ดบังปุ่ม
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -237,7 +246,7 @@ fun IntroQuestionContent(
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // ช่องกรอกข้อมูลต่างๆ
+                // 🌟 เปลี่ยนมาเรียกใช้ InputField ตัวใหม่
                 InputField(label = "ชื่อจริง", value = firstName, onValueChange = onFirstNameChange, primaryColor = LightPrimary, inputBgColor = LightSurface, borderColor = LightBorder)
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -335,23 +344,43 @@ fun IntroQuestionContent(
     }
 }
 
-// Widget ช่วยสร้างช่องกรอกข้อความ
+// 🌟 อัปเดต Widget ช่วยสร้างช่องกรอกข้อความ เป็น BasicTextField
 @Composable
 fun InputField(label: String, value: String, onValueChange: (String) -> Unit, primaryColor: Color, inputBgColor: Color, borderColor: Color) {
+    // State สำหรับจับว่าช่องนี้กำลังถูกกดพิมพ์อยู่หรือเปล่า (เพื่อเปลี่ยนสีกรอบ)
+    var isFocused by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = label, color = primaryColor, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp, start = 8.dp))
-        OutlinedTextField(
+
+        BasicTextField(
             value = value,
             onValueChange = onValueChange,
+            singleLine = true,
+            textStyle = LocalTextStyle.current.copy(color = Color.Black, fontSize = 16.sp),
+            cursorBrush = SolidColor(primaryColor),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(percent = 30),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = inputBgColor, unfocusedContainerColor = inputBgColor,
-                focusedBorderColor = primaryColor, unfocusedBorderColor = borderColor,
-            )
+                .height(44.dp) // 🌟 ล็อกความสูง 50.dp ไม่ให้จม
+                .onFocusChanged { isFocused = it.isFocused },
+            decorationBox = { innerTextField ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(inputBgColor, RoundedCornerShape(percent = 30))
+                        .border(
+                            width = 1.dp,
+                            color = if (isFocused) primaryColor else borderColor, // 🌟 เปลี่ยนสีกรอบตอนกดพิมพ์
+                            shape = RoundedCornerShape(percent = 30)
+                        )
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically // 🌟 จัดตัวหนังสือให้อยู่กึ่งกลางเป๊ะ
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        innerTextField()
+                    }
+                }
+            }
         )
     }
 }

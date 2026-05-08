@@ -63,11 +63,15 @@ import com.wealthvault.core.generated.resources.ic_asset_type_land
 import com.wealthvault.core.generated.resources.ic_asset_type_loan
 import com.wealthvault.core.theme.LightBg
 import org.jetbrains.compose.resources.painterResource
+import com.wealthvault.data_store.TokenStore // 🌟 เปลี่ยนมา import ตัวนี้แทน
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 
 // ===============================================
 // 🌟 Component ใหม่: การ์ดจัดการการแชร์ (ฝังในแชท)
 // ===============================================
 data class MockAssetData(val id: String, val name: String)
+
 
 @Composable
 fun InlineGrantAccessCard(
@@ -76,20 +80,28 @@ fun InlineGrantAccessCard(
     targetUserId: String,
     themeColor: Color,
     repository: SocialRepositoryImpl = koinInject(),
+    tokenStore: TokenStore = koinInject(), // 🌟 2. Inject TokenManager เข้ามา
     onSaveSuccess: (List<String>) -> Unit
 ) {
     var isLoading by remember { mutableStateOf(true) }
     var assetList by remember { mutableStateOf<List<ShareGroupData>>(emptyList()) }
     val selectedAssets = remember { mutableStateListOf<String>() }
-    val mocID = "844c4180-4c6a-438e-bfd3-0e78a24ec1b1"
 
     val scrollState = rememberScrollState()
 
     LaunchedEffect(groupId) {
         isLoading = true
+
+        // 🌟 อ่านค่า User ID จาก TokenStore
+        // เนื่องจาก TokenStore มักเก็บค่าเป็น Flow เราจะใช้ .first() เพื่อเอาค่าล่าสุดมาตัวเดียว
+        val currentUserId = tokenStore.getUserId.firstOrNull()
+
         val result = repository.getShareGroupItems(groupId)
         val allItems = result.getOrNull() ?: emptyList()
-        assetList = allItems.filter { it.sharedBy == mocID }
+
+        // 🌟 กรองรายการโดยใช้ ID จริงจากเครื่อง
+        assetList = allItems.filter { it.sharedBy == currentUserId }
+
         isLoading = false
     }
 
@@ -97,6 +109,7 @@ fun InlineGrantAccessCard(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
+// ... (ส่วนที่เหลือของโค้ด InlineGrantAccessCard เหมือนเดิมครับ) ...
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = Color.White,
@@ -241,20 +254,20 @@ fun InlineGrantAccessCard(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (selectedAssets.size != assetList.size) {
-                        Text(
-                            text = "เลือกทั้งหมด",
-                            color = themeColor,
-                            fontSize = 14.sp,
-                            modifier = Modifier
-                                .clickable {
-                                    if (selectedAssets.size != assetList.size) {
-                                        selectedAssets.clear()
-                                        selectedAssets.addAll(assetList.mapNotNull { it.groupItemId })
+                            Text(
+                                text = "เลือกทั้งหมด",
+                                color = themeColor,
+                                fontSize = 14.sp,
+                                modifier = Modifier
+                                    .clickable {
+                                        if (selectedAssets.size != assetList.size) {
+                                            selectedAssets.clear()
+                                            selectedAssets.addAll(assetList.mapNotNull { it.groupItemId })
+                                        }
                                     }
-                                }
-                                .padding(4.dp)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
+                                    .padding(4.dp)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
                         }
                         if (selectedAssets.isNotEmpty()) {
                             Spacer(modifier = Modifier.width(8.dp))
