@@ -12,11 +12,14 @@ data class TokenRequest(
 )
 @Serializable
 data class TokenResponse(
-    @SerialName("status")
-    val status: String? = null,
+    @SerialName("line_id")
+    val lineId: String? = null,
 
-    @SerialName("data")
-    val data: String? = null,
+    @SerialName("message")
+    val message: String? = null,
+
+    @SerialName("success")
+    val success: Boolean? = null,
 
     @SerialName("error")
     val error: String? = null

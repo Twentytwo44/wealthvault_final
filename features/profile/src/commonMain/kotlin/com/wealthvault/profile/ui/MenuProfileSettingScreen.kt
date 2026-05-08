@@ -38,6 +38,7 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.main.SharedScreen
+import com.wealthvault_final.line_auth.rememberLineAuth
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -48,11 +49,23 @@ class MenuProfileSettingScreen: Screen {
         val rootNavigator = LocalRootNavigator.current
         val navigator = LocalNavigator.currentOrThrow
         val screen = rememberScreen(SharedScreen.Login)
+        val lineAuth = rememberLineAuth(
+            onSuccess = { user ->
+                screenModel.onLineSuccess(user) {
+
+                }
+            },
+            onError = { error ->
+                screenModel.onLineError(error)
+            }
+        )
         MenuProfileSettingContent(
             onBackClick = { rootNavigator.pop() },
             onEditProfileClick = { rootNavigator.push(EditProfileScreen()) },
             onShareSettingClick = { rootNavigator.push(ShareSettingScreen()) },
-            onConnectLineClick = {  },
+            onConnectLineClick = {
+                screenModel.onLineClick(lineAuth)
+            },
             onLogoutClick = {
                 screenModel.unRegisterDevice()
                 navigator.replaceAll(
