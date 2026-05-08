@@ -78,7 +78,7 @@ fun FinancialListTemplate(
             cursorBrush = SolidColor(themeColor), // 🌟 สีเคอร์เซอร์เข้ากับธีม (ส้ม/แดง)
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
+                .height(44.dp),
             decorationBox = { innerTextField ->
                 Row(
                     modifier = Modifier

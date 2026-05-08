@@ -208,7 +208,7 @@ fun InputField(label: String, value: String, onValueChange: (String) -> Unit, pr
             cursorBrush = SolidColor(primaryColor),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp) // 🌟 ล็อกความสูง 50.dp ไม่ให้จม
+                .height(44.dp) // 🌟 ล็อกความสูง 50.dp ไม่ให้จม
                 .onFocusChanged { isFocused = it.isFocused },
             decorationBox = { innerTextField ->
                 Row(

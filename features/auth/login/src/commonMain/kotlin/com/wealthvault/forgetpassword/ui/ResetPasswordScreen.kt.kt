@@ -164,7 +164,7 @@ fun ResetPasswordContent(
                     cursorBrush = SolidColor(if (errorMessage != null) RedErr else LightPrimary),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
+                        .height(44.dp),
                     decorationBox = { innerTextField ->
                         Row(
                             modifier = Modifier
@@ -233,7 +233,7 @@ fun ResetPasswordContent(
                     cursorBrush = SolidColor(if (errorMessage != null) RedErr else LightPrimary),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
+                        .height(44.dp),
                     decorationBox = { innerTextField ->
                         Row(
                             modifier = Modifier

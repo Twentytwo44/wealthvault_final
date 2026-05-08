@@ -195,7 +195,7 @@ fun LoginContent(
                             cursorBrush = SolidColor(LightPrimary), // 🌟 สีเคอร์เซอร์กระพริบ
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp), // 🌟 ล็อกความสูง 50.dp ได้สบายๆ
+                                .height(44.dp), // 🌟 ล็อกความสูง 50.dp ได้สบายๆ
                             decorationBox = { innerTextField ->
                                 Row(
                                     modifier = Modifier
@@ -250,7 +250,7 @@ fun LoginContent(
                             cursorBrush = SolidColor(LightPrimary),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp), // 🌟 สูง 50.dp ตามที่ต้องการ
+                                .height(44.dp), // 🌟 สูง 50.dp ตามที่ต้องการ
                             decorationBox = { innerTextField ->
                                 Row(
                                     modifier = Modifier

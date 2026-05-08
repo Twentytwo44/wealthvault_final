@@ -275,7 +275,7 @@ fun CustomRegisterTextField(
         keyboardOptions = if (isPassword) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
         textStyle = LocalTextStyle.current.copy(color = Color.Black),
         cursorBrush = SolidColor(if (isError) RedErr else LightPrimary),
-        modifier = Modifier.fillMaxWidth().height(50.dp),
+        modifier = Modifier.fillMaxWidth().height(44.dp),
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier

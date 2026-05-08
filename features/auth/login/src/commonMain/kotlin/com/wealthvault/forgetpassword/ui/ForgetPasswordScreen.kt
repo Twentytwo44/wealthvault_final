@@ -155,7 +155,7 @@ fun ForgetPasswordContent(
                     cursorBrush = SolidColor(if (errorMessage != null) errorColor else LightPrimary),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp), // 🌟 ล็อกความสูง 50.dp
+                        .height(44.dp), // 🌟 ล็อกความสูง 50.dp
                     decorationBox = { innerTextField ->
                         Row(
                             modifier = Modifier

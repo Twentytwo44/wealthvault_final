@@ -117,19 +117,27 @@ fun SharedAssetManageContent(
                         key = { _, asset -> asset.groupItemId ?: asset.hashCode() }
                     ) { index, asset ->
                         val assetId = asset.groupItemId ?: ""
-                        val assetName = asset.assetDetail?.name ?: "ไม่ระบุชื่อ"
                         val assetType = asset.type ?: ""
                         val imageUrl = asset.assetDetail?.image
-                        val assetValue = asset.assetDetail?.amount ?: asset.assetDetail?.principal
-                        val sharedAt = asset.sharedAt // 🌟 ดึงค่า sharedAt จากโมเดลส่งไปให้ Component
+                        val sharedAt = asset.sharedAt
+
+                        // 🌟 1. ดักจับชื่อ: ถ้า name เป็นค่าว่าง ("") ให้ลองใช้ชื่อบริษัทประกันแทน ถ้าไม่มีอีกค่อยขึ้น "ไม่ระบุชื่อ"
+                        val assetName = asset.assetDetail?.name?.takeIf { it.isNotBlank() }
+                            ?: asset.assetDetail?.companyName?.takeIf { it.isNotBlank() }
+                            ?: "ไม่ระบุชื่อ"
+
+                        // 🌟 2. ดักจับยอดเงิน: ให้ครอบคลุมทั้ง ทรัพย์สินทั่วไป, หนี้สิน, และ ประกัน
+                        val assetValue = asset.assetDetail?.amount
+                            ?: asset.assetDetail?.principal
+                            ?: asset.assetDetail?.coverageAmount
 
                         SharedAssetItem(
                             assetId = assetId,
                             assetName = assetName,
                             assetType = assetType,
                             imageUrl = imageUrl,
-                            value = assetValue,
-                            sharedAt = sharedAt, // 🌟 ส่งค่าเข้าไปที่นี่
+                            value = assetValue, // 🌟 โยนยอดเงินที่ดักครบทุกเคสแล้วเข้าไป
+                            sharedAt = sharedAt,
                             showDelete = true,
                             isFirstItem = (index == 0),
                             themeColor = themeColor,

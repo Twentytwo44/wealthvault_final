@@ -229,7 +229,7 @@ fun ShareSettingContent(
                     cursorBrush = SolidColor(themeColor),
                     modifier = Modifier
                         .width(70.dp)
-                        .height(50.dp), // ล็อกความสูง
+                        .height(44.dp), // ล็อกความสูง
                     decorationBox = { innerTextField ->
                         Row(
                             modifier = Modifier

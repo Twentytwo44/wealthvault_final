@@ -43,7 +43,7 @@ fun SocialSearchBar(
         singleLine = true,
         textStyle = LocalTextStyle.current.copy(color = Color.Black, fontSize = 14.sp),
         cursorBrush = SolidColor(themeColor), // 🌟 ใช้ themeColor เป็นสีเคอร์เซอร์เพื่อให้เข้ากับธีม
-        modifier = modifier.height(52.dp),    // 🌟 ล็อกความสูงเป๊ะๆ ที่ 52.dp
+        modifier = modifier.height(44.dp),    // 🌟 ล็อกความสูงเป๊ะๆ ที่ 52.dp
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier
