@@ -46,6 +46,9 @@ data class NotificationData(
     @SerialName("Message")
     val message: String? = null,
 
+    @SerialName("Metadata")
+    val metaData: String? = null,
+
     @SerialName("CreatedAt")
     val createdAt: String? = null,
 

@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.wealth.vault.lib)
     alias(libs.plugins.wealth.vault.compose)
+    alias(libs.plugins.kotlin.serialization)
+
 }
 
 kotlin {
@@ -30,6 +32,8 @@ kotlin {
                 implementation(project(":functional:api:auth-api"))
                 implementation(project(":functional:data-store"))
                 implementation(project(":base:core"))
+                implementation(project(":base:config"))
+
                 implementation(project(":functional:api:user-api"))
                 implementation(project(":functional:api:group-api"))
                 implementation(project(":functional:api:account-api"))
@@ -45,6 +49,12 @@ kotlin {
                 implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
                 implementation("io.github.onseok:peekaboo-image-picker:0.5.2")
                 implementation(project(":navigation-point"))
+                implementation(project(":functional:api:websocket-api"))
+                implementation(project(":functional:data-store"))
+                implementation(libs.ktor.serialization.json)
+
+
+
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
             }
         }

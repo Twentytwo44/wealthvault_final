@@ -84,6 +84,30 @@ data class MessageMetadata(
 
     @SerialName("is_deleted")
     val isDeleted: Boolean? = null
+    )
 
+    @Serializable
+    data class ChatAction(
+        @SerialName("action")
+        val action: String,
+        @SerialName("group_id")
+        val groupId: String
+    )
 
-)
+    @Serializable
+    data class WsUpdateResponse(
+        @SerialName("event")
+        val event: String? = null,
+        @SerialName("type")
+        val type: String? = null,
+        @SerialName("payload")
+        val payload: WsPayload? = null
+    )
+
+    @Serializable
+    data class WsPayload(
+        @SerialName("count")
+        val count: Int? = null,
+        @SerialName("group_id")
+        val groupId: String? = null
+    )

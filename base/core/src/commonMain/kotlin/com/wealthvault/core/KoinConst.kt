@@ -6,6 +6,7 @@ object KoinConst {
 
         const val AUTH = "auth-kotlin-serialization"
         const val USER = "user-kotlin-serialization"
+        const val WEBSOCKET = "websocket-kotlin-serialization"
     }
 
     object HttpClient {
@@ -14,6 +15,7 @@ object KoinConst {
 
         const val AUTH = "auth-http-client"
         const val USER = "user-http-client"
+        const val WEBSOCKET = "websocket-http-client"
     }
 
     object Ktor {
@@ -22,6 +24,7 @@ object KoinConst {
 
         const val AUTH = "auth-ktorfit"
         const val USER = "user-ktorfit"
+        const val WEBSOCKET = "websocket-ktorfit"
     }
 
     object DataStore {

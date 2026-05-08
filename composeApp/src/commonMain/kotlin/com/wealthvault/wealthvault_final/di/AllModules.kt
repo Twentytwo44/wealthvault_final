@@ -8,6 +8,7 @@ import com.wealthvault.data_store.di.DataStoreModule
 import com.wealthvault.google_auth.di.GoogleAuthMainModule
 import com.wealthvault.group_api.di.GroupApiModule
 import com.wealthvault.insurance_api.di.InsuranceApiModule
+import com.wealthvault.introduction.di.IntroModule
 import com.wealthvault.investment_api.di.InvestmentApiModule
 import com.wealthvault.land_api.di.LandApiModule
 import com.wealthvault.liability_api.di.LiabilityApiModule
@@ -20,6 +21,7 @@ import com.wealthvault.share_api.di.ShareApiModule
 import com.wealthvault.social.di.SocialModule
 import com.wealthvault.splashscreen.di.GetUserModule
 import com.wealthvault.`user-api`.di.UserApiModule
+import com.wealthvault.websocket_api.di.WebSocketApiModule
 import com.wealthvault_final.`financial-asset`.di.FinancialAssetModule
 import com.wealthvault_final.setup_api.di.GlobalApiModule
 import org.koin.core.module.Module
@@ -59,8 +61,10 @@ object AllModules {
         add(SocialModule.allModules)
         add(ShareApiModule.allModules)
         add(NotificationApiModule.allModules)
+        add(WebSocketApiModule.module)
         add(NotificationModule.allModules)
         add(GetUserModule.allModules)
+        add(IntroModule.allModules)
 
 
 

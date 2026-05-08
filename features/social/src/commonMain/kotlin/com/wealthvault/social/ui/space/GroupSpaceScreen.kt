@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -82,8 +81,13 @@ class GroupSpaceScreen(
 
         val reversedMessages = remember(messages) { messages.reversed() }
 
-        LaunchedEffect(groupId) {
-            screenModel.fetchMessages(groupId)
+        val token by screenModel.accessToken.collectAsState()
+        LaunchedEffect(groupId, token) {
+            val currentToken = token
+            if (currentToken != null) {
+                screenModel.fetchMessages(groupId)
+                screenModel.connectToChat(groupId, currentToken)
+            }
         }
 
 
@@ -161,7 +165,7 @@ fun GroupSpaceContent(
 
             if (isLoading) {
                 Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = themeColor)
+//
                 }
             } else if (messages.isEmpty()) {
                 Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -175,11 +179,15 @@ fun GroupSpaceContent(
             } else {
                 LazyColumn(
                     state = listState,
-                    reverseLayout = true, // 🌟 ลิสต์จากล่างขึ้นบน
+                    reverseLayout = true,
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 300.dp)
                 ) {
-                    items(messages) { msg ->
+                    items(
+                        items = messages,
+                        // ✅ ระบุ Key โดยใช้ ID ของข้อความ (ถ้าไม่มีให้ใช้ hashCode)
+                        key = { msg -> msg.createdAt ?: msg.hashCode() }
+                    ) { msg ->
                         when (msg.msgType) {
 
                             // 🌟 เคสที่ 1: แจ้งเตือนระบบธรรมดา (เพื่อนเข้ากลุ่ม, บลาๆ)

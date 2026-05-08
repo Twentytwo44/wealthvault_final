@@ -1,49 +1,36 @@
 package com.wealthvault.splashscreen
 
-import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.wealthvault.splashscreen.data.UserRepositoryImpl
-import com.wealthvault.`user-api`.model.UserData
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.wealthvault.data_store.TokenStore
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+sealed class SplashState {
+    object Loading : SplashState()
+    object GoToLogin : SplashState()
+    object GoToIntro : SplashState()
+    object GoToMain : SplashState()
+}
+
 class SplashScreenModel(
-    private val userRepository: UserRepositoryImpl
-): ScreenModel {
+    private val tokenStore: TokenStore,
+) : StateScreenModel<SplashState>(SplashState.Loading) {
 
-    private val _state = MutableStateFlow<UserData>(UserData())
-    val state = _state.asStateFlow()
+    init { checkAuthentication() }
 
-    init {
-        fetchUser()
-    }
-
-
-    private fun fetchUser() {
-        // ใช้ screenModelScope เพื่อยิง API (ทำงานแบบ Background Thread)
-
+    private fun checkAuthentication() {
         screenModelScope.launch {
+            // 1. ดึง Token จากเครื่อง
+            val token = tokenStore.accessToken.first()
 
-            try {
-                val result = userRepository.getUser()
-                val userResponse = result.getOrNull()
-                if (result.isSuccess && userResponse != null) {
-                    _state.value = userResponse
-                }
-                else {
-                    println("❌ [ScreenModel] Create Asset Failed")
-                }
-
-
-
-            } catch (e: Exception) {
-                // ถ้าเน็ตหลุด หรือ API พัง ให้เปลี่ยนสถานะเป็น Error
-
+            if (token.isNullOrBlank()) {
+                // ไม่มี Token = ไปหน้า Login
+                mutableState.value = SplashState.GoToLogin
+            } else {
+                // มี Token = ลองดึงโปรไฟล์เพื่อเช็กวันเกิด
+                mutableState.value = SplashState.GoToMain
             }
         }
     }
-
 }
-
-

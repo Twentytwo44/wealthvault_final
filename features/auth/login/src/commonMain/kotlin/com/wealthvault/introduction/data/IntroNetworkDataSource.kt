@@ -1,15 +1,16 @@
 package com.wealthvault.introduction.data
 
-import com.wealthvault.`auth-api`.login.LoginApi
-import com.wealthvault.`auth-api`.model.LoginRequest
+import com.wealthvault.`user-api`.model.UpdateUserData
+import com.wealthvault.`user-api`.model.UpdateUserDataRequest
+import com.wealthvault.`user-api`.updateuser.UpdateUserApi
 
-//class IntroNetworkDataSource(
-//    private val introApi: IntroApi,
-//) {
-//    suspend fun login(request: LoginRequest): Result<String> {
-//        return runCatching {
-//            val result = loginApi.login(request)
-//            result.data?.accessToken ?: throw IllegalArgumentException("Token is null")
-//        }
-//    }
-//}
+class IntroNetworkDataSource(
+    private val introApi: UpdateUserApi,
+) {
+    suspend fun updateUser(request: UpdateUserDataRequest): Result<UpdateUserData> {
+        return runCatching {
+            val result = introApi.updateUser(request)
+            result.data ?: throw IllegalArgumentException("User is null, Cannot create user")
+        }
+    }
+}

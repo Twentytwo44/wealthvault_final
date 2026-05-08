@@ -51,8 +51,11 @@ import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.notification.viewmodel.NotificationScreenModel
 import com.wealthvault.notification_api.model.NotificationData
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.painterResource
-
 
 class NotificationScreen : Screen {
     @Composable
@@ -127,6 +130,7 @@ fun NotificationContent(
                                     title = notification.message ?: "", // ใช้ข้อความจาก API เช่น "👋 test ได้ส่งคำขอเป็นเพื่อนกับคุณ"
                                     inviter = notification.senderId ?: "", // (ถ้าข้อความมีชื่อคนส่งมาแล้ว อาจจะเว้นว่างไว้ หรือใส่ชื่อ SenderID)
                                     time = notification.createdAt ?: "",
+                                    metadata = notification.metaData ?: "",
                                     onDeclineClick = {
                                         // TODO: เรียกฟังก์ชันปฏิเสธ
                                         onAcceptClick(notification.senderId ?: "","decline")
@@ -217,10 +221,16 @@ fun InviteNotificationCard(
     title: String,
     inviter: String,
     time: String,
+    metadata: String?,
     onDeclineClick: () -> Unit,
     onAcceptClick: () -> Unit,
     onReadClick: () -> Unit
 ) {
+    val jsonElement = Json.parseToJsonElement(metadata ?: "")
+
+    // ดึงค่าออกมาเป็น Boolean
+    val isCompleted = jsonElement.jsonObject["is_completed"]?.jsonPrimitive?.booleanOrNull ?: false
+
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onReadClick() },
         colors = CardDefaults.cardColors(containerColor = LightSurface),
@@ -241,31 +251,35 @@ fun InviteNotificationCard(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+            if (isCompleted) {
+                println("✅ Accept Friend action")
+            } else {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    // ปุ่มปฏิเสธ (ขอบส้ม)
+                    OutlinedButton(
+                        onClick = onDeclineClick,
+                        border = BorderStroke(1.dp, LightPrimary),
+                        shape = RoundedCornerShape(percent = 50),
+                        modifier = Modifier.height(40.dp)
+                    ) {
+                        Text("ปฏิเสธ", color = LightPrimary, fontSize = 14.sp)
+                    }
 
-            // ปุ่มกด (ชิดขวา)
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                // ปุ่มปฏิเสธ (ขอบส้ม)
-                OutlinedButton(
-                    onClick = onDeclineClick,
-                    border = BorderStroke(1.dp, LightPrimary),
-                    shape = RoundedCornerShape(percent = 50),
-                    modifier = Modifier.height(40.dp)
-                ) {
-                    Text("ปฏิเสธ", color = LightPrimary, fontSize = 14.sp)
-                }
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // ปุ่มเข้าร่วม (พื้นส้ม)
-                Button(
-                    onClick = onAcceptClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
-                    shape = RoundedCornerShape(percent = 50),
-                    modifier = Modifier.height(40.dp)
-                ) {
-                    Text("เข้าร่วม", color = Color.White, fontSize = 14.sp)
+                    // ปุ่มเข้าร่วม (พื้นส้ม)
+                    Button(
+                        onClick = onAcceptClick,
+                        colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+                        shape = RoundedCornerShape(percent = 50),
+                        modifier = Modifier.height(40.dp)
+                    ) {
+                        Text("ยอมรับ", color = Color.White, fontSize = 14.sp)
+                    }
                 }
             }
+            // ปุ่มกด (ชิดขวา)
+
         }
     }
 }

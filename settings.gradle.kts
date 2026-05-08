@@ -37,6 +37,7 @@ include(":functional:notification")
 include(":functional:api:setup-api")
 include(":functional:api:group-api")
 include(":functional:api:notification-api")
+include(":functional:api:websocket-api")
 
 
 

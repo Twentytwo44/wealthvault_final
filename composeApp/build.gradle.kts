@@ -89,6 +89,7 @@ kotlin {
             implementation(project(":functional:api:group-api"))
             implementation(project(":functional:api:insurance-api"))
             implementation(project(":functional:api:notification-api"))
+            implementation(project(":functional:api:websocket-api"))
 
 
 

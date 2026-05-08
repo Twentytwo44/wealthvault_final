@@ -37,14 +37,7 @@ class ProfileDataSource(
     suspend fun updateUserData(request: UpdateUserDataRequest): Result<UpdateUserData> {
         return runCatching {
             val result = updateUserApi.updateUser(
-                username = request.username,
-                firstName = request.firstName,
-                lastName = request.lastName,
-                birthday = request.birthday,
-                phoneNumber = request.phoneNumber,
-                profileImage = request.profileImage,
-                sharedEnabled = request.sharedEnabled,
-                sharedAge = request.sharedAge
+                request
             )
             result.data ?: throw IllegalArgumentException(result.error ?: "Update Failed")
         }
