@@ -63,8 +63,6 @@ import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_calendar
 import com.wealthvault.core.generated.resources.ic_common_pen
 import com.wealthvault.core.generated.resources.ic_nav_profile
-import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite

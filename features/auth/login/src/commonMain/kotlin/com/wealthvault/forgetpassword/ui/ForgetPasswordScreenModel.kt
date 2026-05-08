@@ -85,7 +85,7 @@ class ForgetPasswordScreenModel(
             otpUseCase(OTPRequest(email, otp)).collect { result ->
                 when (result) {
                     is FlowResult.Continue -> {
-                        _resetToken.value = result.data ?: ""
+                        _resetToken.value = result.data
                         _isOtpVerified.value = true
                     }
                     is FlowResult.Failure -> {

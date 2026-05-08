@@ -28,8 +28,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -189,7 +187,7 @@ fun LoginContent(
                             // 🌟 แสดง Error ตรงมุมขวาบน
                             if (hasError) {
                                 Text(
-                                    text = errorMessage ?: "",
+                                    text = errorMessage,
                                     color = RedErr,
                                     style = MaterialTheme.typography.labelMedium
                                 )
