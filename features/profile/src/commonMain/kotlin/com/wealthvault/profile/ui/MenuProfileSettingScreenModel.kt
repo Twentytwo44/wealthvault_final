@@ -10,7 +10,8 @@ import kotlinx.coroutines.launch
 
 class MenuProfileSettingScreenModel(
     private val unRegisterDeviceRepository: UnRegisterDeviceRepositoryImpl,
-    private val tokenStore: TokenStore
+    private val tokenStore: TokenStore,
+    private val lineApi: LineApi
 ) : ScreenModel {
 
 

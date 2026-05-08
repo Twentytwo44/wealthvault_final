@@ -6,11 +6,13 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.wealthvault.`auth-api`.model.LoginRequest
+import com.wealthvault.`auth-api`.model.TokenRequest
 import com.wealthvault.core.FlowResult
 import com.wealthvault.data_store.DeviceInfo
 import com.wealthvault.data_store.TokenStore
 import com.wealthvault.google_auth.GoogleAuthRepository
 import com.wealthvault.login.data.device.RegisterDeviceRepositoryImpl
+import com.wealthvault.login.data.google.GoogleRepositoryImpl
 import com.wealthvault.login.usecase.LoginUseCase
 import com.wealthvault.notification_api.model.DeviceRequest
 import com.wealthvault.splashscreen.data.UserRepositoryImpl
@@ -25,11 +27,12 @@ sealed class LoginState {
 }
 class LoginScreenModel(
     private val loginUseCase: LoginUseCase,
-    private val googelRepository: GoogleAuthRepository,
+    private val googleRepository: GoogleAuthRepository,
     private val pushHelper: PushNotificationHelper,
     private val addDeviceRepository: RegisterDeviceRepositoryImpl,
     private val tokenStore: TokenStore,
-    private val authRepository: UserRepositoryImpl
+    private val authRepository: UserRepositoryImpl,
+    private val googleLink: GoogleRepositoryImpl
 ) : ScreenModel {
 
     // UI State
@@ -133,17 +136,59 @@ class LoginScreenModel(
         )
     }
 
-    fun onGoogleClick(onSuccess: () -> Unit) {
+    fun onGoogleClick(onNavigate: (LoginState) -> Unit) {
+
         screenModelScope.launch {
+
             isLoading = true
             errorMessage = null
 
-            val user = googelRepository.login()
+            try {
 
-            if (user != null) {
-                onSuccess()
-            } else {
-                errorMessage = "Google login failed"
+                val user = googleRepository.login()
+
+                println("Google User = $user")
+
+                if (user == null) {
+
+                    errorMessage = "Google login failed"
+                    isLoading = false
+
+                    return@launch
+                }
+
+                val request = TokenRequest(
+                    token = user.idToken
+                )
+
+                val response = googleLink.glogin(request)
+
+                response.onSuccess { data ->
+
+                    if (data.success == true) {
+
+                        println("🎉 Google Login Success!")
+
+                        checkUserDataAndNavigate(onNavigate)
+
+                    } else {
+
+                        errorMessage = "Google login failed"
+                    }
+                }
+
+                response.onFailure { exception ->
+
+                    exception.printStackTrace()
+
+                    errorMessage = exception.message
+                }
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+                errorMessage = e.message ?: "Unknown error"
             }
 
             isLoading = false

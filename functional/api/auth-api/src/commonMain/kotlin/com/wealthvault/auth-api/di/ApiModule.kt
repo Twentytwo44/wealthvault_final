@@ -3,6 +3,10 @@ package com.wealthvault.`auth-api`.di
 import com.wealthvault.`auth-api`.HttpClientBuilder
 import com.wealthvault.`auth-api`.fgpassword.ForgetApi
 import com.wealthvault.`auth-api`.fgpassword.ForgetApiImpl
+import com.wealthvault.`auth-api`.googlelink.GoogleLoginApi
+import com.wealthvault.`auth-api`.googlelink.GoogleLoginApiImpl
+import com.wealthvault.`auth-api`.linelink.LineLinkApi
+import com.wealthvault.`auth-api`.linelink.LineLinkApiImpl
 import com.wealthvault.`auth-api`.login.LoginApi
 import com.wealthvault.`auth-api`.login.LoginApiImpl
 import com.wealthvault.`auth-api`.otp.OTPApi
@@ -56,6 +60,8 @@ object ApiModule {
         single<ForgetApi> { ForgetApiImpl(get(named(KoinConst.Ktor.AUTH))) }
         single<ResetApi> { ResetApiImpl(get(named(KoinConst.Ktor.AUTH))) }
         single<OTPApi> { OTPApiImpl(get(named(KoinConst.Ktor.AUTH))) }
+        single<LineLinkApi> { LineLinkApiImpl(get(named(KoinConst.Ktor.AUTH))) }
+        single<GoogleLoginApi> { GoogleLoginApiImpl(get(named(KoinConst.Ktor.AUTH))) }
     }
 
 

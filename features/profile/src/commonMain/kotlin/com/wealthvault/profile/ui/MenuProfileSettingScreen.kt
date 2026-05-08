@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.registry.rememberScreen
@@ -47,6 +52,7 @@ class MenuProfileSettingScreen: Screen {
             onBackClick = { rootNavigator.pop() },
             onEditProfileClick = { rootNavigator.push(EditProfileScreen()) },
             onShareSettingClick = { rootNavigator.push(ShareSettingScreen()) },
+            onConnectLineClick = {  },
             onLogoutClick = {
                 screenModel.unRegisterDevice()
                 navigator.replaceAll(
@@ -61,6 +67,7 @@ fun MenuProfileSettingContent(
     onBackClick: () -> Unit,
     onEditProfileClick: () -> Unit,
     onShareSettingClick: () -> Unit,
+    onConnectLineClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
@@ -101,12 +108,47 @@ fun MenuProfileSettingContent(
         SettingMenuItem(title = "ตั้งค่าการแชร์ทรัพย์สินให้คนใกล้ชิด", onClick = onShareSettingClick)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 🌟 สมมติว่าภาษา/ธีม ยังไม่ทำ ก็ใส่คอมเมนต์ไว้ก่อนได้ครับ
-//        SettingMenuItem(title = "ภาษา", onClick = { /* TODO */ }, showArrow = false)
-//        Spacer(modifier = Modifier.height(24.dp))
-//
-//        SettingMenuItem(title = "ธีม", onClick = { /* TODO */ }, showArrow = false)
-//        Spacer(modifier = Modifier.height(32.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically, // จัดให้อยู่กึ่งกลางแนวตั้ง
+            horizontalArrangement = Arrangement.SpaceBetween // ดันข้อความไปซ้ายสุด ดันปุ่มไปขวาสุด
+        ) {
+            Text(
+                text = "เชื่อมต่อการแจ้งเตือนผ่าน",
+                fontSize = 16.sp,
+                color = Color(0xFF000000),
+            )
+
+            Button(
+                onClick = onConnectLineClick,
+                modifier = Modifier
+                    .height(48.dp), // ปรับความสูงมาตรฐาน
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF06C755) // ใช้สีเขียว LINE Official (#06C755)
+                ),
+                shape = RoundedCornerShape(8.dp), // ขอบมนเล็กน้อยสไตล์ปุ่มทางการ
+                contentPadding = PaddingValues(start = 8.dp, end = 16.dp) // ให้โลโก้อยู่ชิดซ้ายนิดนึง
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    // ส่วนของ Logo
+
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // ส่วนของข้อความ
+                    Text(
+                        text = "LINE Connect",
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
 
         // --- Logout Button ---
         Text(

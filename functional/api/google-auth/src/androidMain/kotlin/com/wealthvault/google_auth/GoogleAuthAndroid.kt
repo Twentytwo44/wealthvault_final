@@ -5,7 +5,6 @@ import android.util.Base64
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
@@ -15,10 +14,15 @@ class GoogleAuthAndroid(
 ) : GoogleAuth {
 
     override suspend fun signIn(): GoogleUser? {
-        try {
+
+        return try {
+
             val googleIdOption = GetGoogleIdOption.Builder()
-                .setServerClientId("130348752829-b63e0fvmhv4ma7n1u4ib6ugj1gl9d858.apps.googleusercontent.com")
+                .setServerClientId(
+                    "130348752829-b63e0fvmhv4ma7n1u4ib6ugj1gl9d858.apps.googleusercontent.com"
+                )
                 .setFilterByAuthorizedAccounts(false)
+                .setAutoSelectEnabled(false)
                 .build()
 
             val request = GetCredentialRequest.Builder()
@@ -33,46 +37,37 @@ class GoogleAuthAndroid(
             )
 
             val credential = result.credential
-            println("credential: $credential")
-            if (credential is CustomCredential) {
 
-                // ดู type ก่อน
-                println("TYPE: ${credential.type}")
+            if (
+                credential is CustomCredential &&
+                credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+            ) {
 
-                // ดึงข้อมูลทั้งหมด (Bundle)
-                val bundle = credential.data
+                val googleCredential =
+                    GoogleIdTokenCredential.createFrom(credential.data)
 
-                for (key in bundle.keySet()) {
-                    println("KEY: $key")
-                    println("VALUE: ${bundle.get(key)}")
-                }
-            }
-            if (credential is GoogleIdTokenCredential) {
+                println("TOKEN = ${googleCredential.idToken}")
+
                 return GoogleUser(
-                    idToken = credential.idToken,
+                    idToken = googleCredential.idToken,
                     accessToken = null,
-                    email = null,
-                    displayName = credential.displayName,
-                    photoUrl = credential.profilePictureUri?.toString(),
-                    userId = credential.id
+                    email = googleCredential.id,
+                    displayName = googleCredential.displayName,
+                    photoUrl = googleCredential.profilePictureUri?.toString(),
+                    userId = googleCredential.id
                 )
             }
-            val googleCredential =
-                GoogleIdTokenCredential.createFrom(credential.data)
 
-            println("TOKEN LENGTH: ${googleCredential.idToken?.length}")
-            println("TOKEN: ${googleCredential.idToken}")
+            null
 
-            val json = decodeJwt(googleCredential.idToken)
-            println(json)
-
-        } catch (e: GetCredentialException) {
-            println("🚨 [GoogleAuth] GetCredentialException: ${e.message}")
         } catch (e: Exception) {
-            println("🚨 [GoogleAuth] Unknown error: ${e.message}")
-        }
 
-        return null
+            e.printStackTrace()
+
+            println("GOOGLE LOGIN ERROR = ${e.message}")
+
+            null
+        }
     }
 
     fun decodeJwt(token: String): String {

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -26,11 +27,8 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -47,8 +45,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,7 +57,6 @@ import coil3.compose.AsyncImage
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_calendar
 import com.wealthvault.core.generated.resources.ic_common_pen
 import com.wealthvault.core.generated.resources.ic_nav_profile
@@ -73,9 +70,6 @@ import com.wealthvault.navigation.MainScreen
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.resources.painterResource
-
-import com.wealthvault.core.theme.WvBgGradientStart
 import org.jetbrains.compose.resources.painterResource
 
 class IntroQuestionScreen : Screen {
@@ -157,28 +151,29 @@ fun IntroQuestionContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(vertical = 24.dp)
+                .statusBarsPadding()
         ) {
             // --- แถบบนสุด: ปุ่มย้อนกลับ ---
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_common_back),
-                    contentDescription = "Back",
-                    tint = LightPrimary,
-                    modifier = Modifier.size(24.dp).clickable { onBackClick() }
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "เพิ่มข้อมูลส่วนตัว",
-                    fontSize = 24.sp,
-                    color = LightPrimary,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                Icon(
+//                    painter = painterResource(Res.drawable.ic_common_back),
+//                    contentDescription = "Back",
+//                    tint = LightPrimary,
+//                    modifier = Modifier.size(24.dp).clickable { onBackClick() }
+//                )
+//                Spacer(modifier = Modifier.width(16.dp))
+//                Text(
+//                    text = "เพิ่มข้อมูลส่วนตัว",
+//                    fontSize = 24.sp,
+//                    color = LightPrimary,
+//                    fontWeight = FontWeight.Medium
+//                )
+//            }
+//
+//            Spacer(modifier = Modifier.height(24.dp))
 
 
             // --- ส่วนเนื้อหาฟอร์ม ---

@@ -109,7 +109,13 @@ class LoginScreen() : Screen {
                     }
                 }
             },
-            onGoogleClick = { screenModel.onGoogleClick { /* TODO */ } },
+            onGoogleClick = { screenModel.onGoogleClick { state ->
+                when (state) {
+                    is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
+                    is LoginState.GoToMain -> navigator.replaceAll(MainScreen()) // หรือ SharedScreen.Main
+                    else -> {}
+                }
+            } },
             onForgotPasswordClick = { navigator.push(ForgetPasswordScreen()) },
             onRegisterClick = { navigator.push(RegisterScreen()) }
         )
