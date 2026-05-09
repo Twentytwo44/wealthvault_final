@@ -11,7 +11,7 @@ class LineAuthAndroid(
     private val launchIntent: (Intent) -> Unit // รับฟังก์ชันสำหรับยิง Intent
 ) : LineAuth {
     // ⚠️ อย่าลืมใส่ Channel ID ของคุณ
-    private val channelId = "2009391315"
+    private val channelId = "2010026293"
 
     override fun login() {
         val params = LineAuthenticationParams.Builder()
