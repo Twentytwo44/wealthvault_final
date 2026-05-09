@@ -67,9 +67,11 @@ class MenuProfileSettingScreen: Screen {
                 screenModel.onLineClick(lineAuth)
             },
             onLogoutClick = {
-                screenModel.unRegisterDevice()
-                navigator.replaceAll(
-                    screen
+                // 🚨 สั่งลบข้อมูลก่อน แล้วค่อยให้มันเปลี่ยนหน้าจอเมื่อเสร็จงาน
+                screenModel.unRegisterDevice(
+                    onLogoutComplete = {
+                        navigator.replaceAll(screen) // ย้ายมาอยู่ตรงนี้
+                    }
                 )
             }
         )

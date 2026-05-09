@@ -3,6 +3,7 @@ package com.wealthvault.splashscreen
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.wealthvault.data_store.TokenStore
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -22,8 +23,9 @@ class SplashScreenModel(
     private fun checkAuthentication() {
         screenModelScope.launch {
             // 1. ดึง Token จากเครื่อง
+            delay(200)
             val token = tokenStore.accessToken.first()
-
+            println("check token: ${token}")
             if (token.isNullOrBlank()) {
                 // ไม่มี Token = ไปหน้า Login
                 mutableState.value = SplashState.GoToLogin

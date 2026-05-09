@@ -96,11 +96,6 @@ class LoginScreen() : Screen {
             isLoading = screenModel.isLoading,
             errorMessage = screenModel.errorMessage,
             onLoginClick = {
-                screenModel.onLoginClick {
-                    navigator.replaceAll(mainScreen)
-                }
-//                navigator.replaceAll(mainScreen)
-                screenModel.onGetFCMToken()
                 screenModel.onLoginClick { state ->
                     when (state) {
                         is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
@@ -109,7 +104,8 @@ class LoginScreen() : Screen {
                     }
                 }
             },
-            onGoogleClick = { screenModel.onGoogleClick { state ->
+            onGoogleClick = {
+                screenModel.onGoogleClick { state ->
                 when (state) {
                     is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
                     is LoginState.GoToMain -> navigator.replaceAll(MainScreen()) // หรือ SharedScreen.Main

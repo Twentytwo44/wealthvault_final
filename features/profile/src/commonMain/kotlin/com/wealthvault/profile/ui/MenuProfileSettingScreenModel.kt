@@ -69,31 +69,31 @@ class MenuProfileSettingScreenModel(
 
    }
 
-    fun unRegisterDevice() {
-        // 🚨 อัปเกรด 1: ครอบด้วย Coroutine Scope เพื่อให้ทำงานเบื้องหลัง (ไม่บล็อกหน้าจอ)
+    fun unRegisterDevice(onLogoutComplete: () -> Unit) {
         screenModelScope.launch {
             try {
-                // 💡 อัปเกรด 2: ถ้า Backend ต้องการ FCM Token ต้องเปลี่ยนไปดึง FCM Token แทนนะครับ
-                // แต่ถ้า Backend ดึงจาก Access Token ได้เลย ก็ใช้บรรทัดนี้ตามเดิมครับ
-                val token = tokenStore.fcmToken.firstOrNull() ?: ""
-                println("fcmToken: ${token}")
+                val token = tokenStore.fcmToken.firstOrNull()
+
+                // 1. ดึงค่าก่อนลบมาดู (จดใส่กระดาษโน้ตใบที่ 1)
+                val accBefore = tokenStore.accessToken.firstOrNull()
+                println("token before delete: $accBefore")
+
+                val request = UnDeviceRequest(token = token.toString())
+                unRegisterDeviceRepository.unDevice(request) // รอจนกว่าจะยิง API เสร็จ
+
+                // 2. เผาสมุดทิ้ง (ลบ DataStore)
                 tokenStore.clear()
 
-                val request = UnDeviceRequest(
-                    token = token.toString()
-                )
-
-                // 🚨 อัปเกรด 3: เรียก Repository (จะรอจนกว่าจะทำเสร็จ)
-                unRegisterDeviceRepository.unDevice(request)
+                // 🚨 3. พิสูจน์ด้วยการไปค้นในสมุดเล่มเดิมใหม่อีกครั้ง (จดใส่กระดาษโน้ตใบที่ 2)
+                val accAfter = tokenStore.accessToken.firstOrNull()
+                println("token after delete: $accAfter") // 👈 ตรงนี้ Log จะปริ้นออกมาเป็น "null" แน่นอนครับ!
 
                 println("✅ [UnregisterDevice] ยกเลิกการเชื่อมต่ออุปกรณ์สำเร็จ!")
 
-                // 🌟 ออปชันเสริม: เมื่อลบเสร็จแล้ว อาจจะสั่งให้แอป Logout หรือเคลียร์ข้อมูลในเครื่อง
-                // tokenStore.clearToken()
-
             } catch (e: Exception) {
-                // 🚨 อัปเกรด 4: ดักจับ Error ป้องกันแอปแครช
                 println("❌ [UnregisterDevice] ยกเลิกอุปกรณ์ไม่สำเร็จ: ${e.message}")
+            } finally {
+                onLogoutComplete()
             }
         }
     }

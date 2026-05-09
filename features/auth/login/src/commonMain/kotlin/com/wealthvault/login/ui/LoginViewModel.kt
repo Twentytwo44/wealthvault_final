@@ -17,6 +17,7 @@ import com.wealthvault.login.usecase.LoginUseCase
 import com.wealthvault.notification_api.model.DeviceRequest
 import com.wealthvault.splashscreen.data.UserRepositoryImpl
 import com.wealthvault_final.notification.PushNotificationHelper
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -46,7 +47,6 @@ class LoginScreenModel(
             errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"
             return
         }
-
         screenModelScope.launch {
             isLoading = true
             errorMessage = null
@@ -80,6 +80,13 @@ class LoginScreenModel(
     // แยกฟังก์ชันเช็ค Birthday ออกมาเพื่อให้โค้ดสะอาด
     private suspend fun checkUserDataAndNavigate(onNavigate: (LoginState) -> Unit) {
         try {
+            // 🚨 1. หยุดรอ 200ms เพื่อให้ DataStore บันทึก Access/Refresh Token ลงเครื่องให้เสร็จสมบูรณ์ 100%
+            delay(200)
+
+            // 🟢 2. เรียกใช้ FCM Token ตรงนี้ (มั่นใจได้ว่าระบบจะหยิบ Token ใหม่ที่เพิ่งเซฟเสร็จไปใช้งาน)
+            onGetFCMToken()
+            delay(200)
+            // 3. เรียกดึงข้อมูล User
             val userResult = authRepository.getUser()
             val userData = userResult.getOrNull()
             val birthday = userData?.birthday
