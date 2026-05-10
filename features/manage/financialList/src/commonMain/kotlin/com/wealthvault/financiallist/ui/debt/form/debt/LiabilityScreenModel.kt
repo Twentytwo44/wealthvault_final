@@ -92,7 +92,7 @@ class LiabilityScreenModel(
 
 
 
-    fun submitLiability(id:String) {
+    fun submitLiability(id:String,onSuccess: () -> Unit) {
         screenModelScope.launch {
             try {
 //                isLoading = true
@@ -113,11 +113,12 @@ class LiabilityScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Liability
                     // สมมติว่า field id อยู่ใน liabilityResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = liabilityResponse.id.toString()
-                    println("✅ [ScreenModel] Liability Created ID: $createdItemId")
+                    println("✅ [ScreenModel] Liability Edit ID: $createdItemId")
+                    onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Create Liability Failed")
+                    println("❌ [ScreenModel] Edit Liability Failed")
                 }
 
             } catch (e: Exception) {

@@ -88,7 +88,7 @@ class BankAccountScreenModel(
         )
     }
 
-    fun submitAccount(id:String) {
+    fun submitAccount(id:String, onSuccess: () -> Unit) {
         screenModelScope.launch {
             try {
 //                isLoading = true
@@ -107,11 +107,12 @@ class BankAccountScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง BankAccount
                     // สมมติว่า field id อยู่ใน bankAccountResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = bankAccountResponse.id
-                    println("✅ [ScreenModel] BankAccount Created ID: $createdItemId")
+                    println("✅ [ScreenModel] BankAccount Edit ID: $createdItemId")
+                    onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Create BankAccount Failed")
+                    println("❌ [ScreenModel] Edit BankAccount Failed")
                 }
 
             } catch (e: Exception) {

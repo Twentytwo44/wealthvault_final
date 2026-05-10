@@ -89,7 +89,12 @@ class BuildingFormScreen(val id: String, val buildingData: BuildingModel) : Scre
             onNextClick = { data, addedList, deletedList, addRef, deleteRef, addIns, deleteIns ->
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList, deletedList, addRef, deleteRef, addIns, deleteIns)
-                screenModel.submitLand(id)
+                screenModel.submitLand(id,
+                    onSuccess = {
+                        // 💡 หลังจากแก้ไขสำเร็จ จะส่งกลับหน้าลิสต์
+                        navigator.pop()
+                    })
+
             },
             landData = landState,
             insData = insState,

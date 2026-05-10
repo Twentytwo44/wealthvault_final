@@ -56,7 +56,11 @@ class ExpenseFormScreen(val id:String,val debtData: ExpenseModel) : Screen {
                 println("data asset input: ${data.attachments}")
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList,deletedList)
-                screenModel.submitLiability(id)
+                screenModel.submitLiability(id,
+                    onSuccess = {
+                        // 💡 หลังจากแก้ไขสำเร็จ จะส่งกลับหน้าลิสต์
+                        navigator.pop()
+                    })
             },
             debtData = debtData
         )

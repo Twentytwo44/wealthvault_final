@@ -95,7 +95,7 @@ class InsuranceScreenModel(
 
 
 
-    fun submitInsurance(id:String) {
+    fun submitInsurance(id:String,onSuccess: () -> Unit) {
         screenModelScope.launch {
             try {
 //                isLoading = true
@@ -114,11 +114,12 @@ class InsuranceScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง insurance
                     // สมมติว่า field id อยู่ใน insuranceResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = insuranceResponse.id.toString()
-                    println("✅ [ScreenModel] insurance Created ID: $createdItemId")
+                    println("✅ [ScreenModel] insurance Edit ID: $createdItemId")
+                    onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Create insurance Failed")
+                    println("❌ [ScreenModel] Edit insurance Failed")
                 }
 
             } catch (e: Exception) {

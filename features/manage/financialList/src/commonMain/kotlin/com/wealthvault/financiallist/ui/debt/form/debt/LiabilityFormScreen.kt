@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -58,7 +56,11 @@ class LiabilityFormScreen(val id:String,val debtData: LiabilityModel) : Screen {
                 println("data asset input: ${data.attachments}")
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList,deletedList)
-                screenModel.submitLiability(id)
+                screenModel.submitLiability(id,
+                    onSuccess = {
+                        // 💡 หลังจากแก้ไขสำเร็จ จะส่งกลับหน้าลิสต์
+                        navigator.pop()
+                    })
             },
             debtData = debtData
         )

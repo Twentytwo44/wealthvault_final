@@ -152,7 +152,7 @@ class LandScreenModel(
 
 
 
-    fun submitLand(id:String) {
+    fun submitLand(id:String,onSuccess: () -> Unit) {
         screenModelScope.launch {
             try {
 //                isLoading = true
@@ -171,11 +171,12 @@ class LandScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Land
                     // สมมติว่า field id อยู่ใน landResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = landResponse.id.toString()
-                    println("✅ [ScreenModel] Land Created ID: $createdItemId")
+                    println("✅ [ScreenModel] Land Edit ID: $createdItemId")
+                    onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Create Land Failed")
+                    println("❌ [ScreenModel] Edit Land Failed")
                 }
 
             } catch (e: Exception) {

@@ -65,8 +65,12 @@ class StockFormScreen(val id: String, val assetData: StockModel? = null) : Scree
             onNextClick = { data, addedList, deletedList ->
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList, deletedList)
-                screenModel.submitAsset(id)
-                navigator.pop() // แก้ไขเสร็จแล้วย้อนกลับ
+                screenModel.submitAsset(id,
+                    onSuccess = {
+                        // 💡 หลังจากแก้ไขสำเร็จ จะส่งกลับหน้าลิสต์
+                        navigator.pop()
+                    })
+
             },
             assetData = assetData
         )

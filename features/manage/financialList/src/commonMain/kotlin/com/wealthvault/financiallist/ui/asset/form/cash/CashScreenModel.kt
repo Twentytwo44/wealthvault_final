@@ -67,7 +67,7 @@ class CashScreenModel(
 
 
 
-    fun submitCash(id:String) {
+    fun submitCash(id:String,onSuccess: () -> Unit) {
         screenModelScope.launch {
             try {
 //                isLoading = true
@@ -86,11 +86,12 @@ class CashScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Cash
                     // สมมติว่า field id อยู่ใน cashResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = cashResponse.id.toString()
-                    println("✅ [ScreenModel] Cash Created ID: $createdItemId")
+                    println("✅ [ScreenModel] Cash Edit ID: $createdItemId")
+                    onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Create Cash Failed")
+                    println("❌ [ScreenModel] Edit Cash Failed")
                 }
 
             } catch (e: Exception) {

@@ -65,8 +65,11 @@ class InsuranceFormScreen(val id: String, val insuranceData: InsuranceModel) : S
             onNextClick = { data, addedList, deletedList ->
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList, deletedList)
-                screenModel.submitInsurance(id)
-                navigator.pop() // แก้ไขเสร็จแล้วย้อนกลับ
+                screenModel.submitInsurance(id,
+                    onSuccess = {
+                        // 💡 หลังจากแก้ไขสำเร็จ จะส่งกลับหน้าลิสต์
+                        navigator.pop()
+                    })
             },
             insuranceData = insuranceData
         )
