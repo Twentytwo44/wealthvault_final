@@ -15,6 +15,7 @@ class IntroScreenModel(
 ) : ScreenModel {
 
     // --- UI State (Form Data) ---
+    var userName by mutableStateOf("")
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
     var phoneNum by mutableStateOf("")
@@ -27,7 +28,7 @@ class IntroScreenModel(
 
     // ฟังก์ชันอัปเดตข้อมูล
     fun updateProfile(onSuccess: () -> Unit) {
-        if (firstName.isBlank() || lastName.isBlank() || phoneNum.isBlank() || birthday.isBlank()) {
+        if (userName.isBlank() || firstName.isBlank() || lastName.isBlank() || phoneNum.isBlank() || birthday.isBlank()) {
             errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"
             return
         }
@@ -42,7 +43,7 @@ class IntroScreenModel(
                 phoneNumber = phoneNum,
                 profileImage = picture,
                 birthday = birthday,
-                username = "",
+                username = userName,
                 sharedEnabled = null,
                 sharedAge = null
             )
