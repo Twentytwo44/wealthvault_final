@@ -201,7 +201,7 @@ fun GroupSpaceContent(
                                 val isGrantAccessPrompt = meta?.type == "GRANT_ACCESS_PROMPT"
 
                                 if (isGrantAccessPrompt) {
-                                    if (meta?.isCompleted == false) {
+                                    if (meta.isCompleted == false) {
 
                                         // ดึงชื่อเพื่อนออกมาจาก content
                                         val contentStr = msg.content ?: ""

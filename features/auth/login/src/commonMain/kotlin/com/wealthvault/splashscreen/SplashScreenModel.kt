@@ -22,6 +22,7 @@ class SplashScreenModel(
 
     private fun checkAuthentication() {
         screenModelScope.launch {
+            delay(1500)
             // 1. ดึง Token จากเครื่อง
             delay(200)
             val token = tokenStore.accessToken.first()

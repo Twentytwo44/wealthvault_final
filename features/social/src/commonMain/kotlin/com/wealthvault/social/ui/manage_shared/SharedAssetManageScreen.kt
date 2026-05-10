@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -83,7 +84,7 @@ fun SharedAssetManageContent(
         modifier = Modifier.background(LightBg)
             .fillMaxSize()
             .statusBarsPadding()
-            .padding(top = 20.dp)
+            .padding(top = 24.dp)
     ) {
         SpaceTopBar(title = "การจัดการทรัพย์สิน", onBackClick = onBackClick)
         HorizontalDivider(color = themeColor.copy(alpha = 0.3f), thickness = 1.dp)
@@ -93,22 +94,22 @@ fun SharedAssetManageContent(
                 CircularProgressIndicator(color = themeColor)
             }
         } else {
-            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 24.dp)) {
+            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 14.dp)) {
                 item {
                     Text(
                         text = "ทรัพย์สินที่คุณแชร์",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = themeColor,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 20.dp)
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 if (assetList.isEmpty()) {
                     item {
                         Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
-                            Text(text = "คุณยังไม่ได้แชร์ทรัพย์สินใดๆ", color = Color.Gray, fontSize = 14.sp)
+                            Text(text = "คุณยังไม่ได้แชร์ทรัพย์สินใดๆ", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 } else {
@@ -153,7 +154,7 @@ fun SharedAssetManageContent(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(50.dp))
                 }
             }
         }

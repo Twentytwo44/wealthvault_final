@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -120,7 +122,7 @@ fun GroupFormContent(
             modifier = Modifier.fillMaxSize().background(LightBg).statusBarsPadding().padding(24.dp)
         ) {
             // --- Header ---
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 32.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 26.dp)) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_common_back),
                     contentDescription = "Back", tint = LightPrimary,
@@ -152,7 +154,7 @@ fun GroupFormContent(
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.clickable { imagePicker.launch() }) {
                     Box(
-                        modifier = Modifier.size(120.dp).border(3.dp, LightPrimary, CircleShape).padding(3.dp).clip(CircleShape).background(LightBg),
+                        modifier = Modifier.size(110.dp).border(3.dp, LightPrimary, CircleShape).padding(3.dp).clip(CircleShape).background(LightBg),
                         contentAlignment = Alignment.Center
                     ) {
                         if (selectedImageBytes != null) {
@@ -177,16 +179,40 @@ fun GroupFormContent(
             Column {
                 Text("ชื่อกลุ่ม", style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
                 Spacer(modifier = Modifier.height(8.dp))
-                TextField(
+                BasicTextField(
                     value = groupName,
                     onValueChange = { groupName = it },
-                    modifier = Modifier.fillMaxWidth().border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = LightSoftWhite, unfocusedContainerColor = LightSoftWhite,
-                        focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
-                    ),
                     singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF3A2F2A)),
+                    cursorBrush = SolidColor(LightPrimary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp), // 🌟 ล็อกความสูงให้เท่าหน้าอื่น
+                    decorationBox = { innerTextField ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                                .border(
+                                    width = 1.dp,
+                                    color = LightBorder.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                if (groupName.isEmpty()) {
+                                    Text(
+                                        text = "กรอกชื่อกลุ่ม", // 🌟 ใส่ placeholder ตรงนี้ได้เลยครับ
+                                        color = Color.LightGray,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    }
                 )
             }
 
@@ -197,14 +223,14 @@ fun GroupFormContent(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("สมาชิกในกลุ่ม (${groupMemberIds.size})", style = MaterialTheme.typography.titleMedium, color = Color(0xFF3A2F2A))
+                Text("สมาชิกในกลุ่ม (${groupMemberIds.size})", style = MaterialTheme.typography.titleSmall, color = Color(0xFF3A2F2A))
                 Icon(painter = painterResource(Res.drawable.ic_common_plus), contentDescription = "Add", tint = themeColor, modifier = Modifier.size(24.dp).clickable { showSheet = true })
             }
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 val currentMembers = availableFriends.filter { groupMemberIds.contains(it.id) }
                 if (currentMembers.isEmpty()) {
-                    item { Text("เลือกสมาชิก", color = Color.Gray, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) }
+                    item { Text("เลือกสมาชิก", color = Color.Gray, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) }
                 } else {
                     items(currentMembers) { friend ->
                         GroupMemberItem(friend = friend, onDeleteClick = {
@@ -219,11 +245,11 @@ fun GroupFormContent(
             Button(
                 onClick = { onSaveClick(groupName, groupMemberIds.toList(), selectedImageBytes) },
                 enabled = groupName.isNotBlank() && groupMemberIds.isNotEmpty() && !isLoading,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp).height(54.dp),
+                modifier = Modifier.fillMaxWidth().height(46.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = themeColor, disabledContainerColor = themeColor.copy(alpha = 0.4f))
             ) {
-                Text(if (isLoading) "กำลังดำเนินการ..." else buttonText, color = Color.White, style = MaterialTheme.typography.titleMedium)
+                Text(if (isLoading) "กำลังดำเนินการ..." else buttonText, color = Color.White, style = MaterialTheme.typography.bodyLarge)
             }
         } // จบเนื้อหา Column หลัก
 
@@ -238,7 +264,9 @@ fun GroupFormContent(
                 },
                 text = {
                     Text(
-                        text = "คุณต้องการลบ '${friendToDelete?.username ?: friendToDelete?.firstName}' ออกจากกลุ่มใช่หรือไม่?",
+                        text = "คุณต้องการลบ '${friendToDelete?.username?.takeIf { it.isNotBlank() }
+                            ?: friendToDelete?.firstName?.takeIf { it.isNotBlank() }
+                            ?: "ไม่ระบุชื่อ"}' ออกจากกลุ่มใช่หรือไม่?",
                         style = MaterialTheme.typography.bodyMedium,
                         color = LightMuted,
                         lineHeight = 22.sp
@@ -286,10 +314,10 @@ fun GroupFormContent(
                 ) {
                     Text(
                         text = "เลือกสมาชิกเข้ากลุ่ม",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         color = LightText,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 16.dp)
+                        modifier = Modifier.padding(bottom = 10.dp)
                     )
 
                     LazyColumn(modifier = Modifier.weight(1f)) {
@@ -303,7 +331,8 @@ fun GroupFormContent(
                                     "ไม่มีรายชื่อเพื่อนที่สามารถเลือกได้",
                                     color = Color.Gray,
                                     modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodySmall
                                 )
                             }
                         } else {
@@ -326,14 +355,14 @@ fun GroupFormContent(
                             selectedFriendIds.clear()
                             showSheet = false
                         },
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp).height(54.dp),
+                        modifier = Modifier.fillMaxWidth().height(46.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = themeColor),
                         enabled = selectedFriendIds.isNotEmpty()
                     ) {
-                        Text("เพิ่มเข้ากลุ่ม", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Text("เพิ่มเข้ากลุ่ม", color = Color.White, style = MaterialTheme.typography.bodyLarge)
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
         }
@@ -345,7 +374,9 @@ fun GroupMemberItem(
     friend: FriendData,
     onDeleteClick: () -> Unit
 ) {
-    val displayName = friend.username ?: friend.firstName ?: "ไม่ระบุชื่อ"
+    val displayName = friend.username?.takeIf { it.isNotBlank() }
+        ?: friend.firstName?.takeIf { it.isNotBlank() }
+        ?: "ไม่ระบุชื่อ"
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -355,7 +386,7 @@ fun GroupMemberItem(
     ) {
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(44.dp)
                 .clip(CircleShape)
                 .background(LightBg),
             contentAlignment = Alignment.Center
@@ -372,12 +403,12 @@ fun GroupMemberItem(
                     painter = painterResource(Res.drawable.ic_nav_profile),
                     contentDescription = null,
                     tint = LightPrimary,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(14.dp))
 
         Text(
             text = displayName,

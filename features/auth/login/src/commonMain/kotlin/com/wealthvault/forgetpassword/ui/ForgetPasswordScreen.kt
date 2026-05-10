@@ -116,11 +116,11 @@ fun ForgetPasswordContent(
     WavyBackground {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(24.dp)) {
             Icon(painter = painterResource(Res.drawable.ic_common_back), contentDescription = "Back", tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onBackClick() })
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Text(text = "ลืมรหัสผ่าน?", color = LightPrimary, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "กรุณากรอกอีเมลที่ลงทะเบียนไว้\nเพื่อรับรหัสยืนยัน (OTP)", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             // 🌟 ปรับแต่งช่องกรอกอีเมลให้แสดง Error ได้ และไม่จมขอบ
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -190,10 +190,10 @@ fun ForgetPasswordContent(
             }
             Spacer(modifier = Modifier.height(40.dp))
             Button(
-                onClick = onSendOtpClick, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(percent = 30),
+                onClick = onSendOtpClick, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(percent = 30),
                 colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
             ) {
-                Text("ส่งรหัสยืนยัน", style = MaterialTheme.typography.titleMedium, color = LightSurface)
+                Text("ส่งรหัสยืนยัน", style = MaterialTheme.typography.bodyLarge, color = LightSurface)
             }
         }
     }

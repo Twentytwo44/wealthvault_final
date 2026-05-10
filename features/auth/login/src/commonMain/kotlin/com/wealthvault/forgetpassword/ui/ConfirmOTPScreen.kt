@@ -108,11 +108,11 @@ fun ConfirmOTPContent(
     WavyBackground {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(24.dp)) {
             Icon(painter = painterResource(Res.drawable.ic_common_back), contentDescription = "Back", tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onBackClick() })
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Text(text = "ยืนยันรหัส OTP", color = LightPrimary, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "เราได้ส่งรหัส 6 หลักไปที่\n$emailSentTo", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             if (errorMessage != null) {
                 Text(
@@ -138,10 +138,10 @@ fun ConfirmOTPContent(
 
             Spacer(modifier = Modifier.height(40.dp))
             Button(
-                onClick = onVerifyClick, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(percent = 30),
+                onClick = onVerifyClick, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(percent = 30),
                 colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
             ) {
-                Text("ยืนยัน", style = MaterialTheme.typography.titleMedium, color = LightSurface)
+                Text("ยืนยัน", style = MaterialTheme.typography.bodyLarge, color = LightSurface)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -205,7 +205,7 @@ fun OtpInputField(
                         },
                         shape = RoundedCornerShape(12.dp)
                     )
-                    .height(64.dp)
+                    .height(50.dp)
                     .clickable { focusRequesters[i].requestFocus() }, // กดที่กรอบตรงไหนก็ได้เพื่อให้พิมพ์ต่อ
                 contentAlignment = Alignment.Center // 🌟 2. สั่งให้ทุกอย่างในกล่องอยู่กึ่งกลางเป๊ะ
             ) {

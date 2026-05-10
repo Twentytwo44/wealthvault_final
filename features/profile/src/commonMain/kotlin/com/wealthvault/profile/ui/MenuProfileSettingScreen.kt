@@ -1,5 +1,6 @@
 package com.wealthvault.profile.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +36,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_next
+import com.wealthvault.core.generated.resources.ic_logo_line
+import com.wealthvault.core.generated.resources.ic_setting_line
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.getScreenModel
@@ -129,7 +133,7 @@ fun MenuProfileSettingContent(
             horizontalArrangement = Arrangement.SpaceBetween // ดันข้อความไปซ้ายสุด ดันปุ่มไปขวาสุด
         ) {
             Text(
-                text = "เชื่อมต่อการแจ้งเตือนผ่าน",
+                text = "แจ้งเตือนผ่าน LINE",
                 fontSize = 16.sp,
                 color = Color(0xFF000000),
             )
@@ -137,28 +141,28 @@ fun MenuProfileSettingContent(
             Button(
                 onClick = onConnectLineClick,
                 modifier = Modifier
-                    .height(48.dp), // ปรับความสูงมาตรฐาน
+                    .height(36.dp), // ปรับความสูงมาตรฐาน
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF06C755) // ใช้สีเขียว LINE Official (#06C755)
                 ),
                 shape = RoundedCornerShape(8.dp), // ขอบมนเล็กน้อยสไตล์ปุ่มทางการ
-                contentPadding = PaddingValues(start = 8.dp, end = 16.dp) // ให้โลโก้อยู่ชิดซ้ายนิดนึง
+                contentPadding = PaddingValues(horizontal = 10.dp) // ให้โลโก้อยู่ชิดซ้ายนิดนึง
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    // ส่วนของ Logo
-
-
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_setting_line),
+                        contentDescription = "Line Logo",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
-
-                    // ส่วนของข้อความ
                     Text(
-                        text = "LINE Connect",
+                        text = "เชื่อมต่อ",
                         color = Color.White,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }

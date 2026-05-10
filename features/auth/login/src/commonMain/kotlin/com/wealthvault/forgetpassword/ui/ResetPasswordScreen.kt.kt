@@ -124,11 +124,11 @@ fun ResetPasswordContent(
     WavyBackground {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(24.dp)) {
             Icon(painter = painterResource(Res.drawable.ic_common_back), contentDescription = "Back", tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onBackClick() })
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Text(text = "ตั้งรหัสผ่านใหม่", color = LightPrimary, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "รหัสผ่านใหม่ของคุณต้องแตกต่างจาก\nรหัสผ่านที่เคยใช้งาน", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             // 🌟 1. ช่องรหัสผ่านใหม่
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -140,7 +140,7 @@ fun ResetPasswordContent(
                     Text(
                         text = "รหัสผ่านใหม่",
                         color = LightPrimary,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.bodyLarge
                     )
 
                     if (errorMessage != null) {
@@ -219,7 +219,7 @@ fun ResetPasswordContent(
                 Text(
                     text = "ยืนยันรหัสผ่านใหม่",
                     color = LightPrimary,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
                 )
 
@@ -285,15 +285,15 @@ fun ResetPasswordContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Button(
                 onClick = onSubmitClick,
-                modifier = Modifier.fillMaxWidth().height(50.dp),
+                modifier = Modifier.fillMaxWidth().height(46.dp),
                 shape = RoundedCornerShape(percent = 30),
                 colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
             ) {
-                Text("เปลี่ยนรหัสผ่าน", style = MaterialTheme.typography.titleMedium, color = LightSurface)
+                Text("เปลี่ยนรหัสผ่าน", style = MaterialTheme.typography.bodyLarge, color = LightSurface)
             }
         }
     }

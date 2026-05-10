@@ -255,7 +255,7 @@ fun ShareSettingContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "คนใกล้ชิด", style = MaterialTheme.typography.titleMedium, color = Color(0xFF3A2F2A))
+            Text(text = "คนใกล้ชิด", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A2F2A))
             Icon(
                 painter = painterResource(Res.drawable.ic_common_plus),
                 contentDescription = "Add",
@@ -413,12 +413,12 @@ fun ShareSettingContent(
                         selectedFriendIds.clear()
                         showSheet = false
                     },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp).height(54.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp).height(46.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = themeColor),
                     enabled = selectedFriendIds.isNotEmpty()
                 ) {
-                    Text("เพิ่ม", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    Text("เพิ่ม", color = Color.White, style = MaterialTheme.typography.bodyLarge)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
             }

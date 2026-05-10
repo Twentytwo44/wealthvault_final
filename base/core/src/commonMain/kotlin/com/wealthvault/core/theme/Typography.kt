@@ -51,6 +51,12 @@ fun getAppTypography(): Typography {
             fontSize = 20.sp
         ),
 
+        titleSmall = TextStyle(
+            fontFamily = appFontFamily,
+            fontWeight = FontWeight.Medium,
+            fontSize = 18.sp
+        ),
+
         // เนื้อหาหลัก / ชื่อรายการ
         bodyLarge = TextStyle(
             fontFamily = appFontFamily,
@@ -70,6 +76,12 @@ fun getAppTypography(): Typography {
             fontFamily = appFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 12.sp
+        ),
+
+        labelSmall = TextStyle(
+            fontFamily = appFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = 10.sp
         )
     )
 }

@@ -59,7 +59,7 @@ fun SocialHeader(
                         painter = painterResource(Res.drawable.ic_common_solid_down),
                         contentDescription = "Select Tab",
                         tint = themeColor,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 

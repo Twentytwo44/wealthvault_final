@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -98,7 +99,7 @@ fun ActivityBubbleCard(
         // --- ฝั่งเพื่อน (ด้านซ้าย) ---
         if (!isMe) {
             Box(
-                modifier = Modifier.size(36.dp).clip(CircleShape).background(LightBg),
+                modifier = Modifier.size(34.dp).clip(CircleShape).background(LightBg),
                 contentAlignment = Alignment.Center
             ) {
                 if (!profileImageUrl.isNullOrEmpty()) {
@@ -117,7 +118,7 @@ fun ActivityBubbleCard(
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(4.dp))
         }
 
         // --- ตัวการ์ด ---
@@ -151,49 +152,49 @@ fun ActivityBubbleCard(
             // ปิดขอบปกติถ้าใช้เส้นประไปแล้ว
             border = if (isFutureShare) null else BorderStroke(1.dp, themeColor.copy(alpha = 0.2f))
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(8.dp)) {
                 // 🌟 หัวข้อ
                 Text(
                     text = title,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = if (isDeleted) Color.Gray else Color(0xFF3A2F2A),
                     fontWeight = FontWeight.Medium
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "ชื่อทรัพย์สิน", fontSize = 12.sp, color = Color.Gray)
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(text = "ชื่อทรัพย์สิน", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+
                     Text(
                         text = assetName,
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = if (isDeleted) Color.Gray else Color(0xFF3A2F2A),
                         textDecoration = if (isDeleted) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
                         textAlign = TextAlign.End,
                         modifier = Modifier.weight(1f)
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = "ประเภท", fontSize = 12.sp, color = Color.Gray)
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(text = "ประเภท", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+
                     Text(
                         text = thaiAssetType,
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = if (isDeleted) Color.Gray else Color(0xFF3A2F2A),
                         textAlign = TextAlign.End,
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 // 🌟 จัดการปุ่มด้านล่าง
                 if (isDeleted) {
                     Text(
                         text = "ทรัพย์สินนี้ถูกลบหรือยกเลิกการแชร์แล้ว",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = RedErr,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.align(Alignment.End).padding(vertical = 4.dp)
@@ -217,7 +218,7 @@ fun ActivityBubbleCard(
                                 Text(
                                     // ตรงนี้ถ้าอยากใช้ formatThaiDate(shareAtDisplay) ของคุณแชมป์ ก็เปลี่ยนได้เลยนะครับ
                                     text = " ${shareAtDisplay.substringBefore("T")}",
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = LightMuted
                                 )
                             }
@@ -233,11 +234,11 @@ fun ActivityBubbleCard(
                         ) {
                             Text(
                                 text = "รายละเอียด",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.labelMedium,
                                 color = themeColor,
                                 fontWeight = FontWeight.Medium
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(2.dp))
                             Icon(
                                 painter = painterResource(Res.drawable.ic_common_solid_right),
                                 contentDescription = null,

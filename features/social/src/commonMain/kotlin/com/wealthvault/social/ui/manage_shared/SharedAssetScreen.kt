@@ -1,6 +1,7 @@
 package com.wealthvault.social.ui.manage_shared
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,8 +56,11 @@ import com.wealthvault.core.generated.resources.ic_asset_type_insurance
 import com.wealthvault.core.generated.resources.ic_asset_type_investment
 import com.wealthvault.core.generated.resources.ic_asset_type_land
 import com.wealthvault.core.generated.resources.ic_asset_type_loan
+import com.wealthvault.core.generated.resources.ic_form_check
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
+import com.wealthvault.core.theme.LightSurface
 import com.wealthvault.core.theme.WealthVaultTheme
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
@@ -145,15 +150,15 @@ fun SharedAssetContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f) // กินพื้นที่ที่เหลือทั้งหมด เพื่อ "ดัน" ปุ่มลงไปข้างล่างสุด
-                .padding(top = 20.dp)
+                .padding(top = 24.dp)
         ) {
             SpaceTopBar(title = "แชร์ทรัพย์สิน", onBackClick = onBackClick)
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = "เลือกสินทรัพย์ที่ต้องการแชร์",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = themeColor,
                 modifier = Modifier.padding(horizontal = 24.dp)
@@ -161,22 +166,21 @@ fun SharedAssetContent(
 
             Text(
                 text = "คุณต้องการให้ $targetName เห็นสินทรัพย์ อะไรของคุณบ้าง?",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = themeColor.copy(alpha = 0.8f),
                 modifier = Modifier.padding(top = 4.dp, start = 24.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // --- 3. กล่องรายการสินทรัพย์ ---
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    // 🌟 สำคัญ: ให้ขยายสุดเท่าที่มีที่ว่าง แต่ถ้าของน้อยก็หดตาม (ไม่ต้องระบุตัวเลขแล้ว)
+                    .padding(horizontal = 24.dp)
                     .weight(1f),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 if (isLoading) {
@@ -191,7 +195,7 @@ fun SharedAssetContent(
                         Text(
                             text = "ไม่มีรายการที่สามารถแชร์ได้",
                             color = Color.Gray,
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -226,7 +230,7 @@ fun SharedAssetContent(
                                         model = imageUrl,
                                         contentDescription = assetName,
                                         contentScale = ContentScale.Crop,
-                                        modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)),
+                                        modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)),
 
                                         )
                                 } else {
@@ -243,45 +247,66 @@ fun SharedAssetContent(
                                     }
 
                                     Box(
-                                        modifier = Modifier.size(48.dp).background(LightBg, RoundedCornerShape(8.dp)),
+                                        modifier = Modifier.size(40.dp).background(LightBg, RoundedCornerShape(8.dp)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         if (iconRes != null) {
-                                            Icon(painterResource(iconRes), contentDescription = assetType, tint = LightPrimary, modifier = Modifier.size(28.dp))
+                                            Icon(painterResource(iconRes), contentDescription = assetType, tint = LightPrimary, modifier = Modifier.size(20.dp))
                                         } else {
-                                            Text(text = assetType.take(3).uppercase(), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                                            Text(text = assetType.take(3).uppercase(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.DarkGray)
                                         }
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.width(16.dp))
+                                Spacer(modifier = Modifier.width(14.dp))
 
                                 // --- ชื่อและราคา ---
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = assetName,
-                                        fontSize = 16.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = Color(0xFF3A2F2A)
                                     )
                                     asset.value?.let { valAmt ->
                                         Text(
                                             text = "${formatAmount(valAmt)} บาท",
-                                            fontSize = 13.sp,
+                                            style = MaterialTheme.typography.labelMedium,
                                             color = Color.Gray
                                         )
                                     }
                                 }
 
                                 // --- Checkbox ---
-                                Checkbox(
-                                    checked = isChecked,
-                                    onCheckedChange = { checked ->
-                                        if (checked) selectedAssets.add(assetId)
-                                        else selectedAssets.remove(assetId)
-                                    },
-                                    colors = CheckboxDefaults.colors(checkedColor = themeColor)
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(RoundedCornerShape(8.dp)) // ปรับความมนให้เข้ากับธีม
+                                        .background(if (isChecked) themeColor else Color.Transparent)
+                                        .border(
+                                            width = 2.dp,
+                                            color = if (isChecked) themeColor else Color.LightGray,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .clickable {
+                                            // 🌟 ลอจิกการจัดการรายการที่เลือก
+                                            if (isChecked) {
+                                                selectedAssets.remove(assetId)
+                                            } else {
+                                                selectedAssets.add(assetId)
+                                            }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isChecked) {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.ic_form_check),
+                                            contentDescription = null,
+                                            tint = LightSoftWhite, // หรือ Color.White ตามที่คุณแชมป์ถนัด
+                                            modifier = Modifier.size(18.dp) // ปรับขนาดไอคอนให้พอดีกล่อง 24dp
+                                        )
+                                    }
+                                }
                             }
 
                             if (asset != filteredList.last()) {
@@ -298,14 +323,14 @@ fun SharedAssetContent(
             onClick = { onShareSubmit(selectedAssets.toList()) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 24.dp)
                 .padding(top = 24.dp, bottom = 24.dp) // เพิ่มระยะห่างบนล่างให้ดูโปร่งขึ้น
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = themeColor),
-            shape = RoundedCornerShape(16.dp),
+                .height(46.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+            shape = RoundedCornerShape(12.dp),
             enabled = !isLoading && selectedAssets.isNotEmpty()
         ) {
-            Text(text = "แบ่งปันข้อมูล", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = "แบ่งปันข้อมูล", style = MaterialTheme.typography.bodyLarge, color = LightSurface)
         }
     }
 }

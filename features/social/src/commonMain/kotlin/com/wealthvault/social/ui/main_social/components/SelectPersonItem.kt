@@ -4,16 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -28,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_form_check
@@ -46,19 +38,18 @@ fun SelectPersonItem(
     onSelectedChange: (Boolean) -> Unit
 ) {
     Surface(
-        color = Color.Transparent,
-//        shape = RoundedCornerShape(16.dp),
+        color = LightSoftWhite, // 🌟 ปรับพื้นหลังให้เป็นสีพรีเมียมเหมือนโค้ดตัวบน
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-//            .padding(bottom = 12.dp)
-            // 🌟 ทำให้จิ้มตรงไหนของกล่องก็ได้เพื่อเปลี่ยนค่า Checkbox
+            .padding(bottom = 10.dp) // 🌟 ระยะห่างระหว่างไอเทม
             .clickable { onSelectedChange(!isSelected) },
-//        border = BorderStroke(1.dp, LightBorder)
+        border = BorderStroke(1.dp, LightBorder) // 🌟 เพิ่มขอบจางๆ ให้ดูมีมิติ
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(10.dp), // 🌟 Padding ด้านในกล่อง
             verticalAlignment = Alignment.CenterVertically
         ) {
             // --- 1. รูปโปรไฟล์ ---
@@ -69,7 +60,7 @@ fun SelectPersonItem(
                     .background(LightBg),
                 contentAlignment = Alignment.Center
             ) {
-                if (friend.profile.toString().isNotEmpty()) {
+                if (friend.profile?.toString()?.isNotEmpty() == true) {
                     AsyncImage(
                         model = friend.profile,
                         contentDescription = "Profile Picture",
@@ -86,28 +77,38 @@ fun SelectPersonItem(
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
-            // --- 2. ข้อมูลชื่อและอีเมล ---
+            // --- 2. ข้อมูลชื่อ ---
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = friend.username.toString().ifEmpty { "ไม่ระบุชื่อ" },
+                    text = friend.username?.takeIf { it.isNotBlank() }
+                        ?: friend.firstName?.takeIf { it.isNotBlank() }
+                        ?: "ไม่ระบุชื่อ",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF3A2F2A)
                 )
+                // 🌟 แถม: ถ้ามี Email ก็โชว์ให้เหมือนโค้ดตัวบนด้วยครับ
+                if (!friend.email.isNullOrEmpty()) {
+                    Text(
+                        text = friend.email!!,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF9E918B)
+                    )
+                }
             }
 
             // --- 3. Checkbox ---
             Box(
                 modifier = Modifier
                     .size(24.dp)
-                    .clip(RoundedCornerShape(8.dp)) // 🌟 ปรับความมนตรงนี้ได้เลย (เช่น 8.dp หรือ 12.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .background(if (isSelected) LightPrimary else Color.Transparent)
                     .border(
                         width = 2.dp,
                         color = if (isSelected) LightPrimary else Color.LightGray,
-                        shape = RoundedCornerShape(8.dp) // 🌟 ต้องใส่ Shape ให้เท่ากับ clip
+                        shape = RoundedCornerShape(8.dp)
                     )
                     .clickable { onSelectedChange(!isSelected) },
                 contentAlignment = Alignment.Center

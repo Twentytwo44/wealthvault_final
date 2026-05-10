@@ -1,6 +1,7 @@
 package com.wealthvault.social.ui.main_social.friend
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
@@ -57,27 +58,32 @@ fun FriendContent(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         SocialSearchBar(
             searchQuery = searchQuery,
             onSearchChange = { searchQuery = it }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(bottom = 24.dp)) {
             items(filteredFriends) { friend ->
                 // 🌟 4. ดัก Event ตอนกดการ์ดแต่ละใบ
                 FriendListItem(
                     friend = friend,
                     onClick = {
                         val id = friend.id ?: ""
-                        val name = friend.username ?: friend.firstName ?: "Unknown"
+                        val name = friend.username?.takeIf { it.isNotBlank() }
+                            ?: friend.firstName?.takeIf { it.isNotBlank() }
+                            ?: "ไม่ระบุชื่อ"
                         onFriendClick(id, name) // โยน ID กับ Name ออกไป
                     }
                 )
             }
         }
+
     }
 }

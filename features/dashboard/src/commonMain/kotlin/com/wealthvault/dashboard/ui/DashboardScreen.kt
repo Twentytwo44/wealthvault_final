@@ -148,7 +148,7 @@ fun DashboardContent(
                     selectedTab = selectedTab
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 val isAsset = selectedTab == DashboardTab.ASSET
                 val headerTitle = if (isAsset) "มูลค่าทรัพย์สิน" else "มูลค่าหนี้สิน"
@@ -161,11 +161,11 @@ fun DashboardContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = headerTitle, style = MaterialTheme.typography.titleMedium, color = Color(0xFFC27A5A))
-                    Text(text = "≈"+headerAmount, style = MaterialTheme.typography.titleMedium, color = headerColor)
+                    Text(text = headerTitle, style = MaterialTheme.typography.titleSmall, color = Color(0xFFC27A5A))
+                    Text(text = "≈"+headerAmount, style = MaterialTheme.typography.titleSmall, color = headerColor)
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
                 val currentList = if (isAsset) data.assets else data.liabilities
 
@@ -241,8 +241,6 @@ fun DashboardTopBar(onNotiClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("W", fontSize = 32.sp, color = Color(0xFFC27A5A), fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.width(8.dp))
             Text("Wealth & Vault", style = MaterialTheme.typography.titleLarge, color = Color(0xFFC27A5A), fontWeight = FontWeight.Medium)
         }
         Icon(
@@ -321,7 +319,7 @@ fun MainCard(
     isSelected: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    val cardShape = RoundedCornerShape(16.dp)
+    val cardShape = RoundedCornerShape(14.dp)
     val scale by animateFloatAsState(if (isSelected) 1.05f else 1f)
     val elevation by animateDpAsState(if (isSelected) 12.dp else 2.dp)
 
@@ -333,13 +331,13 @@ fun MainCard(
             .background(bgBrush)
             .clickable { onClick() }
             .then(if (isSelected) Modifier.border(2.dp, Color.White.copy(alpha = 0.5f), cardShape) else Modifier)
-            .height(90.dp)
+            .height(80.dp)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             if (icon != null) {
-                Icon(painter = icon, contentDescription = null, tint = if (isSelected) Color.White else Color.White.copy(alpha = 0.8f), modifier = Modifier.size(36.dp))
+                Icon(painter = icon, contentDescription = null, tint = if (isSelected) Color.White else Color.White.copy(alpha = 0.8f), modifier = Modifier.size(30.dp))
                 Spacer(modifier = Modifier.width(8.dp))
             }
             Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -347,9 +345,9 @@ fun MainCard(
                     text = title,
                     color = Color.White,
                     style = when {
-                        title.length <= 8 -> MaterialTheme.typography.titleLarge
-                        title.length <= 11 -> MaterialTheme.typography.titleMedium
-                        else -> MaterialTheme.typography.bodyLarge
+                        title.length <= 8 -> MaterialTheme.typography.titleMedium
+                        title.length <= 11 -> MaterialTheme.typography.bodyLarge
+                        else -> MaterialTheme.typography.bodySmall
                     },
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
@@ -370,10 +368,10 @@ fun MainCard(
 @Composable
 fun SafeCard(modifier: Modifier = Modifier, count: String = "0", onAddClick: () -> Unit = {}) {
     Box(
-        modifier = modifier.height(90.dp).shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp)).background(Brush.linearGradient(colors = listOf(Color(0xFFFDAE36), Color(0xFFF3A227)))).padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier = modifier.height(80.dp).shadow(elevation = 4.dp, shape = RoundedCornerShape(14.dp)).background(Brush.linearGradient(colors = listOf(Color(0xFFFDAE36), Color(0xFFF3A227)))).padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically){
-            Icon(painter = painterResource(Res.drawable.ic_nav_asset), contentDescription = null, tint = Color.White, modifier = Modifier.padding(horizontal = 4.dp).size(28.dp))
+            Icon(painter = painterResource(Res.drawable.ic_nav_asset), contentDescription = null, tint = Color.White, modifier = Modifier.padding(horizontal = 4.dp).size(24.dp))
             Spacer(modifier = Modifier.width(10.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.Bottom) {
@@ -393,7 +391,7 @@ fun SafeCard(modifier: Modifier = Modifier, count: String = "0", onAddClick: () 
                         .height(25.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("เพิ่ม", color = Color(0xFFF1A837), style = MaterialTheme.typography.bodyMedium)
+                    Text("เพิ่ม", color = Color(0xFFF1A837), style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
@@ -403,18 +401,18 @@ fun SafeCard(modifier: Modifier = Modifier, count: String = "0", onAddClick: () 
 @Composable
 fun SmallCard(modifier: Modifier = Modifier, bgBrush: Brush, icon: Painter? = null, count: String, label: String, label2: String = "") {
     Column(
-        modifier = modifier.height(90.dp).shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp)).background(bgBrush).padding(horizontal = 12.dp, vertical = 6.dp).padding(top = 4.dp),
+        modifier = modifier.height(80.dp).shadow(elevation = 4.dp, shape = RoundedCornerShape(14.dp)).background(bgBrush).padding(horizontal = 12.dp, vertical = 6.dp).padding(top = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            if (icon != null) Icon(painter = icon, contentDescription = null, tint = Color.White, modifier = Modifier.padding(horizontal = 4.dp).size(26.dp))
-            val countStyle = if (count.length > 2) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge
+            if (icon != null) Icon(painter = icon, contentDescription = null, tint = Color.White, modifier = Modifier.padding(horizontal = 4.dp).size(22.dp))
+            val countStyle = if (count.length > 2) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.titleMedium
             Text(text = count, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center, color = Color.White, style = countStyle, fontWeight = FontWeight.Bold)
         }
         Column (modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = label, color = Color.White, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+            Text(text = label, color = Color.White, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
             if (label2.isNotEmpty()) {
-                Text(text = label2, color = Color.White.copy(alpha = 0.9f), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center, modifier = Modifier.offset(y = (-6).dp))
+                Text(text = label2, color = Color.White.copy(alpha = 0.9f), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, modifier = Modifier.offset(y = (-6).dp))
             }
         }
     }
@@ -436,10 +434,10 @@ fun RealItemCard(
             containerColor = LightSoftWhite
         ),
         border = BorderStroke(1.dp, LightBorder),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)) {
             Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
             Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

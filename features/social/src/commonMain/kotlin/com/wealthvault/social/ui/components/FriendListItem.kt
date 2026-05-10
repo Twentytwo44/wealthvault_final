@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +33,9 @@ fun FriendListItem(
     friend: FriendData,
     onClick: () -> Unit
 ) {
-    val displayName = friend.username ?: friend.firstName ?: "Unknown"
+    val displayName = friend.username?.takeIf { it.isNotBlank() }
+        ?: friend.firstName?.takeIf { it.isNotBlank() }
+        ?: "ไม่ระบุชื่อ"
     SharedUserListItem(displayName = displayName, profileUrl = friend.profile, onClick = onClick)
 }
 
@@ -45,7 +48,9 @@ fun FriendListItem(
     isLeader: Boolean = false,
     onClick: () -> Unit
 ) {
-    val displayName = member.username ?: member.firstName ?: "Unknown"
+    val displayName = member.username?.takeIf { it.isNotBlank() }
+        ?: member.firstName?.takeIf { it.isNotBlank() }
+        ?: "ไม่ระบุชื่อ"
     SharedUserListItem(
         displayName = displayName,
         profileUrl = member.profile,
@@ -69,11 +74,11 @@ private fun SharedUserListItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(vertical = 8.dp) // 💡 เติม horizontal 24.dp ให้ขอบซ้ายขวาไม่ชิดจอเกินไปครับ
+            .padding(vertical = 8.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(44.dp)
                 .clip(CircleShape)
                 .background(LightBg),
             contentAlignment = Alignment.Center
@@ -90,14 +95,14 @@ private fun SharedUserListItem(
                     painter = painterResource(Res.drawable.ic_nav_profile),
                     contentDescription = "Default Profile",
                     tint = LightPrimary,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(14.dp))
 
-        Text(text = displayName, fontSize = 16.sp, color = LightPrimary)
+        Text(text = displayName, style = MaterialTheme.typography.bodyLarge, color = LightPrimary)
 
         if (isLeader) {
             Spacer(modifier = Modifier.width(8.dp))

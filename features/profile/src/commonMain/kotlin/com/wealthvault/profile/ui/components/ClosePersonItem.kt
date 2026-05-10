@@ -54,13 +54,13 @@ fun ClosePersonItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // ส่วนรูปโปรไฟล์
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
                     .background(LightBg),
                 contentAlignment = Alignment.Center
@@ -77,18 +77,18 @@ fun ClosePersonItem(
                         painter = painterResource(Res.drawable.ic_nav_profile),
                         contentDescription = "Default Profile",
                         tint = LightPrimary,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             // ส่วนชื่อและอีเมล
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = friend.username.ifEmpty { "ไม่ระบุชื่อ" },
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF3A2F2A)
                 )
@@ -96,7 +96,7 @@ fun ClosePersonItem(
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = friend.email,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelMedium,
                         color = Color(0xFF9E918B)
                     )
                 }

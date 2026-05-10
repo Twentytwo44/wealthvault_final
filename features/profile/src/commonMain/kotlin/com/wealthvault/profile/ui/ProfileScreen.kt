@@ -114,26 +114,27 @@ fun ProfileContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // --- Profile Info ---
             if (userData == null) {
-                Box(modifier = Modifier.fillMaxWidth().height(110.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = themeColor)
                 }
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
+                    // --- ส่วนรูปโปรไฟล์ ---
                     Box(
                         modifier = Modifier
-                            .size(110.dp)
+                            .size(100.dp)
                             .border(width = 2.dp, color = themeColor, shape = CircleShape)
                             .padding(2.dp)
                             .clip(CircleShape)
                             .background(LightBg),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (userData.profile.toString().isNotEmpty()) {
+                        if (userData.profile?.isNotEmpty() == true) {
                             AsyncImage(
                                 model = userData.profile,
                                 contentDescription = "Profile Picture",
@@ -152,37 +153,57 @@ fun ProfileContent(
 
                     Spacer(modifier = Modifier.width(20.dp))
 
-                    Column {
-                        Text(
-                            text = userData.username ?: "",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF3A2F2A)
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
+                    // --- 🌟 ส่วนข้อความด้านข้าง (เช็คก่อนแสดง) ---
+                    // --- 🌟 ส่วนข้อความด้านข้าง (แก้บั๊ก Smart Cast) ---
+                    Column(
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.height(110.dp)
 
-                        Row {
+                    ) {
+
+                        // 1. เช็ค Username (ดึงมาใส่ตัวแปร local ก่อน)
+                        val uName = userData.username
+                        if (!uName.isNullOrBlank()) {
                             Text(
-                                text = "${userData.firstName} ${userData.lastName}",
+                                text = uName, // 🌟 ตรงนี้ uName จะถูก Smart Cast เป็น String อัตโนมัติครับ
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF3A2F2A)
+                            )
+                        }
+
+                        // 2. เช็ค ชื่อ-นามสกุล
+                        val fName = userData.firstName
+                        val lName = userData.lastName
+                        val fullName = "${fName ?: ""} ${lName ?: ""}".trim()
+                        if (fullName.isNotEmpty()) {
+                            Text(
+                                text = fullName,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray
                             )
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = userData.email ?: "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray
-                        )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        // 3. เช็ค อีเมล
+                        val uEmail = userData.email
+                        if (!uEmail.isNullOrBlank()) {
+                            Text(
+                                text = uEmail, // 🌟 Smart Cast สำเร็จ
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
 
-                        Text(
-                            text = formatThaiDate(userData.birthday),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Gray
-                        )
+                        // 4. เช็ค วันเกิด
+                        val uBirthday = userData.birthday
+                        if (!uBirthday.isNullOrBlank()) {
+                            Text(
+                                text = formatThaiDate(uBirthday), // 🌟 Smart Cast สำเร็จ
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.Gray
+                            )
+                        }
                     }
                 }
             }
@@ -221,7 +242,7 @@ fun ProfileContent(
             ) {
                 Text(
                     text = "คนใกล้ชิด",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = Color(0xFF3A2F2A)
                 )

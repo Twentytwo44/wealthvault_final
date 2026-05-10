@@ -1,11 +1,13 @@
 package com.wealthvault.introduction.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,10 +45,21 @@ import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientStart
 import kotlinx.coroutines.launch
 
-
+// 🌟 Import Res และภาพ โลโก้
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.intro1
+import com.wealthvault.core.generated.resources.intro2
+import com.wealthvault.core.generated.resources.intro3
+import com.wealthvault.core.generated.resources.intro4
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawWithContent
 class IntroScreen() : Screen {
     @Composable
-    override fun Content(){
+    override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
         IntroContent(
@@ -56,24 +70,20 @@ class IntroScreen() : Screen {
         )
     }
 }
+
 @Composable
 fun IntroContent(
-    onBackClick: () -> Unit, // เพิ่มปุ่มย้อนกลับให้เผื่อใช้
-    onFinish: () -> Unit // เมื่อกดปุ่ม ต่อไป ในหน้าสุดท้าย (หน้า 4)
+    onBackClick: () -> Unit,
+    onFinish: () -> Unit
 ) {
-
-    // ข้อมูลสำหรับ 4 หน้าแรก
+    // 🌟 เพิ่ม DrawableResource เข้าไปใน Data Class สำหรับแต่ละหน้า
     val introPages = listOf(
-        IntroPageData("ทรัพย์สิน", "บันทึกทรัพย์สินที่คุณมีได้หลากหลายประเภท"),
-        IntroPageData("รวบรวม", "รวบรวมทรัพย์สินและหนี้สิน\nของคุณไว้ในที่เดียวกัน"),
-        IntroPageData("จัดการ", "ดูภาพรวมของทรัพย์สินเพื่อจัดการ\nทรัพย์สินและผู้ที่เกี่ยวข้อง"),
-        IntroPageData(
-            "แบ่งปัน & ส่งต่อ",
-            "แบ่งปันทรัพย์สินของคุณให้ครอบครัว\nและคนที่คุณรักได้ทราบ"
-        )
+        IntroPageData("ทรัพย์สิน", "บันทึกทรัพย์สินที่คุณมีได้หลากหลายประเภท", Res.drawable.intro1),
+        IntroPageData("รวบรวม", "รวบรวมทรัพย์สินและหนี้สิน\nของคุณไว้ในที่เดียวกัน", Res.drawable.intro2),
+        IntroPageData("จัดการ", "ดูภาพรวมของทรัพย์สินเพื่อจัดการ\nทรัพย์สินและผู้ที่เกี่ยวข้อง", Res.drawable.intro3),
+        IntroPageData("แบ่งปัน & ส่งต่อ", "แบ่งปันทรัพย์สินของคุณให้ครอบครัว\nและคนที่คุณรักได้ทราบ", Res.drawable.intro4)
     )
 
-    // ตัวจัดการหน้า (เหลือ 4 หน้าถ้วน)
     val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
 
@@ -83,37 +93,24 @@ fun IntroContent(
                 .fillMaxSize()
                 .padding(vertical = 24.dp),
         ) {
-            // --- แถบบนสุด: ปุ่มย้อนกลับ ---
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // ถ้ามี Icon ย้อนกลับ สามารถเปิดคอมเมนต์มาใช้ได้เลยครับ
-                // Icon(
-                //     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                //     contentDescription = "Back",
-                //     tint = LightPrimary,
-                //     modifier = Modifier
-                //         .size(28.dp)
-                //         .clickable { onBackClick() }
-                // )
                 Spacer(modifier = Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- ส่วนเนื้อหาแบบเลื่อนได้ (Pager) ---
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.weight(1f) // กินพื้นที่ตรงกลางทั้งหมด
+                modifier = Modifier.weight(1f)
             ) { page ->
-                // หน้า 1-4: แสดงข้อมูลและรูปภาพ
                 IntroPageScreen(pageData = introPages[page], primaryColor = LightPrimary)
             }
 
-            // --- จุดบอกตำแหน่งหน้า (Indicators) ---
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -133,68 +130,78 @@ fun IntroContent(
                 }
             }
 
-            // --- ปุ่ม ต่อไป ---
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
             ) {
                 Button(
                     onClick = {
                         if (pagerState.currentPage < 3) {
-                            // ถ้ายังไม่ถึงหน้าสุดท้าย เลื่อนไปหน้าถัดไป
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
                         } else {
-                            // หน้าสุดท้ายแล้ว (หน้า 4) ทำงานคำสั่ง onFinish ไปยังหน้าต่อไป
                             onFinish()
                         }
                     },
                     modifier = Modifier
-                        .align(Alignment.End) // ชิดขวาสุดของหน้าจอ
+                        .align(Alignment.End)
                         .width(140.dp)
-                        .height(50.dp),
+                        .height(46.dp),
                     shape = RoundedCornerShape(percent = 30),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
                 ) {
-                    Text("ต่อไป", fontSize = 18.sp, color = Color.White)
+                    Text("ต่อไป", style = MaterialTheme.typography.bodyLarge, color = Color.White)
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
 
-// Data Class สำหรับเก็บข้อความหน้า Intro
-data class IntroPageData(val title: String, val description: String)
+// 🌟 เพิ่มตัวแปร imageRes เพื่อรับภาพเข้ามา
+data class IntroPageData(val title: String, val description: String, val imageRes: DrawableResource)
 
-// Composable สำหรับหน้าให้ข้อมูล 1-4
 @Composable
 fun IntroPageScreen(pageData: IntroPageData, primaryColor: Color) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 24.dp).padding(top = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
-        Text(text = pageData.title, fontSize = 28.sp, fontWeight = FontWeight.Medium, color = primaryColor)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = pageData.description, fontSize = 14.sp, color = primaryColor.copy(alpha = 0.8f), textAlign = TextAlign.Center)
+        Text(text = pageData.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Medium, color = primaryColor)
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(text = pageData.description, style = MaterialTheme.typography.bodyLarge, color = primaryColor.copy(alpha = 0.8f), textAlign = TextAlign.Center)
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Box รูปภาพประกอบ
-        Box(
+        // 🌟 แก้ไขรูปภาพ: กว้างขึ้น, ตัดความสูงล่าง-บน, และทำขอบฟุ้ง (เบลอขอบ)
+        Image(
+            painter = painterResource(pageData.imageRes),
+            contentDescription = "Intro Image",
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(width = 250.dp, height = 450.dp)
-                .background(Color(0xFFFEE0BB), shape = RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            // ใส่ภาพ Illustration ตรงนี้
-        }
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .graphicsLayer { alpha = 0.99f }
+                .drawWithContent {
+                    drawContent()
+                    drawRect(
+                        brush = Brush.radialGradient(
+                            // 🌟 ใช้ colorStops เพื่อล็อกความชัดให้อยู่ตรงกลางเยอะๆ
+                            0.0f to Color.Black,       // จุดศูนย์กลาง (ชัด 100%)
+                            0.75f to Color.Black,      // ลากความชัด 100% กว้างออกมาจนถึง 75% ของรูป
+                            1.0f to Color.Transparent, // ค่อยเริ่มเบลอให้โปร่งใสในช่วง 25% สุดท้ายตรงขอบรูป
+                            radius = size.height * 0.6f // 🌟 เปลี่ยนมาอิงตามความสูงของรูปแทน เพื่อให้คลุมขอบบนล่างได้พอดี
+                        ),
+                        blendMode = BlendMode.DstIn
+                    )
+                }
+        )
     }
 }
 

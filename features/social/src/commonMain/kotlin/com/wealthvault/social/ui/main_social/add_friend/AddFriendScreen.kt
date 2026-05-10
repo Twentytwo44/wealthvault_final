@@ -139,7 +139,7 @@ fun AddFriendContent(
             .padding(horizontal = 24.dp, vertical = 24.dp)
     ) {
         // --- 1. Header ---
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 18.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 10.dp)) {
             Icon(painter = painterResource(Res.drawable.ic_common_back), contentDescription = "Back", tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onBackClick() })
             Spacer(modifier = Modifier.width(16.dp))
             Text(text = "เพิ่มเพื่อน", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
@@ -161,7 +161,7 @@ fun AddFriendContent(
                 enabled = searchQuery.isNotBlank() && !isSearching,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = themeColor, disabledContainerColor = themeColor.copy(alpha = 0.5f)),
-                modifier = Modifier.height(52.dp)
+                modifier = Modifier.height(44.dp)
             ) {
                 if (isSearching) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
@@ -171,21 +171,21 @@ fun AddFriendContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // --- 3. ลอจิกสลับหน้าจอ ---
         if (hasSearched && searchQuery.isNotEmpty()) {
 
-            Text("ผลการค้นหา", style = MaterialTheme.typography.titleMedium, color = Color(0xFF3A2F2A), modifier = Modifier.padding(bottom = 16.dp))
+            Text("ผลการค้นหา", style = MaterialTheme.typography.titleSmall, color = Color(0xFF3A2F2A), modifier = Modifier.padding(bottom = 16.dp))
 
             if (!isSearching) {
                 if (searchResult != null) {
                     // เจอคน
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(16.dp)).padding(16.dp)
+                        modifier = Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(16.dp)).padding(10.dp)
                     ) {
-                        Box(modifier = Modifier.size(56.dp).clip(CircleShape).background(LightBg), contentAlignment = Alignment.Center) {
+                        Box(modifier = Modifier.size(46.dp).clip(CircleShape).background(LightBg), contentAlignment = Alignment.Center) {
                             if (!searchResult.profile.isNullOrEmpty()) {
                                 AsyncImage(model = searchResult.profile, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                             } else {
@@ -196,7 +196,7 @@ fun AddFriendContent(
                         Spacer(modifier = Modifier.width(16.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = searchResult.username ?: searchResult.firstName ?: "ไม่ระบุชื่อ", style = MaterialTheme.typography.titleMedium, color = Color(0xFF3A2F2A))
+                            Text(text = searchResult.username ?: searchResult.firstName ?: "ไม่ระบุชื่อ", style = MaterialTheme.typography.bodyLarge, color = Color(0xFF3A2F2A))
                             Text(text = searchResult.email ?: "", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
                         }
 
@@ -207,10 +207,27 @@ fun AddFriendContent(
                                 onClick = { requestSent = true; onAddFriendClick(searchResult) },
                                 enabled = !requestSent,
                                 shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = themeColor, disabledContainerColor = Color.LightGray),
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = themeColor,
+                                    disabledContainerColor = Color.LightGray
+                                ),
+                                // 🌟 วิธีที่ 1: ตั้งค่า Padding เป็น 0 เพื่อให้เราคุมพื้นที่ข้างในเองได้เต็มที่
+                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                modifier = Modifier
+                                    .height(36.dp)
                             ) {
-                                Text(text = if (requestSent) "กำลังส่ง..." else "ส่งคำขอ", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                                // 🌟 วิธีที่ 2: ใช้ Box หรือ Row ครอบแล้วสั่ง Alignment.Center
+                                Box(
+                                    modifier = Modifier.fillMaxHeight(), // ยืดให้เต็มปุ่ม
+                                    contentAlignment = Alignment.Center // บังคับให้ลูก (Text) อยู่ตรงกลางเป๊ะทั้งแนวตั้งและแนวนอน
+                                ) {
+                                    Text(
+                                        text = if (requestSent) "กำลังส่ง..." else "ส่งคำขอ",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        textAlign = TextAlign.Center // เพิ่มความมั่นใจว่าตัวหนังสือจะอยู่กลางบรรทัด
+                                    )
+                                }
                             }
                         }
                     }
@@ -224,7 +241,7 @@ fun AddFriendContent(
 
         } else {
             // คำขอเป็นเพื่อน
-            Text("คำขอเป็นเพื่อน", style = MaterialTheme.typography.titleMedium, color = Color(0xFF3A2F2A), modifier = Modifier.padding(bottom = 16.dp))
+            Text("คำขอเป็นเพื่อน", style = MaterialTheme.typography.titleSmall, color = Color(0xFF3A2F2A), modifier = Modifier.padding(bottom = 16.dp))
 
             if (pendingFriends.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -239,7 +256,7 @@ fun AddFriendContent(
                             onAccept = { request.id?.let { onRespondToRequest(it, true) } },
                             onReject = { request.id?.let { onRespondToRequest(it, false) } }
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
             }
@@ -254,46 +271,105 @@ fun FriendRequestItem(
     onAccept: () -> Unit,
     onReject: () -> Unit
 ) {
-    val displayName = request.username ?: request.firstName ?: "ไม่ระบุชื่อ"
+    val displayName = request.username?.takeIf { it.isNotBlank() }
+        ?: request.firstName?.takeIf { it.isNotBlank() }
+        ?: "ไม่ระบุชื่อ"
 
-    Row(
+    // 🌟 เปลี่ยนจาก Row หลัก เป็น Column เพื่อให้ขึ้นบรรทัดใหม่ได้
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(16.dp))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(12.dp) // เพิ่ม padding อีกนิดให้ดูโปร่ง
     ) {
-        Box(modifier = Modifier.size(50.dp).clip(CircleShape).background(LightBg), contentAlignment = Alignment.Center) {
-            if (!request.profile.isNullOrEmpty()) {
-                AsyncImage(model = request.profile, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-            } else {
-                Icon(painter = painterResource(Res.drawable.ic_nav_profile), contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+        // --- ส่วนบน: ข้อมูลโปรไฟล์ ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier.size(46.dp).clip(CircleShape).background(LightBg),
+                contentAlignment = Alignment.Center
+            ) {
+                if (!request.profile.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = request.profile,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_nav_profile),
+                        contentDescription = null,
+                        tint = LightPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold, // เน้นชื่อหน่อย
+                    color = Color(0xFF3A2F2A)
+                )
+                Text(
+                    text = request.email ?: "",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.height(16.dp)) // ระยะห่างระหว่างโปรไฟล์กับปุ่ม
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = displayName, style = MaterialTheme.typography.titleMedium, color = Color(0xFF3A2F2A))
-            Text(text = request.email ?: "", color = Color.Gray, fontSize = 12.sp)
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // --- ส่วนล่าง: ปุ่ม ปฏิเสธ และ ยอมรับ (ขยายเต็มกว้าง) ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // --- ปุ่ม ปฏิเสธ (Outlined) ---
             OutlinedButton(
                 onClick = onReject,
-                modifier = Modifier.height(36.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                border = BorderStroke(1.dp, Color.LightGray)
+                modifier = Modifier
+                    .weight(1f) // 🌟 แบ่งพื้นที่คนละคนครึ่งเพื่อให้เต็มความกว้าง
+                    .height(34.dp),
+                contentPadding = PaddingValues(0.dp),
+                border = BorderStroke(1.dp, Color.LightGray),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text("ลบ", color = Color.Gray, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "ปฏิเสธ",
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
+
+            // --- ปุ่ม ยอมรับ (Filled) ---
             Button(
                 onClick = onAccept,
-                modifier = Modifier.height(36.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = themeColor)
+                modifier = Modifier
+                    .weight(1f) // 🌟 แบ่งพื้นที่คนละคนครึ่ง
+                    .height(34.dp),
+                contentPadding = PaddingValues(0.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = themeColor),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text("ยืนยัน", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "ยอมรับ",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }

@@ -2,6 +2,7 @@ package com.wealthvault.login.ui
 
 // Import ของที่เราต้องใช้
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,12 +14,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,11 +46,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.registry.screenModule
@@ -58,16 +66,18 @@ import com.wealthvault.core.generated.resources.ic_auth_eye
 import com.wealthvault.core.generated.resources.ic_auth_eye_slash
 import com.wealthvault.core.generated.resources.ic_auth_google
 import com.wealthvault.core.generated.resources.ic_auth_lock
+// 🌟 Import ภาพประกอบหน้า Login (เช็คชื่อไฟล์ในโปรเจกต์คุณแชมป์ด้วยนะครับ)
+import com.wealthvault.core.generated.resources.login
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightMuted
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSurface
 import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.theme.WealthVaultTheme
-import com.wealthvault.core.theme.WvBgGradientEnd
-import com.wealthvault.core.theme.WvBgGradientStart
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientStart
+import com.wealthvault.core.theme.WvBgGradientEnd
+import com.wealthvault.core.theme.WvBgGradientStart
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.forgetpassword.ui.ForgetPasswordScreen
 import com.wealthvault.introduction.ui.IntroScreen
@@ -81,17 +91,17 @@ class LoginScreen() : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LoginScreenModel>()
-        val mainScreen = rememberScreen(SharedScreen.Main)
+
         LoginContent(
             username = screenModel.username,
             onUsernameChange = {
                 screenModel.username = it
-                screenModel.errorMessage = null // 🌟 ทริค UX: ล้าง Error ทันทีเมื่อผู้ใช้เริ่มพิมพ์แก้
+                screenModel.errorMessage = null // ทริค UX: ล้าง Error ทันทีเมื่อผู้ใช้เริ่มพิมพ์แก้
             },
             password = screenModel.password,
             onPasswordChange = {
                 screenModel.password = it
-                screenModel.errorMessage = null // 🌟 ทริค UX: ล้าง Error ทันทีเมื่อผู้ใช้เริ่มพิมพ์แก้
+                screenModel.errorMessage = null // ทริค UX: ล้าง Error ทันทีเมื่อผู้ใช้เริ่มพิมพ์แก้
             },
             isLoading = screenModel.isLoading,
             errorMessage = screenModel.errorMessage,
@@ -99,19 +109,20 @@ class LoginScreen() : Screen {
                 screenModel.onLoginClick { state ->
                     when (state) {
                         is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
-                        is LoginState.GoToMain -> navigator.replaceAll(MainScreen()) // หรือ SharedScreen.Main
+                        is LoginState.GoToMain -> navigator.replaceAll(MainScreen())
                         else -> {}
                     }
                 }
             },
             onGoogleClick = {
                 screenModel.onGoogleClick { state ->
-                when (state) {
-                    is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
-                    is LoginState.GoToMain -> navigator.replaceAll(MainScreen()) // หรือ SharedScreen.Main
-                    else -> {}
+                    when (state) {
+                        is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
+                        is LoginState.GoToMain -> navigator.replaceAll(MainScreen())
+                        else -> {}
+                    }
                 }
-            } },
+            },
             onForgotPasswordClick = { navigator.push(ForgetPasswordScreen()) },
             onRegisterClick = { navigator.push(RegisterScreen()) }
         )
@@ -131,7 +142,7 @@ fun LoginContent(
     onForgotPasswordClick: () -> Unit,
     onRegisterClick: () -> Unit
 ) {
-    // 🌟 เช็คว่ามี Error ไหม
+    // เช็คว่ามี Error ไหม
     val hasError = errorMessage != null
 
     WealthVaultTheme {
@@ -150,21 +161,39 @@ fun LoginContent(
                 }
             }
 
+            // 🌟 แก้ไข: เพิ่ม verticalScroll และ padding เพื่อรองรับจอเล็กและคีย์บอร์ด
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp),
+                    .verticalScroll(rememberScrollState()) // 🌟 ทำให้เลื่อนได้ถ้าเนื้อหาเกินจอ
+                    .statusBarsPadding() // เว้นที่ให้แถบสถานะด้านบน
+                    .imePadding() // 🌟 ดัน UI ขึ้นเมื่อคีย์บอร์ดเด้ง
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Top // 🌟 เปลี่ยนเป็น Top เพื่อให้ scrolling ทำงานได้ถูกต้อง
             ) {
+
+                Spacer(modifier = Modifier.height(20.dp)) // ระยะห่างด้านบนสุด
+
+                // 🌟 แก้ไข: ลดขนาดชื่อแอป เปลี่ยน style เป็น headlineMedium พร้อมเพิ่มความหนาและถ่างช่องไฟ
                 Text(
                     text = "Wealth & Vault",
                     color = LightPrimary,
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp // 🌟 ถ่างช่องไฟเล็กน้อยให้ดูแพง
+                    ),
                 )
 
-                Spacer(modifier = Modifier.height(150.dp))
+
+                // 🌟 ใส่รูปภาพประกอบหน้า Login
+                Image(
+                    painter = painterResource(Res.drawable.login),
+                    contentDescription = "Login Illustration",
+                    modifier = Modifier
+                        .size(180.dp),
+                    contentScale = ContentScale.Fit
+                )
 
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -172,7 +201,7 @@ fun LoginContent(
                 ) {
                     // --- ช่องอีเมล ---
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        // 🌟 ใช้ Row เพื่อวาง "อีเมล" ไว้ซ้าย และ "ข้อความ Error" ไว้ขวา
+                        // ใช้ Row เพื่อวาง "อีเมล" ไว้ซ้าย และ "ข้อความ Error" ไว้ขวา
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -182,11 +211,11 @@ fun LoginContent(
                         ) {
                             Text(
                                 text = "อีเมล",
-                                color = LightPrimary, // 🌟 กลับไปใช้สีเดิม ไม่แดงแล้ว
+                                color = LightPrimary, // กลับไปใช้สีเดิม ไม่แดงแล้ว
                                 style = MaterialTheme.typography.bodyLarge
                             )
 
-                            // 🌟 แสดง Error ตรงมุมขวาบน
+                            // แสดง Error ตรงมุมขวาบน
                             if (hasError) {
                                 Text(
                                     text = errorMessage,
@@ -200,26 +229,26 @@ fun LoginContent(
                             value = username,
                             onValueChange = onUsernameChange,
                             singleLine = true,
-                            textStyle = LocalTextStyle.current.copy(color = Color.Black), // 🌟 สีตัวหนังสือ
-                            cursorBrush = SolidColor(LightPrimary), // 🌟 สีเคอร์เซอร์กระพริบ
+                            textStyle = LocalTextStyle.current.copy(color = Color.Black), // สีตัวหนังสือ
+                            cursorBrush = SolidColor(LightPrimary), // สีเคอร์เซอร์กระพริบ
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(44.dp), // 🌟 ล็อกความสูง 50.dp ได้สบายๆ
+                                .height(44.dp), // ล็อกความสูง 44.dp ตามมาตรฐาน
                             decorationBox = { innerTextField ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .background(LightSurface, RoundedCornerShape(percent = 30))
                                         .border(1.dp, LightBorder, RoundedCornerShape(percent = 30))
-                                        .padding(horizontal = 16.dp), // 🌟 ระยะห่างซ้าย-ขวา ด้านใน
-                                    verticalAlignment = Alignment.CenterVertically // 🌟 ดันทุกอย่างให้อยู่กึ่งกลางพอดีเป๊ะ
+                                        .padding(horizontal = 16.dp), // ระยะห่างซ้าย-ขวา ด้านใน
+                                    verticalAlignment = Alignment.CenterVertically // จัดทุกอย่างให้อยู่กึ่งกลางพอดีเป๊ะ
                                 ) {
                                     // Leading Icon
                                     Icon(
                                         painter = painterResource(Res.drawable.ic_auth_email),
                                         contentDescription = "email",
                                         tint = LightPrimary,
-                                        modifier = Modifier.size(26.dp)
+                                        modifier = Modifier.size(24.dp) // ปรับขนาดไอคอนเล็กน้อยให้ดูดี
                                     )
 
                                     Spacer(modifier = Modifier.width(12.dp))
@@ -230,21 +259,21 @@ fun LoginContent(
                                             // Placeholder (ข้อความจางๆ ตอนยังไม่พิมพ์)
                                             Text("อีเมล", color = Color.Gray)
                                         }
-                                        innerTextField() // 🌟 ตัวควบคุมการพิมพ์ข้อความจะอยู่ตรงนี้
+                                        innerTextField() // ตัวควบคุมการพิมพ์ข้อความจะอยู่ตรงนี้
                                     }
                                 }
                             }
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
                     var isPasswordVisible by remember { mutableStateOf(false) }
 
                     // --- ช่องรหัสผ่าน ---
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = "รหัสผ่าน",
-                            color = LightPrimary, // 🌟 กลับไปใช้สีเดิม ไม่แดงแล้ว
+                            color = LightPrimary, // กลับไปใช้สีเดิม ไม่แดงแล้ว
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
                         )
@@ -252,21 +281,21 @@ fun LoginContent(
                             value = password,
                             onValueChange = onPasswordChange,
                             singleLine = true,
-                            // 🌟 ส่วนสำคัญ: จัดการการซ่อน/แสดงรหัสผ่าน
+                            // ส่วนสำคัญ: จัดการการซ่อน/แสดงรหัสผ่าน
                             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             textStyle = LocalTextStyle.current.copy(color = Color.Black),
                             cursorBrush = SolidColor(LightPrimary),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(44.dp), // 🌟 สูง 50.dp ตามที่ต้องการ
+                                .height(44.dp), // สูง 44.dp ตามที่ต้องการ
                             decorationBox = { innerTextField ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .background(LightSurface, RoundedCornerShape(percent = 30))
                                         .border(1.dp, LightBorder, RoundedCornerShape(percent = 30))
-                                        .padding(start = 16.dp, end = 8.dp), // 🌟 ลด padding ขวาหน่อยเพื่อให้ปุ่มลูกตาไม่ห่างเกิน
+                                        .padding(start = 16.dp, end = 4.dp), // ลด padding ขวาหน่อยเพื่อให้ปุ่มลูกตาไม่ห่างเกิน
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     // Leading Icon (แม่กุญแจ)
@@ -274,7 +303,7 @@ fun LoginContent(
                                         painter = painterResource(Res.drawable.ic_auth_lock),
                                         contentDescription = "lock",
                                         tint = LightPrimary,
-                                        modifier = Modifier.size(26.dp)
+                                        modifier = Modifier.size(24.dp) // ปรับขนาดไอคอนเล็กน้อยให้ดูดี
                                     )
 
                                     Spacer(modifier = Modifier.width(12.dp))
@@ -293,13 +322,13 @@ fun LoginContent(
 
                                     IconButton(
                                         onClick = { isPasswordVisible = !isPasswordVisible },
-                                        modifier = Modifier.size(48.dp) // ขนาดปุ่มมาตรฐานเพื่อให้กดง่าย
+                                        modifier = Modifier.size(44.dp) // ขนาดปุ่มมาตรฐานเพื่อให้กดง่าย
                                     ) {
                                         Icon(
                                             painter = icon,
                                             contentDescription = "Toggle Password Visibility",
                                             tint = LightPrimary,
-                                            modifier = Modifier.size(24.dp)
+                                            modifier = Modifier.size(22.dp) // ปรับขนาดไอคอนให้ดูพอดีกับกรอบ
                                         )
                                     }
                                 }
@@ -318,20 +347,20 @@ fun LoginContent(
                         )
                     }
 
-                    // 🌟 คืนพื้นที่ว่างให้สวยงาม (เอา Error ตรงกลางออกไปแล้ว)
-                    Spacer(modifier = Modifier.height(32.dp))
+                    // คืนพื้นที่ว่างให้สวยงาม
+                    Spacer(modifier = Modifier.height(26.dp))
 
                     // --- ปุ่มเข้าสู่ระบบ ---
                     Button(
                         onClick = onLoginClick,
-                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        modifier = Modifier.fillMaxWidth().height(46.dp),
                         shape = RoundedCornerShape(percent = 30),
                         colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
                     ) {
-                        Text("เข้าสู่ระบบ", style = MaterialTheme.typography.titleMedium, color = LightSurface)
+                        Text("เข้าสู่ระบบ", style = MaterialTheme.typography.bodyLarge, color = LightSurface)
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // --- ยังไม่มีบัญชี ---
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
@@ -359,17 +388,20 @@ fun LoginContent(
                     // --- ปุ่ม Google ---
                     OutlinedButton(
                         onClick = onGoogleClick,
-                        modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 48.dp),
+                        modifier = Modifier.fillMaxWidth().height(46.dp).padding(horizontal = 48.dp),
                         shape = RoundedCornerShape(percent = 30),
                         border = BorderStroke(1.dp, LightBorder),
                         colors = ButtonDefaults.outlinedButtonColors(containerColor = LightSurface)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(painter = painterResource(Res.drawable.ic_auth_google), contentDescription = "Google Logo", modifier = Modifier.size(36.dp), tint = Color.Unspecified)
+                            Icon(painter = painterResource(Res.drawable.ic_auth_google), contentDescription = "Google Logo", modifier = Modifier.size(24.dp), tint = Color.Unspecified)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Google", color = LightPrimary, style = MaterialTheme.typography.bodyLarge)
                         }
                     }
+
+                    // 🌟 เพิ่ม Spacer ด้านล่างสุดเพื่อให้เลื่อนลงมาแล้วมีระยะเว้นสวยๆ เวลาคีย์บอร์ดเด้ง
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }

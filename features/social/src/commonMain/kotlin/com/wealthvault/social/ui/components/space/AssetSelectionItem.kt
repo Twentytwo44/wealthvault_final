@@ -32,13 +32,13 @@ fun AssetSelectionItem(
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = name, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
+                Text(text = name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
                 Spacer(modifier = Modifier.width(8.dp))
                 Surface(color = tagColor, shape = RoundedCornerShape(4.dp), modifier = Modifier.height(16.dp)) {
-                    Text(text = tag, color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 6.dp))
+                    Text(text = tag, color = Color.White, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 6.dp))
                 }
             }
-            Text(text = amount, fontSize = 14.sp, color = Color.Gray)
+            Text(text = amount, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
         }
         Checkbox(
             checked = isChecked,

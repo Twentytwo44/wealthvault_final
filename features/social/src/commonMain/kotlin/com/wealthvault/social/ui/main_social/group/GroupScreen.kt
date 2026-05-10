@@ -57,17 +57,20 @@ fun GroupContent(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         SocialSearchBar(searchQuery = searchQuery, onSearchChange = { searchQuery = it })
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        LazyColumn(
+            modifier = Modifier.weight(1f), // 🌟 เอา padding bottom ออกจากตรงนี้
+            // 🌟 ใส่ padding bottom ไว้ในพื้นที่การเลื่อนแทน
+            contentPadding = PaddingValues(bottom = 24.dp)
+        ) {
             items(filteredGroups) { group ->
-                // 🌟 3. ใส่ onClick ให้ Item
                 GroupListItem(
                     group = group,
                     onClick = {
-                        onGroupClick(group.id ?: "", group.groupName ?: "")
+                        onGroupClick(group.id ?: "", group.groupName ?: "ไม่ระบุชื่อ")
                     }
                 )
             }

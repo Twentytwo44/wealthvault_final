@@ -41,7 +41,7 @@ fun GroupListItem(
         // 🌟 1. รูปโปรไฟล์กลุ่ม (ปรับเป็นสี่เหลี่ยมขอบมน)
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(44.dp)
                 .clip(CircleShape)
                 .background(LightBg),
             contentAlignment = Alignment.Center
@@ -58,17 +58,17 @@ fun GroupListItem(
                     painter = painterResource(Res.drawable.ic_nav_social),
                     contentDescription = "Default Group",
                     tint = LightPrimary, // ใช้ themeColor ให้ดูเนียนตา
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(14.dp))
 
         // 🌟 2. ชื่อกลุ่ม (ใช้ Modifier.weight(1f) เพื่อดันส่วนที่เหลือไปชิดขวา)
         Text(
             text = displayName,
-            style = MaterialTheme.typography.bodyMedium, // 🌟 ใช้ Typography ใหม่ที่ตั้งค่าไว้
+            style = MaterialTheme.typography.bodyLarge,
             color = LightPrimary,
             modifier = Modifier.weight(1f)
         )

@@ -150,25 +150,29 @@ fun GroupProfileContent(
     ) {
         SpaceTopBar(title = "โปรไฟล์กลุ่ม", onBackClick = onBackClick)
         HorizontalDivider(color = themeColor.copy(alpha = 0.3f), thickness = 1.dp)
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(26.dp))
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = themeColor)
             }
         } else {
-            ProfileHeader(name = groupData?.groupName ?: "กำลังโหลด...", subtitle = "", profileImageUrl = groupData?.groupProfile)
+            ProfileHeader(name = groupData?.groupName ?: "กำลังโหลด...", profileImageUrl = groupData?.groupProfile)
         }
 
         val memberCountText = groupData?.memberCount?.let { " ($it)" } ?: ""
-        Text(text = "สมาชิก$memberCountText", color = Color.Gray, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 24.dp))
+        Text(text = "สมาชิก$memberCountText", color = Color.Gray, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 24.dp))
 
         LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 24.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
             items(members) { member ->
-                val rawName = listOfNotNull(member.firstName, member.lastName).joinToString(" ").ifBlank { member.username ?: "ไม่ระบุชื่อ" }
+                val rawName = listOfNotNull(member.firstName, member.lastName)
+                    .joinToString(" ")
+                    .ifBlank { member.username?.takeIf { it.isNotBlank() }
+                    ?: member.firstName?.takeIf { it.isNotBlank() }
+                    ?: "ไม่ระบุชื่อ" }
 
                 // 🌟 ใช้ currentUserId เช็คว่าเป็นตัวเองไหม
                 val displayName = if (member.id == currentUserId) "$rawName (คุณ)" else rawName
@@ -197,7 +201,7 @@ fun GroupProfileContent(
                     Text(
                         text = "แก้ไขกลุ่ม",
                         color = LightPrimary,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.clickable { onEditGroupClick() }.padding(8.dp)
                     )
@@ -205,7 +209,7 @@ fun GroupProfileContent(
                     Text(
                         text = "ออกจากกลุ่ม",
                         color = RedErr,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.clickable { onLeaveGroupClick() }.padding(8.dp)
                     )

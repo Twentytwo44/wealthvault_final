@@ -60,7 +60,7 @@ fun SpaceFloatingMenu(
                     },
                     containerColor = LightPrimary,
                     contentColor = Color.White,
-                    modifier = Modifier.padding(end = 16.dp).size(48.dp),
+                    modifier = Modifier.padding(end = 16.dp).size(46.dp),
                     shape = CircleShape,
                     elevation = FloatingActionButtonDefaults.elevation(0.dp)
                 ) {
@@ -68,7 +68,7 @@ fun SpaceFloatingMenu(
                         painter = painterResource(Res.drawable.ic_dashboard_share),
                         contentDescription = null,
                         tint = LightSoftWhite,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(26.dp)
                     )
                 }
 
@@ -82,7 +82,7 @@ fun SpaceFloatingMenu(
                     },
                     containerColor = LightPrimary,
                     contentColor = Color.White,
-                    modifier = Modifier.padding(end = 74.dp).size(48.dp),
+                    modifier = Modifier.padding(end = 74.dp).size(46.dp),
                     shape = CircleShape,
                     elevation = FloatingActionButtonDefaults.elevation(0.dp)
                 ) {
@@ -90,7 +90,7 @@ fun SpaceFloatingMenu(
                         painter = painterResource(Res.drawable.ic_social_manage),
                         contentDescription = null,
                         tint = LightSoftWhite,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(26.dp)
                     )
                 }
 
@@ -103,14 +103,14 @@ fun SpaceFloatingMenu(
             onClick = { expanded = !expanded },
             containerColor = if (expanded) Color(0xFFD4A089) else LightPrimary,
             contentColor = Color.White,
-            modifier = Modifier.offset(y = (-30).dp).size(56.dp),
+            modifier = Modifier.offset(y = (-30).dp).size(54.dp),
             shape = CircleShape
         ) {
             Icon(
                 painter = painterResource(Res.drawable.ic_profile_setting),
                 contentDescription = null,
                 tint = LightSoftWhite,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(28.dp)
             )
         }
     }

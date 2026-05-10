@@ -93,7 +93,7 @@ fun DetailDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(LightBg)
-                            .padding(top = 24.dp, bottom = 16.dp, start = 24.dp, end = 24.dp)
+                            .padding(top = 20.dp, bottom = 14.dp, start = 20.dp, end = 20.dp)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -136,7 +136,7 @@ fun DetailDialog(
                                                 Spacer(modifier = Modifier.width(3.dp))
                                                 Text(
                                                     text = safeUpdatedAt,
-                                                    style = MaterialTheme.typography.bodySmall,
+                                                    style = MaterialTheme.typography.labelSmall,
                                                     fontWeight = FontWeight.Medium,
                                                     color = LightMuted.copy(0.8f)
                                                 )
@@ -147,7 +147,7 @@ fun DetailDialog(
                                 }
                                 Text(
                                     text = safeTitle,
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = if (safeTitle == "-") Color.Gray else LightText
                                 )
@@ -164,7 +164,7 @@ fun DetailDialog(
                         modifier = Modifier
                             .weight(1f, fill = false)
                             .verticalScroll(scrollState)
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = 20.dp)
                     ) {
                         content()
                         Spacer(modifier = Modifier.height(12.dp))
@@ -253,7 +253,7 @@ fun DetailRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
+            .padding(vertical = 4.dp)
     ) {
         Text(
             text = label,

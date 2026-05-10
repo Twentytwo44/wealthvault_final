@@ -10,6 +10,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,7 +34,7 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun ProfileHeader(
     name: String,
-    subtitle: String,
+    subtitle: String? = null,
     profileImageUrl: String? = null,
     isFriend: Boolean = false,
     username: String = "-",
@@ -51,7 +52,7 @@ fun ProfileHeader(
         // --- รูปโปรไฟล์ ---
         Box(
             modifier = Modifier
-                .size(120.dp)
+                .size(110.dp)
                 .border(width = 3.dp, color = LightPrimary, shape = CircleShape)
                 .padding(3.dp)
                 .clip(CircleShape)
@@ -79,21 +80,23 @@ fun ProfileHeader(
 
         // 🌟 เช็คเงื่อนไข: ถ้า "ไม่ได้เป็นเพื่อน" ถึงจะโชว์ Username และ Email ใต้รูป
         if (!isFriend) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // --- ชื่อ และ ซับไตเติ้ล ---
             Text(
                 text = name,
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF3A2F2A)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = subtitle,
-                fontSize = 12.sp,
-                color = Color.Gray
-            )
+            if (subtitle != null){
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray
+                )
+            }
         }
 
         // 🌟 แสดงกล่องข้อมูลส่วนตัวเฉพาะเมื่อเป็นเพื่อนกัน (แทนที่ชื่อใต้รูปไปเลย)

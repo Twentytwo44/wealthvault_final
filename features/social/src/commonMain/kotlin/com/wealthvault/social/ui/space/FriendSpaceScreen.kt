@@ -173,7 +173,7 @@ fun FriendSpaceContent(
                     state = listState,
                     reverseLayout = true, // 🌟 สั่งให้โหลดจากล่างขึ้นบน
                     modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 300.dp)
+                    contentPadding = PaddingValues(start = 2.dp, end = 6.dp, top = 16.dp, bottom = 300.dp)
                 ) {
                     items(messages) { msg ->
                         val isMe = msg.isMe == true
@@ -197,7 +197,7 @@ fun FriendSpaceContent(
                             }
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
             }
@@ -210,7 +210,7 @@ fun FriendSpaceContent(
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 100.dp) // ดันพ้นเมนูลอย
+                .padding(bottom = 80.dp) // ดันพ้นเมนูลอย
         ) {
             SmallFloatingActionButton(
                 onClick = {

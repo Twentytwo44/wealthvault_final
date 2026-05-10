@@ -50,7 +50,7 @@ fun SelectPersonItem(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp)
+            .padding(bottom = 10.dp)
             // 🌟 ทำให้จิ้มตรงไหนของกล่องก็ได้เพื่อเปลี่ยนค่า Checkbox
             .clickable { onSelectedChange(!isSelected) },
         border = BorderStroke(1.dp, LightBorder)
@@ -58,7 +58,7 @@ fun SelectPersonItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // --- 1. รูปโปรไฟล์ ---
@@ -86,7 +86,7 @@ fun SelectPersonItem(
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             // --- 2. ข้อมูลชื่อและอีเมล ---
             Column(modifier = Modifier.weight(1f)) {

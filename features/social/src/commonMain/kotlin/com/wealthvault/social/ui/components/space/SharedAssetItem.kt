@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +52,7 @@ import com.wealthvault.core.generated.resources.ic_asset_type_land
 import com.wealthvault.core.generated.resources.ic_asset_type_loan
 import com.wealthvault.core.generated.resources.ic_common_clock
 import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
 import kotlinx.coroutines.launch
@@ -126,12 +128,12 @@ fun SharedAssetItem(
             }
         }
     }
-    Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) {
+    Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 5.dp)) {
 
         // --- สีแดงด้านหลัง (ปุ่มลบ) ---
         if (showDelete) {
             Surface(
-                color = Color(0xFFE53935),
+                color = RedErr,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.matchParentSize().offset {
                     val safeX = if (offsetX.value.isNaN()) 0f else offsetX.value
@@ -145,7 +147,7 @@ fun SharedAssetItem(
                     },
                     contentAlignment = Alignment.CenterEnd
                 ) {
-                    Text(text = "ลบ", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(end = 28.dp))
+                    Text(text = "ลบ", color = Color.White, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, modifier = Modifier.padding(end = 28.dp))
                 }
             }
         }
@@ -191,13 +193,13 @@ fun SharedAssetItem(
         ) {
             // 🌟 Layout ใหม่ จัดกลุ่ม 3 ส่วน ซ้าย กลาง ขวา
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // 🔹 ส่วนที่ 1: ไอคอน (ซ้ายสุด)
                 val isImageUrl = imageUrl?.let { it.endsWith(".png", ignoreCase = true) || it.endsWith(".jpg", ignoreCase = true) || it.endsWith(".jpeg", ignoreCase = true) || it.endsWith(".webp", ignoreCase = true) } == true
                 if (isImageUrl) {
-                    AsyncImage(model = imageUrl, contentDescription = assetName, contentScale = ContentScale.Crop, modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)))
+                    AsyncImage(model = imageUrl, contentDescription = assetName, contentScale = ContentScale.Crop, modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)))
                 } else {
                     val iconRes = when {
                         assetType.contains("account", ignoreCase = true) -> Res.drawable.ic_asset_type_account
@@ -211,21 +213,21 @@ fun SharedAssetItem(
                     }
 
                     Box(
-                        modifier = Modifier.size(48.dp).background(LightBg, RoundedCornerShape(12.dp)),
+                        modifier = Modifier.size(40.dp).background(LightBg, RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (iconRes != null) Icon(painterResource(iconRes), contentDescription = assetType, tint = themeColor, modifier = Modifier.size(24.dp))
-                        else Text(text = assetType.take(3).uppercase(), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = themeColor)
+                        if (iconRes != null) Icon(painterResource(iconRes), contentDescription = assetType, tint = themeColor, modifier = Modifier.size(20.dp))
+                        else Text(text = assetType.take(3).uppercase(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = themeColor)
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
                 // 🔹 ส่วนที่ 2: ชื่อและมูลค่า (ตรงกลาง)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = assetName,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF3A2F2A),
                         maxLines = 1,
@@ -234,7 +236,7 @@ fun SharedAssetItem(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (value != null) "${formatAmount(value)} บาท" else "ไม่ระบุมูลค่า",
-                        fontSize = 13.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         color = Color.Gray
                     )
                 }
@@ -248,9 +250,9 @@ fun SharedAssetItem(
                         Text(
                             text = thaiAssetType,
                             color = themeColor,
-                            fontSize = 11.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 0.dp)
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                         )
                     }
 
@@ -269,7 +271,7 @@ fun SharedAssetItem(
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = formatThaiDate(sharedAt.substringBefore("T")),
-                                fontSize = 11.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = themeColor.copy(alpha = 0.8f),
                                 fontWeight = FontWeight.Medium
                             )

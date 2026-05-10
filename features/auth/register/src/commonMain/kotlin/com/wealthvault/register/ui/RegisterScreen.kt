@@ -1,13 +1,16 @@
 package com.wealthvault.register.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image // 🌟 Import เพิ่ม
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState // 🌟 Import เพิ่ม
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll // 🌟 Import เพิ่ม
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,12 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.layout.ContentScale // 🌟 Import เพิ่ม
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -31,6 +37,8 @@ import com.wealthvault.core.theme.*
 
 import com.wealthvault.core.generated.resources.Res
 import org.jetbrains.compose.resources.painterResource
+// 🌟 Import ภาพประกอบหน้า Register (เช็คชื่อไฟล์ในโปรเจกต์คุณแชมป์ด้วยนะครับ)
+import com.wealthvault.core.generated.resources.register
 import com.wealthvault.core.generated.resources.ic_auth_email
 import com.wealthvault.core.generated.resources.ic_auth_google
 import com.wealthvault.core.generated.resources.ic_auth_eye
@@ -102,21 +110,42 @@ fun RegisterContent(
             }
         }
 
+        // 🌟 แก้ไข Column หลัก: เพิ่ม Scroll และ imePadding เพื่อรองรับคีย์บอร์ดและจอเล็ก
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .verticalScroll(rememberScrollState()) // 🌟 ทำให้เลื่อนหน้าจอได้
+                .statusBarsPadding()
+                .imePadding() // 🌟 ดัน UI ขึ้นเมื่อคีย์บอร์ดเด้ง
+                .padding(horizontal = 24.dp, vertical = 16.dp), // ปรับ padding เล็กน้อย
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top // เปลี่ยนเป็น Top เพื่อให้ scrolling ทำงานได้ถูกต้อง
         ) {
+
+            Spacer(modifier = Modifier.height(20.dp)) // ระยะห่างด้านบนสุด
+
+            // 🌟 แก้ไขสไตล์ชื่อแอป: ปรับ Headline และเพิ่มหนา + ช่องไฟ
             Text(
                 text = "Wealth & Vault",
                 color = LightPrimary,
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp // 🌟 ถ่างช่องไฟเล็กน้อยให้ดูแพง
+                ),
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
 
-            Spacer(modifier = Modifier.height(100.dp))
+
+            // 🌟 ใส่รูปภาพประกอบหน้า Register
+            Image(
+                painter = painterResource(Res.drawable.register),
+                contentDescription = "Register Illustration",
+                modifier = Modifier
+                    .size(140.dp)
+                    .padding(10.dp),
+                contentScale = ContentScale.Fit
+            )
+
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -152,7 +181,7 @@ fun RegisterContent(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
                 var isPasswordVisible by remember { mutableStateOf(false) }
 
                 // --- 2. ช่องรหัสผ่าน ---
@@ -175,7 +204,7 @@ fun RegisterContent(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
                 var isConfirmPasswordVisible by remember { mutableStateOf(false) }
 
                 // --- 3. ช่องยืนยันรหัสผ่าน ---
@@ -198,20 +227,20 @@ fun RegisterContent(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(34.dp))
+                Spacer(modifier = Modifier.height(36.dp)) // ปรับระยะห่างก่อนปุ่ม
 
                 // --- 4. ปุ่มสร้างบัญชี ---
                 Button(
                     onClick = onRegisterClick,
                     enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().height(46.dp),
                     shape = RoundedCornerShape(percent = 30),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
                 ) {
-                    Text("สร้างบัญชี", style = MaterialTheme.typography.titleMedium, color = LightSurface)
+                    Text("สร้างบัญชี", style = MaterialTheme.typography.bodyLarge, color = LightSurface)
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // --- 5. มีบัญชีอยู่แล้ว? ---
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
@@ -225,7 +254,7 @@ fun RegisterContent(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp)) // ปรับระยะห่างก่อนเส้นคั่น
 
                 // --- 6. เส้นคั่น หรือ ---
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)) {
@@ -240,17 +269,20 @@ fun RegisterContent(
                 OutlinedButton(
                     onClick = onGoogleClick,
                     enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 48.dp),
+                    modifier = Modifier.fillMaxWidth().height(46.dp).padding(horizontal = 48.dp), // ปรับความสูงให้เท่าปุ่มหลัก
                     shape = RoundedCornerShape(percent = 30),
                     border = BorderStroke(1.dp, LightBorder),
                     colors = ButtonDefaults.outlinedButtonColors(containerColor = LightSurface)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(painterResource(Res.drawable.ic_auth_google), contentDescription = "Google", modifier = Modifier.size(36.dp), tint = Color.Unspecified)
+                        Icon(painterResource(Res.drawable.ic_auth_google), contentDescription = "Google", modifier = Modifier.size(24.dp), tint = Color.Unspecified) // ปรับขนาดไอคอน Google
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Google", color = LightPrimary, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
+
+                // 🌟 เพิ่ม Spacer ด้านล่างสุดเพื่อให้เลื่อนลงมาแล้วมีระยะเว้นสวยๆ เวลาคีย์บอร์ดเด้ง
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -273,7 +305,7 @@ fun CustomRegisterTextField(
         singleLine = true,
         visualTransformation = if (isPassword && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
         keyboardOptions = if (isPassword) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
-        textStyle = LocalTextStyle.current.copy(color = Color.Black),
+        textStyle = LocalTextStyle.current.copy(color = Color.Black, fontSize = 16.sp), // ปรับขนาด Font
         cursorBrush = SolidColor(if (isError) RedErr else LightPrimary),
         modifier = Modifier.fillMaxWidth().height(44.dp),
         decorationBox = { innerTextField ->
@@ -286,14 +318,14 @@ fun CustomRegisterTextField(
                         color = if (isError) RedErr else LightBorder,
                         shape = RoundedCornerShape(percent = 30)
                     )
-                    .padding(start = 16.dp, end = if (isPassword) 8.dp else 16.dp),
+                    .padding(start = 16.dp, end = if (isPassword) 4.dp else 16.dp), // ปรับ padding ขวาสำหรับปุ่มลูกตา
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     painter = painterResource(leadingIcon),
                     contentDescription = null,
                     tint = if (isError) RedErr else LightPrimary,
-                    modifier = Modifier.size(26.dp)
+                    modifier = Modifier.size(24.dp) // ปรับขนาด Leading Icon
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Box(modifier = Modifier.weight(1f)) {
@@ -304,8 +336,11 @@ fun CustomRegisterTextField(
                 }
                 if (isPassword) {
                     val icon = if (isPasswordVisible) painterResource(Res.drawable.ic_auth_eye) else painterResource(Res.drawable.ic_auth_eye_slash)
-                    IconButton(onClick = { onPasswordVisibleChange(!isPasswordVisible) }) {
-                        Icon(painter = icon, contentDescription = "Toggle", tint = if (isError) RedErr else LightPrimary, modifier = Modifier.size(24.dp))
+                    IconButton(
+                        onClick = { onPasswordVisibleChange(!isPasswordVisible) },
+                        modifier = Modifier.size(44.dp) // ปรับขนาดปุ่ม IconButton
+                    ) {
+                        Icon(painter = icon, contentDescription = "Toggle", tint = if (isError) RedErr else LightPrimary, modifier = Modifier.size(22.dp)) // ปรับขนาดไอคอนลูกตา
                     }
                 }
             }

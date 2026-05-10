@@ -120,7 +120,9 @@ fun FriendProfileContent(
 
     val userInfo = profileData?.userInfo
     val displayEmail = userInfo?.email ?: "กำลังโหลด..."
-    val displayName = userInfo?.username ?: friendName
+    val displayName = userInfo?.username?.takeIf { it.isNotBlank() }
+        ?: userInfo?.firstName?.takeIf { it.isNotBlank() }
+        ?: "ไม่ระบุชื่อ"
 
     // ดึงสถานะความเป็นเพื่อนมาเก็บไว้เช็ค
     val isFriend = userInfo?.isFriend == true
@@ -163,7 +165,7 @@ fun FriendProfileContent(
                             subtitle = displayEmail,
                             profileImageUrl = userInfo?.profile,
                             isFriend = isFriend,
-                            username = userInfo?.username ?: "-",
+                            username = userInfo?.username?.takeIf { it.isNotBlank() } ?: "-",
                             email = userInfo?.email ?: "-",
                             fullName = fullName,
                             phoneNumber = userInfo?.phoneNumber ?: "-",

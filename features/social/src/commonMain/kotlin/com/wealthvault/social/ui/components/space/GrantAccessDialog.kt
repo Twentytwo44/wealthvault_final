@@ -2,6 +2,7 @@ package com.wealthvault.social.ui.components.space
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,7 +63,9 @@ import com.wealthvault.core.generated.resources.ic_asset_type_insurance
 import com.wealthvault.core.generated.resources.ic_asset_type_investment
 import com.wealthvault.core.generated.resources.ic_asset_type_land
 import com.wealthvault.core.generated.resources.ic_asset_type_loan
+import com.wealthvault.core.generated.resources.ic_form_check
 import com.wealthvault.core.theme.LightBg
+import com.wealthvault.core.theme.LightSoftWhite
 import org.jetbrains.compose.resources.painterResource
 import com.wealthvault.data_store.TokenStore // 🌟 เปลี่ยนมา import ตัวนี้แทน
 import kotlinx.coroutines.flow.first
@@ -109,23 +113,22 @@ fun InlineGrantAccessCard(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-// ... (ส่วนที่เหลือของโค้ด InlineGrantAccessCard เหมือนเดิมครับ) ...
         Surface(
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(18.dp),
             color = Color.White,
             shadowElevation = 2.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(14.dp)) {
                 Text(
-                    text = "ต้องการแชร์ asset ของคุณให้ $targetName\nในช่วงก่อนที่ $targetName จะเข้ากลุ่มหรือไม่",
-                    fontSize = 14.sp,
+                    text = "ต้องการแชร์ asset ของคุณให้ $targetName\nในช่วงก่อนที่จะเข้ากลุ่มหรือไม่",
+                    style = MaterialTheme.typography.bodyMedium,
                     color = Color.Black,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 if (isLoading) {
                     Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
@@ -133,7 +136,7 @@ fun InlineGrantAccessCard(
                     }
                 } else if (assetList.isEmpty()) {
                     Box(modifier = Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
-                        Text("ไม่มีรายการทรัพย์สินที่สามารถแชร์ได้", color = Color.Gray, fontSize = 14.sp)
+                        Text("ไม่มีรายการทรัพย์สินที่สามารถแชร์ได้", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
                     }
                 } else {
                     Column(
@@ -227,19 +230,39 @@ fun InlineGrantAccessCard(
 
                                 Text(
                                     text = assetName,
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.bodyLarge,
                                     color = Color.Black,
                                     modifier = Modifier.weight(1f)
                                 )
 
-                                Checkbox(
-                                    checked = isChecked,
-                                    onCheckedChange = { checked ->
-                                        if (checked) selectedAssets.add(assetId)
-                                        else selectedAssets.remove(assetId)
-                                    },
-                                    colors = CheckboxDefaults.colors(checkedColor = themeColor)
-                                )
+                                // 🌟 เปลี่ยนจาก Standard Checkbox กลับมาเป็น Custom Box แบบวาดเอง
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(RoundedCornerShape(8.dp)) // ปรับความมนตรงนี้ได้เลย
+                                        .background(if (isChecked) themeColor else Color.Transparent) // ใช้ themeColor ของการ์ด
+                                        .border(
+                                            width = 2.dp,
+                                            color = if (isChecked) themeColor else Color.LightGray,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .clickable {
+                                            // โลจิกสลับค่า เปิด/ปิด
+                                            if (isChecked) selectedAssets.remove(assetId)
+                                            else selectedAssets.add(assetId)
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isChecked) {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.ic_form_check),
+                                            contentDescription = null,
+                                            tint = LightSoftWhite,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+
                             }
                         }
                     }
@@ -257,7 +280,7 @@ fun InlineGrantAccessCard(
                             Text(
                                 text = "เลือกทั้งหมด",
                                 color = themeColor,
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier
                                     .clickable {
                                         if (selectedAssets.size != assetList.size) {
@@ -274,7 +297,7 @@ fun InlineGrantAccessCard(
                             Text(
                                 text = "ล้าง",
                                 color = Color.Gray,
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier
                                     .clickable {
                                         selectedAssets.clear()
@@ -291,7 +314,7 @@ fun InlineGrantAccessCard(
                         colors = ButtonDefaults.buttonColors(containerColor = themeColor),
                         shape = RoundedCornerShape(50)
                     ) {
-                        Text("บันทึก", color = Color.White)
+                        Text("บันทึก", color = Color.White, style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
