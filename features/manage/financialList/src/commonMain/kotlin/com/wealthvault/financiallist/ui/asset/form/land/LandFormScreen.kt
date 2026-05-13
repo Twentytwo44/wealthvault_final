@@ -59,8 +59,12 @@ class LandFormScreen(val id: String, val landData: LandModel) : Screen {
             onNextClick = { data, addedList, deletedList, addRef, deleteRef ->
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList, deletedList, addRef, deleteRef)
-                screenModel.submitLand(id)
-                navigator.pop()
+                screenModel.submitLand(id,
+                    onSuccess = {
+                        // 💡 หลังจากแก้ไขสำเร็จ จะส่งกลับหน้าลิสต์
+                        navigator.pop()
+                    })
+
             },
             landData = landData,
             buildingData = buildState

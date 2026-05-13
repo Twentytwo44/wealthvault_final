@@ -65,9 +65,13 @@ class BankAccountFormScreen(val id: String, val bankAccountData: BankAccountMode
             onNextClick = { data, addedList, deletedList ->
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList, deletedList)
-                screenModel.submitAccount(id)
-                // 💡 หลังจากแก้ไขสำเร็จ ปกติจะส่งกลับหน้าลิสต์
-                navigator.pop()
+                screenModel.submitAccount(
+                    id = id,
+                    onSuccess = {
+                        // 💡 หลังจากแก้ไขสำเร็จ จะส่งกลับหน้าลิสต์
+                        navigator.pop()
+                    }
+                )
             },
             bankAccountData = bankAccountData
         )

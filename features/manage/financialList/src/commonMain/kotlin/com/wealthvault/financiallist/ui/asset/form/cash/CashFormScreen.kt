@@ -63,8 +63,12 @@ data class CashFormScreen(val id: String, val cashData: CashModel) : Screen {
             onNextClick = { data, addedList, deletedList ->
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList, deletedList)
-                screenModel.submitCash(id)
-                navigator.pop() // แก้ไขเสร็จแล้วย้อนกลับ
+                screenModel.submitCash(id,
+                    onSuccess = {
+                        // 💡 หลังจากแก้ไขสำเร็จ จะส่งกลับหน้าลิสต์
+                        navigator.pop()
+                    })
+
             },
             cashData = cashData
         )

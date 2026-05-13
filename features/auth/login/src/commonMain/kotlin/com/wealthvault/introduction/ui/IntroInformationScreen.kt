@@ -75,6 +75,8 @@ class IntroQuestionScreen : Screen {
         val screenModel = getScreenModel<IntroScreenModel>()
 
         IntroQuestionContent(
+            userName = screenModel.userName,
+            onUserNameChange = { screenModel.userName = it },
             firstName = screenModel.firstName,
             onFirstNameChange = { screenModel.firstName = it },
             lastName = screenModel.lastName,
@@ -106,6 +108,8 @@ class IntroQuestionScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IntroQuestionContent(
+    userName: String,
+    onUserNameChange: (String) -> Unit,
     firstName: String,
     onFirstNameChange: (String) -> Unit,
     lastName: String,
@@ -134,7 +138,7 @@ fun IntroQuestionContent(
     var birthday by remember { mutableStateOf("") }
 
     // 🌟 ดักการกรอกข้อมูล: ตรวจสอบว่ากรอกครบทุกช่องหรือยัง
-    val isFormValid = firstName.isNotBlank() && lastName.isNotBlank() && dob.isNotBlank() && phoneNum.isNotBlank()
+    val isFormValid = userName.isNotBlank() && firstName.isNotBlank() && lastName.isNotBlank() && dob.isNotBlank() && phoneNum.isNotBlank()
 
     WavyBackground {
         Column(
@@ -221,6 +225,9 @@ fun IntroQuestionContent(
                 Spacer(modifier = Modifier.height(30.dp))
 
                 // ฟิลด์บังคับกรอก (มีดอกจัน *)
+                ProfileTextField(label = "ชื่อผู้ใช้งาน*", value = userName, onValueChange = onUserNameChange, placeholder = "กรอกชื่อผู้ใช้งาน")
+                Spacer(modifier = Modifier.height(14.dp))
+
                 ProfileTextField(label = "ชื่อจริง*", value = firstName, onValueChange = onFirstNameChange, placeholder = "กรอกชื่อจริง")
                 Spacer(modifier = Modifier.height(14.dp))
 

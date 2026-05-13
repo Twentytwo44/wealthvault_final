@@ -85,7 +85,7 @@ class StockScreenModel(
     }
 
 
-    fun submitAsset(id:String) {
+    fun submitAsset(id:String,onSuccess: () -> Unit) {
         screenModelScope.launch {
             try {
 
@@ -100,11 +100,12 @@ class StockScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Asset
                     // สมมติว่า field id อยู่ใน assetResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = assetResponse.id.toString()
-                    println("✅ [ScreenModel] Asset Created ID: $createdItemId")
+                    println("✅ [ScreenModel] Asset Edit ID: $createdItemId")
+                    onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Create Asset Failed")
+                    println("❌ [ScreenModel] Edit Asset Failed")
                 }
 
             } catch (e: Exception) {
