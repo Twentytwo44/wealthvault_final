@@ -8,7 +8,9 @@ import com.wealthvault.notification.data.notification.PutNotificationDataSource
 import com.wealthvault.notification.data.notification.PutNotificationRepositoryImpl
 import com.wealthvault.notification.usecase.NotificationUseCase
 import com.wealthvault.notification.viewmodel.NotificationScreenModel
-import kotlinx.coroutines.Dispatchers
+import com.wealthvault.notification_api.readall.PutNotiReadAllApi
+import com.wealthvault.notification_api.readall.PutNotiReadAllApiImpl
+import kotlinx.coroutines.Dispatchers // 🌟 ลบ import kotlinx.coroutines.IO ออกไป
 import kotlinx.coroutines.IO
 import org.koin.dsl.module
 
@@ -17,17 +19,18 @@ object NotificationModule {
 
         single { Dispatchers.IO }
 
-        factory{ NotificationUseCase(get(),get() ) }
-        factory{ NotificationScreenModel(get(),get(),get() )}
+        factory { NotificationUseCase(get(), get()) }
+        factory { NotificationScreenModel(get(), get(), get()) }
 
-        // notfication api
+        // notification api
         factory { NotificationDataSource(get()) }
         single<NotificationRepositoryImpl> {
             NotificationRepositoryImpl(get())
         }
-        factory { PutNotificationDataSource(get()) }
-        single<PutNotificationRepositoryImpl>
-        {
+
+        factory { PutNotificationDataSource(get(), get()) }
+        // 🌟 แก้ไข: ดึงปีกกา { ขึ้นมาอยู่บรรทัดเดียวกัน
+        single<PutNotificationRepositoryImpl> {
             PutNotificationRepositoryImpl(get())
         }
 
@@ -35,7 +38,6 @@ object NotificationModule {
         single<AcceptFriendRepositoryImpl> {
             AcceptFriendRepositoryImpl(get())
         }
-
 
     }
 }

@@ -6,40 +6,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +37,7 @@ import com.wealthvault.core.generated.resources.ic_nav_social
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
+import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
@@ -96,7 +71,7 @@ data class CashSummaryScreen(val request: CashModel, val shareTo: ShareTo) : Scr
             },
             data = state.cashRequest,
             shareInfo = state.shareTo,
-            isSaving = state.isLoading // 🌟 ส่งสถานะ Loading
+            isSaving = state.isLoading
         )
     }
 }
@@ -117,16 +92,13 @@ fun SummaryContent(
             Column(modifier = Modifier.statusBarsPadding()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
                     modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_common_back),
                         contentDescription = "Back",
                         tint = LightPrimary,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable { onBackClick() }
+                        modifier = Modifier.size(24.dp).clickable { onBackClick() }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
@@ -141,7 +113,7 @@ fun SummaryContent(
             Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
                 Button(
                     onClick = onConfirmClick,
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().height(46.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     enabled = !isSaving
@@ -149,7 +121,7 @@ fun SummaryContent(
                     if (isSaving) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("ยืนยัน", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Text("ยืนยัน", color = Color.White, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
@@ -164,7 +136,6 @@ fun SummaryContent(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 🌟 แก้ไขข้อความหัวข้อ
             Text("รายละเอียดเงินสดและทองคำ", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -190,12 +161,37 @@ fun SummaryCard(data: CashModel) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, LightBorder.copy(alpha = 0.6f))
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            // 🌟 ปรับ Label และใช้ formatAmount
+        Column(modifier = Modifier.padding(14.dp)) {
+            // --- ข้อมูลแถวปกติ ---
             SummaryRow("ชื่อรายการ", data.cashName)
             SummaryRow("มูลค่า / จำนวน", "${formatAmount(data.amount)} บาท")
-            SummaryRow("คำอธิบาย", data.description.ifBlank { "-" })
 
+            // --- 🌟 ส่วนคำอธิบายแบบใหม่ (มีกรอบและเลื่อนได้) ---
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "คำอธิบาย",
+                style = MaterialTheme.typography.labelMedium,
+                color = LightText.copy(alpha = 0.8f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 120.dp) // 🌟 จำกัดความสูงสูงสุด ถ้าเกินจะเลื่อนได้
+                    .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                    .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                    .verticalScroll(rememberScrollState()) // 🌟 ทำให้เลื่อนได้ภายในกรอบ
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = data.description.ifBlank { "-" },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (data.description.isNotBlank()) LightText else Color.Gray.copy(alpha = 0.6f)
+                )
+            }
+
+            // --- ส่วนไฟล์แนบ ---
             Spacer(modifier = Modifier.height(24.dp))
             Text("ข้อมูลอ้างอิง (ไฟล์แนบ)", style = MaterialTheme.typography.bodyMedium, color = LightPrimary, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
@@ -246,8 +242,8 @@ fun SummaryRow(label: String, value: String) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = LightText.copy(alpha = 0.8f))
-        Text(value, style = MaterialTheme.typography.bodyMedium, color = LightText, fontWeight = FontWeight.Medium)
+        Text(label, style = MaterialTheme.typography.labelMedium, color = LightText.copy(alpha = 0.8f))
+        Text(value, style = MaterialTheme.typography.labelMedium, color = LightText, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -277,19 +273,19 @@ fun ShareSection(shareInfo: ShareTo?) {
                 var isFirst = true
 
                 shareInfo.friend.forEach { friend ->
-                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
+                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp), color = LightBg)
                     SharedItemSummaryCard(friend)
                     isFirst = false
                 }
 
                 shareInfo.group.forEach { group ->
-                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
+                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp), color = LightBg)
                     SharedItemSummaryCard(group)
                     isFirst = false
                 }
 
                 shareInfo.email.forEach { email ->
-                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
+                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp), color = LightBg)
                     SharedItemSummaryCard(email)
                     isFirst = false
                 }
@@ -309,7 +305,7 @@ fun SharedItemSummaryCard(data: ShareInfo) {
     ) {
         // Profile Image / Placeholder
         Box(
-            modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(LightBg),
+            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(LightBg),
             contentAlignment = Alignment.Center
         ) {
             if (!data.profileUrl.isNullOrBlank()) {
@@ -325,7 +321,7 @@ fun SharedItemSummaryCard(data: ShareInfo) {
                     "G" -> painterResource(Res.drawable.ic_nav_social)
                     else -> painterResource(Res.drawable.ic_nav_profile)
                 }
-                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(20.dp))
             }
         }
 
@@ -334,7 +330,7 @@ fun SharedItemSummaryCard(data: ShareInfo) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = data.name ?: "",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = LightText,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -363,7 +359,7 @@ fun SharedItemSummaryCard(data: ShareInfo) {
                             Text(
                                 text = data.subText,
                                 color = LightPrimary,
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.labelSmall,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -377,7 +373,7 @@ fun SharedItemSummaryCard(data: ShareInfo) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = data.date!!,
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray,
                             maxLines = 1
                         )

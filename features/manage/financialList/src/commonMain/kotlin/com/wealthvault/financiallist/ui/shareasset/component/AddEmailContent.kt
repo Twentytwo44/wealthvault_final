@@ -1,44 +1,25 @@
 package com.wealthvault.financiallist.ui.shareasset.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_calendar
-import com.wealthvault.core.theme.LightBorder
-import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.core.theme.LightText
+import com.wealthvault.core.theme.*
 import com.wealthvault.financiallist.ui.shareasset.CustomCheckbox
 import org.jetbrains.compose.resources.painterResource
 
@@ -56,30 +37,53 @@ fun AddEmailContent(
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp).navigationBarsPadding()) {
 
         Text("เพิ่มอีเมลผู้รับ", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
-        Text("ระบบจะส่งคำเชิญไปยังอีเมลนี้เพื่อให้เข้าถึงข้อมูล", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+        Text("ระบบจะส่งคำเชิญไปยังอีเมลนี้เพื่อให้เข้าถึงข้อมูล", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         Spacer(modifier = Modifier.height(20.dp))
 
+        // 🌟 Email Input แบบ BasicTextField (สูง 44.dp) ตาม Master UI
         Column {
             Text(text = "อีเมล", style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            BasicTextField(
                 value = emailText,
                 onValueChange = { emailText = it },
-                modifier = Modifier.fillMaxWidth().border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
-                placeholder = { Text("example@gmail.com", color = Color.LightGray) },
-                shape = RoundedCornerShape(12.dp),
                 singleLine = true,
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = LightSoftWhite,
-                    unfocusedContainerColor = LightSoftWhite,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = LightText
-                )
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF3A2F2A)),
+                cursorBrush = SolidColor(LightPrimary),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
+                decorationBox = { innerTextField ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                            .border(
+                                width = 1.dp,
+                                color = LightBorder.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            if (emailText.isEmpty()) {
+                                Text(
+                                    text = "example@gmail.com",
+                                    color = Color.LightGray,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
+                }
             )
         }
+
         Spacer(modifier = Modifier.height(16.dp))
 
+        // 🌟 ส่วนตั้งวันการแชร์ล่วงหน้า
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable { isDateChecked = !isDateChecked }.padding(vertical = 4.dp)
@@ -88,34 +92,51 @@ fun AddEmailContent(
                 isSelected = isDateChecked,
                 onSelectedChange = { isDateChecked = it }
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Text("ตั้งวันการแชร์ล่วงหน้า", color = LightPrimary, style = MaterialTheme.typography.bodyMedium)
         }
 
-        AnimatedVisibility(visible = isDateChecked) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, LightBorder, RoundedCornerShape(12.dp))
-                    .background(LightSoftWhite)
-                    .clickable { showDatePicker = true }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = selectedDate ?: "เลือกวันที่",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (selectedDate != null) LightText else Color.Gray.copy(0.7f)
-                )
-                Icon(painterResource(Res.drawable.ic_common_calendar), contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+        AnimatedVisibility(
+            visible = isDateChecked,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp) // 🌟 สูง 44.dp มาตรฐาน
+                        .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                        .border(
+                            width = 1.dp,
+                            color = LightBorder.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { showDatePicker = true }
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = selectedDate ?: "เลือกวันที่",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (selectedDate != null) Color(0xFF3A2F2A) else Color.LightGray
+                    )
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_calendar),
+                        contentDescription = null,
+                        tint = LightPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
+        // 🌟 ปุ่มเพิ่ม (สูง 46.dp)
         Button(
             onClick = {
                 val finalDate = if (isDateChecked) selectedDate else null
@@ -123,11 +144,16 @@ fun AddEmailContent(
                 onConfirm(emailText, finalDate, finalApiDate)
             },
             enabled = emailText.contains("@") && emailText.contains("."),
-            modifier = Modifier.fillMaxWidth().height(50.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = LightPrimary,
+                disabledContainerColor = Color.LightGray.copy(alpha = 0.5f)
+            )
         ) {
-            Text("เพิ่ม", color = Color.White, style = MaterialTheme.typography.titleMedium)
+            Text("เพิ่ม", color = Color.White, style = MaterialTheme.typography.bodyLarge)
         }
     }
 

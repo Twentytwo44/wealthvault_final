@@ -38,7 +38,7 @@ kotlin {
                 implementation(project(":features:manage:form"))
                 implementation(project(":features:notification"))
                 implementation(project(":navigation-point"))
-
+                implementation(project(":functional:api:notification-api"))
 
 
 

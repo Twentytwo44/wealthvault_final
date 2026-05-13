@@ -1,36 +1,36 @@
 package com.wealthvault.social.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border // 🌟 Import เพิ่มเติม
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape // 🌟 Import เพิ่มเติม
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip // 🌟 Import เพิ่มเติม
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-// 🌟 Import Res และไอคอนที่เราจำไว้
 import org.jetbrains.compose.resources.painterResource
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_solid_down
 import com.wealthvault.core.generated.resources.ic_social_plus
 import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.generated.resources.ic_nav_social
-
-// 🌟 Import สีจาก Theme ของเรา
 import com.wealthvault.core.theme.LightPrimary
 
 @Composable
 fun SocialHeader(
-    currentTabName: String, // ชื่อแท็บปัจจุบัน ("เพื่อน" หรือ "กลุ่ม")
-    onTabSelected: (String) -> Unit, // เมื่อกดเลือกแท็บจาก Dropdown
+    currentTabName: String,
+    onTabSelected: (String) -> Unit,
     onAddFriendClick: () -> Unit,
     onAddGroupClick: () -> Unit,
-    // 🌟 เรียกใช้สี LightPrimary จาก Theme เป็นค่า Default
-    themeColor: Color = LightPrimary
+    themeColor: Color = LightPrimary,
+    hasPendingRequest: Boolean = false // 🌟 1. รับสถานะจุดแดงเข้ามา (ค่าเริ่มต้นคือ false)
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -50,12 +50,11 @@ fun SocialHeader(
                 ) {
                     Text(
                         text = currentTabName,
-                        style = MaterialTheme.typography.titleLarge, // 🌟 ใช้ Typography ของแอป
+                        style = MaterialTheme.typography.titleLarge,
                         color = themeColor
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(
-                        // 🌟 ไอคอนลูกศรชี้ลง
                         painter = painterResource(Res.drawable.ic_common_solid_down),
                         contentDescription = "Select Tab",
                         tint = themeColor,
@@ -63,7 +62,6 @@ fun SocialHeader(
                     )
                 }
 
-                // เมนู Dropdown
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
@@ -71,26 +69,14 @@ fun SocialHeader(
                     shape = RoundedCornerShape(12.dp),
                 ) {
                     DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = "เพื่อน",
-                                color = themeColor,
-                                style = MaterialTheme.typography.bodyLarge // 🌟 เติมบรรทัดนี้เข้าไปครับ
-                            )
-                        },
+                        text = { Text(text = "เพื่อน", color = themeColor, style = MaterialTheme.typography.bodyLarge) },
                         onClick = {
                             onTabSelected("เพื่อน")
                             expanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = "กลุ่ม",
-                                color = themeColor,
-                                style = MaterialTheme.typography.bodyLarge // 🌟 เติมบรรทัดนี้เข้าไปครับ
-                            )
-                        },
+                        text = { Text(text = "กลุ่ม", color = themeColor, style = MaterialTheme.typography.bodyLarge) },
                         onClick = {
                             onTabSelected("กลุ่ม")
                             expanded = false
@@ -102,19 +88,19 @@ fun SocialHeader(
             // --- ฝั่งขวา: ไอคอนเพิ่มเพื่อน และ เพิ่มกลุ่ม ---
             Row(verticalAlignment = Alignment.CenterVertically) {
 
-                // 🌟 1. ปุ่มเพิ่มเพื่อน (ไอคอนคน + เครื่องหมายบวกมุมขวาบน)
+                // 🌟 2. ปุ่มเพิ่มเพื่อน (เพิ่มเงื่อนไขจุดแดง)
                 Box(
                     modifier = Modifier
                         .clickable { onAddFriendClick() }
                         .padding(4.dp),
-                    contentAlignment = Alignment.TopEnd // 🌟 สั่งให้ของในกล่องนี้ ไปกองรวมกันที่มุมขวาบน
+                    contentAlignment = Alignment.TopEnd
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_nav_profile),
                         contentDescription = "Add Friend",
                         tint = themeColor,
                         modifier = Modifier
-                            .padding(end = 8.dp, top = 4.dp) // ดันไอคอนหลักลงและไปซ้ายนิดนึง เพื่อเว้นที่ให้เครื่องหมายบวก
+                            .padding(end = 8.dp, top = 4.dp)
                             .size(20.dp)
                     )
                     Icon(
@@ -124,13 +110,24 @@ fun SocialHeader(
                         modifier = Modifier
                             .padding(start = 8.dp, top = 8.dp)
                             .size(10.dp)
-
                     )
+
+                    // 🌟 วาดจุดแดงถ้ามีคำขอเป็นเพื่อน
+                    if (hasPendingRequest) {
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .offset(x = 2.dp, y = (-2).dp) // ขยับให้ลอยอยู่ขวาบนนิดๆ
+                                .clip(CircleShape)
+                                .background(Color(0xFFDC4A3C)) // สีแดงแจ้งเตือน
+                                .border(1.5.dp, Color.White, CircleShape) // ขอบขาวให้ตัดกับไอคอน
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(14.dp))
 
-                // 🌟 2. ปุ่มเพิ่มกลุ่ม (ไอคอนกลุ่มเพื่อน + เครื่องหมายบวกมุมขวาบน)
+                // ปุ่มเพิ่มกลุ่ม
                 Box(
                     modifier = Modifier
                         .clickable { onAddGroupClick() }
@@ -143,7 +140,7 @@ fun SocialHeader(
                         tint = themeColor,
                         modifier = Modifier
                             .padding(end = 8.dp, top = 4.dp)
-                            .size(22.dp) // ไอคอนกลุ่มปรับให้ใหญ่กว่าไอคอนคนเดี่ยวนิดนึง
+                            .size(22.dp)
                     )
                     Icon(
                         painter = painterResource(Res.drawable.ic_social_plus),
@@ -156,8 +153,6 @@ fun SocialHeader(
                 }
             }
         }
-
-        // เส้นคั่นด้านล่าง Header
         HorizontalDivider(color = themeColor.copy(alpha = 0.3f), thickness = 1.dp)
     }
 }

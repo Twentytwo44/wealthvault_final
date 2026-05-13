@@ -96,7 +96,8 @@ fun ReferenceImagepicker(
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                    modifier = Modifier.background(LightSoftWhite) // 🌟 ปรับพื้นหลังเมนู
+                    modifier = Modifier.background(LightSoftWhite),
+                    shape = RoundedCornerShape(12.dp),
                 ) {
                     DropdownMenuItem(
                         text = {

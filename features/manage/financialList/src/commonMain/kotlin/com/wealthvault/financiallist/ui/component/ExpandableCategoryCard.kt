@@ -72,7 +72,7 @@ fun ExpandableCategoryCard(
                     )
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             Text(
                 text = title,
@@ -133,17 +133,17 @@ fun RealItemCard(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
+        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
+            Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = Color(0xFF3A2F2A))
             Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = subtitleLabel, fontSize = 14.sp, color = Color.Gray)
-                Text(text = subtitleValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
+                Text(text = subtitleLabel, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                Text(text = subtitleValue, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A2F2A))
             }
             Spacer(modifier = Modifier.height(2.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = amountLabel, fontSize = 14.sp, color = Color.Gray)
-                Text(text = amountValue, fontSize = 14.sp, color = Color(0xFF3A2F2A))
+                Text(text = amountLabel, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                Text(text = amountValue, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A2F2A))
             }
         }
     }

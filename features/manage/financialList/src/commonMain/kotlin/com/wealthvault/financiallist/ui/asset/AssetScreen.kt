@@ -163,7 +163,6 @@ fun AssetContent(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -173,13 +172,14 @@ fun AssetContent(
                             filteredCashes.forEach { cash ->
                                 RealItemCard(
                                     title = cash.name ?: "",
-                                    subtitleLabel = "รายละเอียด", subtitleValue = cash.description.toString().ifEmpty { "เงินสด" },
-                                    amountLabel = "มูลค่า", amountValue = "${formatAmount(cash.ammount ?: 0)} บาท",
+                                    subtitleLabel = "รายละเอียด",
+                                    subtitleValue = cash.description?.takeIf { it.isNotBlank() } ?: "-",
+                                    amountLabel = "มูลค่า",
+                                    amountValue = "${formatAmount(cash.ammount ?: 0)} บาท",
                                     onClick = { selectedAssetId = cash.id; selectedAssetType = "cash" }
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -196,7 +196,6 @@ fun AssetContent(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -212,7 +211,6 @@ fun AssetContent(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -228,7 +226,6 @@ fun AssetContent(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -255,7 +252,7 @@ fun AssetContent(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 40.dp, end = 25.dp)
-                .size(56.dp)
+                .size(50.dp)
                 .clickable { onAddClick() },
             shape = CircleShape,
             color = LightAsset,

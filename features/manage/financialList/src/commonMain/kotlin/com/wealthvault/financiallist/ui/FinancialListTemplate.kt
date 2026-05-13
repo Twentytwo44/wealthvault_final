@@ -47,7 +47,7 @@ fun FinancialListTemplate(
             .fillMaxSize()
             .statusBarsPadding()
             .padding(horizontal = 20.dp)
-            .padding(top = 20.dp)
+            .padding(top = 24.dp)
     ) {
         // --- 1. ส่วนหัวข้อ (Header) ---
         Row(
@@ -66,7 +66,7 @@ fun FinancialListTemplate(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // --- 2. ช่องค้นหา (Search Bar) ---
         // 🌟 เปลี่ยนมาใช้ BasicTextField เพื่อจัดกึ่งกลางและไม่จมขอบ
@@ -107,7 +107,7 @@ fun FinancialListTemplate(
             }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // --- 3. พื้นที่สำหรับใส่ข้อมูลลิสต์ ---
         // โค้ดส่วนนี้จะดึง UI จากหน้า Asset หรือ Debt มาแสดง
