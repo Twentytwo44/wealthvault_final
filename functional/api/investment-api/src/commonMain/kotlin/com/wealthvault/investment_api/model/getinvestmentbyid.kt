@@ -21,6 +21,7 @@ data class InvestmentIdData(
     @SerialName("broker_name") val brokerName: String? = null,
     @SerialName("quantity") val quantity: Double? = null,
     @SerialName("cost_per_price") val costPerPrice: Double? = null,
+    @SerialName("amount") val amount: Double? = null,
     @SerialName("description") val description: String? = null,
     @SerialName("files") val files: List<FileDataModel>? = emptyList(),
     @SerialName("created_at") val createdAt: String? = null,
