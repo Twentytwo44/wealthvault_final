@@ -32,9 +32,7 @@ class ShareAssetScreenModel<T>(
     private val _groupState = MutableStateFlow<List<GetAllGroupData>>(emptyList())
     val groupState = _groupState.asStateFlow()
 
-    init {
-        fetchData()
-    }
+
 
     fun initData(request: T?) {
         _formState.update { it.copy(request = request) }
@@ -46,7 +44,7 @@ class ShareAssetScreenModel<T>(
 
 
 
-    private fun fetchData() {
+     fun fetchData() {
         screenModelScope.launch {
             _formState.update { it.copy(isLoading = true) }
 

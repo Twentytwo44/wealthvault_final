@@ -28,7 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,6 +38,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -51,13 +54,11 @@ import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightMuted
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.core.theme.LightSurface
 import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.notification.viewmodel.NotificationScreenModel
 import com.wealthvault.notification_api.model.NotificationData
 import com.wealthvault.social.ui.main_social.add_friend.AddFriendScreen
-import kotlinx.coroutines.delay // 🌟 อย่าลืม import delay
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonObject
@@ -71,18 +72,27 @@ class NotificationScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val notificationData by screenModel.notificationData.collectAsState()
 
-        // 🌟 เปลี่ยนจาก LaunchedEffect(Unit) เป็นสังเกต Navigator
-        // ทุกครั้งที่มีการ Push หรือ Pop หน้าจอ โค้ดในนี้จะเช็กว่าถ้าหน้าปัจจุบันคือ NotificationScreen ให้โหลดข้อมูลใหม่
-        LaunchedEffect(navigator.lastItem) {
-            if (navigator.lastItem is NotificationScreen) {
-                screenModel.fetchNotifications()
-            }
-        }
+        // 🌟 1. ดึง Lifecycle มา
+        val lifecycleOwner = LocalLifecycleOwner.current
 
-        // ส่วนของการ Read All เงียบๆ 2 วินาที (คงไว้เหมือนเดิม)
-        LaunchedEffect(Unit) {
-            delay(1000)
-            screenModel.markAllAsReadBackground()
+        // 🌟 2. ใช้ DisposableEffect รวบจบทั้งสลับหน้าจอ และ สลับแอป
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 หน้าแจ้งเตือนตื่นแล้ว! สั่งโหลดข้อมูลและเคลียร์ Noti...")
+
+                    // สั่งโหลดแจ้งเตือนล่าสุด
+                    screenModel.fetchNotifications()
+
+                    // สั่ง Mark as read (ส่วนการ delay 1 วินาที ให้ย้ายไปทำใน ScreenModel แทน)
+                    screenModel.markAllAsReadBackground()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
         NotificationContent(
@@ -95,7 +105,6 @@ class NotificationScreen : Screen {
         )
     }
 }
-
 @Composable
 fun NotificationContent(
     onBackClick: () -> Unit,

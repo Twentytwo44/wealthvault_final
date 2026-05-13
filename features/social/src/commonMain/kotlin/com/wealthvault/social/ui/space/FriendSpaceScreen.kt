@@ -29,7 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -42,6 +42,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -80,31 +83,46 @@ class FriendSpaceScreen(
         val reversedMessages = remember(messages) { messages.reversed() }
         val isLoading by screenModel.isLoading.collectAsState()
 
-        LaunchedEffect(friendId) {
-            screenModel.fetchMessages(friendId)
+        // 🌟 1. ดึง Lifecycle มา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ลบ LaunchedEffect(friendId) ทิ้ง และใช้ ON_RESUME แทน
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 FriendSpace ตื่นแล้ว! สั่งโหลดข้อความของ $friendName ใหม่...")
+                    // สั่งดึงข้อมูลใหม่ทุกครั้งที่กลับมาหน้านี้
+                    screenModel.fetchMessages(friendId)
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
         WealthVaultTheme {
             FriendSpaceContent(
                 friendName = friendName,
-                messages = messages,
+                messages = messages, // หรือจะส่ง reversedMessages ลงไป ถ้า Content ต้องการ
                 isLoading = isLoading,
                 onBackClick = { navigator.pop() },
                 onShareClick = {
                     navigator.push(
                         SharedAssetScreen(
-                            targetId = friendId,        // ส่ง ID เพื่อนไป
-                            targetName = friendName,    // ส่งชื่อเพื่อนไป
-                            isGroup = false             // บอกว่าไม่ใช่กลุ่มนะ
+                            targetId = friendId,
+                            targetName = friendName,
+                            isGroup = false
                         )
                     )
                 },
                 onManageClick = {
                     navigator.push(
                         SharedAssetManageScreen(
-                            targetId = friendId,        // ส่ง ID เพื่อนไป
-                            targetName = friendName,    // ส่งชื่อเพื่อนไป
-                            isGroup = false             // บอกว่าไม่ใช่กลุ่มนะ
+                            targetId = friendId,
+                            targetName = friendName,
+                            isGroup = false
                         )
                     )
                 },

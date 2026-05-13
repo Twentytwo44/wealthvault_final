@@ -25,11 +25,7 @@ class ProfileScreenModel(
     private val _allFriends = MutableStateFlow<List<CloseFriendData>>(emptyList())
     val allFriends = _allFriends.asStateFlow()
 
-    init {
-        // โหลดข้อมูลพื้นฐานทันทีที่สร้าง Model
-        fetchUser()
-        fetchCloseFriends()
-    }
+
 
     fun fetchUser() {
         screenModelScope.launch {

@@ -24,7 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -34,6 +34,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
 import com.wealthvault.core.generated.resources.Res
@@ -54,12 +57,27 @@ class ProfileScreen() : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<ProfileScreenModel>()
-
-        LaunchedEffect(Unit) {
-            screenModel.fetchUser()
-             screenModel.fetchCloseFriends()
-        }
         val rootNavigator = LocalRootNavigator.current
+
+        // 🌟 1. ดึง Lifecycle ของหน้าจอมา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ลบ LaunchedEffect ทิ้ง แล้วดัก ON_RESUME เพื่อให้รีเฟรชตอนเปิดแอปกลับมา
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 ProfileScreen ตื่นแล้ว! สั่ง fetchUser และ fetchCloseFriends...")
+                    screenModel.fetchUser()
+                    screenModel.fetchCloseFriends()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
         val userData by screenModel.userState.collectAsState()
         // 🌟 ดึงข้อมูลจาก State ใน ScreenModel มาใช้งาน
         val closeFriends by screenModel.closeFriends.collectAsState()

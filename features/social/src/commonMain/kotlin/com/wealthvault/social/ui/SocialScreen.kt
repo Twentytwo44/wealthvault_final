@@ -2,16 +2,27 @@ package com.wealthvault.social.ui
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.wealthvault.core.utils.getScreenModel // 🌟 Import getScreenModel
+import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.social.ui.components.SocialHeader
 import com.wealthvault.social.ui.main_social.add_friend.AddFriendScreen
 import com.wealthvault.social.ui.main_social.form_group.CreateGroupScreen
@@ -30,10 +41,23 @@ class SocialScreen : Screen {
         var currentTab by rememberSaveable { mutableStateOf("เพื่อน") }
         val navigator = LocalNavigator.currentOrThrow
 
-        // 🌟 3. โหลดข้อมูลจุดแดงทุกครั้งที่กลับมาหน้านี้
-        // (เวลากดรับเพื่อนเสร็จ แล้วกด Back กลับมา จุดแดงจะได้หายไปครับ)
-        LaunchedEffect(navigator.lastItem) {
-            screenModel.fetchPendingFriendsBadge()
+        // 🌟 3. ดึง Lifecycle มาใช้งาน
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 4. ใช้ DisposableEffect ดัก ON_RESUME แทน เพื่อให้จุดแดงอัปเดตเสมอ
+        // ไม่ว่าจะกด Back กลับมา หรือสลับแอปกลับมา
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 SocialScreen ตื่นแล้ว! อัปเดตสถานะจุดแดงคำขอเป็นเพื่อน...")
+                    screenModel.fetchPendingFriendsBadge()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
         var rootNavigator = navigator
@@ -46,7 +70,7 @@ class SocialScreen : Screen {
             onTabSelected = { selectedTab -> currentTab = selectedTab },
             onAddFriendClick = { rootNavigator.push(AddFriendScreen()) },
             onAddGroupClick = { rootNavigator.push(CreateGroupScreen()) },
-            hasPendingRequest = hasPendingRequest // 🌟 4. ส่งค่าสถานะจุดแดงลงไป
+            hasPendingRequest = hasPendingRequest // 🌟 5. ส่งค่าสถานะจุดแดงลงไป
         )
     }
 }

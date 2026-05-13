@@ -1,5 +1,6 @@
 package com.wealthvault.splashscreen
 
+// 🌟 Import Res และภาพ โลโก้
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -33,13 +34,11 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.generated.resources.Res
+import com.wealthvault.core.generated.resources.wealthvault_logo
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.login.ui.LoginScreen
 import com.wealthvault.navigation.MainScreen
-
-// 🌟 Import Res และภาพ โลโก้
-import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.wealthvault_logo
 import org.jetbrains.compose.resources.painterResource
 
 class SplashScreen : Screen {
@@ -49,32 +48,35 @@ class SplashScreen : Screen {
         val screenModel = getScreenModel<SplashScreenModel>()
         val state by screenModel.state.collectAsState()
 
-        // 🌟 1. สร้างตัวแปรสำหรับจัดการความโปร่งใส (Alpha) เริ่มต้นที่ 0f (มองไม่เห็น)
         val alphaAnimation = remember { Animatable(0f) }
 
-        // 🌟 2. สั่งให้เล่นแอนิเมชันทันทีที่หน้านี้ถูกเปิดขึ้นมา
         LaunchedEffect(Unit) {
+            // 🌟 1. สั่งให้ Model เริ่มเช็ก Authentication ทันทีที่เปิดหน้าจอ
+            screenModel.checkAuthentication()
+
+            // 🌟 2. เริ่มเล่นแอนิเมชันเฟด
             alphaAnimation.animateTo(
-                targetValue = 1f, // ค่อยๆ ชัดขึ้นจนเต็ม 100%
+                targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 1000, // ใช้เวลาเฟด 1 วินาที (ปรับช้าเร็วได้ที่นี่)
-                    easing = FastOutSlowInEasing // จังหวะเฟดแบบนุ่มนวล
+                    durationMillis = 1000,
+                    easing = FastOutSlowInEasing
                 )
             )
         }
 
+        // 🌟 3. จัดการการเปลี่ยนหน้า (ใช้ replaceAll ถูกต้องแล้วครับ!)
         LaunchedEffect(state) {
             when (state) {
                 is SplashState.GoToLogin -> navigator.replaceAll(LoginScreen())
                 is SplashState.GoToMain -> navigator.replaceAll(MainScreen())
-                else -> {} // Loading
+                else -> {} // ยังคงอยู่ในหน้า Loading
             }
         }
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFFFF9F5)),
+                .background(Color(0xFFFFF9F5)), // สีพื้นหลังโทนอุ่น เข้ากับ Branding ดีครับ
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -82,9 +84,8 @@ class SplashScreen : Screen {
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .alpha(alphaAnimation.value) // 🌟 3. ผูกค่าแอนิเมชันเข้ากับความโปร่งใสของทั้ง Column
+                    .alpha(alphaAnimation.value)
             ) {
-                // 1. รูปโลโก้
                 Image(
                     painter = painterResource(Res.drawable.wealthvault_logo),
                     contentDescription = "App Logo",
@@ -93,7 +94,6 @@ class SplashScreen : Screen {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 2. ชื่อแอป
                 Text(
                     text = "Wealth & Vault",
                     style = MaterialTheme.typography.headlineSmall.copy(
@@ -105,7 +105,7 @@ class SplashScreen : Screen {
 
                 Spacer(modifier = Modifier.height(48.dp))
 
-                // 3. เส้นโหลด
+                // 💡 ทริคเล็กๆ: การมี LinearProgressIndicator ช่วยบอกผู้ใช้ว่า "แอปไม่ได้ค้างนะ"
                 LinearProgressIndicator(
                     color = Color(0xFFC27A5A),
                     trackColor = Color(0xFFC27A5A).copy(alpha = 0.2f),

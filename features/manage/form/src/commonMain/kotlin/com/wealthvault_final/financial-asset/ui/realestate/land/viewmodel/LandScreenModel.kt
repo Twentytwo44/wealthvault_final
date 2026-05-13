@@ -38,9 +38,6 @@ class LandScreenModel(
     private val _BuildingState = MutableStateFlow<List<GetBuildingData>>(emptyList())
     val BuildingState = _BuildingState.asStateFlow()
 
-    init {
-        fetchData()
-    }
 
     // ✍️ ฟังก์ชันอัปเดตข้อมูลจากหน้าฟอร์ม
     fun updateForm(data: LandModel) {

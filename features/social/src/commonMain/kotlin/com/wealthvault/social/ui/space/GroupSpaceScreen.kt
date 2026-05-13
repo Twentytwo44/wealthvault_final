@@ -27,7 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -40,6 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -80,22 +83,43 @@ class GroupSpaceScreen(
         val isLoading by screenModel.isLoading.collectAsState()
 
         val reversedMessages = remember(messages) { messages.reversed() }
-
         val token by screenModel.accessToken.collectAsState()
-        LaunchedEffect(groupId, token) {
-            val currentToken = token
-            if (currentToken != null) {
-                screenModel.fetchMessages(groupId)
-                screenModel.connectToChat(groupId, currentToken)
+
+        // 🌟 1. ดึง Lifecycle มา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ใช้ DisposableEffect โดยสังเกต token ด้วย (เผื่อกรณีตอนแรก token ยังโหลดไม่เสร็จ)
+        DisposableEffect(lifecycleOwner, token) {
+            val observer = LifecycleEventObserver { _, event ->
+                val currentToken = token
+
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    if (currentToken != null) {
+                        println("🔄 GroupSpace ตื่นแล้ว! โหลดข้อความล่าสุด และเชื่อมต่อแชทใหม่...")
+                        screenModel.fetchMessages(groupId)
+                        screenModel.connectToChat(groupId, currentToken)
+                    }
+                } else if (event == Lifecycle.Event.ON_PAUSE) {
+                    // 💡 แนะนำเพิ่มเติม: ถ้าแอปพับลงไป ควรตัดการเชื่อมต่อ Socket เพื่อประหยัดแบต/เมมโมรี่
+                    // ถ้าใน ScreenModel มีฟังก์ชันตัดการเชื่อมต่อ ให้เรียกใช้ตรงนี้เลยครับ เช่น:
+                    // screenModel.disconnectChat()
+                }
+            }
+
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+                // 💡 สำคัญ: ตอนกด Back ออกจากหน้านี้ ต้องตัด Socket ทิ้งด้วย ไม่งั้นจะเกิด Memory Leak
+                // screenModel.disconnectChat()
             }
         }
 
-
         WealthVaultTheme {
             GroupSpaceContent(
-                groupId = groupId, // 🌟 ส่ง groupId เข้ามาด้วย
+                groupId = groupId,
                 groupName = groupName,
-                messages = messages,
+                messages = messages, // หรือ reversedMessages ตามที่ UI ต้องการ
                 isLoading = isLoading,
                 onBackClick = { navigator.pop() },
                 onShareClick = {

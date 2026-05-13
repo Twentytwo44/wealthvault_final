@@ -19,9 +19,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -37,6 +38,8 @@ import com.wealthvault.financiallist.ui.shareasset.component.ShareItemWithDelete
 import com.wealthvault.financiallist.ui.shareasset.model.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import androidx.lifecycle.compose.LocalLifecycleOwner
+
 
 @Composable
 fun CustomCheckbox(isSelected: Boolean, onSelectedChange: (Boolean) -> Unit) {
@@ -72,16 +75,42 @@ data class ShareAssetScreen(val type: String, val id: String) : Screen {
         val friendState by screenModel.friendState.collectAsState()
         val groupState by screenModel.groupState.collectAsState()
 
-        LaunchedEffect(Unit) { screenModel.initData(id, type) }
+        // 🌟 1. ดึง Lifecycle มาใช้งาน
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ใช้ ON_RESUME เพื่อให้รายชื่อเพื่อน/กลุ่มที่แชร์อยู่ อัปเดตล่าสุดเสมอ
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 ShareAssetScreen ตื่นแล้ว! โหลดข้อมูลตั้งต้นใหม่...")
+                    screenModel.initData(id, type)
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
 
         ShareAssetContent(
             onBackClick = { navigator.pop() },
             onPrepareUnshare = { itemToUnshare, onReadyCallback ->
-                screenModel.prepareUnshareItem(itemToUnshare, id) { preparedItem -> onReadyCallback(preparedItem) }
+                screenModel.prepareUnshareItem(itemToUnshare, id) { preparedItem ->
+                    onReadyCallback(preparedItem)
+                }
             },
             onNextClick = { shareTo, unshareList ->
                 screenModel.initShareData(shareTo)
-                screenModel.submitShare(id = id, type = type, unshareList = unshareList, onSuccess = { navigator.pop() })
+                // 💡 ตรงนี้ถ้าเป็นไปได้ แนะนำให้ใช้ท่าสังเกต isSuccess แทน
+                // แต่ถ้า ScreenModel จัดการเรื่อง Loading/Debounce ไว้แล้ว ท่านี้ก็ใช้งานได้ครับ
+                screenModel.submitShare(
+                    id = id,
+                    type = type,
+                    unshareList = unshareList,
+                    onSuccess = {
+                        navigator.pop()
+                    }
+                )
             },
             friendData = friendState,
             groupData = groupState

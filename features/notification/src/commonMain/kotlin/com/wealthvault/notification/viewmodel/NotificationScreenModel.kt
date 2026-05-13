@@ -21,10 +21,6 @@ class NotificationScreenModel(
     private val _notificationData = MutableStateFlow<List<NotificationData>>(emptyList())
     val notificationData = _notificationData.asStateFlow()
 
-    // 🌟 1. ใส่ init ไว้ เพื่อให้มันดึงข้อมูลทันทีที่เปิดหน้าจอนี้ขึ้นมา
-    init {
-        fetchNotifications()
-    }
 
     // 🌟 2. ฟังก์ชันสำหรับเรียก UseCase เพื่อดึงข้อมูล (Fetch)
     fun fetchNotifications() {

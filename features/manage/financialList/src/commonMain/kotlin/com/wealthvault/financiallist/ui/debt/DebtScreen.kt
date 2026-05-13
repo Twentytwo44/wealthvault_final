@@ -12,7 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +25,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -66,8 +69,23 @@ class DebtScreen : Screen {
         val screenModel = getScreenModel<DebtScreenModel>()
         val navigatorContent = LocalRootNavigator.current
 
-        LaunchedEffect(Unit) {
-            screenModel.fetchLiabilities()
+        // 🌟 1. ดึง Lifecycle ของหน้าจอมา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. เปลี่ยนมาใช้ ON_RESUME เพื่อให้ข้อมูลหนี้สินอัปเดตเสมอ
+        // ไม่ว่าจะเป็นการเปิดหน้าจอครั้งแรก, กด Back กลับมา, หรือสลับแอปกลับมา
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 DebtScreen ตื่นแล้ว! สั่งโหลดข้อมูลหนี้สินและค่าใช้จ่ายใหม่...")
+                    screenModel.fetchLiabilities()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
         val loans by screenModel.loans.collectAsState()

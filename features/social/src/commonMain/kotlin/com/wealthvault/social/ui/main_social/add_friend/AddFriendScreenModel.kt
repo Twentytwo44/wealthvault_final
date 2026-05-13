@@ -32,6 +32,11 @@ class AddFriendScreenModel(
     val addFriendSuccess: StateFlow<Boolean> = _addFriendSuccess.asStateFlow()
 
     // 🌟 ฟังก์ชันค้นหาผู้ใช้จาก Email
+
+    fun resetAddFriendSuccess() {
+        _addFriendSuccess.value = false
+    }
+
     fun searchUser(email: String) {
         screenModelScope.launch {
             _isSearching.value = true

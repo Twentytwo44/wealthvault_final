@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,6 +54,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import cafe.adriel.voyager.core.screen.Screen
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
@@ -73,17 +76,34 @@ import com.wealthvault.`user-api`.model.FriendData
 import com.wealthvault.`user-api`.model.UserData
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
+import androidx.lifecycle.compose.LocalLifecycleOwner
+
 
 class ShareSettingScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<ShareSettingScreenModel>()
-
-        LaunchedEffect(Unit) {
-            screenModel.fetchUser()
-            screenModel.fetchCloseFriends()
-        }
         val rootNavigator = LocalRootNavigator.current
+
+        // 🌟 1. ดึง Lifecycle ของหน้าจอมา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. เปลี่ยนมาใช้ ON_RESUME เพื่อให้รีเฟรชข้อมูลเวลาสลับหน้าจอหรือแอปตื่น
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 ShareSettingScreen ตื่นแล้ว! สั่งโหลดข้อมูลผู้ใช้และเพื่อนสนิท...")
+                    screenModel.fetchUser()
+                    screenModel.fetchCloseFriends()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
         val userData by screenModel.userState.collectAsState()
         val closeFriends by screenModel.closeFriends.collectAsState()
         val allFriends by screenModel.allFriends.collectAsState()
@@ -91,7 +111,7 @@ class ShareSettingScreen : Screen {
         ShareSettingContent(
             userData = userData,
             closeFriends = closeFriends,
-            allFriends = allFriends, // 🌟 ตัวนี้จะเป็น List<FriendData>
+            allFriends = allFriends,
             onBackClick = {
                 rootNavigator.pop()
             },
@@ -105,13 +125,12 @@ class ShareSettingScreen : Screen {
                 screenModel.addCloseFriends(ids)
             },
             onPlusClick = {
-                // 🌟 สั่งโหลดเพื่อนเฉพาะตอนกดปุ่มบวก
+                // 👍 เขียนตรงนี้ไว้ดีมากครับ! โหลดเมื่อจำเป็นต้องใช้ (Lazy Load) ช่วยประหยัดเน็ตได้ดีเลย
                 screenModel.fetchAllFriends()
             }
         )
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShareSettingContent(

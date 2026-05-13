@@ -37,6 +37,16 @@ class FormGroupScreenModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    fun resetSuccessState() {
+        _isSuccess.value = false
+    }
+
+    // 🌟 ฟังก์ชันสำหรับเคลียร์ข้อความ Error
+    // (ใช้ป้องกันไม่ให้ Snackbar เด้งโชว์ข้อความเดิมซ้ำๆ เวลาหน้าจอมีการ Recompose)
+    fun clearErrorMessage() {
+        _errorMessage.value = null
+    }
+
     fun createGroup(groupName: String, memberIds: List<String>, imageBytes: ByteArray?) {
         screenModelScope.launch {
             _isLoading.value = true

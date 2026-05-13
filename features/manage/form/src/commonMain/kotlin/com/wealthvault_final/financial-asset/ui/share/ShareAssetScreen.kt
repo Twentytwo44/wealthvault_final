@@ -40,11 +40,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,13 +55,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -117,19 +118,36 @@ class ShareAssetScreen<T>(val request: T? = null) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<ShareAssetScreenModel<T>>()
 
-        val formState by screenModel.formState.collectAsState() // 🌟 ดึง State หลักมา
+        val formState by screenModel.formState.collectAsState()
         val friendState by screenModel.friendState.collectAsState()
         val groupState by screenModel.groupState.collectAsState()
 
+        // 🌟 1. ดึง Lifecycle มาจัดการความสดใหม่ของข้อมูล
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 ShareAssetScreen ตื่นแล้ว! อัปเดตรายชื่อเพื่อนและกลุ่ม...")
+                    screenModel.fetchData() // โหลดรายชื่อเพื่อน/กลุ่มใหม่เสมอ
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
+        // 🌟 2. ใช้ LaunchedEffect(Unit) เฉพาะการตั้งค่าเริ่มต้นครั้งแรกสุดเท่านั้น
         LaunchedEffect(Unit) {
             screenModel.initData(request)
         }
 
         ShareAssetContent(
-            initialShareTo = formState.shareTo, // 🌟 โยนค่าเดิมเข้าไป
+            initialShareTo = formState.shareTo,
             onBackClick = { navigator.pop() },
             onNextClick = { shareTo ->
-                screenModel.saveShareInfo(shareTo) // 🌟 บันทึกคนที่เราเลือกก่อนไปหน้าสรุป
+                screenModel.saveShareInfo(shareTo)
                 navigateToSummary(navigator, request, shareTo)
             },
             friendData = friendState,

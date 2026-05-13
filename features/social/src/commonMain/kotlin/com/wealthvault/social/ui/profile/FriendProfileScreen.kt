@@ -2,11 +2,32 @@ package com.wealthvault.social.ui.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,24 +35,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.theme.LightBg
-
-import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.`user-api`.model.FriendProfileData
-import com.wealthvault.`user-api`.model.ItemPreview
+import com.wealthvault.core.theme.WealthVaultTheme
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
-
-import com.wealthvault.social.ui.components.space.SpaceTopBar
-import com.wealthvault.social.ui.components.profile.ProfileHeader
-import com.wealthvault.core.theme.WealthVaultTheme
+import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.social.ui.components.profile.ExpandableCategoryCard
+import com.wealthvault.social.ui.components.profile.ProfileHeader
 import com.wealthvault.social.ui.components.profile.RealItemCard
-
 import com.wealthvault.social.ui.components.profile.SmartAssetDetailDialog
+import com.wealthvault.social.ui.components.space.SpaceTopBar
+import com.wealthvault.`user-api`.model.FriendProfileData
+import com.wealthvault.`user-api`.model.ItemPreview
 
 class FriendProfileScreen(
     private val friendId: String,
@@ -44,23 +65,40 @@ class FriendProfileScreen(
 
         val profileData by screenModel.profileData.collectAsState()
         val isLoading by screenModel.isLoading.collectAsState()
-        // 🌟 รับ State การลบสำเร็จ
         val isRemoveSuccess by screenModel.isRemoveSuccess.collectAsState()
+        val isSuccess by screenModel.isSuccess.collectAsState()
+        val isAlreadySent by screenModel.isAlreadySent.collectAsState()
 
         var showRemoveConfirm by remember { mutableStateOf(false) }
 
-        LaunchedEffect(friendId) {
-            screenModel.fetchProfile(friendId)
+        // 🌟 1. ดึง Lifecycle มา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ดัก ON_RESUME เพื่ออัปเดตข้อมูลโปรไฟล์เพื่อนเวลาสลับแอปหรือสลับหน้า
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 FriendProfile ตื่นแล้ว! โหลดข้อมูลโปรไฟล์ของ $friendName ใหม่...")
+                    screenModel.fetchProfile(friendId)
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
-        // 🌟 ถ้าลบเพื่อนสำเร็จ (isRemoveSuccess) -> ให้รีโหลดหน้าเดิม
+        // 🌟 3. อันนี้เก็บไว้เหมือนเดิม! เอาไว้รีเฟรชหน้าจอทันทีตอนที่กดยืนยันการลบแล้ว Backend ตอบกลับมาว่าสำเร็จ
         LaunchedEffect(isRemoveSuccess) {
             if (isRemoveSuccess) {
                 screenModel.fetchProfile(friendId) // 🔄 รีโหลดเพื่อให้ปุ่มกลับเป็น "เพิ่มเพื่อน"
+
+                // 💡 Pro Tip: หากหน้าจอนี้มีการ recompose บ่อยๆ แนะนำให้เพิ่มฟังก์ชันเคลียร์สถานะด้วยครับ
+                // เพื่อป้องกันไม่ให้มันวิ่งเข้ามาโหลด fetchProfile() ซ้ำรัวๆ
+                // screenModel.resetRemoveState()
             }
         }
-        val isSuccess by screenModel.isSuccess.collectAsState()
-        val isAlreadySent by screenModel.isAlreadySent.collectAsState()
 
         WealthVaultTheme {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -75,6 +113,7 @@ class FriendProfileScreen(
                     onAddFriendClick = { screenModel.addFriend(friendId) }
                 )
 
+                // ส่วนของ AlertDialog ทำมาได้สวยงามและครอบคลุมดีแล้วครับ!
                 if (showRemoveConfirm) {
                     AlertDialog(
                         onDismissRequest = { showRemoveConfirm = false },

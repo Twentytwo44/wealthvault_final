@@ -45,9 +45,6 @@ class BuildingScreenModel(
     )
     val state = _state.asStateFlow()
 
-    init {
-        fetchData()
-    }
 
     // ✍️ ฟังก์ชันอัปเดตข้อมูลจากหน้าฟอร์ม
     fun updateForm(data: BuildingModel) {
@@ -58,7 +55,7 @@ class BuildingScreenModel(
         _state.value = data
     }
 
-    private fun fetchData() {
+    fun fetchData() {
         screenModelScope.launch {
             try {
                 // 🚀 ยิง API พร้อมกัน 2 ตัวเพื่อความรวดเร็ว

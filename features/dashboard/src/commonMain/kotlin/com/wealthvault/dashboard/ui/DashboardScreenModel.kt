@@ -25,9 +25,7 @@ class DashboardScreenModel(
     private val _hasUnreadNoti = MutableStateFlow(false)
     val hasUnreadNoti = _hasUnreadNoti.asStateFlow()
 
-    init {
-        fetchDashboard()
-    }
+
 
     fun fetchDashboard() {
         checkUnreadNotifications()

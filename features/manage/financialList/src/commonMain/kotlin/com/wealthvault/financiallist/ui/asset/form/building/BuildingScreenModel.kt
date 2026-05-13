@@ -34,9 +34,7 @@ class BuildingScreenModel(
     val InsState = _InsState.asStateFlow()
 
 
-    init {
-        fetchData()
-    }
+
 
 
     private val _state = MutableStateFlow(
@@ -82,7 +80,7 @@ class BuildingScreenModel(
 
 
 
-    private fun fetchData() {
+    fun fetchData() {
         screenModelScope.launch {
 
 

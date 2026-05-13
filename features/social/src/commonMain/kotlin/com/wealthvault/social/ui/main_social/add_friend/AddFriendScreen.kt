@@ -3,13 +3,40 @@ package com.wealthvault.social.ui.main_social.add_friend
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,7 +45,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -48,15 +77,33 @@ class AddFriendScreen : Screen {
         val addFriendSuccess by screenModel.addFriendSuccess.collectAsState()
         val pendingFriends by screenModel.pendingFriends.collectAsState()
 
-        // 🌟 ดึง State Popup จาก ScreenModel
         val popupMessage by screenModel.popupMessage.collectAsState()
 
-        LaunchedEffect(Unit) {
-            screenModel.fetchPendingFriends()
+        // 🌟 1. ดึง Lifecycle มา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ใช้ DisposableEffect แทน เพื่อดึงรายการ "คำขอเป็นเพื่อน" ใหม่เสมอตอนแอปตื่น
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 AddFriendScreen ตื่นแล้ว! โหลดรายการคำขอเป็นเพื่อนใหม่...")
+                    screenModel.fetchPendingFriends()
+
+                    // 💡 หมายเหตุ: เราไม่สั่งค้นหาเพื่อน (searchUser) ตรงนี้นะครับ
+                    // ปล่อยให้มันโชว์ผลลัพธ์เดิมที่ผู้ใช้ค้นหาค้างไว้ถูกต้องแล้วครับ
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
+        // 🌟 3. จัดการตอนเพิ่มเพื่อนสำเร็จ (เพิ่มการเคลียร์ State ก่อน Pop ป้องกันบัค)
         LaunchedEffect(addFriendSuccess) {
             if (addFriendSuccess) {
+                screenModel.resetAddFriendSuccess() // 👈 แนะนำให้มีฟังก์ชันนี้ใน ScreenModel ครับ
                 navigator.pop()
             }
         }
@@ -80,7 +127,7 @@ class AddFriendScreen : Screen {
                 }
             )
 
-            // 🌟 2. แจ้งเตือน Popup (AlertDialog)
+            // 🌟 Popup ทำมาได้ดีมากๆ ครับ มีการสั่ง clearPopupMessage ด้วย ถูกต้องเลย!
             if (popupMessage != null) {
                 AlertDialog(
                     onDismissRequest = { screenModel.clearPopupMessage() },

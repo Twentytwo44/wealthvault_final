@@ -23,7 +23,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape // 🌟 Import CircleShape สำหรับทำจุดกลม
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,7 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +50,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -61,7 +64,7 @@ import com.wealthvault.core.generated.resources.ic_dashboard_share
 import com.wealthvault.core.generated.resources.ic_nav_asset
 import com.wealthvault.core.generated.resources.ic_nav_debt
 import com.wealthvault.core.generated.resources.ic_nav_social
-import com.wealthvault.core.theme.LightBg // 🌟 Import สีพื้นหลังมาทำขอบจุดแดง
+import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.LocalRootNavigator
@@ -84,8 +87,6 @@ class DashboardScreen(
         val screenModel = getScreenModel<DashboardScreenModel>()
         val dashboardState by screenModel.dashboardState.collectAsState()
         val isLoading by screenModel.isLoading.collectAsState()
-
-        // 🌟 1. รับค่าสถานะการแจ้งเตือน
         val hasUnreadNoti by screenModel.hasUnreadNoti.collectAsState()
 
         val navigator = LocalNavigator.currentOrThrow
@@ -97,9 +98,24 @@ class DashboardScreen(
         }
         var selectedTab by remember { mutableStateOf(DashboardTab.ASSET) }
 
-        // 🌟 2. อัปเดตข้อมูลและเช็ค Noti ทุกครั้งที่กลับมาหน้านี้ (จาก Unit เปลี่ยนเป็น navigator.lastItem)
-        LaunchedEffect(navigator.lastItem) {
-            screenModel.fetchDashboard()
+        // 🌟 1. ดึง Lifecycle ของหน้าจอมา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ใช้ DisposableEffect ดัก ON_RESUME เพื่อให้ครอบคลุมทั้ง
+        // - การกดสลับหน้าจอกลับมา (Screen lifecycle ขยับเป็น Resume)
+        // - การพับแอปแล้วเปิดใหม่ (App lifecycle ขยับเป็น Resume)
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 DashboardScreen กลับมาทำงาน! สั่ง fetchDashboard()...")
+                    screenModel.fetchDashboard()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
         DashboardContent(
@@ -113,7 +129,7 @@ class DashboardScreen(
             isLoading = isLoading,
             selectedTab = selectedTab,
             onTabChange = { selectedTab = it },
-            hasUnreadNoti = hasUnreadNoti // 🌟 3. ส่งค่าลงไปให้ DashboardContent
+            hasUnreadNoti = hasUnreadNoti
         )
     }
 }

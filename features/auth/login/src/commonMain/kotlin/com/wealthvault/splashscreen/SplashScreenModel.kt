@@ -4,7 +4,7 @@ import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.wealthvault.data_store.TokenStore
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 sealed class SplashState {
@@ -18,21 +18,28 @@ class SplashScreenModel(
     private val tokenStore: TokenStore,
 ) : StateScreenModel<SplashState>(SplashState.Loading) {
 
-    init { checkAuthentication() }
-
-    private fun checkAuthentication() {
+    // 🌟 ย้ายจาก init มาสร้างฟังก์ชันให้เรียกจากภายนอกได้
+    fun checkAuthentication() {
         screenModelScope.launch {
-            delay(1500)
-            // 1. ดึง Token จากเครื่อง
-            delay(200)
-            val token = tokenStore.accessToken.first()
-            println("check token: ${token}")
-            if (token.isNullOrBlank()) {
-                // ไม่มี Token = ไปหน้า Login
+            try {
+                // รวมจังหวะหน่วงเวลาให้พอดี (ประมาณ 1.5 - 2 วินาที)
+                delay(1700)
+
+                // 🌟 ใช้ firstOrNull เพื่อความปลอดภัย ไม่ให้ Flow ค้าง
+                val token = tokenStore.accessToken.firstOrNull()
+
+                println("check token: $token")
+
+                if (token.isNullOrBlank()) {
+                    mutableState.value = SplashState.GoToLogin
+                } else {
+                    // 💡 ตรงนี้ในอนาคตถ้าจะเช็กโปรไฟล์/วันเกิด ให้ยิง API ต่อที่นี่ได้เลย
+                    mutableState.value = SplashState.GoToMain
+                }
+            } catch (e: Exception) {
+                println("❌ Splash Error: ${e.message}")
+                // ถ้า Error ให้ส่งไป Login เพื่อความปลอดภัย
                 mutableState.value = SplashState.GoToLogin
-            } else {
-                // มี Token = ลองดึงโปรไฟล์เพื่อเช็กวันเกิด
-                mutableState.value = SplashState.GoToMain
             }
         }
     }

@@ -1,43 +1,60 @@
 package com.wealthvault.social.ui.profile
 
+// Import component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.group_api.model.GroupData
-import com.wealthvault.group_api.model.GroupMemberItem
-import com.wealthvault.social.ui.components.FriendListItem
-
-// Import component
-import com.wealthvault.social.ui.components.space.SpaceTopBar
-import com.wealthvault.social.ui.components.profile.ProfileHeader
-import com.wealthvault.social.ui.main_social.create_group.EditGroupScreen
-import androidx.compose.runtime.getValue  // 🌟 สำหรับอ่านค่า (getter)
-import androidx.compose.runtime.setValue  // 🌟 สำหรับเขียนค่า (setter) - ตัวนี้แหละที่หายไป
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.RedErr
+import com.wealthvault.core.utils.getScreenModel
+import com.wealthvault.data_store.TokenStore
+import com.wealthvault.group_api.model.GroupData
+import com.wealthvault.group_api.model.GroupMemberItem
 import com.wealthvault.social.ui.SocialScreen
-import com.wealthvault.data_store.TokenStore // 🌟 เพิ่ม import
+import com.wealthvault.social.ui.components.FriendListItem
+import com.wealthvault.social.ui.components.profile.ProfileHeader
+import com.wealthvault.social.ui.components.space.SpaceTopBar
+import com.wealthvault.social.ui.main_social.create_group.EditGroupScreen
 import kotlinx.coroutines.flow.firstOrNull
 import org.koin.compose.koinInject
 
@@ -51,11 +68,11 @@ class GroupProfileScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val tokenStore = koinInject<TokenStore>() // 🌟 Inject TokenStore
+        val tokenStore = koinInject<TokenStore>() // 🌟 Inject TokenStore ถูกต้องแล้วครับ
 
         var currentUserId by remember { mutableStateOf<String?>(null) }
 
-        // 🌟 อ่าน User ID จริงจากเครื่อง
+        // 🌟 อ่าน User ID จริงจากเครื่อง (ใช้ LaunchedEffect(Unit) ตรงนี้ถูกต้องแล้ว เพราะอ่านแค่ครั้งเดียวตอนสร้างหน้าจอ)
         LaunchedEffect(Unit) {
             currentUserId = tokenStore.getUserId.firstOrNull()
         }
@@ -72,12 +89,30 @@ class GroupProfileScreen(
         val members by screenModel.members.collectAsState()
         var showLeaveDialog by remember { mutableStateOf(false) }
 
-        LaunchedEffect(groupId) {
-            screenModel.fetchGroupData(groupId)
+        // 🌟 1. ดึง Lifecycle มา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ลบ LaunchedEffect(groupId) ทิ้ง และใช้ ON_RESUME แทน
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 GroupProfile ตื่นแล้ว! สั่งโหลดข้อมูลกลุ่ม $groupId ใหม่...")
+                    // ทุกครั้งที่สลับหน้ากลับมาจากการแก้ไขกลุ่ม หรือสลับแอป ข้อมูลจะอัปเดตเสมอ!
+                    screenModel.fetchGroupData(groupId)
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
+        // 🌟 ส่วนนี้เก็บไว้เหมือนเดิม ถูกต้องแล้วครับ
         LaunchedEffect(leaveSuccess) {
             if (leaveSuccess) {
+                // แนะนำเพิ่มเติม: ควรเรียก screenModel.resetLeaveState() ก่อน pop
+                // เพื่อเคลียร์สถานะเป็น false ป้องกันบัคตอนเข้ากลุ่มอื่น
                 navigator.popUntil { screen -> screen is SocialScreen }
             }
         }
@@ -87,7 +122,7 @@ class GroupProfileScreen(
                 groupData = groupData,
                 members = members,
                 isLoading = isLoading,
-                currentUserId = currentUserId ?: "", // 🌟 ส่ง ID จริงไปแทน mocID
+                currentUserId = currentUserId ?: "",
                 onBackClick = { navigator.pop() },
                 onFriendClick = { friendId, friendName ->
                     rootNavigator.push(FriendProfileScreen(friendId, friendName))
@@ -105,7 +140,7 @@ class GroupProfileScreen(
                 onLeaveGroupClick = { showLeaveDialog = true }
             )
 
-            // ... (AlertDialog ส่วนเดิม) ...
+            // ... (AlertDialog ส่วนเดิมของคุณ คงไว้ได้เลยครับ ทำมาดีแล้ว) ...
             if (showLeaveDialog) {
                 AlertDialog(
                     onDismissRequest = { showLeaveDialog = false },

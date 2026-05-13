@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,11 +26,10 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.social.ui.main_social.form_group.FormGroupScreenModel
 import com.wealthvault.social.ui.main_social.form_group.GroupFormContent
-import androidx.compose.runtime.setValue  // 🌟 สำหรับเขียนค่า (setter) - ตัวนี้แหละที่หายไป
-import com.wealthvault.core.theme.RedErr
 
 class EditGroupScreen(
     private val groupId: String,
@@ -50,30 +50,27 @@ class EditGroupScreen(
 
         val snackbarHostState = remember { SnackbarHostState() }
 
-        // ดึงรายชื่อเพื่อนสำหรับเลือกใน BottomSheet
+        // 🌟 หน้า Form ใช้ LaunchedEffect(Unit) ถูกต้องแล้ว!
         LaunchedEffect(Unit) {
             screenModel.fetchFriends()
         }
 
-        // ถ้าอัปเดตทุกอย่างสำเร็จ ให้เด้งกลับหน้าโปรไฟล์กลุ่ม
+        // 🌟 ยุบรวม isSuccess เหลืออันเดียว และเพิ่มการ Reset State
         LaunchedEffect(isSuccess) {
             if (isSuccess) {
-                navigator.pop()
-            }
-        }
-
-        LaunchedEffect(errorMessage) {
-            errorMessage?.let { msg ->
-                snackbarHostState.showSnackbar(message = msg)
-            }
-        }
-
-        LaunchedEffect(isSuccess) {
-            if (isSuccess) {
-                // ถอยกลับไปจนกว่าจะเจอหน้า SocialMainScreen
+                screenModel.resetSuccessState() // อย่าลืมสร้างฟังก์ชันนี้ใน ScreenModel นะครับ
                 navigator.popUntil { it::class.simpleName == "SocialMainScreen" }
             }
         }
+
+        // 🌟 เคลียร์ Error ทิ้งหลังจากโชว์ Snackbar เสร็จ
+        LaunchedEffect(errorMessage) {
+            errorMessage?.let { msg ->
+                snackbarHostState.showSnackbar(message = msg)
+                screenModel.clearErrorMessage() // อย่าลืมสร้างฟังก์ชันนี้ใน ScreenModel เช่นกัน
+            }
+        }
+
         var showExitDialog by remember { mutableStateOf(false) }
         var showDeleteGroupDialog by remember { mutableStateOf(false) }
 

@@ -16,7 +16,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,7 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -51,8 +53,22 @@ class SharedAssetManageScreen(
         val assetList by screenModel.assetList.collectAsState()
         val isLoading by screenModel.isLoading.collectAsState()
 
-        LaunchedEffect(targetId) {
-            screenModel.fetchSharedAssets(targetId, isGroup)
+        // 🌟 1. ดึง Lifecycle มา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ดัก ON_RESUME ให้รีเฟรชข้อมูลทุกครั้งที่แอปตื่น หรือสลับหน้าจอกลับมา
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 SharedAssetManage ตื่นแล้ว! โหลดรายการทรัพย์สินที่แชร์ให้ $targetName ใหม่...")
+                    screenModel.fetchSharedAssets(targetId, isGroup)
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
         SharedAssetManageContent(
@@ -67,7 +83,6 @@ class SharedAssetManageScreen(
         )
     }
 }
-
 @Composable
 fun SharedAssetManageContent(
     targetName: String,

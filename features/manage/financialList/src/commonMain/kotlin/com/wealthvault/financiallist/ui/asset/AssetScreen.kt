@@ -15,7 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +28,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import com.wealthvault.account_api.model.AccountData
@@ -81,8 +84,22 @@ class AssetScreen() : Screen {
         val navigator = LocalRootNavigator.current
         val screenModel = getScreenModel<AssetScreenModel>()
 
-        LaunchedEffect(Unit) {
-            screenModel.fetchAllAssets()
+        // 🌟 1. ดึง Lifecycle มา
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        // 🌟 2. ใช้ ON_RESUME เพื่อให้ข้อมูลทรัพย์สินอัปเดตเสมอเมื่อแอปตื่น หรือสลับหน้าจอกลับมา
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    println("🔄 AssetScreen ตื่นแล้ว! สั่งโหลดข้อมูลทรัพย์สินทั้งหมดใหม่...")
+                    screenModel.fetchAllAssets()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
 
         val accounts by screenModel.accounts.collectAsState()
@@ -107,7 +124,6 @@ class AssetScreen() : Screen {
         )
     }
 }
-
 @Composable
 fun AssetContent(
     screenModel: AssetScreenModel,
