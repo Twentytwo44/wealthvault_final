@@ -85,4 +85,21 @@ class NotificationScreenModel(
             }
         }
     }
+
+    fun markAllAsReadBackground() {
+        screenModelScope.launch {
+            // 1. เช็กก่อนว่ามีอันที่ยังไม่อ่านไหม (ถ้าอ่านหมดแล้วจะได้ไม่ต้องยิง API ให้เปลือง)
+            val hasUnread = _notificationData.value.any { it.isRead != true }
+            if (!hasUnread) return@launch
+
+            // 2. ยิง API ไปบอกหลังบ้านว่าอ่านหมดแล้ว
+            val result = putNotificationRepository.putReadAllNoti()
+
+            result.onSuccess {
+                println("✅ Read ALL Notifications (Background) success!")
+            }.onFailure { error ->
+                println("🚨 Read ALL Background failed!: ${error.message}")
+            }
+        }
+    }
 }

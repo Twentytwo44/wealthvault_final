@@ -41,6 +41,9 @@ import com.wealthvault.financiallist.ui.debt.form.expense.ExpenseScreenModel
 import com.wealthvault.financiallist.ui.shareasset.ShareScreenModel
 import com.wealthvault.financiallist.ui.shareasset.usecase.GetShareAssetUseCase
 import com.wealthvault.financiallist.usecase.FinanciallistUseCase
+import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreenModel
+import com.wealthvault_final.`financial-asset`.ui.realestate.RealEstateScreenModel
+import com.wealthvault_final.`financial-obligations`.ui.menu.ObMenuScreenModel
 import org.koin.dsl.module
 
 val financiallistModule = module {
@@ -160,6 +163,13 @@ val financiallistModule = module {
     }
     factory { UnshareNetworkDataSource(get(), get()) }
     single { UnshareRepositoryImpl(get(), get(), get(), get()) }
+
+    factory { MenuScreenModel() }
+
+    // 🌟 2. เพิ่มของฝั่งหนี้สินด้วย (ถ้ามีหน้าเมนูฝั่งนั้น)
+    factory { ObMenuScreenModel() }
+    factory { RealEstateScreenModel() }
+
 
 
 

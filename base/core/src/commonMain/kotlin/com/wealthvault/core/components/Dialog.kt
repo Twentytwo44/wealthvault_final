@@ -156,7 +156,6 @@ fun DetailDialog(
                     }
 
                     HorizontalDivider(color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
-                    Spacer(modifier = Modifier.height(6.dp))
 
                     // --- 2. Scrollable Content ---
                     val scrollState = rememberScrollState()
@@ -171,7 +170,6 @@ fun DetailDialog(
                     }
 
                     // --- 3. Fixed Footer ---
-                    Spacer(modifier = Modifier.height(6.dp))
                     Column(modifier = Modifier.fillMaxWidth()) {
                         HorizontalDivider(color = LightBorder.copy(alpha = 0.5f), thickness = 0.8.dp)
 

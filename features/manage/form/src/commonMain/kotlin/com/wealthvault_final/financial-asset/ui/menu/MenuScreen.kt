@@ -1,48 +1,25 @@
 package com.wealthvault_final.`financial-asset`.ui.menu
 
-// 🌟 Import Theme และ Resources
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -56,6 +33,7 @@ import com.wealthvault.core.generated.resources.stock
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightText
+import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.ui.bankaccount.BankAccountFormScreen
 import com.wealthvault_final.`financial-asset`.ui.cash.CashFormScreen
 import com.wealthvault_final.`financial-asset`.ui.insurance.InsuranceFormScreen
@@ -64,6 +42,11 @@ import com.wealthvault_final.`financial-asset`.ui.stock.StockFormScreen
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+
+// 🌟 1. สร้าง ScreenModel เพื่อเก็บสถานะการเลือก
+class MenuScreenModel : ScreenModel {
+    var selectedId by mutableStateOf<Int?>(1)
+}
 
 data class AssetCategory(
     val id: Int,
@@ -85,8 +68,12 @@ class MenuScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        // 🌟 2. เรียกใช้ ScreenModel
+        val screenModel = getScreenModel<MenuScreenModel>()
 
         MenuContent(
+            selectedId = screenModel.selectedId,
+            onCategorySelect = { screenModel.selectedId = it },
             onBackClick = { navigator.pop() },
             onNextClick = { selectedCategory ->
                 when (selectedCategory?.id) {
@@ -104,11 +91,11 @@ class MenuScreen : Screen {
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun MenuContent(
+    selectedId: Int?,
+    onCategorySelect: (Int?) -> Unit,
     onBackClick: () -> Unit = {},
     onNextClick: (AssetCategory?) -> Unit = {}
 ) {
-    var selectedId by remember { mutableStateOf<Int?>(1) }
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = LightBg,
@@ -116,10 +103,8 @@ fun MenuContent(
             Column(modifier = Modifier.statusBarsPadding()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    // 🌟 1. ปรับ Padding เป็น 24.dp ให้ขอบเท่ากัน
                     modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
                 ) {
-                    // 🌟 ถอด IconButton ออก ใช้ Icon + clickable แทน เพื่อแก้ปัญหาขอบดัน
                     Icon(
                         painter = painterResource(Res.drawable.ic_common_back),
                         contentDescription = "Back",
@@ -138,16 +123,15 @@ fun MenuContent(
             }
         },
         bottomBar = {
-            // 🌟 2. ปรับ Padding ของปุ่มเป็น 24.dp
-            Box(modifier = Modifier.navigationBarsPadding().padding(horizontal = 24.dp, vertical = 24.dp)) {
+            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
                 Button(
                     onClick = { onNextClick(assetCategories.find { it.id == selectedId }) },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().height(46.dp), // 🌟 มาตรฐาน 46.dp
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     enabled = selectedId != null
                 ) {
-                    Text("ต่อไป", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    Text("ต่อไป", color = Color.White, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -157,7 +141,6 @@ fun MenuContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                // 🌟 3. ปรับ Padding ขอบซ้ายขวาของการ์ดเป็น 24.dp
                 .padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -167,7 +150,7 @@ fun MenuContent(
                 AssetCard(
                     category = category,
                     isSelected = selectedId == category.id,
-                    onClick = { selectedId = category.id }
+                    onClick = { onCategorySelect(category.id) }
                 )
             }
         }
@@ -181,17 +164,21 @@ fun AssetCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val borderWidth = if (isSelected) 2.dp else 0.dp
-    val borderColor = if (isSelected) category.borderColor else Color.Transparent
+    val borderWidth = if (isSelected) 2.dp else 1.dp
+    // 🌟 ปรับสีขอบตอนไม่เลือกให้เป็น LightBorder จางๆ ตามหน้าอื่นๆ
+    val borderColor = if (isSelected) category.borderColor else Color.LightGray.copy(alpha = 0.3f)
 
     Card(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(160.dp),
+            .height(130.dp),
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(borderWidth, borderColor),
-        colors = CardDefaults.cardColors(containerColor = category.backgroundColor)
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) category.backgroundColor else Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (isSelected) {
@@ -202,7 +189,7 @@ fun AssetCard(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(12.dp)
-                        .size(22.dp)
+                        .size(20.dp)
                 )
             }
 
@@ -214,16 +201,16 @@ fun AssetCard(
                 Image(
                     painter = painterResource(category.iconRes),
                     contentDescription = category.title,
-                    modifier = Modifier.size(100.dp),
+                    modifier = Modifier.size(70.dp), // ปรับขนาดไอคอนเล็กน้อยให้สมดุล
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = category.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = LightText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                    color = if (isSelected) category.borderColor else LightText,
                     textAlign = TextAlign.Center
                 )
             }

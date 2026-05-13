@@ -106,11 +106,25 @@ class LoginScreen() : Screen {
             isLoading = screenModel.isLoading,
             errorMessage = screenModel.errorMessage,
             onLoginClick = {
-                screenModel.onLoginClick { state ->
-                    when (state) {
-                        is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
-                        is LoginState.GoToMain -> navigator.replaceAll(MainScreen())
-                        else -> {}
+                // 🌟 1. กำหนดรูปแบบของอีเมล (ต้องมี @ และ . ตามด้วยตัวอักษร)
+                val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,}$".toRegex()
+
+                // 🌟 2. เช็คค่าว่างก่อน
+                if (screenModel.username.isBlank() || screenModel.password.isBlank()) {
+                    screenModel.errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"
+                }
+                // 🌟 3. เช็ครูปแบบอีเมล
+                else if (!screenModel.username.matches(emailRegex)) {
+                    screenModel.errorMessage = "รูปแบบอีเมลไม่ถูกต้อง"
+                }
+                // 🌟 4. ถ้าถูกต้องทั้งหมด ค่อยเรียกใช้ API
+                else {
+                    screenModel.onLoginClick { state ->
+                        when (state) {
+                            is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
+                            is LoginState.GoToMain -> navigator.replaceAll(MainScreen())
+                            else -> {}
+                        }
                     }
                 }
             },

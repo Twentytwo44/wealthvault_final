@@ -56,11 +56,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -216,7 +218,7 @@ fun ShareAssetContent(
             Column(modifier = Modifier.statusBarsPadding()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 20.dp)
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 8.dp, top = 24.dp)
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_common_back),
@@ -246,11 +248,11 @@ fun ShareAssetContent(
                         )
                         onNextClick(dataToSend)
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().height(46.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
                 ) {
-                    Text("ต่อไป", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    Text("ต่อไป", color = Color.White, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -270,21 +272,25 @@ fun ShareAssetContent(
                 border = BorderStroke(1.dp, LightBorder),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent)
             ) {
-                LazyColumn(
-                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (selectedFriends.isEmpty()) {
-                        item {
-                            Text(
-                                "ยังไม่ได้เลือกเพื่อนหรือกลุ่ม",
-                                modifier = Modifier.fillMaxWidth().height(200.dp).padding(16.dp),
-                                textAlign = TextAlign.Center,
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    } else {
+                if (selectedFriends.isEmpty()) {
+                    // 🌟 ใช้ Box เพื่อจัดวางข้อความให้อยู่กึ่งกลาง Card ทั้งแนวตั้งและแนวนอน
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "ยังไม่ได้เลือกเพื่อนหรือกลุ่ม",
+                            textAlign = TextAlign.Center,
+                            color = Color.Gray,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                } else {
+                    // ถ้ามีข้อมูล ค่อยโชว์ LazyColumn ตามปกติ
+                    LazyColumn(
+                        modifier = Modifier.padding(10.dp).fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         items(selectedFriends) { friend ->
                             ShareItemWithDelete(
                                 data = friend,
@@ -295,60 +301,76 @@ fun ShareAssetContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
 
             // --- ส่วนที่ 2: แชร์ให้คนไม่มีบัญชี ---
             SectionHeader(
                 title = "แชร์ให้คนที่ไม่มีบัญชี",
                 showInfo = true,
-                onInfoClick = { showEmailInfoTooltip = !showEmailInfoTooltip }, // 🌟 กด Info เพื่อเปิด/ปิด Tooltip
+                onInfoClick = { showEmailInfoTooltip = !showEmailInfoTooltip },
                 onAddClick = openInputEmail
             )
 
-            // 🌟 2. กล่องข้อความ Info Popup (แสดงเมื่อกด Icon Info)
-            AnimatedVisibility(visible = showEmailInfoTooltip) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                        .background(Color.White, RoundedCornerShape(12.dp))
-                        .border(1.dp, LightBorder, RoundedCornerShape(20.dp))
-                        .padding(10.dp)
-                ) {
-                    Text(
-                        text = "หากคนที่คุณต้องการให้เข้าถึงทรัพย์สินนี้\nยังไม่มีบัญชีของ Wealth & Vault\nหรือยังไม่ได้เพิ่มเพื่อน สามารถแชร์ผ่านอีเมลได้",
-                        color = LightPrimary,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
+            Box(modifier = Modifier.fillMaxWidth()) {
 
-            Card(
-                modifier = Modifier.fillMaxWidth().height(240.dp),
-                shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, LightBorder),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-            ) {
-                LazyColumn(
-                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                // 1. เนื้อหาหลัก (Card) ให้อยู่เลเยอร์ล่างสุด
+                Card(
+                    modifier = Modifier.fillMaxWidth().height(240.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, LightBorder),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent)
                 ) {
                     if (selectedEmails.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().padding(16.dp).height(100.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("ยังไม่มีการเพิ่มอีเมล", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
-                            }
-                        }
-                    } else {
-                        items(selectedEmails) { email ->
-                            ShareItemWithDelete(
-                                data = email,
-                                onDelete = { selectedEmails.remove(email) }
+                        Box(
+                            modifier = Modifier.fillMaxSize().padding(12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "ยังไม่มีการเพิ่มอีเมล",
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
                             )
                         }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.padding(10.dp).fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(selectedEmails) { email ->
+                                ShareItemWithDelete(
+                                    data = email,
+                                    onDelete = { selectedEmails.remove(email) }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // 🌟 2. กล่องข้อความ Info Popup ลอยทับด้านบน
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = showEmailInfoTooltip,
+                    // เพิ่ม Animation ให้ค่อยๆ โผล่ลงมาทับ จะดูเนียนตาขึ้น
+                    enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top),
+                    exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.shrinkVertically(shrinkTowards = Alignment.Top),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(horizontal = 8.dp) // ขยับไม่ให้ชิดขอบจอเกินไป
+                        .zIndex(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            // เพิ่ม Shadow ให้ดูเป็น Popup ที่ลอยอยู่จริงๆ (ออปชันเสริม)
+//                            .shadow(elevation = 6.dp, shape = RoundedCornerShape(12.dp))
+                            .background(Color.White, RoundedCornerShape(12.dp))
+                            .border(1.dp, LightBorder, RoundedCornerShape(12.dp)) // ปรับขอบให้โค้งเท่ากัน
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            text = "หากคนที่คุณต้องการให้เข้าถึงทรัพย์สินนี้\nยังไม่มีบัญชีของ Wealth & Vault\nหรือยังไม่ได้เพิ่มเพื่อน สามารถแชร์ผ่านอีเมลได้",
+                            color = LightPrimary,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 }
             }
@@ -448,12 +470,12 @@ fun ShareItemWithDelete(data: ShareInfo, onDelete: () -> Unit) {
         border = BorderStroke(1.dp, LightBorder),
     ) {
         Row(
-            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+            modifier = Modifier.padding(10.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Profile Image / Placeholder
             Box(
-                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(LightBg),
+                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(LightBg),
                 contentAlignment = Alignment.Center
             ) {
                 if (!data.profileUrl.isNullOrBlank()) {
@@ -470,19 +492,19 @@ fun ShareItemWithDelete(data: ShareInfo, onDelete: () -> Unit) {
                         else -> painterResource(Res.drawable.ic_nav_profile)
                     }
                     if (data.typeData == "E") {
-                        Icon(painter = painterResource(Res.drawable.ic_form_email_outline), contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+                        Icon(painter = painterResource(Res.drawable.ic_form_email_outline), contentDescription = null, tint = LightPrimary, modifier = Modifier.size(20.dp))
                     } else {
-                        Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+                        Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(20.dp))
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = data.name ?: "",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = LightText,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
@@ -492,7 +514,7 @@ fun ShareItemWithDelete(data: ShareInfo, onDelete: () -> Unit) {
                     // 🌟 แบบของอีเมล: วันที่อยู่ใต้ชื่อเลย (ที่คุณแชมป์บอกว่าโอเคแล้ว)
                     if (data.date != null) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(data.date!!, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                        Text(data.date!!, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                     }
                 } else {
                     // 🌟 แบบของเพื่อน/กลุ่ม: จับ Badge และ วันที่ มาเรียงในบรรทัดเดียวกัน
@@ -513,12 +535,12 @@ fun ShareItemWithDelete(data: ShareInfo, onDelete: () -> Unit) {
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     val icon = if(data.typeData == "G") painterResource(Res.drawable.ic_nav_social) else painterResource(Res.drawable.ic_nav_profile)
-                                    Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(12.dp))
+                                    Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(10.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = data.subText,
                                         color = LightPrimary,
-                                        style = MaterialTheme.typography.labelMedium,
+                                        style = MaterialTheme.typography.labelSmall,
                                         maxLines = 1,
                                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                     )
@@ -532,7 +554,7 @@ fun ShareItemWithDelete(data: ShareInfo, onDelete: () -> Unit) {
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = data.date!!,
-                                    style = MaterialTheme.typography.labelMedium,
+                                    style = MaterialTheme.typography.labelSmall,
                                     color = Color.Gray,
                                     maxLines = 1
                                 )
@@ -550,7 +572,7 @@ fun ShareItemWithDelete(data: ShareInfo, onDelete: () -> Unit) {
                     painter = painterResource(Res.drawable.ic_common_bin),
                     contentDescription = "Delete",
                     tint = RedErr,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -600,7 +622,7 @@ fun FriendSelectionList(
     var globalApiDate by remember { mutableStateOf<String?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth().padding(16.dp).navigationBarsPadding()) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp).navigationBarsPadding()) {
 
         Text("เลือกเพื่อนหรือกลุ่ม", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
         Spacer(modifier = Modifier.height(16.dp))
@@ -624,20 +646,20 @@ fun FriendSelectionList(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(LightBg), contentAlignment = Alignment.Center) {
+                        Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(LightBg), contentAlignment = Alignment.Center) {
                             // 🌟 แก้ไข: เช็กให้ชัวร์ว่าไม่เป็น null และไม่เป็น String ว่าง ("")
                             if (!item.profileUrl.isNullOrBlank()) {
                                 AsyncImage(model = item.profileUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                             } else {
                                 val icon = if(item.typeData == "G") painterResource(Res.drawable.ic_nav_social) else painterResource(Res.drawable.ic_nav_profile)
-                                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+                                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(20.dp))
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(item.name ?: "", style = MaterialTheme.typography.bodyLarge, color = LightText)
@@ -647,9 +669,9 @@ fun FriendSelectionList(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 val icon = if(item.typeData == "G") painterResource(Res.drawable.ic_nav_social) else painterResource(Res.drawable.ic_nav_profile)
-                                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(12.dp))
+                                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(10.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(item.subText, color = LightPrimary, style = MaterialTheme.typography.labelMedium)
+                                Text(item.subText, color = LightPrimary, style = MaterialTheme.typography.labelSmall)
                             }
                         }
 
@@ -686,21 +708,31 @@ fun FriendSelectionList(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .height(44.dp) // 🌟 1. บังคับความสูง 44.dp ตามมาตรฐานหน้าอื่น
+                    .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                    .border(
+                        width = 1.dp,
+                        color = LightBorder.copy(alpha = 0.5f), // 🌟 2. ใช้ขอบจาง 0.5 ตาม Master UI
+                        shape = RoundedCornerShape(12.dp)
+                    )
                     .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, LightBorder, RoundedCornerShape(12.dp))
-                    .background(LightSoftWhite)
                     .clickable { showDatePicker = true }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    .padding(horizontal = 16.dp), // 🌟 3. Padding ซ้าย-ขวา 16.dp (ไม่ต้องใส่ vertical เพราะ Row จัดกลางให้)
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = globalDate ?: "เลือกวันที่",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (globalDate != null) LightText else Color.Gray.copy(0.7f)
+                    // 🌟 4. ใช้ bodyLarge และสี Color(0xFF3A2F2A) เพื่อให้เหมือนตอนพิมพ์ใน TextField
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (globalDate != null) Color(0xFF3A2F2A) else Color.LightGray
                 )
-                Icon(painterResource(Res.drawable.ic_common_calendar), contentDescription = "Select Date", tint = LightPrimary, modifier = Modifier.size(24.dp))
+                Icon(
+                    painter = painterResource(Res.drawable.ic_common_calendar),
+                    contentDescription = "Select Date",
+                    tint = LightPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
 
@@ -713,7 +745,7 @@ fun FriendSelectionList(
                 val finalizedList = tempSelected.map { it.copy(date = finalDate, apiDate = finalApiDate) }
                 onConfirm(finalizedList)
             },
-            modifier = Modifier.fillMaxWidth().height(50.dp),
+            modifier = Modifier.fillMaxWidth().height(46.dp),
             shape = RoundedCornerShape(12.dp),
             enabled = tempSelected.isNotEmpty(),
             colors = ButtonDefaults.buttonColors(
@@ -722,7 +754,7 @@ fun FriendSelectionList(
                 disabledContentColor = Color.White
             )
         ) {
-            Text("เพิ่ม", color = Color.White, style = MaterialTheme.typography.titleMedium)
+            Text("เพิ่ม", color = Color.White, style = MaterialTheme.typography.bodyLarge)
         }
     }
 
@@ -791,31 +823,53 @@ fun AddEmailContent(onConfirm: (email: String, date: String?, apiDate: String?) 
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp).navigationBarsPadding()) {
 
         Text("เพิ่มอีเมลผู้รับ", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
-        Text("ระบบจะส่งคำเชิญไปยังอีเมลนี้เพื่อให้เข้าถึงข้อมูล", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+        Text("ระบบจะส่งคำเชิญไปยังอีเมลนี้เพื่อให้เข้าถึงข้อมูล", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         Spacer(modifier = Modifier.height(20.dp))
 
+        // 🌟 Email Input แบบ BasicTextField (สูง 44.dp)
         Column {
             Text(text = "อีเมล", style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            androidx.compose.foundation.text.BasicTextField(
                 value = emailText,
                 onValueChange = { emailText = it },
-                modifier = Modifier.fillMaxWidth().border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
-                placeholder = { Text("example@gmail.com", color = Color.LightGray) },
-                shape = RoundedCornerShape(12.dp),
                 singleLine = true,
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = LightSoftWhite,
-                    unfocusedContainerColor = LightSoftWhite,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = LightText
-                )
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF3A2F2A)),
+                cursorBrush = androidx.compose.ui.graphics.SolidColor(LightPrimary),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
+                decorationBox = { innerTextField ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                            .border(
+                                width = 1.dp,
+                                color = LightBorder.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            if (emailText.isEmpty()) {
+                                Text(
+                                    text = "example@gmail.com",
+                                    color = Color.LightGray,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
+                }
             )
         }
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 🌟 เพิ่ม Checkbox "ตั้งวันการแชร์ล่วงหน้า" สำหรับ Email Flow
+        // 🌟 ตั้งวันแชร์ล่วงหน้า
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable { isDateChecked = !isDateChecked }.padding(vertical = 4.dp)
@@ -824,34 +878,47 @@ fun AddEmailContent(onConfirm: (email: String, date: String?, apiDate: String?) 
                 isSelected = isDateChecked,
                 onSelectedChange = { isDateChecked = it }
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Text("ตั้งวันการแชร์ล่วงหน้า", color = LightPrimary, style = MaterialTheme.typography.bodyMedium)
         }
 
         AnimatedVisibility(visible = isDateChecked) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, LightBorder, RoundedCornerShape(12.dp))
-                    .background(LightSoftWhite)
-                    .clickable { showDatePicker = true }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = selectedDate ?: "เลือกวันที่",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (selectedDate != null) LightText else Color.Gray.copy(0.7f)
-                )
-                Icon(painterResource(Res.drawable.ic_common_calendar), contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+            Column {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp) // 🌟 สูง 44.dp มาตรฐาน
+                        .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                        .border(
+                            width = 1.dp,
+                            color = LightBorder.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { showDatePicker = true }
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = selectedDate ?: "เลือกวันที่",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (selectedDate != null) Color(0xFF3A2F2A) else Color.LightGray
+                    )
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_common_calendar),
+                        contentDescription = null,
+                        tint = LightPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
+        // 🌟 ปุ่มเพิ่ม (สูง 46.dp)
         Button(
             onClick = {
                 val finalDate = if (isDateChecked) selectedDate else null
@@ -859,11 +926,16 @@ fun AddEmailContent(onConfirm: (email: String, date: String?, apiDate: String?) 
                 onConfirm(emailText, finalDate, finalApiDate)
             },
             enabled = emailText.contains("@") && emailText.contains("."),
-            modifier = Modifier.fillMaxWidth().height(50.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = LightPrimary,
+                disabledContainerColor = Color.LightGray.copy(alpha = 0.5f)
+            )
         ) {
-            Text("เพิ่ม", color = Color.White, style = MaterialTheme.typography.titleMedium)
+            Text("เพิ่ม", color = Color.White, style = MaterialTheme.typography.bodyLarge)
         }
     }
 

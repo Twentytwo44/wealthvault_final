@@ -1,51 +1,24 @@
 package com.wealthvault_final.`financial-asset`.ui.realestate.land
 
-// 🌟 Import Theme
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -57,12 +30,7 @@ import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_bin
 import com.wealthvault.core.generated.resources.ic_common_plus
-import com.wealthvault.core.theme.LightBg
-import com.wealthvault.core.theme.LightBorder
-import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.core.theme.LightText
-import com.wealthvault.core.theme.RedErr
+import com.wealthvault.core.theme.*
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
 import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
@@ -80,16 +48,14 @@ class LandFormScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LandScreenModel>()
 
-        // 🌟 1. ดึง State ออกมา
         val state by screenModel.state.collectAsState()
         val buildState by screenModel.BuildingState.collectAsState()
 
         LandInputForm(
-            initialData = state, // 🌟 2. โยนค่าเริ่มต้นเข้าไปในฟอร์ม
+            initialData = state,
             onBackClick = { navigator.pop() },
             onNextClick = { data ->
                 screenModel.updateForm(data)
-                // 🌟 ส่ง data ที่อัปเดตล่าสุดไปหน้าแชร์โดยตรง
                 navigator.push(ShareAssetScreen(request = data))
             },
             buildingData = buildState
@@ -100,19 +66,15 @@ class LandFormScreen : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandInputForm(
-    initialData: LandModel, // 🌟 รับ initialData เข้ามา
+    initialData: LandModel,
     onBackClick: () -> Unit = {},
     onNextClick: (LandModel) -> Unit,
     buildingData: List<GetBuildingData>
 ) {
-    // 🌟 ดึงค่าจาก initialData มาใส่ตั้งต้น
     var deedNum by remember { mutableStateOf(initialData.deedNum) }
     var landName by remember { mutableStateOf(initialData.landName) }
-
-    // เรื่องตัวเลข ถ้าเป็น 0.0 ให้แสดงหน้าว่างๆ
     var area by remember { mutableStateOf(if (initialData.area == 0.0) "" else initialData.area.toString()) }
     var amount by remember { mutableStateOf(if (initialData.amount == 0.0) "" else initialData.amount.toString()) }
-
     var description by remember { mutableStateOf(initialData.description) }
     var locationAddress by remember { mutableStateOf(initialData.locationAddress) }
     var locationSubDistrict by remember { mutableStateOf(initialData.locationSubDistrict) }
@@ -120,20 +82,14 @@ fun LandInputForm(
     var locationProvince by remember { mutableStateOf(initialData.locationProvince) }
     var locationPostalCode by remember { mutableStateOf(initialData.locationPostalCode) }
 
-    // 🌟 ดึงค่า List ต่างๆ กลับมาใส่ใน State
     val referenceIds = remember { mutableStateListOf<RefModel>().apply { addAll(initialData.referenceIds) } }
     val attachments = remember { mutableStateListOf<Attachment>().apply { addAll(initialData.attachments) } }
     val filePicker = rememberFilePicker { newFiles -> attachments.addAll(newFiles) }
     var showBuildingsheet by remember { mutableStateOf(false) }
 
-    // 🌟 Validation: เช็กข้อมูลจำเป็น รวมที่อยู่ด้วย
-    val isFormValid = deedNum.isNotBlank() &&
-            landName.isNotBlank() &&
-            area.isNotBlank() &&
-            locationAddress.isNotBlank() &&
-            locationSubDistrict.isNotBlank() &&
-            locationDistrict.isNotBlank() &&
-            locationProvince.isNotBlank() &&
+    val isFormValid = deedNum.isNotBlank() && landName.isNotBlank() && area.isNotBlank() &&
+            locationAddress.isNotBlank() && locationSubDistrict.isNotBlank() &&
+            locationDistrict.isNotBlank() && locationProvince.isNotBlank() &&
             locationPostalCode.isNotBlank()
 
     Scaffold(
@@ -163,7 +119,7 @@ fun LandInputForm(
             }
         },
         bottomBar = {
-            Box(modifier = Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 24.dp)) {
+            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
                 Button(
                     onClick = {
                         val data = LandModel(
@@ -182,19 +138,12 @@ fun LandInputForm(
                         )
                         onNextClick(data)
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = LightPrimary,
-                        disabledContainerColor = LightBorder
-                    ),
+                    modifier = Modifier.fillMaxWidth().height(46.dp), // 🌟 ปรับสูง 46.dp ตามต้นแบบ
+                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp),
                     enabled = isFormValid
                 ) {
-                    Text(
-                        text = "ต่อไป",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (isFormValid) Color.White else Color.Gray
-                    )
+                    Text("ต่อไป", style = MaterialTheme.typography.bodyLarge, color = Color.White)
                 }
             }
         }
@@ -206,12 +155,12 @@ fun LandInputForm(
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
 
+            // 🌟 ข้อมูลทั่วไป (ใช้ AssetTextField ที่แก้เป็น BasicTextField แล้ว)
             AssetTextField(value = deedNum, onValueChange = { deedNum = it }, label = "เลขที่โฉนดที่ดิน*", placeholder = "ระบุเลขที่โฉนด")
             AssetTextField(value = landName, onValueChange = { landName = it }, label = "ชื่อเรียกที่ดิน*", placeholder = "เช่น ที่ดินเปล่าเชียงใหม่")
 
-            AssetTextField(
+            CustomTextField(
                 value = area,
                 onValueChange = { if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) area = it },
                 label = "ขนาดพื้นที่ (ตร.ว.)*",
@@ -219,7 +168,7 @@ fun LandInputForm(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            AssetTextField(
+            CustomTextField(
                 value = amount,
                 onValueChange = { if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) amount = it },
                 label = "มูลค่าประเมิน (บาท)",
@@ -227,12 +176,13 @@ fun LandInputForm(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            // 🌟 เติมดอกจันให้รู้ว่าบังคับกรอก
+            // 🌟 ส่วนที่อยู่
             AssetTextField(value = locationAddress, onValueChange = { locationAddress = it }, label = "ที่อยู่*", placeholder = "ซอย, ถนน")
             AssetTextField(value = locationSubDistrict, onValueChange = { locationSubDistrict = it }, label = "ตำบล / แขวง*", placeholder = "ระบุตำบล")
             AssetTextField(value = locationDistrict, onValueChange = { locationDistrict = it }, label = "อำเภอ / เขต*", placeholder = "ระบุอำเภอ")
             AssetTextField(value = locationProvince, onValueChange = { locationProvince = it }, label = "จังหวัด*", placeholder = "ระบุจังหวัด")
-            AssetTextField(
+
+            CustomTextField(
                 value = locationPostalCode,
                 onValueChange = { if (it.isEmpty() || it.all { char -> char.isDigit() }) locationPostalCode = it },
                 label = "รหัสไปรษณีย์*",
@@ -240,6 +190,7 @@ fun LandInputForm(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
+            // 🌟 ส่วนอ้างอิงอาคาร
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                 ReferenceSectionHeader(title = "อาคาร / สิ่งปลูกสร้างบนที่ดินนี้", onAddClick = { showBuildingsheet = true })
                 Spacer(modifier = Modifier.height(8.dp))
@@ -248,7 +199,7 @@ fun LandInputForm(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
+                            .height(44.dp) // ปรับสูงเท่า TextField ปกติ
                             .background(LightSoftWhite, RoundedCornerShape(12.dp))
                             .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                             .clickable { showBuildingsheet = true },
@@ -264,7 +215,6 @@ fun LandInputForm(
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         referenceIds.forEach { build ->
-                            val shortId = if (build.areaId.length > 8) build.areaId.take(8).uppercase() else build.areaId
                             ReferenceItemRow(name = build.areaName) {
                                 referenceIds.remove(build)
                             }
@@ -275,14 +225,14 @@ fun LandInputForm(
 
             AssetTextField(value = description, onValueChange = { description = it }, label = "รายละเอียดเพิ่มเติม", placeholder = "ระบุรายละเอียดเพิ่มเติม", isMultiLine = true)
 
-            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                ReferenceImagepicker(
-                    attachments = attachments,
-                    onAddImage = { filePicker.launchImage() },
-                    onAddPdf = { filePicker.launchPdf() },
-                    onRemove = { item -> attachments.remove(item) }
-                )
-            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            ReferenceImagepicker(
+                attachments = attachments,
+                onAddImage = { filePicker.launchImage() },
+                onAddPdf = { filePicker.launchPdf() },
+                onRemove = { item -> attachments.remove(item) }
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -302,7 +252,60 @@ fun LandInputForm(
     }
 }
 
-// 🌟 Reusable Components สำหรับส่วนอ้างอิง
+// 🌟 Component ย่อย CustomTextField (มาตรฐาน Master UI)
+@Composable
+private fun CustomTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    readOnly: Boolean = false,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    onClick: (() -> Unit)? = null
+) {
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
+        Spacer(modifier = Modifier.height(8.dp))
+        Box {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                readOnly = readOnly,
+                singleLine = true,
+                keyboardOptions = keyboardOptions,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF3A2F2A)),
+                cursorBrush = SolidColor(LightPrimary),
+                modifier = Modifier.fillMaxWidth().height(44.dp),
+                decorationBox = { innerTextField ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                            .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            if (value.isEmpty()) {
+                                Text(text = placeholder, color = Color.LightGray, style = MaterialTheme.typography.bodyLarge)
+                            }
+                            innerTextField()
+                        }
+                        if (trailingIcon != null) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            trailingIcon()
+                        }
+                    }
+                }
+            )
+            if (onClick != null) {
+                Box(modifier = Modifier.matchParentSize().clip(RoundedCornerShape(12.dp)).clickable { onClick() })
+            }
+        }
+    }
+}
+
 @Composable
 fun ReferenceSectionHeader(title: String, onAddClick: () -> Unit) {
     Row(
@@ -315,9 +318,7 @@ fun ReferenceSectionHeader(title: String, onAddClick: () -> Unit) {
             painter = painterResource(Res.drawable.ic_common_plus),
             contentDescription = null,
             tint = LightPrimary,
-            modifier = Modifier
-                .size(24.dp)
-                .clickable { onAddClick() }
+            modifier = Modifier.size(24.dp).clickable { onAddClick() }
         )
     }
 }
@@ -327,22 +328,19 @@ fun ReferenceItemRow(name: String, onRemove: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(44.dp) // ปรับความสูงรายการที่เลือกแล้วให้เท่า TextField
             .background(LightSoftWhite, RoundedCornerShape(12.dp))
             .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-            .padding(12.dp),
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(name, style = MaterialTheme.typography.bodyLarge, color = LightText)
-        }
+        Text(name, style = MaterialTheme.typography.bodyLarge, color = LightText, modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(Res.drawable.ic_common_bin),
             contentDescription = null,
             tint = RedErr.copy(alpha = 0.7f),
-            modifier = Modifier
-                .size(24.dp)
-                .clickable { onRemove() }
+            modifier = Modifier.size(20.dp).clickable { onRemove() }
         )
     }
 }
@@ -378,16 +376,19 @@ fun BuildingSelectionBottomSheet(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(build.areaName, fontWeight = FontWeight.Medium)
-                                }
+                                Text(build.areaName, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
                                 Checkbox(checked = isChecked, onCheckedChange = null, colors = CheckboxDefaults.colors(checkedColor = LightPrimary))
                             }
                         }
                     }
                 }
             }
-            Button(onClick = { onConfirm(tempSelected.toList()) }, modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(50.dp), shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)) {
+            Button(
+                onClick = { onConfirm(tempSelected.toList()) },
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(46.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
+            ) {
                 Text("ตกลง (${tempSelected.size}) รายการ", color = Color.White)
             }
         }

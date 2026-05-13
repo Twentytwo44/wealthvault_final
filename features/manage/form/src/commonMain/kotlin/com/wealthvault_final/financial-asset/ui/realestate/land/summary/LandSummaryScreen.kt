@@ -8,11 +8,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -142,7 +144,7 @@ fun SummaryContent(
             Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 24.dp)) {
                 Button(
                     onClick = onConfirmClick,
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().height(46.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     enabled = !isSaving
@@ -150,7 +152,7 @@ fun SummaryContent(
                     if (isSaving) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("ยืนยัน", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Text("ยืนยัน", color = Color.White, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
@@ -190,7 +192,7 @@ fun SummaryCard(data: LandModel) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, LightBorder.copy(alpha = 0.6f))
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             // --- ข้อมูลพื้นฐานโฉนด ---
             SummaryRow("เลขที่โฉนด", data.deedNum)
             SummaryRow("ชื่อที่ดิน", data.landName)
@@ -225,7 +227,30 @@ fun SummaryCard(data: LandModel) {
                 }
             }
 
-            SummaryRow("คำอธิบาย", data.description.ifBlank { "-" })
+            // --- 🌟 ส่วนคำอธิบายแบบใหม่ (มีกรอบและเลื่อนได้) ---
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "คำอธิบาย",
+                style = MaterialTheme.typography.bodyMedium,
+                color = LightText.copy(alpha = 0.7f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 120.dp) // 🌟 จำกัดความสูงสูงสุด ถ้าเกินจะเลื่อนได้
+                    .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                    .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                    .verticalScroll(rememberScrollState()) // 🌟 ทำให้เลื่อนได้ภายในกรอบ
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = data.description.ifBlank { "-" },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (data.description.isNotBlank()) LightText else Color.Gray.copy(alpha = 0.6f)
+                )
+            }
 
             // --- ไฟล์แนบหลักฐาน ---
             Spacer(modifier = Modifier.height(20.dp))

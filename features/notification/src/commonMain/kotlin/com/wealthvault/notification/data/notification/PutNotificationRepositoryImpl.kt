@@ -9,4 +9,8 @@ class PutNotificationRepositoryImpl(
         return networkDataSource.putNoti(id)
     }
 
+    // 🌟 เพิ่มฟังก์ชันให้ ScreenModel มาเรียกใช้งาน
+    suspend fun putReadAllNoti(): Result<NotificationResponse> {
+        return networkDataSource.putReadAllNoti()
+    }
 }

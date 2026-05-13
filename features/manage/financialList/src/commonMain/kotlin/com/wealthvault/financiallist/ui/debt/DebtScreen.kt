@@ -134,7 +134,6 @@ fun DebtContent(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
@@ -144,7 +143,8 @@ fun DebtContent(
                             filteredExpenses.forEach { exp ->
                                 RealItemCard(
                                     title = exp.name ?: "",
-                                    subtitleLabel = "จ่ายให้", subtitleValue = exp.creditor ?: "-",
+                                    subtitleLabel = "จ่ายให้",
+                                    subtitleValue = exp.creditor?.takeIf { it.isNotBlank() } ?: "-",
                                     amountLabel = "ยอดชำระ", amountValue = "${formatAmount(exp.principal ?: 0.0)} บาท",
                                     onClick = { selectedLiabilityId = exp.id }
                                 )
@@ -161,7 +161,7 @@ fun DebtContent(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 40.dp, end = 25.dp)
-                .size(56.dp)
+                .size(50.dp)
                 .clickable { onAddClick() },
             shape = CircleShape,
             color = LightDebt,

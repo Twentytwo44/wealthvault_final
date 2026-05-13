@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape // 🌟 Import CircleShape สำหรับทำจุดกลม
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -60,6 +61,7 @@ import com.wealthvault.core.generated.resources.ic_dashboard_share
 import com.wealthvault.core.generated.resources.ic_nav_asset
 import com.wealthvault.core.generated.resources.ic_nav_debt
 import com.wealthvault.core.generated.resources.ic_nav_social
+import com.wealthvault.core.theme.LightBg // 🌟 Import สีพื้นหลังมาทำขอบจุดแดง
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.utils.LocalRootNavigator
@@ -82,16 +84,21 @@ class DashboardScreen(
         val screenModel = getScreenModel<DashboardScreenModel>()
         val dashboardState by screenModel.dashboardState.collectAsState()
         val isLoading by screenModel.isLoading.collectAsState()
+
+        // 🌟 1. รับค่าสถานะการแจ้งเตือน
+        val hasUnreadNoti by screenModel.hasUnreadNoti.collectAsState()
+
         val navigator = LocalNavigator.currentOrThrow
         val localRootNavigator = LocalRootNavigator.current
-
 
         var rootNavigator = navigator
         while (rootNavigator.parent != null) {
             rootNavigator = rootNavigator.parent!!
         }
         var selectedTab by remember { mutableStateOf(DashboardTab.ASSET) }
-        LaunchedEffect(Unit) {
+
+        // 🌟 2. อัปเดตข้อมูลและเช็ค Noti ทุกครั้งที่กลับมาหน้านี้ (จาก Unit เปลี่ยนเป็น navigator.lastItem)
+        LaunchedEffect(navigator.lastItem) {
             screenModel.fetchDashboard()
         }
 
@@ -105,7 +112,8 @@ class DashboardScreen(
             dashboardState = dashboardState,
             isLoading = isLoading,
             selectedTab = selectedTab,
-            onTabChange = { selectedTab = it }
+            onTabChange = { selectedTab = it },
+            hasUnreadNoti = hasUnreadNoti // 🌟 3. ส่งค่าลงไปให้ DashboardContent
         )
     }
 }
@@ -117,7 +125,8 @@ fun DashboardContent(
     dashboardState: DashboardDataResponse?,
     isLoading: Boolean,
     selectedTab: DashboardTab,
-    onTabChange: (DashboardTab) -> Unit
+    onTabChange: (DashboardTab) -> Unit,
+    hasUnreadNoti: Boolean // 🌟 รับค่าที่ตรงนี้
 ) {
     Column(
         modifier = Modifier
@@ -126,7 +135,8 @@ fun DashboardContent(
             .padding(horizontal = 20.dp)
             .padding(top = 20.dp)
     ) {
-        DashboardTopBar(onNotiClick = onNotiClick)
+        // 🌟 4. ส่งสถานะจุดแดงลงไปให้ TopBar วาดต่อ
+        DashboardTopBar(onNotiClick = onNotiClick, hasUnreadNoti = hasUnreadNoti)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -170,19 +180,12 @@ fun DashboardContent(
                 val currentList = if (isAsset) data.assets else data.liabilities
 
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(10.dp), // ระยะห่างระหว่างการ์ด
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 32.dp)
                 ) {
                     items(currentList) { assetItem ->
-
-                        // 🌟 1. ดึงชื่อหมวดหมู่ชั่วคราว เพื่อเอามาเช็คว่าจะใช้ Label คำว่าอะไร
                         val categoryName = getCategoryGroupName(assetItem.type, isAsset)
-
-                        // 🌟 2. กำหนด Label ของบรรทัดที่ 2
-
-
-                        // 🌟 3. กำหนด Label ของบรรทัดที่ 3
                         val amtLabel = when (categoryName) {
                             "บัญชีเงินฝาก" -> "ยอดเงิน"
                             "เงินสด ทองคำ" -> "มูลค่า"
@@ -193,17 +196,15 @@ fun DashboardContent(
                             else -> "มูลค่า"
                         }
 
-                        // 🌟 4. วาดการ์ดเรียงกันลงมาเลย
                         RealItemCard(
                             title = assetItem.name.ifEmpty { "ไม่ระบุชื่อ" },
                             subtitleLabel = "ประเภท",
-                            subtitleValue = categoryName, // ข้อมูลจริงที่ API Dashboard ส่งมา
+                            subtitleValue = categoryName,
                             amountLabel = amtLabel,
                             amountValue = "${assetItem.value?.let { formatAmount(it) } ?: "0"} บาท"
                         )
                     }
                     item { Spacer(modifier = Modifier.height(80.dp)) }
-
                 }
             }
         }
@@ -214,13 +215,13 @@ fun DashboardContent(
 // 🌟 ฟังก์ชันจัดกลุ่ม (Grouping Helper)
 // =====================================
 fun getCategoryGroupName(type: String, isAsset: Boolean): String {
-    val t = type.lowercase() // 🌟 1. เปลี่ยนเป็น lowercase() ครับ
+    val t = type.lowercase()
     return if (isAsset) {
         when {
             t.contains("account") -> "บัญชีเงินฝาก"
             t.contains("cash") -> "เงินสด ทองคำ"
             t.contains("investment") -> "ลงทุน หุ้น กองทุน"
-            t.contains("insurance") -> "ประกัน" // 🌟 2. เติมหมวดประกันให้ครับ
+            t.contains("insurance") -> "ประกัน"
             t.contains("building") -> "บ้าน ตึก อาคาร"
             t.contains("land") -> "ที่ดิน"
             else -> "ทรัพย์สินอื่นๆ"
@@ -234,7 +235,10 @@ fun getCategoryGroupName(type: String, isAsset: Boolean): String {
 }
 
 @Composable
-fun DashboardTopBar(onNotiClick: () -> Unit) {
+fun DashboardTopBar(
+    onNotiClick: () -> Unit,
+    hasUnreadNoti: Boolean = false // 🌟 รับสถานะจุดแดงมา
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -243,12 +247,30 @@ fun DashboardTopBar(onNotiClick: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Wealth & Vault", style = MaterialTheme.typography.titleLarge, color = Color(0xFFC27A5A), fontWeight = FontWeight.Medium)
         }
-        Icon(
-            painter = painterResource(Res.drawable.ic_dashboard_noti),
-            contentDescription = "Notifications",
-            tint = Color(0xFFC47B5D),
-            modifier = Modifier.size(32.dp).clickable { onNotiClick() }
-        )
+
+        // 🌟 5. ครอบด้วย Box เพื่อแปะจุดแดงทับไอคอน
+        Box(
+            modifier = Modifier.clickable { onNotiClick() },
+            contentAlignment = Alignment.TopEnd
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_dashboard_noti),
+                contentDescription = "Notifications",
+                tint = Color(0xFFC47B5D),
+                modifier = Modifier.size(32.dp).padding(4.dp)
+            )
+
+            // 🌟 วาดจุดแดงเมื่อมีข้อความที่ยังไม่อ่าน
+            if (hasUnreadNoti) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFDC4A3C)) // จุดสีแดง
+                        .border(1.5.dp, LightBg, CircleShape) // ใส่ขอบสีพื้นหลังเพื่อให้ดูตัดกันสวยๆ
+                )
+            }
+        }
     }
 }
 

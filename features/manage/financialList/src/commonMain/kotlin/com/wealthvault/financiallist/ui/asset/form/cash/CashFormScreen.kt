@@ -152,12 +152,12 @@ fun CashInputForm(
 
                         onNextClick(data, addList, deleteList)
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp), // 🌟 สูง 50.dp
+                    modifier = Modifier.fillMaxWidth().height(46.dp), // 🌟 สูง 50.dp
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp), // 🌟 โค้ง 12.dp
                     enabled = isFormValid
                 ) {
-                    Text("ยืนยันการแก้ไข", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                    Text("ยืนยันการแก้ไข", style = MaterialTheme.typography.bodyLarge, color = Color.White)
                 }
             }
         }
@@ -169,7 +169,6 @@ fun CashInputForm(
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
 
             AssetTextField(
                 value = cashName,
@@ -198,7 +197,7 @@ fun CashInputForm(
                 isMultiLine = true
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             ReferenceImagepicker(
                 attachments = currentAssets,

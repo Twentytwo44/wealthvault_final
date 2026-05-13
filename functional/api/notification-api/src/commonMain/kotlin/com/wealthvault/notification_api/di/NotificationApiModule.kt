@@ -8,6 +8,8 @@ import com.wealthvault.notification_api.notification.GetNotificationsApi
 import com.wealthvault.notification_api.notification.GetNotificationsApiImpl
 import com.wealthvault.notification_api.read.PutNotiApi
 import com.wealthvault.notification_api.read.PutNotiApiImpl
+import com.wealthvault.notification_api.readall.PutNotiReadAllApi
+import com.wealthvault.notification_api.readall.PutNotiReadAllApiImpl
 import com.wealthvault.notification_api.registerdevice.AddDevicesApi
 import com.wealthvault.notification_api.registerdevice.AddDevicesApiImpl
 import com.wealthvault.notification_api.unregisterdevice.UnDevicesApi
@@ -29,7 +31,7 @@ object NotificationApiModule {
         single<GetNotificationsApi> { GetNotificationsApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<UnDevicesApi> { UnDevicesApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<GetAllDeviceApi> { GetAllDeviceApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-
+        single<PutNotiReadAllApi> { PutNotiReadAllApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
 
     }
 

@@ -270,7 +270,7 @@ fun EditProfileContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp, top = 8.dp)
+                .padding(bottom = 24.dp)
         ) {
             Button(
                 onClick = {

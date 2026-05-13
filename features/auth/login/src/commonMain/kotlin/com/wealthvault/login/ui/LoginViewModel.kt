@@ -20,12 +20,12 @@ import com.wealthvault_final.notification.PushNotificationHelper
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 sealed class LoginState {
     object Loading : LoginState()
     object GoToIntro : LoginState()
     object GoToMain : LoginState()
 }
+
 class LoginScreenModel(
     private val loginUseCase: LoginUseCase,
     private val googleRepository: GoogleAuthRepository,
@@ -41,6 +41,30 @@ class LoginScreenModel(
     var password by mutableStateOf("")
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
+
+    // 🌟 ฟังก์ชันสำหรับแปลง Error จาก Backend / Network ให้เป็นภาษาไทยที่อ่านง่าย
+    private fun parseErrorMessage(rawError: String?): String {
+        if (rawError.isNullOrBlank()) return "เกิดข้อผิดพลาดบางอย่าง กรุณาลองใหม่"
+
+        val lowerError = rawError.lowercase()
+
+        return when {
+            // เคสพิมพ์ผิด (อิงจาก RPC Error ของหลังบ้าน)
+            lowerError.contains("invalid email or password") ||
+                    lowerError.contains("wrong password") ||
+                    lowerError.contains("user not found") -> "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+
+            // เคสปัญหาเครือข่าย/เน็ตหลุด/เซิร์ฟเวอร์ตาย
+            lowerError.contains("timeout") ||
+                    lowerError.contains("failed to connect") ||
+                    lowerError.contains("unknownhost") ||
+                    lowerError.contains("network") ||
+                    lowerError.contains("connection refused") -> "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
+
+            // เคสอื่นๆ ที่ไม่ได้ดักไว้ (ตัดคำว่า rpc error ทิ้งถ้ามี เพื่อให้ดูสะอาดขึ้น)
+            else -> "เข้าสู่ระบบไม่สำเร็จ: ${rawError.replace("rpc error: code = Internal desc = ", "")}"
+        }
+    }
 
     fun onLoginClick(onNavigate: (LoginState) -> Unit) {
         if (username.isBlank() || password.isBlank()) {
@@ -60,34 +84,36 @@ class LoginScreenModel(
                     is FlowResult.Continue -> {
                         if (flowResult.data) {
                             println("🎉 Login Success! กำลังเช็คข้อมูลส่วนตัว...")
-
-                            // 🌟 ขั้นตอนเพิ่มเติม: เช็คข้อมูล User หลัง Login สำเร็จ
                             checkUserDataAndNavigate(onNavigate)
                         }
                     }
 
                     is FlowResult.Failure -> {
                         isLoading = false
-                        // ... (ลอจิกจัดการ errorMessage เดิมของคุณ) ...
+                        // 🌟 นำข้อความ Error ไปผ่านตัวกรองก่อนแสดงผล
+                        errorMessage = parseErrorMessage(flowResult.cause?.message)
                     }
 
-                    is FlowResult.Ended -> { isLoading = false }
+                    is FlowResult.Ended -> {
+                        // ปล่อยผ่าน
+                    }
                 }
             }
         }
     }
 
-    // แยกฟังก์ชันเช็ค Birthday ออกมาเพื่อให้โค้ดสะอาด
     private suspend fun checkUserDataAndNavigate(onNavigate: (LoginState) -> Unit) {
         try {
-            // 🚨 1. หยุดรอ 200ms เพื่อให้ DataStore บันทึก Access/Refresh Token ลงเครื่องให้เสร็จสมบูรณ์ 100%
             delay(200)
-
-            // 🟢 2. เรียกใช้ FCM Token ตรงนี้ (มั่นใจได้ว่าระบบจะหยิบ Token ใหม่ที่เพิ่งเซฟเสร็จไปใช้งาน)
             onGetFCMToken()
             delay(200)
-            // 3. เรียกดึงข้อมูล User
+
             val userResult = authRepository.getUser()
+
+            if (userResult.isFailure) {
+                throw Exception(userResult.exceptionOrNull()?.message ?: "ดึงข้อมูลโปรไฟล์ล้มเหลว")
+            }
+
             val userData = userResult.getOrNull()
             val birthday = userData?.birthday
 
@@ -100,22 +126,22 @@ class LoginScreenModel(
             }
         } catch (e: Exception) {
             println("❌ Error checking user data: ${e.message}")
-            onNavigate(LoginState.GoToIntro)
+            // 🌟 ผ่านตัวกรองเผื่อว่าเน็ตหลุดตอนเช็คข้อมูล User พอดี
+            errorMessage = "ดึงข้อมูลโปรไฟล์ไม่สำเร็จ: " + parseErrorMessage(e.message)
         } finally {
             isLoading = false
         }
     }
 
-    fun onGetFCMToken(){
+    fun onGetFCMToken() {
         pushHelper.getDeviceTokenInfo(
             onSuccess = { deviceInfo ->
-
                 println("============================================================")
                 println("Test FCM Token: ${deviceInfo.fcmToken}")
                 println("Platform: ${deviceInfo.platform}")
                 println("Device Name: ${deviceInfo.deviceName}")
                 println("============================================================")
-                // 3. 🟢 นำข้อมูลที่ดึงได้ ประกอบร่างยิง API ไปเก็บที่ Django
+
                 screenModelScope.launch {
                     try {
                         val request = DeviceRequest(
@@ -127,8 +153,7 @@ class LoginScreenModel(
                             fcmToken = deviceInfo.fcmToken,
                             platform = deviceInfo.platform,
                             deviceName = deviceInfo.deviceName,
-
-                            )
+                        )
                         tokenStore.saveDeviceInfo(info)
                         addDeviceRepository.addDevice(request)
                         println("✅ ส่ง Device Token ขึ้น Server สำเร็จ!")
@@ -144,23 +169,18 @@ class LoginScreenModel(
     }
 
     fun onGoogleClick(onNavigate: (LoginState) -> Unit) {
-
         screenModelScope.launch {
-
             isLoading = true
             errorMessage = null
 
             try {
-
                 val user = googleRepository.login()
 
                 println("Google User = $user")
 
                 if (user == null) {
-
-                    errorMessage = "Google login failed"
+                    errorMessage = "ยกเลิกการเข้าสู่ระบบผ่าน Google"
                     isLoading = false
-
                     return@launch
                 }
 
@@ -171,36 +191,28 @@ class LoginScreenModel(
                 val response = googleLink.glogin(request)
 
                 response.onSuccess { data ->
-
                     if (data.success == true) {
-
                         println("🎉 Google Login Success!")
-
                         checkUserDataAndNavigate(onNavigate)
-
                     } else {
-
-                        errorMessage = "Google login failed"
+                        errorMessage = "เข้าสู่ระบบด้วย Google ไม่สำเร็จ"
+                        isLoading = false
                     }
                 }
 
                 response.onFailure { exception ->
-
                     exception.printStackTrace()
-
-                    errorMessage = exception.message
+                    // 🌟 นำข้อความ Error ไปผ่านตัวกรองก่อนแสดงผล
+                    errorMessage = parseErrorMessage(exception.message)
+                    isLoading = false
                 }
 
             } catch (e: Exception) {
-
                 e.printStackTrace()
-
-                errorMessage = e.message ?: "Unknown error"
+                // 🌟 นำข้อความ Error ไปผ่านตัวกรองก่อนแสดงผล
+                errorMessage = parseErrorMessage(e.message)
+                isLoading = false
             }
-
-            isLoading = false
         }
     }
-
-
 }

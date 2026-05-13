@@ -1,21 +1,18 @@
 package com.wealthvault_final.`financial-asset`.ui.components
 
-// 🌟 Import Theme ของแอป
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
@@ -28,50 +25,58 @@ fun AssetTextField(
     label: String,
     placeholder: String,
     isMultiLine: Boolean = false,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default // 🌟 รับ KeyboardOptions เหมือนเดิม
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        // 🌟 ปรับ Label ให้เป็นสี LightPrimary และใช้ bodyMedium ตามสไตล์ Profile
+        // --- 1. ส่วน Label ---
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = LightPrimary
         )
-
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 🌟 เปลี่ยนมาใช้ TextField ธรรมดาแล้ววาดกรอบเอง
-        TextField(
+        // --- 2. ส่วนช่องกรอก (BasicTextField) ---
+        BasicTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = Color.LightGray) },
+            singleLine = !isMultiLine,
+            keyboardOptions = keyboardOptions,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF3A2F2A)),
+            cursorBrush = SolidColor(LightPrimary),
             modifier = Modifier
                 .fillMaxWidth()
-                // 🌟 จัดการความสูงถ้าเป็น MultiLine
-                .then(if (isMultiLine) Modifier.height(120.dp) else Modifier)
-                // 🌟 วาดกรอบให้โค้ง 12.dp และสีจางๆ แบบ Profile
-                .border(
-                    width = 1.dp,
-                    color = LightBorder.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(12.dp)
-                ),
-            shape = RoundedCornerShape(12.dp),
-            colors = TextFieldDefaults.colors(
-                // 🌟 สีพื้นหลัง
-                focusedContainerColor = LightSoftWhite,
-                unfocusedContainerColor = LightSoftWhite,
-
-                // 🌟 ปิดเส้นขีดด้านล่างเพราะเราวาด border ไปแล้ว
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-
-                // 🌟 สีตัวหนังสือตอนพิมพ์
-                focusedTextColor = Color(0xFF3A2F2A),
-                unfocusedTextColor = Color(0xFF3A2F2A)
-            ),
-            keyboardOptions = keyboardOptions,
-            singleLine = !isMultiLine // 🌟 ถ้าไม่ได้ตั้งเป็น multiLine ให้เป็น singleLine
+                // 🌟 ถ้าเป็น MultiLine ให้สูง 120.dp ถ้าปกติสูง 44.dp
+                .height(if (isMultiLine) 120.dp else 44.dp),
+            decorationBox = { innerTextField ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                        .border(
+                            width = 1.dp,
+                            color = LightBorder.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = if (isMultiLine) 12.dp else 0.dp // เพิ่ม padding บน-ล่างถ้าเป็นหลายบรรทัด
+                        ),
+                    // 🌟 ถ้าเป็น MultiLine ให้เริ่มพิมพ์จากด้านบน ถ้าบรรทัดเดียวให้อยู่ตรงกลาง
+                    verticalAlignment = if (isMultiLine) Alignment.Top else Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (value.isEmpty()) {
+                            Text(
+                                text = placeholder,
+                                color = Color.LightGray,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
+            }
         )
     }
 }

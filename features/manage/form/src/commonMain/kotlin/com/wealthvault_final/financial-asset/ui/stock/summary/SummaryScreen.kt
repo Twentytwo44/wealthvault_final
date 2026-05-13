@@ -5,39 +5,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,15 +33,13 @@ import com.wealthvault.core.generated.resources.ic_form_email_outline
 import com.wealthvault.core.generated.resources.ic_form_photo
 import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.generated.resources.ic_nav_social
-import com.wealthvault.core.theme.LightBg
-import com.wealthvault.core.theme.LightBorder
-import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightText
+import com.wealthvault.core.theme.*
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault_final.`financial-asset`.model.ShareInfo
 import com.wealthvault_final.`financial-asset`.model.ShareTo
 import com.wealthvault_final.`financial-asset`.model.StockModel
+import com.wealthvault_final.`financial-asset`.ui.components.maptype.investmentTypes // 🌟 Import Map
 import org.jetbrains.compose.resources.painterResource
 
 data class SummaryScreen(val request: StockModel, val shareTo: ShareTo) : Screen {
@@ -76,7 +49,6 @@ data class SummaryScreen(val request: StockModel, val shareTo: ShareTo) : Screen
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<SummaryScreenModel>()
 
-        // 🚩 ส่งข้อมูลเข้า ScreenModel
         LaunchedEffect(Unit) {
             screenModel.initData(request)
             screenModel.initShareInfo(shareTo)
@@ -93,7 +65,7 @@ data class SummaryScreen(val request: StockModel, val shareTo: ShareTo) : Screen
             },
             data = state.investmentRequest,
             shareInfo = state.shareTo,
-            isSaving = state.isLoading // 🌟 ส่งสถานะ Loading
+            isSaving = state.isLoading
         )
     }
 }
@@ -114,7 +86,6 @@ fun SummaryContent(
             Column(modifier = Modifier.statusBarsPadding()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    // 🌟 1. ปรับ Padding ของ TopBar ขอบซ้าย-ขวา เป็น 24.dp
                     modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp, top = 24.dp)
                 ) {
                     Icon(
@@ -126,14 +97,9 @@ fun SummaryContent(
                             .clickable { onBackClick() }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = "สรุป",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = LightPrimary
-                    )
+                    Text(text = "สรุป", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
                 }
             }
-
         },
         bottomBar = {
             Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
@@ -147,7 +113,7 @@ fun SummaryContent(
                     if (isSaving) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("ยืนยัน", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Text("บันทึก", color = Color.White, style = MaterialTheme.typography.titleMedium)
                     }
                 }
             }
@@ -187,10 +153,11 @@ fun SummaryCard(data: StockModel) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, LightBorder.copy(alpha = 0.6f))
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            // 🌟 1. Map ประเภทการลงทุน
+            val mappedType = investmentTypes.find { it.first == data.type }?.second ?: data.type
 
-            // --- ข้อมูลการลงทุน ---
-            SummaryRow("ประเภทการลงทุน", data.type.ifBlank { "-" })
+            SummaryRow("ประเภทการลงทุน", mappedType)
             SummaryRow("แอป / โบรกเกอร์", data.brokerName.ifBlank { "-" })
             SummaryRow("ชื่อหุ้น / กองทุน", data.stockName.ifBlank { "-" })
             SummaryRow("สัญลักษณ์ (Ticker)", data.stockSymbol.ifBlank { "-" })
@@ -202,25 +169,46 @@ fun SummaryCard(data: StockModel) {
             SummaryRow("จำนวน", "${formatAmount(data.quantity)} หน่วย")
             SummaryRow("ราคาทุน (ต่อหน่วย)", "${formatAmount(data.costPerPrice)} บาท")
 
-            // 🌟 คำนวณมูลค่ารวม
             val totalValue = data.quantity * data.costPerPrice
             SummaryRow("มูลค่ารวมทั้งหมด", "${formatAmount(totalValue)} บาท", isHighlight = true)
 
-            Spacer(modifier = Modifier.height(12.dp))
-            HorizontalDivider(color = LightBg)
-            Spacer(modifier = Modifier.height(12.dp))
-
-            SummaryRow("คำอธิบาย", data.description.ifBlank { "-" })
-
-            // --- ไฟล์แนบหลักฐาน ---
+            // --- 🌟 2. ส่วนคำอธิบายแบบ Master UI (มีกรอบและเลื่อนได้) ---
             Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "คำอธิบาย",
+                style = MaterialTheme.typography.labelMedium,
+                color = LightText.copy(alpha = 0.8f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 120.dp)
+                    .background(LightSoftWhite, RoundedCornerShape(12.dp))
+                    .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                    .verticalScroll(rememberScrollState())
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = data.description.ifBlank { "-" },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (data.description.isNotBlank()) LightText else Color.Gray.copy(alpha = 0.6f)
+                )
+            }
+
+            // --- ส่วนไฟล์แนบ ---
+            Spacer(modifier = Modifier.height(24.dp))
             Text("ข้อมูลอ้างอิง (ไฟล์แนบ)", style = MaterialTheme.typography.bodyMedium, color = LightPrimary, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
 
             if (data.attachments.isEmpty()) {
                 Text("ไม่มีไฟล์แนบ", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             } else {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 4.dp)
+                ) {
                     items(data.attachments) { img ->
                         val isPdf = img.name.lowercase().endsWith(".pdf") || img.type.name.equals("PDF", ignoreCase = true)
                         Box(
@@ -257,14 +245,23 @@ fun SummaryRow(label: String, value: String, isHighlight: Boolean = false) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = LightText.copy(alpha = 0.7f))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = LightText.copy(alpha = 0.7f),
+            modifier = Modifier.weight(1f)
+        )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.labelMedium,
             color = if (isHighlight) LightPrimary else LightText,
-            fontWeight = if (isHighlight) FontWeight.Bold else FontWeight.Medium
+            fontWeight = if (isHighlight) FontWeight.Bold else FontWeight.Medium,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(2f),
+            softWrap = true,
+            maxLines = 5
         )
     }
 }
@@ -276,7 +273,7 @@ fun ShareSection(shareInfo: ShareTo?) {
     val isEmpty = shareInfo.friend.isEmpty() && shareInfo.group.isEmpty() && shareInfo.email.isEmpty()
 
     if (isEmpty) {
-        Text("ไม่มีการแชร์ข้อมูล", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), textAlign = TextAlign.Center)
+        Text(text = "ไม่มีการแชร์ข้อมูล", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), textAlign = TextAlign.Center)
     } else {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -287,17 +284,17 @@ fun ShareSection(shareInfo: ShareTo?) {
             Column(modifier = Modifier.padding(8.dp)) {
                 var isFirst = true
                 shareInfo.friend.forEach {
-                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
+                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp), color = LightBg)
                     SharedItemSummaryCard(it)
                     isFirst = false
                 }
                 shareInfo.group.forEach {
-                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
+                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp), color = LightBg)
                     SharedItemSummaryCard(it)
                     isFirst = false
                 }
                 shareInfo.email.forEach {
-                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = LightBg)
+                    if (!isFirst) HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp), color = LightBg)
                     SharedItemSummaryCard(it)
                     isFirst = false
                 }
@@ -306,89 +303,44 @@ fun ShareSection(shareInfo: ShareTo?) {
     }
 }
 
-// ==========================================
-// 🌟 Custom UI Component แบบหน้าแชร์ (ไม่มีปุ่มลบ)
-// ==========================================
 @Composable
 fun SharedItemSummaryCard(data: ShareInfo) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Profile Image / Placeholder
         Box(
-            modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(LightBg),
+            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(LightBg),
             contentAlignment = Alignment.Center
         ) {
             if (!data.profileUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model = data.profileUrl,
-                    contentDescription = "Profile",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                AsyncImage(model = data.profileUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
             } else {
                 val icon = when (data.typeData) {
                     "E" -> painterResource(Res.drawable.ic_form_email_outline)
                     "G" -> painterResource(Res.drawable.ic_nav_social)
                     else -> painterResource(Res.drawable.ic_nav_profile)
                 }
-                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(24.dp))
+                Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(20.dp))
             }
         }
-
         Spacer(modifier = Modifier.width(12.dp))
-
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = data.name ?: "",
-                style = MaterialTheme.typography.bodyLarge,
-                color = LightText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            // 🌟 รวบเงื่อนไขให้ วันที่ ไปอยู่ฝั่งขวาเหมือนกันทั้งหมด
+            Text(text = data.name ?: "", style = MaterialTheme.typography.bodyMedium, color = LightText, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if ((data.typeData != "E" && data.subText.isNotBlank()) || data.date != null) {
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween // ดันวันที่ไปชิดขวา
-                ) {
-                    // Badge (อยู่ซ้าย - ซ่อนถ้าเป็น Email)
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     if (data.typeData != "E" && data.subText.isNotBlank()) {
-                        Row(
-                            modifier = Modifier
-                                .weight(1f, fill = false) // กันข้อความยาวเกิน
-                                .background(LightBg, RoundedCornerShape(200.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Row(modifier = Modifier.weight(1f, fill = false).background(LightBg, RoundedCornerShape(200.dp)).padding(horizontal = 6.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                             val icon = if(data.typeData == "G") painterResource(Res.drawable.ic_nav_social) else painterResource(Res.drawable.ic_nav_profile)
                             Icon(painter = icon, contentDescription = null, tint = LightPrimary, modifier = Modifier.size(12.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = data.subText,
-                                color = LightPrimary,
-                                style = MaterialTheme.typography.labelMedium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Text(text = data.subText, color = LightPrimary, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
-                    } else {
-                        Spacer(modifier = Modifier.width(1.dp)) // ใส่ช่องว่างเปล่าๆ เพื่อดันให้ SpaceBetween ดันวันที่ไปชิดขวาได้
-                    }
-
-                    // วันที่แชร์ล่วงหน้า (อยู่ขวา)
+                    } else { Spacer(modifier = Modifier.width(1.dp)) }
                     if (data.date != null) {
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = data.date!!,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.Gray,
-                            maxLines = 1
-                        )
+                        Text(text = data.date!!, style = MaterialTheme.typography.labelSmall, color = Color.Gray, maxLines = 1)
                     }
                 }
             }
