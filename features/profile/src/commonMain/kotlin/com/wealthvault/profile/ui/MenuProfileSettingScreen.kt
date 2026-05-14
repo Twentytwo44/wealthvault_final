@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box // 🌟 Import Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,10 +19,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator // 🌟 Import CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState // 🌟 Import collectAsState
+import androidx.compose.runtime.getValue // 🌟 Import getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,7 +49,6 @@ import com.wealthvault.main.SharedScreen
 import com.wealthvault_final.line_auth.rememberLineAuth
 import org.jetbrains.compose.resources.painterResource
 
-
 class MenuProfileSettingScreen: Screen {
     @Composable
     override fun Content(){
@@ -53,6 +56,10 @@ class MenuProfileSettingScreen: Screen {
         val rootNavigator = LocalRootNavigator.current
         val navigator = LocalNavigator.currentOrThrow
         val screen = rememberScreen(SharedScreen.Login)
+
+        // 🌟 1. ดึงสถานะ isLoading มาจาก ScreenModel
+        val isLoading by screenModel.isLoading.collectAsState()
+
         val lineAuth = rememberLineAuth(
             onSuccess = { user ->
                 screenModel.onLineSuccess(user) {
@@ -64,6 +71,7 @@ class MenuProfileSettingScreen: Screen {
             }
         )
         MenuProfileSettingContent(
+            isLoading = isLoading, // 🌟 2. โยนค่า isLoading ลงไปให้ Component วาด
             onBackClick = { rootNavigator.pop() },
             onEditProfileClick = { rootNavigator.push(EditProfileScreen()) },
             onShareSettingClick = { rootNavigator.push(ShareSettingScreen()) },
@@ -81,8 +89,10 @@ class MenuProfileSettingScreen: Screen {
         )
     }
 }
+
 @Composable
 fun MenuProfileSettingContent(
+    isLoading: Boolean, // 🌟 รับค่า isLoading
     onBackClick: () -> Unit,
     onEditProfileClick: () -> Unit,
     onShareSettingClick: () -> Unit,
@@ -91,91 +101,105 @@ fun MenuProfileSettingContent(
 ) {
     val themeColor = Color(0xFFC27A5A)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(LightBg)
-            .statusBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 24.dp)
-
-    ) {
-        // --- Header ---
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 32.dp)
+    // 🌟 3. เอา Box มาครอบนอกสุด เพื่อให้สามารถวาด Loading ซ้อนทับหน้าจอได้
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(LightBg)
+                .statusBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 24.dp)
         ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_common_back),
-                contentDescription = "Back",
-                tint = themeColor,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clickable { onBackClick() }
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = "ตั้งค่าโปรไฟล์",
-                style = MaterialTheme.typography.titleLarge,
-                color = themeColor
-            )
-        }
-
-        // --- Menu Items ---
-        SettingMenuItem(title = "แก้ไขโปรไฟล์", onClick = onEditProfileClick)
-        Spacer(modifier = Modifier.height(24.dp))
-
-        SettingMenuItem(title = "ตั้งค่าการแชร์ทรัพย์สินให้คนใกล้ชิด", onClick = onShareSettingClick)
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically, // จัดให้อยู่กึ่งกลางแนวตั้ง
-            horizontalArrangement = Arrangement.SpaceBetween // ดันข้อความไปซ้ายสุด ดันปุ่มไปขวาสุด
-        ) {
-            Text(
-                text = "แจ้งเตือนผ่าน LINE",
-                fontSize = 16.sp,
-                color = Color(0xFF000000),
-            )
-
-            Button(
-                onClick = onConnectLineClick,
-                modifier = Modifier
-                    .height(36.dp), // ปรับความสูงมาตรฐาน
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF06C755) // ใช้สีเขียว LINE Official (#06C755)
-                ),
-                shape = RoundedCornerShape(8.dp), // ขอบมนเล็กน้อยสไตล์ปุ่มทางการ
-                contentPadding = PaddingValues(horizontal = 10.dp) // ให้โลโก้อยู่ชิดซ้ายนิดนึง
+            // --- Header ---
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 32.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                Icon(
+                    painter = painterResource(Res.drawable.ic_common_back),
+                    contentDescription = "Back",
+                    tint = themeColor,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { onBackClick() }
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "ตั้งค่าโปรไฟล์",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = themeColor
+                )
+            }
+
+            // --- Menu Items ---
+            SettingMenuItem(title = "แก้ไขโปรไฟล์", onClick = onEditProfileClick)
+            Spacer(modifier = Modifier.height(24.dp))
+
+            SettingMenuItem(title = "ตั้งค่าการแชร์ทรัพย์สินให้คนใกล้ชิด", onClick = onShareSettingClick)
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically, // จัดให้อยู่กึ่งกลางแนวตั้ง
+                horizontalArrangement = Arrangement.SpaceBetween // ดันข้อความไปซ้ายสุด ดันปุ่มไปขวาสุด
+            ) {
+                Text(
+                    text = "แจ้งเตือนผ่าน LINE",
+                    fontSize = 16.sp,
+                    color = Color(0xFF000000),
+                )
+
+                Button(
+                    onClick = onConnectLineClick,
+                    modifier = Modifier
+                        .height(36.dp), // ปรับความสูงมาตรฐาน
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF06C755) // ใช้สีเขียว LINE Official (#06C755)
+                    ),
+                    shape = RoundedCornerShape(8.dp), // ขอบมนเล็กน้อยสไตล์ปุ่มทางการ
+                    contentPadding = PaddingValues(horizontal = 10.dp) // ให้โลโก้อยู่ชิดซ้ายนิดนึง
                 ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_setting_line),
-                        contentDescription = "Line Logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "เชื่อมต่อ",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_setting_line),
+                            contentDescription = "Line Logo",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "เชื่อมต่อ",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
-        }
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        // --- Logout Button ---
-        Text(
-            text = "ออกจากระบบ",
-            fontSize = 16.sp,
-            color = Color(0xFFE74C3C), // สีแดง
-            modifier = Modifier.clickable { onLogoutClick() }
-        )
+            // --- Logout Button ---
+            Text(
+                text = "ออกจากระบบ",
+                fontSize = 16.sp,
+                color = Color(0xFFE74C3C), // สีแดง
+                modifier = Modifier.clickable { onLogoutClick() }
+            )
+        }
+
+        // 🌟 4. วาด Loading Overlay สีดำจางๆ ทับหน้าจอเมื่อกำลังโหลด
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = themeColor)
+            }
+        }
     }
 }
 

@@ -74,7 +74,13 @@ import com.wealthvault.notification.ui.NotificationScreen
 import com.wealthvault.`user-api`.model.DashboardDataResponse
 import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
 import org.jetbrains.compose.resources.painterResource
-
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.composed
 enum class DashboardTab {
     ASSET, DEBT
 }
@@ -151,15 +157,23 @@ fun DashboardContent(
             .padding(horizontal = 20.dp)
             .padding(top = 20.dp)
     ) {
-        // 🌟 4. ส่งสถานะจุดแดงลงไปให้ TopBar วาดต่อ
         DashboardTopBar(onNotiClick = onNotiClick, hasUnreadNoti = hasUnreadNoti)
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        if (isLoading) {
+        // 🌟 แยกส่วน Loading ใหม่ตามสั่ง!
+        if (isLoading && dashboardState == null) {
+
+            // 1. ส่วนการ์ดด้านบน: โชว์เป็น Skeleton โครงร่าง
+            DashboardSkeletonGridCards()
+
+            Spacer(modifier = Modifier.height(40.dp)) // เว้นระยะลงมาหน่อย
+
+            // 2. ส่วนด้านล่าง: โชว์วงกลมหมุนๆ ตามเดิม
             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Color(0xFFC27A5A))
             }
+
         } else {
             dashboardState?.let { data ->
                 DashboardGridCards(
@@ -489,4 +503,43 @@ fun RealItemCard(
             }
         }
     }
+}
+
+// ==========================================
+// 🌟 Skeleton Loading Components
+// ==========================================
+
+@Composable
+fun DashboardSkeletonGridCards() {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // แถวแรก: MainCard(ซ้าย) + SafeCard(ขวา)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(modifier = Modifier.weight(1f).height(80.dp).clip(RoundedCornerShape(14.dp)).shimmerEffect())
+            Box(modifier = Modifier.weight(1f).height(80.dp).clip(RoundedCornerShape(14.dp)).shimmerEffect())
+        }
+
+        // แถวสอง: MainCard(ซ้าย) + Row ของ SmallCard 2 อัน(ขวา)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(modifier = Modifier.weight(1f).height(80.dp).clip(RoundedCornerShape(14.dp)).shimmerEffect())
+            Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(modifier = Modifier.weight(1f).height(80.dp).clip(RoundedCornerShape(14.dp)).shimmerEffect())
+                Box(modifier = Modifier.weight(1f).height(80.dp).clip(RoundedCornerShape(14.dp)).shimmerEffect())
+            }
+        }
+    }
+}
+
+// Modifier สำหรับทำแอนิเมชันสีเทาวูบวาบ (Shimmer Pulse)
+fun Modifier.shimmerEffect(): Modifier = composed {
+    val transition = rememberInfiniteTransition(label = "shimmer")
+    val alpha by transition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.7f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shimmer_alpha"
+    )
+    this.background(Color(0xFFE0E0E0).copy(alpha = alpha))
 }

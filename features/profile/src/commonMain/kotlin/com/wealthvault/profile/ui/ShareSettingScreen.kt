@@ -56,6 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.core.screen.Screen
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
@@ -69,32 +72,35 @@ import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.getScreenModel
+import com.wealthvault.profile.data.ProfileRepositoryImpl
 import com.wealthvault.profile.ui.components.ClosePersonItem
 import com.wealthvault.profile.ui.components.SelectPersonItem
 import com.wealthvault.`user-api`.model.CloseFriendData
 import com.wealthvault.`user-api`.model.FriendData
+import com.wealthvault.`user-api`.model.UpdateUserDataRequest
 import com.wealthvault.`user-api`.model.UserData
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
-import androidx.lifecycle.compose.LocalLifecycleOwner
-
 
 class ShareSettingScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<ShareSettingScreenModel>()
         val rootNavigator = LocalRootNavigator.current
-
-        // 🌟 1. ดึง Lifecycle ของหน้าจอมา
         val lifecycleOwner = LocalLifecycleOwner.current
 
-        // 🌟 2. เปลี่ยนมาใช้ ON_RESUME เพื่อให้รีเฟรชข้อมูลเวลาสลับหน้าจอหรือแอปตื่น
+        // 🌟 ดึงค่า Loading มาจาก ScreenModel
+        val isLoading by screenModel.isLoading.collectAsState()
+
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_RESUME) {
-                    println("🔄 ShareSettingScreen ตื่นแล้ว! สั่งโหลดข้อมูลผู้ใช้และเพื่อนสนิท...")
-                    screenModel.fetchUser()
-                    screenModel.fetchCloseFriends()
+                    println("🔄 ShareSettingScreen ตื่นแล้ว! สั่งโหลดข้อมูลผู้ใช้และเพื่อนสนิทแบบต่อคิว...")
+                    // 🌟 ใช้ฟังก์ชันที่รวมร่างแล้ว
+                    screenModel.fetchShareSettingData()
                 }
             }
             lifecycleOwner.lifecycle.addObserver(observer)
@@ -112,9 +118,8 @@ class ShareSettingScreen : Screen {
             userData = userData,
             closeFriends = closeFriends,
             allFriends = allFriends,
-            onBackClick = {
-                rootNavigator.pop()
-            },
+            isLoading = isLoading, // 🌟 ส่งสถานะลงไปให้ UI วาด
+            onBackClick = { rootNavigator.pop() },
             onSettingsChanged = { newEnabled, newAge ->
                 screenModel.updateShareSettings(newEnabled, newAge)
             },
@@ -125,18 +130,19 @@ class ShareSettingScreen : Screen {
                 screenModel.addCloseFriends(ids)
             },
             onPlusClick = {
-                // 👍 เขียนตรงนี้ไว้ดีมากครับ! โหลดเมื่อจำเป็นต้องใช้ (Lazy Load) ช่วยประหยัดเน็ตได้ดีเลย
                 screenModel.fetchAllFriends()
             }
         )
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShareSettingContent(
     userData: UserData?,
     closeFriends: List<CloseFriendData>,
     allFriends: List<FriendData>,
+    isLoading: Boolean, // 🌟 รับสถานะ Loading ตรงนี้
     onBackClick: () -> Unit,
     onSettingsChanged: (Boolean, Int) -> Unit,
     onRemoveFriend: (String) -> Unit,
@@ -149,7 +155,6 @@ fun ShareSettingContent(
     val sheetState = rememberModalBottomSheetState()
     val selectedFriendIds = remember { mutableStateListOf<String>() }
 
-    // 🌟 1. เพิ่ม State สำหรับ Dialog ยืนยันการลบ
     var showDeleteDialog by remember { mutableStateOf(false) }
     var friendToDelete by remember { mutableStateOf<CloseFriendData?>(null) }
 
@@ -158,7 +163,7 @@ fun ShareSettingContent(
 
     LaunchedEffect(userData) {
         if (userData != null) {
-            isSharingEnabled = userData.shareEnabled?: false
+            isSharingEnabled = userData.shareEnabled ?: false
             sharedAgeText = userData.sharedAge.toString()
         }
     }
@@ -193,9 +198,18 @@ fun ShareSettingContent(
             Text(text = "ตั้งค่าการแชร์ทรัพย์สิน", style = MaterialTheme.typography.titleLarge, color = themeColor)
         }
 
-        if (userData == null) {
+        // 🌟 ถ้าระบบกำลังโหลด (isLoading) ให้โชว์วงกลมหมุนๆ แล้ว Return ออกไปเลย
+        if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = themeColor)
+            }
+            return
+        }
+
+        // 🌟 ถ้าโหลดเสร็จแต่ได้ค่า Null มา (พังจริงๆ) ก็โชว์แบบเดิม
+        if (userData == null) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("ไม่สามารถโหลดข้อมูลได้", color = Color.Gray)
             }
             return
         }
@@ -306,7 +320,6 @@ fun ShareSettingContent(
                         showDelete = true,
                         isEnabled = true,
                         onDeleteClick = {
-                            // 🌟 2. เวลากดลบ ให้เก็บค่าคนนั้นไว้แล้วเปิด Dialog แทน
                             friendToDelete = friend
                             showDeleteDialog = true
                         }
@@ -316,12 +329,12 @@ fun ShareSettingContent(
         }
     }
 
-    // --- 🌟 3. AlertDialog สำหรับยืนยันการลบ ---
+    // --- AlertDialog สำหรับยืนยันการลบ ---
     if (showDeleteDialog && friendToDelete != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             containerColor = Color.White,
-            shape = RoundedCornerShape(20.dp), // 🌟 1. กำหนดความโค้งให้เข้ากับ Card ในหน้าอื่นๆ
+            shape = RoundedCornerShape(20.dp),
             title = {
                 Text(
                     text = "ลบคนใกล้ชิด",
@@ -334,8 +347,8 @@ fun ShareSettingContent(
                 Text(
                     text = "คุณแน่ใจหรือไม่ว่าต้องการลบ '${friendToDelete?.username}' ออกจากรายชื่อคนใกล้ชิด?",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = LightMuted, // 🌟 2. ปรับให้เข้มกว่า Color.Gray เพื่อให้อ่านง่ายและดูแพงขึ้น
-                    lineHeight = 22.sp // เพิ่มระยะห่างบรรทัดนิดนึงให้อ่านสบายตา
+                    color = LightMuted,
+                    lineHeight = 22.sp
                 )
             },
             confirmButton = {
@@ -348,7 +361,7 @@ fun ShareSettingContent(
                 ) {
                     Text(
                         text = "ลบ",
-                        color = RedErr, // 🌟 3. ใช้สีแดง (Material Red 700) ให้ดูเป็นปุ่มอันตรายชัดเจนขึ้น
+                        color = RedErr,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -359,7 +372,7 @@ fun ShareSettingContent(
                 ) {
                     Text(
                         text = "ยกเลิก",
-                        color = LightMuted, // 🌟 4. ใช้สีเทาอมน้ำตาลให้รับกับธีม ไม่ดูเหมือนปุ่มโดน Disable
+                        color = LightMuted,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -418,7 +431,7 @@ fun ShareSettingContent(
                                 friend = friend,
                                 isSelected = selectedFriendIds.contains(friend.id),
                                 onSelectedChange = { isSelected ->
-                                    if (isSelected) selectedFriendIds.add(friend.id  ?: "",)
+                                    if (isSelected) selectedFriendIds.add(friend.id ?: "")
                                     else selectedFriendIds.remove(friend.id)
                                 }
                             )

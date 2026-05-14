@@ -25,12 +25,11 @@ class DashboardScreenModel(
     private val _hasUnreadNoti = MutableStateFlow(false)
     val hasUnreadNoti = _hasUnreadNoti.asStateFlow()
 
-
-
     fun fetchDashboard() {
-        checkUnreadNotifications()
         screenModelScope.launch {
             _isLoading.value = true
+
+            // 🌟 1. สั่งดึง Dashboard ให้เสร็จก่อน
             repository.getDashboardData()
                 .onSuccess { data ->
                     _dashboardState.value = data
@@ -38,6 +37,11 @@ class DashboardScreenModel(
                 .onFailure { error ->
                     println("🚨 Dashboard Error: ${error.message}")
                 }
+
+            // 🌟 2. พอ Dashboard ดึงเสร็จ (ไม่ว่าจะสำเร็จหรือพัง) ค่อยเรียกเช็ค Noti ต่อ
+            // วิธีนี้จะทำให้เซิร์ฟเวอร์ไม่โดนรุมยิงพร้อมกันครับ
+            checkUnreadNotifications()
+
             _isLoading.value = false
         }
     }

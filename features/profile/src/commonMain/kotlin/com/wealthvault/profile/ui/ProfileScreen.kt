@@ -59,16 +59,20 @@ class ProfileScreen() : Screen {
         val screenModel = getScreenModel<ProfileScreenModel>()
         val rootNavigator = LocalRootNavigator.current
 
-        // 🌟 1. ดึง Lifecycle ของหน้าจอมา
+        // 🌟 1. ดึง State ต่างๆ มาใช้งาน รวมถึง isLoading ด้วย
+        val isLoading by screenModel.isLoading.collectAsState()
+        val userData by screenModel.userState.collectAsState()
+        val closeFriends by screenModel.closeFriends.collectAsState()
+
         val lifecycleOwner = LocalLifecycleOwner.current
 
-        // 🌟 2. ลบ LaunchedEffect ทิ้ง แล้วดัก ON_RESUME เพื่อให้รีเฟรชตอนเปิดแอปกลับมา
+        // 🌟 2. ดัก ON_RESUME เพื่อให้รีเฟรชตอนเปิดแอปกลับมา
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_RESUME) {
-                    println("🔄 ProfileScreen ตื่นแล้ว! สั่ง fetchUser และ fetchCloseFriends...")
-                    screenModel.fetchUser()
-                    screenModel.fetchCloseFriends()
+                    println("🔄 ProfileScreen ตื่นแล้ว! สั่ง fetchProfileData แบบต่อแถว...")
+                    // 🌟 3. เปลี่ยนมาเรียกฟังก์ชันแบบต่อคิว เพื่อป้องกันเซิร์ฟเวอร์โดนรุมยิง
+                    screenModel.fetchProfileData()
                 }
             }
             lifecycleOwner.lifecycle.addObserver(observer)
@@ -78,13 +82,10 @@ class ProfileScreen() : Screen {
             }
         }
 
-        val userData by screenModel.userState.collectAsState()
-        // 🌟 ดึงข้อมูลจาก State ใน ScreenModel มาใช้งาน
-        val closeFriends by screenModel.closeFriends.collectAsState()
-
         ProfileContent(
             userData = userData,
             closeFriends = closeFriends,
+            isLoading = isLoading, // 🌟 4. โยนสถานะโหลดไปที่ UI
             onSettingsClick = {
                 rootNavigator.push(MenuProfileSettingScreen())
             }
@@ -92,12 +93,11 @@ class ProfileScreen() : Screen {
     }
 }
 
-
-
 @Composable
 fun ProfileContent(
     userData: UserData?,
     closeFriends: List<CloseFriendData>,
+    isLoading: Boolean, // 🌟 รับค่า isLoading มาคุมการหมุน
     onSettingsClick: () -> Unit
 ) {
     val themeColor = Color(0xFFC27A5A)
@@ -135,11 +135,12 @@ fun ProfileContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             // --- Profile Info ---
-            if (userData == null) {
+            // 🌟 5. ใช้ isLoading เป็นเงื่อนไขหลักในการโชว์วงกลมโหลดข้อมูล
+            if (isLoading) {
                 Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = themeColor)
                 }
-            } else {
+            } else if (userData != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
                     // --- ส่วนรูปโปรไฟล์ ---
@@ -171,19 +172,17 @@ fun ProfileContent(
 
                     Spacer(modifier = Modifier.width(20.dp))
 
-                    // --- 🌟 ส่วนข้อความด้านข้าง (เช็คก่อนแสดง) ---
-                    // --- 🌟 ส่วนข้อความด้านข้าง (แก้บั๊ก Smart Cast) ---
+                    // --- ส่วนข้อความด้านข้าง ---
                     Column(
                         verticalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.height(110.dp)
-
                     ) {
 
-                        // 1. เช็ค Username (ดึงมาใส่ตัวแปร local ก่อน)
+                        // 1. เช็ค Username
                         val uName = userData.username
                         if (!uName.isNullOrBlank()) {
                             Text(
-                                text = uName, // 🌟 ตรงนี้ uName จะถูก Smart Cast เป็น String อัตโนมัติครับ
+                                text = uName,
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF3A2F2A)
@@ -206,7 +205,7 @@ fun ProfileContent(
                         val uEmail = userData.email
                         if (!uEmail.isNullOrBlank()) {
                             Text(
-                                text = uEmail, // 🌟 Smart Cast สำเร็จ
+                                text = uEmail,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray
                             )
@@ -216,13 +215,18 @@ fun ProfileContent(
                         val uBirthday = userData.birthday
                         if (!uBirthday.isNullOrBlank()) {
                             Text(
-                                text = formatThaiDate(uBirthday), // 🌟 Smart Cast สำเร็จ
+                                text = formatThaiDate(uBirthday),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = Color.Gray
                             )
                         }
                     }
+                }
+            } else {
+                // 🌟 (ออปชันเสริม) ดักไว้กรณีโหลดเสร็จแล้วแต่ได้ค่า Null หรือ Error มา
+                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                    Text("ไม่สามารถโหลดข้อมูลโปรไฟล์ได้", color = Color.Gray)
                 }
             }
 
@@ -252,10 +256,9 @@ fun ProfileContent(
             Spacer(modifier = Modifier.height(32.dp))
 
             // --- Close People List Header ---
-            // 🌟 สร้าง Row คลุมเพื่อให้ข้อความ 2 อันอยู่บรรทัดเดียวกัน
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween, // 🌟 ดันให้อยู่ซ้ายสุด-ขวาสุด
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -265,8 +268,8 @@ fun ProfileContent(
                     color = Color(0xFF3A2F2A)
                 )
 
-                // 🌟 ถ้ารายชื่อเพื่อนว่างเปล่า ให้โชว์ข้อความนี้ที่ฝั่งขวา
-                if (closeFriends.isEmpty()) {
+                // ถ้ารายชื่อเพื่อนว่างเปล่า และ ไม่ได้โหลดอยู่ ให้โชว์ข้อความนี้
+                if (closeFriends.isEmpty() && !isLoading) {
                     Text(
                         text = "ยังไม่มีคนใกล้ชิด",
                         style = MaterialTheme.typography.bodyMedium,
@@ -278,8 +281,7 @@ fun ProfileContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // 🌟 ถ้ารายชื่อเพื่อนไม่ว่างเปล่า ถึงจะวาดรายการ
-        if (closeFriends.isNotEmpty()) {
+        if (closeFriends.isNotEmpty() && !isLoading) {
             items(closeFriends) { friend ->
                 ClosePersonItem(
                     friend = friend,
