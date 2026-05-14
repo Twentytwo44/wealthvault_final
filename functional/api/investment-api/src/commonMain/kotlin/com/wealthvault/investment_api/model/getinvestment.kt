@@ -45,9 +45,6 @@ data class GetInvestmentData(
     @SerialName("cost_per_price")
     val costPerPrice: Double? = null,
 
-    @SerialName("amount")
-    val amount: Double? = null,
-
     @SerialName("description")
     val description: String? = null,
 

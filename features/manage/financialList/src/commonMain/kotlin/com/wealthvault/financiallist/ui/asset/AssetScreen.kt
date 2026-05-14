@@ -203,17 +203,9 @@ fun AssetContent(
                     item {
                         ExpandableCategoryCard(title = "ลงทุน หุ้น กองทุน", itemCount = filteredInvestments.size, themeColor = "asset") {
                             filteredInvestments.forEach { invest ->
-                                val rawTotal = invest.amount ?: 0.0
-
-                                // 🌟 เช็คว่ามี symbol ไหม ถ้ามีค่อยใส่ () ถ้าไม่มีก็แสดงแค่ชื่อ
-                                val displayTitle = if (!invest.symbol.isNullOrEmpty()) {
-                                    "${invest.name} (${invest.symbol})"
-                                } else {
-                                    invest.name ?: "ไม่ระบุชื่อ"
-                                }
-
+                                val rawTotal = (invest.quantity ?: 0.0) * (invest.costPerPrice ?: 0.0)
                                 RealItemCard(
-                                    title = displayTitle, // 🌟 เรียกใช้ตัวแปรที่เราดักเงื่อนไขไว้
+                                    title = "${invest.name} (${invest.symbol})",
                                     subtitleLabel = "โบรกเกอร์", subtitleValue = invest.brokerName ?: "",
                                     amountLabel = "มูลค่ารวม", amountValue = "${formatAmount(rawTotal)} บาท",
                                     onClick = { selectedAssetId = invest.id; selectedAssetType = "investment" }
