@@ -76,8 +76,8 @@ data class MessageMetadata(
     @SerialName("share_at_display")
     val shareAtDisplay: String? = null,
 
-    @SerialName("target_user_id")
-    val targetUserId: String? = null,
+    @SerialName("target_user_ids")
+    val targetUserIds: List<String>? = null,
 
     @SerialName("type")
     val type: String? = null,

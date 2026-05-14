@@ -20,7 +20,7 @@ object NotificationModule {
         single { Dispatchers.IO }
 
         factory { NotificationUseCase(get(), get()) }
-        factory { NotificationScreenModel(get(), get(), get()) }
+        factory { NotificationScreenModel(get(), get()) }
 
         // notification api
         factory { NotificationDataSource(get()) }

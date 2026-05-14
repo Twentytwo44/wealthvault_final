@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator // 🌟 Import เพิ่ม
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -72,46 +73,49 @@ class NotificationScreen : Screen {
         val screenModel = getScreenModel<NotificationScreenModel>()
         val navigator = LocalNavigator.currentOrThrow
         val notificationData by screenModel.notificationData.collectAsStateWithLifecycle()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle() // 🌟 ดึงค่าโหลด
 
-        // 🌟 1. ดึง Lifecycle มา
         val lifecycleOwner = LocalLifecycleOwner.current
 
-        // 🌟 2. ใช้ DisposableEffect รวบจบทั้งสลับหน้าจอ และ สลับแอป
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    println("🔄 หน้าแจ้งเตือนตื่นแล้ว! สั่งโหลดข้อมูลและเคลียร์ Noti...")
-
-                    // สั่งโหลดแจ้งเตือนล่าสุด
-                    screenModel.fetchNotifications()
-
-                    // สั่ง Mark as read (ส่วนการ delay 1 วินาที ให้ย้ายไปทำใน ScreenModel แทน)
-                    screenModel.markAllAsReadBackground()
+                when (event) {
+                    Lifecycle.Event.ON_RESUME -> {
+                        println("🔄 หน้าแจ้งเตือนตื่นแล้ว! โหลดข้อมูลล่าสุด...")
+                        screenModel.fetchNotifications()
+                    }
+                    Lifecycle.Event.ON_PAUSE -> {
+                        println("👋 ผู้ใช้ละสายตาจากหน้านี้... สั่งเคลียร์เป็นอ่านทั้งหมด")
+                        screenModel.markAllAsReadBackground()
+                    }
+                    else -> {}
                 }
             }
             lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
         }
 
         NotificationContent(
-            onBackClick = { navigator.pop() },
-            onReadClick = { data -> screenModel.readNotification(data) },
-            onNavigateToAddFriend = {
-                navigator.push(AddFriendScreen())
+            onBackClick = {
+                // 🌟 ยิงคำสั่งอ่านทั้งหมดทันทีที่กด Back เพื่อความชัวร์ (ไม่ต้องรอ Lifecycle)
+                screenModel.markAllAsReadBackground()
+                navigator.pop()
             },
-            notificationData = notificationData
+            onReadClick = { data -> screenModel.readNotification(data) },
+            onNavigateToAddFriend = { navigator.push(AddFriendScreen()) },
+            notificationData = notificationData,
+            isLoading = isLoading // 🌟 โยนลงไปให้ฟังก์ชันวาด UI
         )
     }
 }
+
 @Composable
 fun NotificationContent(
     onBackClick: () -> Unit,
     onReadClick: (String) -> Unit,
     onNavigateToAddFriend: () -> Unit,
     notificationData: List<NotificationData>,
+    isLoading: Boolean // 🌟 รับค่า isLoading
 ) {
     Column(
         modifier = Modifier
@@ -120,7 +124,7 @@ fun NotificationContent(
             .statusBarsPadding()
             .padding(horizontal = 24.dp, vertical = 24.dp)
     ) {
-        // --- ส่วนหัว (Header) ---
+        // --- Header ---
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
@@ -136,7 +140,12 @@ fun NotificationContent(
         }
 
         // --- ส่วนเนื้อหา ---
-        if (notificationData.isEmpty()) {
+        // 🌟 เพิ่มเงื่อนไขเช็ค isLoading
+        if (isLoading && notificationData.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = LightPrimary)
+            }
+        } else if (notificationData.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -190,10 +199,6 @@ fun NotificationContent(
         }
     }
 }
-
-// ---------------------------------------------------------
-// Component ย่อยสำหรับการ์ดแจ้งเตือนแบบต่างๆ
-// ---------------------------------------------------------
 
 /**
  * 🌟 Helper: ไอคอนแจ้งเตือน

@@ -191,7 +191,7 @@ fun SummaryCard(data: CashModel) {
         Column(modifier = Modifier.padding(14.dp)) {
             // --- ข้อมูลแถวปกติ ---
             SummaryRow("ชื่อรายการ", data.cashName)
-            SummaryRow("มูลค่า / จำนวน", "${formatAmount(data.amount)} บาท")
+            SummaryRow("มูลค่า", "${formatAmount(data.amount)} บาท")
 
             // --- 🌟 ส่วนคำอธิบายแบบใหม่ (มีกรอบและเลื่อนได้) ---
             Spacer(modifier = Modifier.height(12.dp))

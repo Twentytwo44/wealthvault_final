@@ -106,7 +106,7 @@ fun MenuScreen(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "ประเภทหนี้สิน",
+                        text = "ประเภท",
                         style = MaterialTheme.typography.titleLarge,
                         color = LightPrimary
                     )

@@ -237,13 +237,29 @@ fun GroupSpaceContent(
                                             else -> "สมาชิก"
                                         }
 
+                                        // 🌟 1. ดึงไอดีตัวแรกออกมาจาก List ก่อน และแปลงให้เป็น String ธรรมดา
+                                        val extractedTargetId = meta.targetUserIds?.firstOrNull() ?: ""
+
                                         InlineGrantAccessCard(
                                             groupId = groupId,
                                             targetName = extractedName.trim(),
-                                            targetUserId = meta.targetUserId ?: "",
+                                            targetUserId = extractedTargetId, // 🌟 2. โยน String ที่ดึงมาได้เข้าไปแทน
                                             themeColor = themeColor,
                                             onSaveSuccess = { selectedIds ->
-                                                onGrantAccess(meta.targetUserId ?: "", selectedIds)
+                                                // ใส่ Log เพื่อสืบสวน
+                                                println("🚀 [DEBUG GrantAccess] กำลังจะส่งค่า...")
+                                                println("👉 Group ID: $groupId")
+                                                println("👉 Target User ID: $extractedTargetId")
+                                                println("👉 Item IDs: $selectedIds")
+
+                                                // 🌟 3. เช็คจาก String ได้เลยว่าว่างไหม
+                                                if (extractedTargetId.isEmpty()) {
+                                                    println("❌ [DEBUG GrantAccess] ทักท้วง! Target ID ว่างเปล่า ส่งไม่ได้เด็ดขาด!")
+                                                    return@InlineGrantAccessCard
+                                                }
+
+                                                // 🌟 4. ส่ง String ธรรมดา และ List ของ Item ไปให้ Backend
+                                                onGrantAccess(extractedTargetId, selectedIds)
                                             }
                                         )
                                     } else {

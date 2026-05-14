@@ -362,6 +362,9 @@ fun DashboardGridCards(
     }
 }
 
+
+
+
 @Composable
 fun MainCard(
     modifier: Modifier = Modifier,
@@ -376,6 +379,18 @@ fun MainCard(
     val scale by animateFloatAsState(if (isSelected) 1.05f else 1f)
     val elevation by animateDpAsState(if (isSelected) 12.dp else 2.dp)
 
+    val indicatorWidth by animateDpAsState(
+        targetValue = if (isSelected) 20.dp else 14.dp,
+        animationSpec = tween(durationMillis = 300)
+    )
+    val indicatorHeight by animateDpAsState(
+        targetValue = if (isSelected) 3.dp else 2.dp,
+        animationSpec = tween(durationMillis = 300)
+    )
+    val indicatorAlpha by animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0.6f,
+        animationSpec = tween(durationMillis = 300)
+    )
     Box(
         modifier = modifier
             .graphicsLayer(scaleX = scale, scaleY = scale)
@@ -383,14 +398,24 @@ fun MainCard(
             .clip(cardShape)
             .background(bgBrush)
             .clickable { onClick() }
-            .then(if (isSelected) Modifier.border(2.dp, Color.White.copy(alpha = 0.5f), cardShape) else Modifier)
+            // 🌟 ปรับตรงนี้: ถ้าเลือกโชว์เส้นขาว 0.5f ถ้าไม่เลือกโชว์เส้นขาวบางๆ 0.15f
+            .border(
+                width = if (isSelected) 2.dp else 1.dp,
+                color = if (isSelected) Color.White.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.15f),
+                shape = cardShape
+            )
             .height(80.dp)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             if (icon != null) {
-                Icon(painter = icon, contentDescription = null, tint = if (isSelected) Color.White else Color.White.copy(alpha = 0.8f), modifier = Modifier.size(30.dp))
+                Icon(
+                    painter = icon,
+                    contentDescription = null,
+                    tint = if (isSelected) Color.White else Color.White.copy(alpha = 0.8f),
+                    modifier = Modifier.size(30.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
             }
             Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -405,16 +430,24 @@ fun MainCard(
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = subtitle, style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.9f))
-                    Spacer(modifier = Modifier.width(3.dp))
-                    Icon(painter = painterResource(Res.drawable.ic_common_down_line), contentDescription = null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(14.dp))
-                }
+                // 🌟 ปรับตรงนี้: เอา Row ที่ครอบ Icon สามเหลี่ยมออก เหลือแค่ Text Subtitle
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
             }
         }
-        if (isSelected) {
-            Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp).size(width = 20.dp, height = 3.dp).background(Color.White, RoundedCornerShape(50)))
-        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 4.dp)
+                .size(width = indicatorWidth, height = indicatorHeight)
+                .background(
+                    color = Color.White.copy(alpha = indicatorAlpha),
+                    shape = RoundedCornerShape(50)
+                )
+        )
     }
 }
 

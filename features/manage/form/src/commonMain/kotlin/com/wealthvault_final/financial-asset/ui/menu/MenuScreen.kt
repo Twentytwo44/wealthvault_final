@@ -115,7 +115,7 @@ fun MenuContent(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "ประเภททรัพย์สิน",
+                        text = "ประเภท",
                         style = MaterialTheme.typography.titleLarge,
                         color = LightPrimary
                     )

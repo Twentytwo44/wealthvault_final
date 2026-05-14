@@ -152,7 +152,7 @@ fun AssetContent(
 
     Box(modifier = Modifier.fillMaxSize()) {
         FinancialListTemplate(
-            headerTitle = "ทรัพย์สิน",
+            headerTitle = "ทรัพย์สิน & ประกัน",
             themeColor = LightAsset,
             searchQuery = searchQuery,
             onSearchChange = { searchQuery = it },
@@ -205,14 +205,8 @@ fun AssetContent(
                             filteredInvestments.forEach { invest ->
                                  val rawTotal = invest.amount ?: 0.0
 
-                                // 🌟 เช็คว่ามี symbol ไหม ถ้ามีค่อยใส่ () ถ้าไม่มีก็แสดงแค่ชื่อ
-                                val displayTitle = if (!invest.symbol.isNullOrEmpty()) {
-                                    "${invest.name} (${invest.symbol})"
-                                } else {
-                                    invest.name ?: "ไม่ระบุชื่อ"
-                                }
                                 RealItemCard(
-                                    title = displayTitle,
+                                    title = invest.name ?: "ไม่ระบุชื่อ",
                                     subtitleLabel = "โบรกเกอร์", subtitleValue = invest.brokerName ?: "",
                                     amountLabel = "มูลค่ารวม", amountValue = "${formatAmount(rawTotal)} บาท",
                                     onClick = { selectedAssetId = invest.id; selectedAssetType = "investment" }

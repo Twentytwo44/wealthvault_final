@@ -131,15 +131,12 @@ fun SmartAssetDetailDialog(
             }
 
             is InvestmentIdData -> {
-                 // 🌟 เช็คก่อนว่ามี symbol ไหม ถ้าไม่มีก็โชว์แค่ชื่อ
-                val displayTitle = if (!itemData.symbol.isNullOrEmpty()) {
-                    "${itemData.name} (${itemData.symbol})"
-                } else {
-                    itemData.name ?: "ไม่ระบุชื่อ"
-                }
+                // 🌟 โชว์แค่ชื่อเท่านั้น ไม่มีวงเล็บต่อท้ายแล้ว
+                val displayTitle = itemData.name ?: "ไม่ระบุชื่อ"
+
                 DetailDialog(
                     subtitle = subtitleText,
-                    title = displayTitle, // 🌟 เอาตัวแปรมาใส่แทน
+                    title = displayTitle,
                     updatedAt = formatThaiDate(itemData.updatedAt),
                     themeType = themeType,
                     showBottomMenu = showBottomMenu,
@@ -149,6 +146,12 @@ fun SmartAssetDetailDialog(
                     onShare = onShare
                 ) {
                     DetailRow("โบรกเกอร์", itemData.brokerName)
+
+                    // 🌟 เพิ่มบรรทัดนี้: เอา Symbol มาแสดงเป็น DetailRow (ถ้ามีค่า)
+                    if (!itemData.symbol.isNullOrEmpty()) {
+                        DetailRow("สัญลักษณ์", itemData.symbol)
+                    }
+
                     DetailRow("จำนวน", formatAmount(itemData.quantity ?: 0.0))
                     DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(itemData.costPerPrice ?: 0.0)} บาท")
                     // 🌟 Map ประเภทการลงทุน

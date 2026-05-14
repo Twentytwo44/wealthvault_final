@@ -55,7 +55,7 @@ fun BottomBarItem(
                     painter = it,
                     contentDescription = tab.options.title,
                     tint = if (selected) LightPrimary else UnselectedColor,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
 
@@ -63,7 +63,7 @@ fun BottomBarItem(
 
             Text(
                 text = tab.options.title,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelMedium,
                 color = if (selected) LightPrimary else UnselectedColor,
                 fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal
             )

@@ -12,7 +12,7 @@ class PutNotiApiImpl(private val ktorfit: Ktorfit) : PutNotiApi {
         // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
         val client = ktorfit.httpClient
 
-        return client.put("${Config.localhost_android}notifications/${id}/") {
+        return client.put("${Config.localhost_android}notifications/${id}") {
 
         }.body()
     }

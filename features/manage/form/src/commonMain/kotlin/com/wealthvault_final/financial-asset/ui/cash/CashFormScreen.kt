@@ -165,7 +165,7 @@ fun CashInputForm(
                         amount = newValue
                     }
                 },
-                label = "จำนวน*",
+                label = "มูลค่า*",
                 placeholder = "0.00",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
