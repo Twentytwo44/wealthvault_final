@@ -131,9 +131,20 @@ fun SmartAssetDetailDialog(
             }
 
             is InvestmentIdData -> {
+                 // 🌟 เช็คก่อนว่ามี symbol ไหม ถ้าไม่มีก็โชว์แค่ชื่อ
+                val displayTitle = if (!itemData.symbol.isNullOrEmpty()) {
+                    "${itemData.name} (${itemData.symbol})"
+                } else {
+                    itemData.name ?: "ไม่ระบุชื่อ"
+                }
                 DetailDialog(
-                    subtitle = subtitleText, title = "${itemData.name} (${itemData.symbol})", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
-                    showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete("${itemData.name} (${itemData.symbol})") },
+                    subtitle = subtitleText,
+                    title = displayTitle, // 🌟 เอาตัวแปรมาใส่แทน
+                    updatedAt = formatThaiDate(itemData.updatedAt),
+                    themeType = themeType,
+                    showBottomMenu = showBottomMenu,
+                    onDismiss = onDismiss,
+                    onDelete = { onDelete(displayTitle) },
                     onEdit = { onEdit(itemData) },
                     onShare = onShare
                 ) {
@@ -142,7 +153,7 @@ fun SmartAssetDetailDialog(
                     DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(itemData.costPerPrice ?: 0.0)} บาท")
                     // 🌟 Map ประเภทการลงทุน
                     DetailRow("ประเภท", mapTypeLabel(itemData.type, investmentTypes))
-                    DetailRow("มูลค่ารวม", "${formatAmount((itemData.quantity ?: 0.0) * (itemData.costPerPrice ?: 0.0))} บาท", isHighlight = true)
+                    DetailRow("มูลค่ารวม", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
