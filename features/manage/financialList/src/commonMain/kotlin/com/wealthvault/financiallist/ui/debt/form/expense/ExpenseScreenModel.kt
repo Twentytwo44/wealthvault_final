@@ -39,7 +39,7 @@ class ExpenseScreenModel(
             principal = data.principal,
             interestRate = "",
             description = data.description,
-            startedAt = data.startedAt,
+            startedAt = data.startedAt.take(10),
             endedAt = "",
             creditor = "",
             attachments = data.attachments

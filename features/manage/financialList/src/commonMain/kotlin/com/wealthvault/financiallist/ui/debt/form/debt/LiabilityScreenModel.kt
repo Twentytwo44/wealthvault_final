@@ -39,8 +39,8 @@ class LiabilityScreenModel(
             principal = data.principal,
             interestRate = data.interestRate,
             description = data.description,
-            startedAt = data.startedAt,
-            endedAt = data.endedAt,
+            startedAt = data.startedAt.take(10),
+            endedAt = data.endedAt.take(10),
             creditor = data.creditor,
             attachments = data.attachments
 
