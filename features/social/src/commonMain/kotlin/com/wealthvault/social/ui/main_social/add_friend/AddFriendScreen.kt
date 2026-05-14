@@ -32,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -71,13 +71,13 @@ class AddFriendScreen : Screen {
 
         var searchQuery by remember { mutableStateOf("") }
 
-        val isSearching by screenModel.isSearching.collectAsState()
-        val hasSearched by screenModel.hasSearched.collectAsState()
-        val searchResult by screenModel.searchResult.collectAsState()
-        val addFriendSuccess by screenModel.addFriendSuccess.collectAsState()
-        val pendingFriends by screenModel.pendingFriends.collectAsState()
+        val isSearching by screenModel.isSearching.collectAsStateWithLifecycle()
+        val hasSearched by screenModel.hasSearched.collectAsStateWithLifecycle()
+        val searchResult by screenModel.searchResult.collectAsStateWithLifecycle()
+        val addFriendSuccess by screenModel.addFriendSuccess.collectAsStateWithLifecycle()
+        val pendingFriends by screenModel.pendingFriends.collectAsStateWithLifecycle()
 
-        val popupMessage by screenModel.popupMessage.collectAsState()
+        val popupMessage by screenModel.popupMessage.collectAsStateWithLifecycle()
 
         // 🌟 1. ดึง Lifecycle มา
         val lifecycleOwner = LocalLifecycleOwner.current

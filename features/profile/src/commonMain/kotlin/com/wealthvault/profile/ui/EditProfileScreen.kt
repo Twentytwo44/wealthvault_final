@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
 import com.preat.peekaboo.image.picker.SelectionMode
@@ -96,11 +96,11 @@ fun EditProfileContent(
     onBackClick: () -> Unit,
     onSaveClick: () -> Unit
 ) {
-    val userData by screenModel.userState.collectAsState()
-    val isSaving by screenModel.isSaving.collectAsState()
-    val saveSuccess by screenModel.saveSuccess.collectAsState()
+    val userData by screenModel.userState.collectAsStateWithLifecycle()
+    val isSaving by screenModel.isSaving.collectAsStateWithLifecycle()
+    val saveSuccess by screenModel.saveSuccess.collectAsStateWithLifecycle()
 
-    val profileImageByteArray by screenModel.profileImageByteArray.collectAsState()
+    val profileImageByteArray by screenModel.profileImageByteArray.collectAsStateWithLifecycle()
 
     var username by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }

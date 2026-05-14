@@ -26,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +39,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -66,9 +66,9 @@ class ForgetPasswordScreen : Screen {
         var emailText by remember { mutableStateOf("") }
 
         // ดึง State จาก ScreenModel
-        val isLoading by screenModel.isLoading.collectAsState()
-        val isOtpSent by screenModel.isOtpSent.collectAsState()
-        val errorMessage by screenModel.errorMessage.collectAsState()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val isOtpSent by screenModel.isOtpSent.collectAsStateWithLifecycle()
+        val errorMessage by screenModel.errorMessage.collectAsStateWithLifecycle()
 
         // ถ้ายิง API ขอ OTP สำเร็จ ให้ไปหน้าถัดไป
         LaunchedEffect(isOtpSent) {

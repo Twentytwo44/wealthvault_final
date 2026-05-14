@@ -45,7 +45,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +63,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -118,9 +118,9 @@ class ShareAssetScreen<T>(val request: T? = null) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<ShareAssetScreenModel<T>>()
 
-        val formState by screenModel.formState.collectAsState()
-        val friendState by screenModel.friendState.collectAsState()
-        val groupState by screenModel.groupState.collectAsState()
+        val formState by screenModel.formState.collectAsStateWithLifecycle()
+        val friendState by screenModel.friendState.collectAsStateWithLifecycle()
+        val groupState by screenModel.groupState.collectAsStateWithLifecycle()
 
         // 🌟 1. ดึง Lifecycle มาจัดการความสดใหม่ของข้อมูล
         val lifecycleOwner = LocalLifecycleOwner.current

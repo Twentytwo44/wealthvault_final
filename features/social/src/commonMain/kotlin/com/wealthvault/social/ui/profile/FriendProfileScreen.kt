@@ -23,7 +23,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -63,11 +63,11 @@ class FriendProfileScreen(
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<FriendProfileScreenModel>()
 
-        val profileData by screenModel.profileData.collectAsState()
-        val isLoading by screenModel.isLoading.collectAsState()
-        val isRemoveSuccess by screenModel.isRemoveSuccess.collectAsState()
-        val isSuccess by screenModel.isSuccess.collectAsState()
-        val isAlreadySent by screenModel.isAlreadySent.collectAsState()
+        val profileData by screenModel.profileData.collectAsStateWithLifecycle()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val isRemoveSuccess by screenModel.isRemoveSuccess.collectAsStateWithLifecycle()
+        val isSuccess by screenModel.isSuccess.collectAsStateWithLifecycle()
+        val isAlreadySent by screenModel.isAlreadySent.collectAsStateWithLifecycle()
 
         var showRemoveConfirm by remember { mutableStateOf(false) }
 

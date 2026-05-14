@@ -93,7 +93,7 @@ class ShareSettingScreen : Screen {
         val lifecycleOwner = LocalLifecycleOwner.current
 
         // 🌟 ดึงค่า Loading มาจาก ScreenModel
-        val isLoading by screenModel.isLoading.collectAsState()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
 
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
@@ -110,9 +110,9 @@ class ShareSettingScreen : Screen {
             }
         }
 
-        val userData by screenModel.userState.collectAsState()
-        val closeFriends by screenModel.closeFriends.collectAsState()
-        val allFriends by screenModel.allFriends.collectAsState()
+        val userData by screenModel.userState.collectAsStateWithLifecycle()
+        val closeFriends by screenModel.closeFriends.collectAsStateWithLifecycle()
+        val allFriends by screenModel.allFriends.collectAsStateWithLifecycle()
 
         ShareSettingContent(
             userData = userData,

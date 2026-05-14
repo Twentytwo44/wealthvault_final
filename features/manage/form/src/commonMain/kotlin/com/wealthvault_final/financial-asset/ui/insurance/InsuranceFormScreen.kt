@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -48,7 +49,7 @@ class InsuranceFormScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<InsuranceScreenModel>()
 
-        val state by screenModel.state.collectAsState()
+        val state by screenModel.state.collectAsStateWithLifecycle()
 
         InsuranceInputForm(
             initialData = state,

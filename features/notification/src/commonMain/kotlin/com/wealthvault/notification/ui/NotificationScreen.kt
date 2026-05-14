@@ -70,7 +70,7 @@ class NotificationScreen : Screen {
     override fun Content() {
         val screenModel = getScreenModel<NotificationScreenModel>()
         val navigator = LocalNavigator.currentOrThrow
-        val notificationData by screenModel.notificationData.collectAsState()
+        val notificationData by screenModel.notificationData.collectAsStateWithLifecycle()
 
         // 🌟 1. ดึง Lifecycle มา
         val lifecycleOwner = LocalLifecycleOwner.current

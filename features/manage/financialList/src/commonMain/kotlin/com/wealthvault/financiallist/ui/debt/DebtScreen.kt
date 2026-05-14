@@ -13,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -88,8 +88,8 @@ class DebtScreen : Screen {
             }
         }
 
-        val loans by screenModel.loans.collectAsState()
-        val expenses by screenModel.expenses.collectAsState()
+        val loans by screenModel.loans.collectAsStateWithLifecycle()
+        val expenses by screenModel.expenses.collectAsStateWithLifecycle()
 
         DebtContent(
             onAddClick = {

@@ -60,9 +60,9 @@ class ProfileScreen() : Screen {
         val rootNavigator = LocalRootNavigator.current
 
         // 🌟 1. ดึง State ต่างๆ มาใช้งาน รวมถึง isLoading ด้วย
-        val isLoading by screenModel.isLoading.collectAsState()
-        val userData by screenModel.userState.collectAsState()
-        val closeFriends by screenModel.closeFriends.collectAsState()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val userData by screenModel.userState.collectAsStateWithLifecycle()
+        val closeFriends by screenModel.closeFriends.collectAsStateWithLifecycle()
 
         val lifecycleOwner = LocalLifecycleOwner.current
 

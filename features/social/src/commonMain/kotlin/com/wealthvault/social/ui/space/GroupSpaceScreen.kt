@@ -28,7 +28,6 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -79,11 +79,11 @@ class GroupSpaceScreen(
 
         val screenModel = getScreenModel<GroupSpaceScreenModel>()
 
-        val messages by screenModel.messages.collectAsState()
-        val isLoading by screenModel.isLoading.collectAsState()
+        val messages by screenModel.messages.collectAsStateWithLifecycle()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
 
         val reversedMessages = remember(messages) { messages.reversed() }
-        val token by screenModel.accessToken.collectAsState()
+        val token by screenModel.accessToken.collectAsStateWithLifecycle()
 
         // 🌟 1. ดึง Lifecycle มา
         val lifecycleOwner = LocalLifecycleOwner.current

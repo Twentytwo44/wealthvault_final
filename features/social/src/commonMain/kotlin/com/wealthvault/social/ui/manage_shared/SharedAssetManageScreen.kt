@@ -50,8 +50,8 @@ class SharedAssetManageScreen(
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<SharedAssetManageScreenModel>()
 
-        val assetList by screenModel.assetList.collectAsState()
-        val isLoading by screenModel.isLoading.collectAsState()
+        val assetList by screenModel.assetList.collectAsStateWithLifecycle()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
 
         // 🌟 1. ดึง Lifecycle มา
         val lifecycleOwner = LocalLifecycleOwner.current

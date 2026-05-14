@@ -2,12 +2,20 @@ package com.wealthvault.social.ui.main_social.form_group
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -20,16 +28,16 @@ class CreateGroupScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<FormGroupScreenModel>()
 
-        val isLoading by screenModel.isLoading.collectAsState()
-        val isSuccess by screenModel.isSuccess.collectAsState()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val isSuccess by screenModel.isSuccess.collectAsStateWithLifecycle()
 
         // รับค่า errorMessage จาก ScreenModel
-        val errorMessage by screenModel.errorMessage.collectAsState()
+        val errorMessage by screenModel.errorMessage.collectAsStateWithLifecycle()
 
         // 🌟 1. สร้าง State สำหรับคุมการโชว์ Snackbar (แจ้งเตือนข้ามแพลตฟอร์ม)
         val snackbarHostState = remember { SnackbarHostState() }
 
-        val allFriends by screenModel.friends.collectAsState()
+        val allFriends by screenModel.friends.collectAsStateWithLifecycle()
 
         LaunchedEffect(Unit) {
             screenModel.fetchFriends()

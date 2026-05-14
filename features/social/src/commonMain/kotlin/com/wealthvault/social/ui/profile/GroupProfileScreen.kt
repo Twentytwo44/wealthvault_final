@@ -27,7 +27,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -83,10 +83,10 @@ class GroupProfileScreen(
         }
 
         val screenModel = getScreenModel<GroupProfileScreenModel>()
-        val leaveSuccess by screenModel.leaveSuccess.collectAsState()
-        val groupData by screenModel.groupData.collectAsState()
-        val isLoading by screenModel.isLoading.collectAsState()
-        val members by screenModel.members.collectAsState()
+        val leaveSuccess by screenModel.leaveSuccess.collectAsStateWithLifecycle()
+        val groupData by screenModel.groupData.collectAsStateWithLifecycle()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val members by screenModel.members.collectAsStateWithLifecycle()
         var showLeaveDialog by remember { mutableStateOf(false) }
 
         // 🌟 1. ดึง Lifecycle มา

@@ -30,7 +30,6 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -78,10 +78,10 @@ class FriendSpaceScreen(
         }
         val screenModel = getScreenModel<FriendSpaceScreenModel>()
 
-        val messages by screenModel.messages.collectAsState()
+        val messages by screenModel.messages.collectAsStateWithLifecycle()
         // 🌟 กลับด้าน List เหมือนเดิม เพื่อให้ใช้ร่วมกับ reverseLayout ได้
         val reversedMessages = remember(messages) { messages.reversed() }
-        val isLoading by screenModel.isLoading.collectAsState()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
 
         // 🌟 1. ดึง Lifecycle มา
         val lifecycleOwner = LocalLifecycleOwner.current

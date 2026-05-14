@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -43,10 +43,10 @@ class EditGroupScreen(
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<FormGroupScreenModel>()
 
-        val isLoading by screenModel.isLoading.collectAsState()
-        val isSuccess by screenModel.isSuccess.collectAsState()
-        val errorMessage by screenModel.errorMessage.collectAsState()
-        val allFriends by screenModel.friends.collectAsState()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val isSuccess by screenModel.isSuccess.collectAsStateWithLifecycle()
+        val errorMessage by screenModel.errorMessage.collectAsStateWithLifecycle()
+        val allFriends by screenModel.friends.collectAsStateWithLifecycle()
 
         val snackbarHostState = remember { SnackbarHostState() }
 

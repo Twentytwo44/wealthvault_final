@@ -36,7 +36,7 @@ class SocialScreen : Screen {
         val screenModel = getScreenModel<SocialScreenModel>()
 
         // 🌟 2. ดึงสถานะจุดแดง (True/False)
-        val hasPendingRequest by screenModel.hasPendingRequest.collectAsState()
+        val hasPendingRequest by screenModel.hasPendingRequest.collectAsStateWithLifecycle()
 
         var currentTab by rememberSaveable { mutableStateOf("เพื่อน") }
         val navigator = LocalNavigator.currentOrThrow

@@ -16,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import com.wealthvault.account_api.model.AccountData
@@ -102,12 +102,12 @@ class AssetScreen() : Screen {
             }
         }
 
-        val accounts by screenModel.accounts.collectAsState()
-        val cashes by screenModel.cashes.collectAsState()
-        val investments by screenModel.investments.collectAsState()
-        val insurances by screenModel.insurances.collectAsState()
-        val buildings by screenModel.buildings.collectAsState()
-        val lands by screenModel.lands.collectAsState()
+        val accounts by screenModel.accounts.collectAsStateWithLifecycle()
+        val cashes by screenModel.cashes.collectAsStateWithLifecycle()
+        val investments by screenModel.investments.collectAsStateWithLifecycle()
+        val insurances by screenModel.insurances.collectAsStateWithLifecycle()
+        val buildings by screenModel.buildings.collectAsStateWithLifecycle()
+        val lands by screenModel.lands.collectAsStateWithLifecycle()
 
         AssetContent(
             screenModel = screenModel,

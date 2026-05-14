@@ -91,9 +91,9 @@ class DashboardScreen(
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<DashboardScreenModel>()
-        val dashboardState by screenModel.dashboardState.collectAsState()
-        val isLoading by screenModel.isLoading.collectAsState()
-        val hasUnreadNoti by screenModel.hasUnreadNoti.collectAsState()
+        val dashboardState by screenModel.dashboardState.collectAsStateWithLifecycle()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val hasUnreadNoti by screenModel.hasUnreadNoti.collectAsStateWithLifecycle()
 
         val navigator = LocalNavigator.currentOrThrow
         val localRootNavigator = LocalRootNavigator.current

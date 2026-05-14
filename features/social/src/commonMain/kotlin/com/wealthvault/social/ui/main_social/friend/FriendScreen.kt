@@ -1,20 +1,29 @@
 package com.wealthvault.social.ui.main_social.friend
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator // 🌟 Import Navigator
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.social.ui.components.FriendListItem
 import com.wealthvault.social.ui.components.SocialSearchBar
+import com.wealthvault.social.ui.space.FriendSpaceScreen
 import com.wealthvault.`user-api`.model.FriendData
-import com.wealthvault.social.ui.space.FriendSpaceScreen // 🌟 Import หน้า Space
 
 class FriendScreen : Screen {
     @Composable
@@ -32,7 +41,7 @@ class FriendScreen : Screen {
             screenModel.fetchFriends()
         }
 
-        val friends by screenModel.friends.collectAsState()
+        val friends by screenModel.friends.collectAsStateWithLifecycle()
 
         FriendContent(
             friends = friends,

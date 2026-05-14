@@ -45,10 +45,10 @@ class ConfirmOTPScreen(private val email: String) : Screen {
 
         var otpCode by remember { mutableStateOf("") }
 
-        val isLoading by screenModel.isLoading.collectAsState()
-        val isOtpVerified by screenModel.isOtpVerified.collectAsState()
-        val resetToken by screenModel.resetToken.collectAsState()
-        val errorMessage by screenModel.errorMessage.collectAsState()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val isOtpVerified by screenModel.isOtpVerified.collectAsStateWithLifecycle()
+        val resetToken by screenModel.resetToken.collectAsStateWithLifecycle()
+        val errorMessage by screenModel.errorMessage.collectAsStateWithLifecycle()
 
         LaunchedEffect(isOtpVerified) {
             if (isOtpVerified && resetToken.isNotEmpty()) {

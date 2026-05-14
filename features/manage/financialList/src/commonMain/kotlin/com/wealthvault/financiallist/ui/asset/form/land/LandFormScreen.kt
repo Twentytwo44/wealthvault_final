@@ -39,7 +39,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -76,7 +77,6 @@ import com.wealthvault_final.`financial-asset`.model.RefModel
 import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
 import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
 import org.jetbrains.compose.resources.painterResource
-import androidx.lifecycle.compose.LocalLifecycleOwner
 
 
 class LandFormScreen(val id: String, val landData: LandModel) : Screen {
@@ -104,7 +104,7 @@ class LandFormScreen(val id: String, val landData: LandModel) : Screen {
             screenModel.updateForm(landData)
         }
 
-        val buildState by screenModel.BuildingState.collectAsState()
+        val buildState by screenModel.BuildingState.collectAsStateWithLifecycle()
 
         LandInputForm(
             onBackClick = { navigator.pop() },

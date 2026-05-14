@@ -81,9 +81,9 @@ class SharedAssetScreen(
         // 🌟 1. ดึง ScreenModel มาใช้งาน
         val screenModel = getScreenModel<SharedAssetScreenModel>()
 
-        val assetList by screenModel.assetList.collectAsState()
-        val isLoading by screenModel.isLoading.collectAsState()
-        val isShareSuccess by screenModel.isShareSuccess.collectAsState()
+        val assetList by screenModel.assetList.collectAsStateWithLifecycle()
+        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val isShareSuccess by screenModel.isShareSuccess.collectAsStateWithLifecycle()
 
         // 🌟 2. โหลดข้อมูลเมื่อเปิดหน้าจอ โดยส่ง targetId และ isGroup ไป
         LaunchedEffect(targetId) {
