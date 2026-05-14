@@ -68,6 +68,7 @@ import com.wealthvault.share_api.model.ItemToShareData
 import com.wealthvault.social.ui.components.space.SpaceTopBar
 import com.wealthvault.social.ui.components.space.simpleVerticalScrollbar
 import org.jetbrains.compose.resources.painterResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class SharedAssetScreen(
     private val targetId: String,

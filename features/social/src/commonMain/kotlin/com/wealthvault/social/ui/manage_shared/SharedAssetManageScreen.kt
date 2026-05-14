@@ -38,6 +38,7 @@ import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.share_api.model.ShareGroupData
 import com.wealthvault.social.ui.components.space.SharedAssetItem
 import com.wealthvault.social.ui.components.space.SpaceTopBar
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class SharedAssetManageScreen(
     private val targetId: String,

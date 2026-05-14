@@ -28,6 +28,7 @@ import com.wealthvault.social.ui.main_social.add_friend.AddFriendScreen
 import com.wealthvault.social.ui.main_social.form_group.CreateGroupScreen
 import com.wealthvault.social.ui.main_social.friend.FriendScreen
 import com.wealthvault.social.ui.main_social.group.GroupScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class SocialScreen : Screen {
     @Composable

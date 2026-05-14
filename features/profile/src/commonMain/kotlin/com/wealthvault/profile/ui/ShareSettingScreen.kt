@@ -39,7 +39,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,8 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
@@ -72,17 +70,12 @@ import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.profile.data.ProfileRepositoryImpl
 import com.wealthvault.profile.ui.components.ClosePersonItem
 import com.wealthvault.profile.ui.components.SelectPersonItem
 import com.wealthvault.`user-api`.model.CloseFriendData
 import com.wealthvault.`user-api`.model.FriendData
-import com.wealthvault.`user-api`.model.UpdateUserDataRequest
 import com.wealthvault.`user-api`.model.UserData
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 class ShareSettingScreen : Screen {
