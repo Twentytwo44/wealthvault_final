@@ -139,16 +139,16 @@ fun RegisterContent(
                 ),
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
-
+            Spacer(modifier = Modifier.height(16.dp))
             Image(
                 painter = painterResource(Res.drawable.register),
                 contentDescription = "Register Illustration",
                 modifier = Modifier
-                    .size(140.dp)
+                    .size(150.dp)
                     .padding(10.dp),
                 contentScale = ContentScale.Fit
             )
-
+            Spacer(modifier = Modifier.height(16.dp))
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -258,32 +258,8 @@ fun RegisterContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // --- 6. เส้นคั่น หรือ ---
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)) {
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
-                    Text(text = " หรือ ", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
 
-                // --- 7. ปุ่ม Google ---
-                OutlinedButton(
-                    onClick = onGoogleClick,
-                    enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth().height(46.dp).padding(horizontal = 48.dp),
-                    shape = RoundedCornerShape(percent = 30),
-                    border = BorderStroke(1.dp, LightBorder),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = LightSurface)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(painterResource(Res.drawable.ic_auth_google), contentDescription = "Google", modifier = Modifier.size(24.dp), tint = Color.Unspecified)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Google", color = LightPrimary, style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
