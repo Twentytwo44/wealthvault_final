@@ -33,7 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,9 +50,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -92,9 +88,7 @@ class DashboardScreen(
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<DashboardScreenModel>()
-        val dashboardState by screenModel.dashboardState.collectAsStateWithLifecycle()
-        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
-        val hasUnreadNoti by screenModel.hasUnreadNoti.collectAsStateWithLifecycle()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
         val navigator = LocalNavigator.currentOrThrow
         val localRootNavigator = LocalRootNavigator.current
@@ -105,26 +99,6 @@ class DashboardScreen(
         }
         var selectedTab by remember { mutableStateOf(DashboardTab.ASSET) }
 
-        // 🌟 1. ดึง Lifecycle ของหน้าจอมา
-        val lifecycleOwner = LocalLifecycleOwner.current
-
-        // 🌟 2. ใช้ DisposableEffect ดัก ON_RESUME เพื่อให้ครอบคลุมทั้ง
-        // - การกดสลับหน้าจอกลับมา (Screen lifecycle ขยับเป็น Resume)
-        // - การพับแอปแล้วเปิดใหม่ (App lifecycle ขยับเป็น Resume)
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    println("🔄 DashboardScreen กลับมาทำงาน! สั่ง fetchDashboard()...")
-                    screenModel.fetchDashboard()
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-
         DashboardContent(
             onNotiClick = {
                 localRootNavigator.push(NotificationScreen())
@@ -132,11 +106,11 @@ class DashboardScreen(
             onAddClick = {
                 rootNavigator.push(MenuScreen())
             },
-            dashboardState = dashboardState,
-            isLoading = isLoading,
+            dashboardState = uiState.data,
+            isLoading = uiState.isLoading,
             selectedTab = selectedTab,
             onTabChange = { selectedTab = it },
-            hasUnreadNoti = hasUnreadNoti
+            hasUnreadNoti = uiState.hasUnreadNotifications
         )
     }
 }

@@ -69,7 +69,7 @@ class LoginApiImplTest {
         val apiImpl = LoginApiImpl(ktorfit)
 
         // 5. รันการทดสอบ
-        val response = apiImpl.login(LoginRequest("naymegadragon@gmail.com", "dino2064"))
+        val response = apiImpl.login(LoginRequest("test@example.invalid", "test-password"))
         println("--- API Response Result ---")
         println("Status: ${response.status}")
         println("User ID: ${response.data?.userId}")

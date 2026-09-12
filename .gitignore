@@ -18,6 +18,12 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 
-composeApp/google-services.json
+# Local signing material and generated release outputs must stay out of new commits.
+*.jks
+*.keystore
+composeApp/release/*.apk
+composeApp/release/baselineProfiles/**/*.dm
+
+**/google-services.json
 
 iosApp/Pods/

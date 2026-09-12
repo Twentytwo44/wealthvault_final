@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:functional/api/line-auth/src/androidHostTest/kotlin/com/wealthvault_final/line_auth/ExampleUnitTest.kt
 package com.wealthvault_final.line_auth
-========
-package com.wealthvault.financiallist
->>>>>>>> main:features/manage/financialList/src/androidHostTest/kotlin/com/wealthvault/financiallist/ExampleUnitTest.kt
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -66,6 +66,27 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
                         }
                     }
 
+                    commonTest {
+                        dependencies {
+                            implementation(versionCatalogLibrary("kotlin-test"))
+                            implementation(versionCatalogLibrary("coroutines-test"))
+                        }
+                    }
+
+                    getByName("androidHostTest") {
+                        dependencies {
+                            implementation(versionCatalogLibrary("kotlin-test"))
+                        }
+                    }
+
+                    getByName("androidDeviceTest") {
+                        dependencies {
+                            implementation(versionCatalogLibrary("androidx-runner"))
+                            implementation(versionCatalogLibrary("androidx-core"))
+                            implementation(versionCatalogLibrary("androidx-testExt-junit"))
+                        }
+                    }
+
                     androidMain {
                         dependencies {
                             implementation(versionCatalogLibrary("coroutines-android"))

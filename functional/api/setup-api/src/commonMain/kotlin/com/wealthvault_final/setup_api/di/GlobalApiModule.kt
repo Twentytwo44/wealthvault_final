@@ -2,6 +2,7 @@ package com.wealthvault_final.setup_api.di
 
 import com.wealthvault.config.Config
 import com.wealthvault.core.KoinConst
+import com.wealthvault.data_store.SessionStore
 import com.wealthvault_final.setup_api.HttpClientBuilder
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -13,10 +14,10 @@ object GlobalApiModule {
 
         // --- 1. Global HttpClient ---
         single<HttpClient>(named(KoinConst.HttpClient.GLOBAL)) {
-            // มั่นใจว่า HttpClientBuilder รับ (Json, TokenStore?)
+            // Depend on the storage boundary so the HTTP layer is storage-agnostic.
             HttpClientBuilder(
                 json = get(named(KoinConst.KotlinSerialization.GLOBAL)),
-                tokenStore = get() // ดึง TokenStore (ที่ปกติลงทะเบียนแบบไม่มี named)
+                tokenStore = get<SessionStore>()
             ).build(withAuth = true) // เรียกใช้ฟังก์ชัน build ที่เราแก้ชื่อใหม่
         }
 

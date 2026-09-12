@@ -9,14 +9,10 @@ import com.wealthvault.forgetpassword.ui.ForgetPasswordScreenModel
 import com.wealthvault.forgetpassword.usecase.ForgetUsecase
 import com.wealthvault.forgetpassword.usecase.OTPUseCase
 import com.wealthvault.forgetpassword.usecase.ResetPasswordUseCase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import org.koin.dsl.module
 
 object ForgetModule {
     val allModules = module {
-        single { Dispatchers.IO }
-
         factory { ForgetNetworkDataSource(get()) }
         single<ForgetRepositoryImpl> {
             ForgetRepositoryImpl(

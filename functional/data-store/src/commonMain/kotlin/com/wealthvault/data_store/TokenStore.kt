@@ -16,7 +16,7 @@ data class DeviceInfo( val fcmToken: String?, val platform: String?, val deviceN
 
 class TokenStore(
     private val dataStore: DataStore<Preferences>
-) {
+) : SessionStore {
 
     companion object {
         private val KEY_ACCESS_TOKEN = stringPreferencesKey("access_token")
@@ -32,16 +32,16 @@ class TokenStore(
 
 
     // token
-    val accessToken: Flow<String?> = dataStore.data
+    override val accessToken: Flow<String?> = dataStore.data
         .map { preferences -> preferences[KEY_ACCESS_TOKEN] }
 
-    val getUserId: Flow<String?> = dataStore.data
+    override val getUserId: Flow<String?> = dataStore.data
         .map { preferences -> preferences[KEY_USER_ID] }
 
-    val fcmToken: Flow<String?> = dataStore.data
+    override val fcmToken: Flow<String?> = dataStore.data
         .map { preferences -> preferences[KEY_FCM_TOKEN] }
 
-    val refreshToken: Flow<String?> = dataStore.data
+    override val refreshToken: Flow<String?> = dataStore.data
         .map { preferences -> preferences[KEY_REFRESH_TOKEN] }
 
 //    suspend fun saveTokens(access: String, refresh: String) {
@@ -52,11 +52,11 @@ class TokenStore(
 //    }
 
     // --- ส่วนของ Token ---
-    val authData: Flow<AuthToken> = dataStore.data.map { pref ->
+    override val authData: Flow<AuthToken> = dataStore.data.map { pref ->
         AuthToken(pref[KEY_ACCESS_TOKEN], pref[KEY_REFRESH_TOKEN])
     }
 
-    suspend fun saveAuthToken(token: AuthToken) {
+    override suspend fun saveAuthToken(token: AuthToken) {
         dataStore.edit { pref ->
             pref[KEY_ACCESS_TOKEN] = token.accessToken ?: ""
             pref[KEY_REFRESH_TOKEN] = token.refreshToken ?: ""
@@ -64,14 +64,14 @@ class TokenStore(
     }
 
     // device info
-    val deviceInfo: Flow<DeviceInfo> = dataStore.data.map { pref ->
+    override val deviceInfo: Flow<DeviceInfo> = dataStore.data.map { pref ->
         DeviceInfo(
             fcmToken = pref[KEY_FCM_TOKEN],
             platform = pref[KEY_PLATFORM],
             deviceName = pref[KEY_DEVICE_NAME]
         )
     }
-    suspend fun saveUserId(device: UserId) {
+    override suspend fun saveUserId(device: UserId) {
         dataStore.edit { pref ->
             pref[KEY_USER_ID] = device.userId ?: ""
 
@@ -79,7 +79,7 @@ class TokenStore(
     }
 
 
-    suspend fun saveDeviceInfo(device: DeviceInfo) {
+    override suspend fun saveDeviceInfo(device: DeviceInfo) {
         dataStore.edit { pref ->
             pref[KEY_FCM_TOKEN] = device.fcmToken ?: ""
             pref[KEY_PLATFORM] = device.platform ?: ""
@@ -89,7 +89,7 @@ class TokenStore(
 
 
 
-    suspend fun clear() {
+    override suspend fun clear() {
         dataStore.edit { it.clear() }
     }
 }

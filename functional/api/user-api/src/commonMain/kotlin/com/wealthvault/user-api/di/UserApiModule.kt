@@ -27,6 +27,7 @@ import com.wealthvault.`user-api`.updateuser.UpdateUserApiImpl
 import com.wealthvault.`user-api`.user.UserApi
 import com.wealthvault.`user-api`.user.UserApiImpl
 import com.wealthvault.user_api.closefriend.CloseFriendApiImpl
+import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -48,7 +49,9 @@ object UserApiModule {
         single<UpdateUserApi> {UpdateUserApiImpl(ktorfit = get(named(KoinConst.Ktor.AUTH)), tokenStore = get())}
         single<CloseFriendApi> { CloseFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<UpdateCloseFriendApi> { UpdateCloseFriendApiImpl(tokenStore = get()) }
-        single<DashboardApi> { DashboardApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<DashboardApi> {
+            DashboardApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL)))
+        }
         single<GetUserByEmailApi> { GetUserByEmailApiImpl(get(named(KoinConst.Ktor.GLOBAL)))}
         single<GetFriendMsgApi> { GetFriendMsgApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
         single<GetFriendProfileApi> { GetFriendProfileApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }

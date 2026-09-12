@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:functional/api/line-auth/src/androidDeviceTest/kotlin/com/wealthvault_final/line_auth/ExampleInstrumentedTest.kt
 package com.wealthvault_final.line_auth
-========
-package com.wealthvault.financial_obligations
->>>>>>>> main:features/manage/financial-obligations/src/androidDeviceTest/kotlin/com/wealthvault/financial_obligations/ExampleInstrumentedTest.kt
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

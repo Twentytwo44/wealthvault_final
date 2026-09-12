@@ -10,14 +10,10 @@ import com.wealthvault.notification.usecase.NotificationUseCase
 import com.wealthvault.notification.viewmodel.NotificationScreenModel
 import com.wealthvault.notification_api.readall.PutNotiReadAllApi
 import com.wealthvault.notification_api.readall.PutNotiReadAllApiImpl
-import kotlinx.coroutines.Dispatchers // 🌟 ลบ import kotlinx.coroutines.IO ออกไป
-import kotlinx.coroutines.IO
 import org.koin.dsl.module
 
 object NotificationModule {
     val allModules = module {
-
-        single { Dispatchers.IO }
 
         factory { NotificationUseCase(get(), get()) }
         factory { NotificationScreenModel(get(), get()) }

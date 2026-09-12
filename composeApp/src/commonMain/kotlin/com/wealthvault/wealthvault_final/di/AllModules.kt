@@ -1,6 +1,7 @@
 package com.wealthvault.wealthvault_final.di
 
 import com.wealthvault.account_api.di.AccountApiModule
+import com.wealthvault.core.di.coreModule
 import com.wealthvault.`auth-api`.di.ApiModule
 import com.wealthvault.building_api.di.BuildingApiModule
 import com.wealthvault.cash_api.di.CashApiModule
@@ -30,6 +31,7 @@ import org.koin.core.module.Module
 object AllModules {
     val modules = arrayListOf<Module>().apply {
 
+        add(coreModule)
         add(DataStoreModule.allModules)
 
 
@@ -53,13 +55,7 @@ object AllModules {
         add(FinancialAssetModule.allModules)
         add(GroupApiModule.allModules)
         add(ShareApiModule.allModules)
-        add(LiabilityApiModule.allModules)
-        add(LandApiModule.allModules)
-        add(BuildingApiModule.allModules)
-        add(InsuranceApiModule.allModules)
-        add(AccountApiModule.allModules)
         add(SocialModule.allModules)
-        add(ShareApiModule.allModules)
         add(NotificationApiModule.allModules)
         add(WebSocketApiModule.module)
         add(NotificationModule.allModules)

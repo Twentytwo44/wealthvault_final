@@ -51,8 +51,6 @@ import com.wealthvault_final.`financial-obligations`.ui.expense.viewmodel.Expens
 import com.wealthvault_final.`financial-obligations`.ui.liability.summary.LiabilitySummaryScreenModel
 import com.wealthvault_final.`financial-obligations`.ui.liability.usecase.AddLiabilityUseCase
 import com.wealthvault_final.`financial-obligations`.ui.liability.viewmodel.LiabilityScreenModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import org.koin.dsl.module
 
 object FinancialAssetModule {
@@ -177,7 +175,6 @@ object FinancialAssetModule {
                 networkDataSource = get(),
             )
         }
-        single { Dispatchers.IO }
         factory { ShareAssetScreenModel<Any>(get(),get()) }
 
 

@@ -19,6 +19,7 @@ dependencyResolutionManagement {
 }
 
 include(":composeApp")
+include(":androidApp")
 
 include(":functional:api:auth-api")
 include(":functional:data-store")

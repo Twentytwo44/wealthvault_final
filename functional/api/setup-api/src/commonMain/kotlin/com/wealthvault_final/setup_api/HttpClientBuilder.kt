@@ -5,7 +5,7 @@ import com.wealthvault.`auth-api`.model.RefreshRequest
 import com.wealthvault.`auth-api`.model.RefreshResponse
 import com.wealthvault.config.Config
 import com.wealthvault.data_store.AuthToken
-import com.wealthvault.data_store.TokenStore
+import com.wealthvault.data_store.SessionStore
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -22,13 +22,17 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 
 
 class HttpClientBuilder(
     private val json: Json,
-    private val tokenStore: TokenStore? = null
+    private val tokenStore: SessionStore? = null
 ) {
+    private val refreshMutex = Mutex()
+
     fun build(withAuth: Boolean = true): HttpClient {
         val client = HttpClient(CIO) {
             val safeJson = Json {
@@ -85,45 +89,23 @@ class HttpClientBuilder(
                 if (originalCall.response.status == HttpStatusCode.Unauthorized && !isAuthRoute) {
                     println("🔄 401 Detected! กำลังแอบไปขอ Token ใหม่ให้...")
 
-                    val currentRefreshToken = tokenStore.refreshToken.first()
-
-                    if (!currentRefreshToken.isNullOrBlank()) {
-                        // สร้าง Client ตัวจิ๋วไปขอ Token
-                        val refreshClient = HttpClient(CIO) {
-                            install(ContentNegotiation) { json(json) }
+                    val failedAccessToken = tokenStore.accessToken.first()
+                    val newAccessToken = refreshMutex.withLock {
+                        // Another request may have refreshed the session while this one was in flight.
+                        val latestSession = tokenStore.authData.first()
+                        if (!latestSession.accessToken.isNullOrBlank() &&
+                            latestSession.accessToken != failedAccessToken
+                        ) {
+                            latestSession.accessToken
+                        } else {
+                            refreshSession(client, tokenStore)
                         }
+                    }
 
-                        try {
-                            val response: RefreshResponse = refreshClient.post("${Config.localhost_android}auth/refresh/") {
-                                setBody(RefreshRequest(currentRefreshToken))
-                                contentType(ContentType.Application.Json)
-                            }.body()
-
-                            val newAccess = response.data?.accessToken
-                            val newRefresh = response.data?.refreshToken
-
-                            if (!newAccess.isNullOrBlank() && !newRefresh.isNullOrBlank()) {
-                                println("✅ ได้ Token ใหม่มาแล้ว! บันทึกลงเครื่องและยิง API เดิมอีกรอบ...")
-                                tokenStore.saveAuthToken(AuthToken(newAccess, newRefresh))
-
-                                // 4. ลบ Token เก่าทิ้ง แปะ Token ใหม่ แล้วสั่งยิง API เส้นเดิม!
-                                request.headers.remove(HttpHeaders.Authorization)
-                                request.header(HttpHeaders.Authorization, "Bearer $newAccess")
-                                originalCall = execute(request)
-
-                            } else {
-                                println("❌ ขอ Token ใหม่ไม่ผ่าน (API ส่งกลับมาว่างเปล่า)")
-                                tokenStore.saveAuthToken(AuthToken(null, null))
-                            }
-                        } catch (e: Exception) {
-                            println("❌ ขอ Token ใหม่พัง: ${e.message}")
-                            tokenStore.saveAuthToken(AuthToken(null, null))
-                        } finally {
-                            refreshClient.close()
-                        }
-                    } else {
-                        println("❌ ไม่มี Refresh Token ในเครื่อง บังคับ Logout")
-                        tokenStore.saveAuthToken(AuthToken(null, null))
+                    if (!newAccessToken.isNullOrBlank()) {
+                        request.headers.remove(HttpHeaders.Authorization)
+                        request.header(HttpHeaders.Authorization, "Bearer $newAccessToken")
+                        originalCall = execute(request)
                     }
                 }
 
@@ -133,5 +115,38 @@ class HttpClientBuilder(
         }
 
         return client
+    }
+
+    private suspend fun refreshSession(
+        client: HttpClient,
+        tokenStore: SessionStore,
+    ): String? {
+        val currentRefreshToken = tokenStore.refreshToken.first()
+        if (currentRefreshToken.isNullOrBlank()) {
+            println("❌ ไม่มี Refresh Token ในเครื่อง บังคับ Logout")
+            tokenStore.saveAuthToken(AuthToken(null, null))
+            return null
+        }
+
+        return try {
+            val response: RefreshResponse = client.post("${Config.localhost_android}auth/refresh/") {
+                setBody(RefreshRequest(currentRefreshToken))
+                contentType(ContentType.Application.Json)
+            }.body()
+
+            val newAccess = response.data?.accessToken
+            val newRefresh = response.data?.refreshToken
+            if (!newAccess.isNullOrBlank() && !newRefresh.isNullOrBlank()) {
+                tokenStore.saveAuthToken(AuthToken(newAccess, newRefresh))
+                newAccess
+            } else {
+                tokenStore.saveAuthToken(AuthToken(null, null))
+                null
+            }
+        } catch (error: Throwable) {
+            println("❌ ขอ Token ใหม่พัง: ${error.message}")
+            tokenStore.saveAuthToken(AuthToken(null, null))
+            null
+        }
     }
 }
