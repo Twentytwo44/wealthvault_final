@@ -30,6 +30,8 @@ import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.social.ui.main_social.form_group.FormGroupScreenModel
 import com.wealthvault.social.ui.main_social.form_group.GroupFormContent
+import com.wealthvault.social.ui.main_social.form_group.FormGroupUiAction
+import com.wealthvault.social.ui.main_social.form_group.formGroupErrorMessage
 
 class EditGroupScreen(
     private val groupId: String,
@@ -47,6 +49,8 @@ class EditGroupScreen(
         val isSuccess by screenModel.isSuccess.collectAsStateWithLifecycle()
         val errorMessage by screenModel.errorMessage.collectAsStateWithLifecycle()
         val allFriends by screenModel.friends.collectAsStateWithLifecycle()
+        val friendsLoading by screenModel.friendsLoading.collectAsStateWithLifecycle()
+        val friendsError by screenModel.friendsError.collectAsStateWithLifecycle()
 
         val snackbarHostState = remember { SnackbarHostState() }
 
@@ -83,6 +87,9 @@ class EditGroupScreen(
                 initialImageUrl = initialImageUrl,
                 initialMemberIds = initialMemberIds,
                 availableFriends = allFriends,
+                friendsLoading = friendsLoading,
+                friendsErrorMessage = friendsError?.let(::formGroupErrorMessage),
+                onRetryFriends = { screenModel.onAction(FormGroupUiAction.FetchFriends) },
                 isLoading = isLoading,
                 showDeleteButton = true, // 🌟 เปิดใช้งานปุ่มถังขยะ
                 onDeleteGroupClick = {

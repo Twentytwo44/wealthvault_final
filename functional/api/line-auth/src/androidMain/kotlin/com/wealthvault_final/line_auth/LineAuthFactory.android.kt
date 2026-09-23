@@ -1,4 +1,4 @@
-package com.wealthvault_final.line_auth
+package com.wealthvault.line_auth
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.linecorp.linesdk.LineApiResponseCode
 import com.linecorp.linesdk.auth.LineLoginApi
-import com.wealthvault_final.line_auth.model.LineUser
+import com.wealthvault.line_auth.model.LineUser
 
 @Composable
 actual fun rememberLineAuth(
@@ -26,15 +26,6 @@ actual fun rememberLineAuth(
                 val profile = lineResult.lineProfile
                 val credential = lineResult.lineCredential // 👈 ตัวเก็บ Access Token
                 val idToken = lineResult.lineIdToken // 👈 ตัวเก็บ ID Token (ถ้าขอสิทธิ์ OPENID_CONNECT ไว้)
-
-                // 🟢 สั่ง Log ออกมาดูแบบจัดเต็ม
-                println("=========================================")
-                println("🟢 [LINE SDK] Login Success!")
-                println("🟢 ID: ${profile?.userId}")
-                println("🟢 Name: ${profile?.displayName}")
-                println("🟢 Access Token: ${credential?.accessToken?.tokenString}")
-                println("🟢 ID Token: ${idToken?.rawString}")
-                println("=========================================")
 
                 // จับใส่ก้อน LineUser
                 val user = LineUser(

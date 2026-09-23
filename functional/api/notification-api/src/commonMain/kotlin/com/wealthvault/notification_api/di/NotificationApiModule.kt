@@ -14,6 +14,7 @@ import com.wealthvault.notification_api.registerdevice.AddDevicesApi
 import com.wealthvault.notification_api.registerdevice.AddDevicesApiImpl
 import com.wealthvault.notification_api.unregisterdevice.UnDevicesApi
 import com.wealthvault.notification_api.unregisterdevice.UnDevicesApiImpl
+import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -26,12 +27,12 @@ object NotificationApiModule {
             }
         }
 
-        single<AddDevicesApi> { AddDevicesApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<PutNotiApi> { PutNotiApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetNotificationsApi> { GetNotificationsApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UnDevicesApi> { UnDevicesApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetAllDeviceApi> { GetAllDeviceApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<PutNotiReadAllApi> { PutNotiReadAllApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<AddDevicesApi> { AddDevicesApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<PutNotiApi> { PutNotiApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetNotificationsApi> { GetNotificationsApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UnDevicesApi> { UnDevicesApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetAllDeviceApi> { GetAllDeviceApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<PutNotiReadAllApi> { PutNotiReadAllApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
 
     }
 

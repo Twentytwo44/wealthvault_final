@@ -2,17 +2,29 @@ package com.wealthvault.financiallist.ui.asset.form.insurance
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.wealthvault.financiallist.data.insurance.InsuranceRepositoryImpl
-import com.wealthvault.insurance_api.model.InsuranceFileUploadData
-import com.wealthvault.insurance_api.model.InsuranceRequest
-import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
-import com.wealthvault_final.`financial-asset`.model.InsuranceModel
+import com.wealthvault.domain.portfolio.UpdateInsuranceRepository
+import com.wealthvault.domain.portfolio.CreateInsuranceRepository
+import com.wealthvault.domain.portfolio.InsuranceFileUploadData
+import com.wealthvault.domain.portfolio.InsuranceRequest
+import com.wealthvault.core.model.Attachment
+import com.wealthvault.core.model.Money
+import com.wealthvault.domain.portfolio.InsuranceModel
+import com.wealthvault.core.architecture.FormAction
+import com.wealthvault.core.architecture.FormEffect
+import com.wealthvault.core.architecture.UiState
+import com.wealthvault.core.architecture.UiStateHolder
+import com.wealthvault.core.architecture.toAppError
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class InsuranceScreenModel(
-    private val insuranceRepository: InsuranceRepositoryImpl
+    private val insuranceRepository: UpdateInsuranceRepository,
+    private val createInsuranceRepository: CreateInsuranceRepository,
 ) : ScreenModel {
     // 📦 ถังเก็บข้อมูล
     private val _state = MutableStateFlow(
@@ -20,7 +32,7 @@ class InsuranceScreenModel(
             policyNumber = "",
             type = "",
             companyName = "",
-            coverageAmount = 0.0,
+            coverageAmount = Money(0),
             coveragePeriod = "",
             expDate = "",
             description = "",
@@ -29,13 +41,25 @@ class InsuranceScreenModel(
             conDate = ""
         )
     )
+    val state = _state.asStateFlow()
+    private val udf = UiStateHolder(_state.value)
+    val uiState: StateFlow<UiState<InsuranceModel>> = udf.state
+    val effects = udf.effects
+    private var submitJob: Job? = null
     private val _addedAttachments = MutableStateFlow<List<Attachment>>(emptyList())
     private val _deleteAttachments = MutableStateFlow<List<Attachment>>(emptyList())
+
+    fun onAction(action: FormAction<InsuranceModel>) {
+        when (action) {
+            is FormAction.Changed -> updateForm(action.value)
+            is FormAction.AttachmentsChanged -> updateAttachment(action.added, action.deleted)
+            is FormAction.Submit -> submitInsurance(action.id)
+        }
+    }
 
  
 
     fun updateForm(data: InsuranceModel) {
-        println("data update succes " + data.name)
         _state.update { it.copy(
             policyNumber = data.policyNumber,
             type = data.type,
@@ -48,6 +72,7 @@ class InsuranceScreenModel(
             attachments = data.attachments,
             conDate = data.conDate
         ) }
+        udf.set(_state.value, isLoading = false, error = null)
     }
 
     fun updateAttachment(addedList: List<Attachment>,deletedList: List<Attachment>) {
@@ -95,8 +120,10 @@ class InsuranceScreenModel(
 
 
 
-    fun submitInsurance(id:String,onSuccess: () -> Unit) {
-        screenModelScope.launch {
+    fun submitInsurance(id:String,onSuccess: () -> Unit = {}) {
+        if (submitJob?.isActive == true) return
+        udf.loading()
+        val job = screenModelScope.launch {
             try {
 //                isLoading = true
 //                errorMessage = null
@@ -114,22 +141,52 @@ class InsuranceScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง insurance
                     // สมมติว่า field id อยู่ใน insuranceResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = insuranceResponse.id.toString()
-                    println("✅ [ScreenModel] insurance Edit ID: $createdItemId")
+                    udf.success()
+                    udf.emit(FormEffect.Saved)
                     onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Edit insurance Failed")
+                    udf.failure(insuranceResult.exceptionOrNull()?.toAppError()
+                        ?: IllegalStateException("Insurance update failed").toAppError())
                 }
 
-            } catch (e: Exception) {
-                println("❌ [ScreenModel] Exception: ${e.message}")
-//                errorMessage = e.message ?: "เกิดข้อผิดพลาดในการเชื่อมต่อ"
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                udf.failure(e.toAppError())
             } finally {
 //                isLoading = false
-                println("🏁 [ScreenModel] Process Finished.")
             }
         }
+        submitJob = job
+        job.invokeOnCompletion { if (submitJob === job) submitJob = null }
+    }
+
+    /** Creates a new insurance item and returns its domain id to the share step. */
+    fun submitCreate(onSuccess: (String) -> Unit = {}) {
+        if (submitJob?.isActive == true) return
+        udf.loading()
+        val job = screenModelScope.launch {
+            try {
+                when (val result = createInsuranceRepository.createInsurance(asRequest().copy(deleteListId = emptyList()))) {
+                    is com.wealthvault.core.architecture.AppResult.Success -> {
+                        val id = result.value.id?.takeIf { it.isNotBlank() }
+                            ?: error("Insurance create response did not include an id")
+                        udf.success()
+                        udf.emit(FormEffect.Saved)
+                        onSuccess(id)
+                    }
+                    is com.wealthvault.core.architecture.AppResult.Failure -> udf.failure(result.error)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                udf.failure(e.toAppError())
+            }
+        }
+        submitJob = job
+        job.invokeOnCompletion { if (submitJob === job) submitJob = null }
     }
 
 }

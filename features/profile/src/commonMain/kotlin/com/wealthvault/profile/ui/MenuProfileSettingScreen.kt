@@ -41,8 +41,7 @@ import com.wealthvault.core.generated.resources.ic_setting_line
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.main.SharedScreen
-import com.wealthvault_final.line_auth.rememberLineAuth
+import com.wealthvault.core.navigation.SharedScreen
 import org.jetbrains.compose.resources.painterResource
 
 class MenuProfileSettingScreen: Screen {
@@ -56,7 +55,7 @@ class MenuProfileSettingScreen: Screen {
         // 🌟 1. ดึงสถานะ isLoading มาจาก ScreenModel
         val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
 
-        val lineAuth = rememberLineAuth(
+        val lineAuth = LocalLineSignInProviderFactory.current.rememberProvider(
             onSuccess = { user ->
                 screenModel.onLineSuccess(user) {
 

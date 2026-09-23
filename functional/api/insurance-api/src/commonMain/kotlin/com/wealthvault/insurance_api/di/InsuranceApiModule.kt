@@ -4,6 +4,7 @@ package com.wealthvault.insurance_api.di
 
 
 import com.wealthvault.core.KoinConst
+import io.ktor.client.HttpClient
 import com.wealthvault.insurance_api.createcash.CreateInsuranceApi
 import com.wealthvault.insurance_api.createcash.CreateInsuranceApiImpl
 import com.wealthvault.insurance_api.deleteinsurance.DeleteInsuranceApi
@@ -27,11 +28,11 @@ object InsuranceApiModule {
             }
         }
 
-        single<CreateInsuranceApi> { CreateInsuranceApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetInsuranceApi> { GetInsuranceApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetInsuranceByIdApi> { GetInsuranceByIdApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UpdateInsuranceApi> { UpdateInsuranceApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<DeleteInsuranceApi> { DeleteInsuranceApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<CreateInsuranceApi> { CreateInsuranceApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetInsuranceApi> { GetInsuranceApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetInsuranceByIdApi> { GetInsuranceByIdApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UpdateInsuranceApi> { UpdateInsuranceApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<DeleteInsuranceApi> { DeleteInsuranceApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
 
 
 

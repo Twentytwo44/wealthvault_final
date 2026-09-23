@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DeleteGroupResponse(
+internal data class DeleteGroupResponse(
     @SerialName("data")
     val data: Boolean? = null,
 

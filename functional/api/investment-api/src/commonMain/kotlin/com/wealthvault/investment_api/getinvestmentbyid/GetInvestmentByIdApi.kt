@@ -1,10 +1,7 @@
 package com.wealthvault.investment_api.getinvestmentbyid
 
-import com.wealthvault.investment_api.model.InvestmentIdResponse
-import de.jensklingenberg.ktorfit.http.GET
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.portfolio.InvestmentIdData
 
 interface GetInvestmentByIdApi {
-    @GET("asset/invest/{id}")
-    suspend fun getInvestmentById(@Path("id") id: String): InvestmentIdResponse
+    suspend fun getInvestmentById(id: String): InvestmentIdData?
 }

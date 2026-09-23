@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.wealth.vault.lib)
     alias(libs.plugins.wealth.vault.compose)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -26,20 +25,10 @@ kotlin {
                 // ลบบรรทัดที่ซ้ำออกไป 1 อัน (voyager-navigator)
                 implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 
-                implementation(project(":functional:api:auth-api"))
-                implementation(project(":functional:api:notification-api"))
-                implementation(project(":functional:api:user-api"))
-
-                implementation(project(":functional:data-store"))
                 implementation(project(":base:core"))
-
-                // 🌟 IMPORT MODULE SOCIAL (เพิ่มบรรทัดนี้เพื่อให้เรียก AddFriendScreen ได้)
-                // ปล. เช็กชื่อ path ":social" อีกทีนะครับว่าโปรเจกต์จริงตั้งชื่อโฟลเดอร์ไว้ว่าอะไร
-                // เช่น อาจจะเป็น implementation(project(":feature:social"))
-                implementation(project(":features:social"))
-
-                implementation("androidx.datastore:datastore-preferences-core:1.1.1")
-                implementation(libs.ktor.serialization.json)
+                implementation(project(":domain:social"))
+                implementation(project(":domain:notification"))
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
             }
         }
         commonTest {

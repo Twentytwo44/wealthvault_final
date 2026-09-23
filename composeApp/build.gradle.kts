@@ -4,33 +4,85 @@ plugins {
     alias(libs.plugins.androidLint)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    // CocoaPods owns the app framework integration. The auth data module owns
+    // the GoogleSignIn cinterop; declaring the same pod here would link its
+    // generated symbols twice when data:auth is exported below.
+    kotlin("native.cocoapods")
 
 }
 
 kotlin {
+    // The production iOS app declares this pod through the generated podspec
+    // and the Podfile below; Gradle owns only the framework metadata here.
+    cocoapods {
+        version = "1.0"
+        summary = "WealthVault shared Kotlin Multiplatform application"
+        homepage = "https://github.com/Twentytwo44/wealthvault_final"
+        ios.deploymentTarget = "15.0"
+        // Let CocoaPods own the iOS app integration. The generated podspec
+        // contributes its Gradle syncFramework script phase to iosApp rather
+        // than invoking an incompatible embed-and-sign task from Xcode.
+        podfile = project.file("../iosApp/Podfile")
+        // CocoaPods owns the Apple framework integration. Keeping the
+        // framework declaration inside this block prevents Kotlin 2.3 from
+        // registering the incompatible direct embed-and-sign task.
+        framework {
+            baseName = "ComposeApp"
+            isStatic = true
+            binaryOption("bundleId", "com.wealthvault.composeapp")
+            export(project(":data:auth"))
+            export(project(":base:security"))
+            export(project(":features:auth:login"))
+        }
+    }
+
     androidLibrary {
         namespace = "com.wealthvault.composeapp"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ComposeApp"
-            isStatic = true
-            export(project(":functional:api:line-auth"))
-            export(project(":features:auth:login"))
+    iosArm64()
+    iosSimulatorArm64()
+
+    // Shared Kotlin tests link the exported auth implementation directly.
+    // CocoaPods supplies these frameworks to the app workspace, but Gradle's
+    // native test linker does not inherit the workspace xcconfig, so mirror
+    // the synthetic pod framework search paths for the debug test binary.
+    val googleAuthPodFrameworkRoot = rootProject.file(
+        "data/auth/build/cocoapods/synthetic/ios/build/Debug-iphonesimulator",
+    )
+    iosSimulatorArm64 {
+        binaries {
+            configureEach {
+                if (name == "debugTest") {
+                    listOf(
+                        "GoogleSignIn",
+                        "AppAuth",
+                        "GTMAppAuth",
+                        "GTMSessionFetcher",
+                        "AppCheckCore",
+                        "GoogleUtilities",
+                        "PromisesObjC",
+                    )
+                        .forEach { framework ->
+                            val frameworkPath = googleAuthPodFrameworkRoot.resolve(framework).path
+                            linkerOpts("-F$frameworkPath")
+                            linkerOpts("-rpath", frameworkPath)
+                        }
+                }
+            }
         }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(project(":base:core"))
+            implementation(project(":base:database"))
+            implementation(project(":domain:auth"))
+            implementation(libs.compose.uiTooling)
 
         }
         commonMain.dependencies {
@@ -50,15 +102,12 @@ kotlin {
             implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
             implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
             implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
-            implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
             implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 
 
-            implementation(project(":functional:data-store"))
             implementation(project(":base:core"))
+            implementation(project(":base:database"))
             api(project(":features:auth:login"))
-            implementation(project(":features:auth:login"))
-            implementation(project(":features:auth:register"))
             implementation(project(":features:dashboard"))
             implementation(project(":features:notification"))
             implementation(project(":features:manage:financialList"))
@@ -67,41 +116,19 @@ kotlin {
             implementation(project(":main"))
 
 
-            implementation(project(":functional:api:account-api"))
-            implementation(project(":functional:api:auth-api"))
-            implementation(project(":functional:api:building-api"))
-            implementation(project(":functional:api:cash-api"))
+            // These projects are exported by the CocoaPods framework above;
+            // they must be API dependencies of the corresponding source set.
+            api(project(":data:auth"))
+            api(project(":base:security"))
+            implementation(project(":domain:profile"))
+            implementation(project(":data:dashboard"))
+            implementation(project(":data:notification"))
+            implementation(project(":data:profile"))
+            implementation(project(":data:portfolio"))
+            implementation(project(":data:social"))
 
-            implementation(project(":functional:api:google-auth"))
-            implementation(project(":functional:api:insurance-api"))
-            implementation(project(":functional:api:investment-api"))
-            implementation(project(":functional:api:land-api"))
-            implementation(project(":functional:api:liability-api"))
-            implementation(project(":functional:api:user-api"))
-            api(project(":functional:api:line-auth"))
-            implementation(project(":functional:notification"))
-            implementation(project(":functional:api:setup-api"))
-            implementation(project(":functional:api:group-api"))
-            implementation(project(":functional:api:insurance-api"))
-            implementation(project(":functional:api:notification-api"))
-            implementation(project(":functional:api:websocket-api"))
+            implementation(project(":base:network"))
 
-
-
-
-            implementation(project(":features:manage:form"))
-
-            implementation(project(":features:auth:register"))
-            implementation(project(":features:dashboard"))
-            implementation(project(":features:notification"))
-            implementation(project(":features:manage:financialList"))
-            implementation(project(":features:social"))
-            implementation(project(":features:profile"))
-
-
-
-
-//            implementation(project(":features:auth:introduction"))
 
 
 
@@ -112,14 +139,9 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.coroutines.test)
         }
     }
-}
-
-dependencies {
-    debugImplementation(libs.compose.uiTooling)
-    debugImplementation("androidx.compose.ui:ui-tooling:1.6.1")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.6.1")
 }
 
 compose {

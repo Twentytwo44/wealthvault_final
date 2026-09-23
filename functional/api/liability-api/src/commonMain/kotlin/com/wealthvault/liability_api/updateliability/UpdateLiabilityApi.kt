@@ -2,13 +2,9 @@ package com.wealthvault.liability_api.updateliability
 
 
 
-import com.wealthvault.liability_api.model.LiabilityRequest
-import com.wealthvault.liability_api.model.LiabilityResponse
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.PATCH
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.portfolio.LiabilityData
+import com.wealthvault.domain.portfolio.LiabilityRequest
 
 interface UpdateLiabilityApi {
-    @PATCH("lia/{id}/")
-    suspend fun updateLiability(@Path("id") id: String, @Body request: LiabilityRequest): LiabilityResponse
+    suspend fun updateLiability(id: String, request: LiabilityRequest): LiabilityData
 }

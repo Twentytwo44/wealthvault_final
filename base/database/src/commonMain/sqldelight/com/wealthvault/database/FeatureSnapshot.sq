@@ -1,0 +1,24 @@
+CREATE TABLE feature_snapshot (
+    namespace TEXT NOT NULL,
+    cache_key TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    updated_at_epoch_millis INTEGER NOT NULL,
+    PRIMARY KEY (namespace, cache_key)
+);
+
+selectByKey:
+SELECT payload, updated_at_epoch_millis
+FROM feature_snapshot
+WHERE namespace = ? AND cache_key = ?;
+
+upsert:
+INSERT OR REPLACE INTO feature_snapshot(namespace, cache_key, payload, updated_at_epoch_millis)
+VALUES (?, ?, ?, ?);
+
+deleteByKey:
+DELETE FROM feature_snapshot
+WHERE namespace = ? AND cache_key = ?;
+
+deleteByNamespace:
+DELETE FROM feature_snapshot
+WHERE namespace = ?;

@@ -1,9 +1,7 @@
 package com.wealthvault.`user-api`.friend
 
-import com.wealthvault.`user-api`.model.FriendResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.domain.profile.FriendData
 
 interface FriendApi {
-    @GET("friend/")
-    suspend fun getFriend(): FriendResponse
+    suspend fun getFriend(): List<FriendData>
 }

@@ -11,6 +11,7 @@ import com.wealthvault.account_api.getaccountbyid.GetAccountByIdApiImpl
 import com.wealthvault.account_api.updateaccount.UpdateAccountApi
 import com.wealthvault.account_api.updateaccount.UpdateAccountApiImpl
 import com.wealthvault.core.KoinConst
+import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -25,11 +26,11 @@ object AccountApiModule {
         }
 
 
-        single<CreateAccountApi> { CreateAccountApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetAccountApi> { GetAccountApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetAccountByIdApi> { GetAccountByIdApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UpdateAccountApi> { UpdateAccountApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<DeleteAccountApi> { DeleteAccountApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<CreateAccountApi> { CreateAccountApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetAccountApi> { GetAccountApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetAccountByIdApi> { GetAccountByIdApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UpdateAccountApi> { UpdateAccountApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<DeleteAccountApi> { DeleteAccountApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
 
 
 

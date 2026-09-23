@@ -2,10 +2,13 @@ package com.wealthvault.investment_api.createcash
 
 
 
-import com.wealthvault.building_api.model.BuildingRequest
 import com.wealthvault.building_api.model.BuildingResponse
 import com.wealthvault.config.Config
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.domain.portfolio.BuildingData
+import com.wealthvault.domain.portfolio.BuildingRequest
+import com.wealthvault.building_api.requireDomainData
+import com.wealthvault.building_api.toWire
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -14,34 +17,32 @@ import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 
-class CreateBuildingApiImpl(private val ktorfit: Ktorfit) : CreateBuildingApi {
-    override suspend fun create(request: BuildingRequest): BuildingResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
-
+class CreateBuildingApiImpl(private val client: HttpClient) : CreateBuildingApi {
+    override suspend fun create(request: BuildingRequest): BuildingData {
+        val wireRequest = request.toWire()
         return client.post("${Config.localhost_android}asset/building/") {
             setBody(
                 MultiPartFormDataContent(
                     formData {
 
-                        append("name", request.name ?: "")
+                        append("name", wireRequest.name ?: "")
                         append("type", "BUILDING_TYPE_HOUSE")
-                        append("area", request.area ?: 0.0)
-                        append("amount", request.amount ?: 0.0)
-                        append("description", request.description ?: "")
-                        append("location.address", request.locationAddress ?: "")
-                        append("location.sub_district", request.locationSubDistrict ?: "")
-                        append("location.district", request.locationDistrict ?: "")
-                        append("location.province", request.locationProvince ?: "")
-                        append("location.postal_code", request.locationPostalCode ?: "")
-                        request.insIds.forEach { insData ->
+                        append("area", wireRequest.area ?: 0.0)
+                        append("amount", wireRequest.amount ?: 0.0)
+                        append("description", wireRequest.description ?: "")
+                        append("location.address", wireRequest.locationAddress ?: "")
+                        append("location.sub_district", wireRequest.locationSubDistrict ?: "")
+                        append("location.district", wireRequest.locationDistrict ?: "")
+                        append("location.province", wireRequest.locationProvince ?: "")
+                        append("location.postal_code", wireRequest.locationPostalCode ?: "")
+                        wireRequest.insIds.forEach { insData ->
                             append("ins_ids", insData.insId ?: "")
                         }
-                        request.referenceIds.forEach { refData ->
+                        wireRequest.referenceIds.forEach { refData ->
                             append("reference_ids", refData.areaId ?: "")
                         }
 
-                        request.files.forEach { fileData ->
+                        wireRequest.files.forEach { fileData ->
                             append("files", fileData.bytes, Headers.build {
 
                                 // ✅ 1. ใส่ ContentType ตามชนิดไฟล์จริงๆ (image/jpeg หรือ application/pdf)
@@ -57,6 +58,6 @@ class CreateBuildingApiImpl(private val ktorfit: Ktorfit) : CreateBuildingApi {
                     }
                 )
             )
-        }.body()
+        }.body<BuildingResponse>().requireDomainData()
     }
 }

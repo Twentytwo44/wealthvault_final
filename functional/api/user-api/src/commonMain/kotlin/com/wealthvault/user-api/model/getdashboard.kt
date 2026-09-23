@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DashboardDataResponse(
+internal data class DashboardDataResponse(
     @SerialName("assets")
     val assets: List<DashboardItem> = emptyList(),
 
@@ -22,7 +22,7 @@ data class DashboardDataResponse(
 )
 
 @Serializable
-data class DashboardItem(
+internal data class DashboardItem(
     @SerialName("id")
     val id: String = "",
 
@@ -42,7 +42,7 @@ data class DashboardItem(
 )
 
 @Serializable
-data class CreatedAtData(
+internal data class CreatedAtData(
     @SerialName("seconds")
     val seconds: Long = 0,
 
@@ -51,7 +51,7 @@ data class CreatedAtData(
 )
 
 @Serializable
-data class NetWorthData(
+internal data class NetWorthData(
     @SerialName("count")
     val count: Int = 0,
 

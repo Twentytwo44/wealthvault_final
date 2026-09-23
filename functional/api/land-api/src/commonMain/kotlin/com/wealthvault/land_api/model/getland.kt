@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class GetLandResponse(
+internal data class GetLandResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -17,7 +17,7 @@ data class GetLandResponse(
 )
 
 @Serializable
-data class GetLandData(
+internal data class GetLandData(
 
     @SerialName("id")
     val id: String? = null,
@@ -53,7 +53,7 @@ data class GetLandData(
     )
 
 @Serializable
-data class LocationAll(
+internal data class LocationAll(
     @SerialName("location_id")
     val locationId: String? = null,
 
@@ -79,7 +79,6 @@ data class LocationAll(
     val updatedAt: String? = null,
 
     )
-
 
 
 

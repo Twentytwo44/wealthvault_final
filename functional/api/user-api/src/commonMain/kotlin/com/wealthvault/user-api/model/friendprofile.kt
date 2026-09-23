@@ -4,19 +4,19 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class FriendProfileResponse(
+internal data class FriendProfileResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: FriendProfileData? = null
 )
 
 @Serializable
-data class FriendProfileData(
+internal data class FriendProfileData(
     @SerialName("user_info") val userInfo: FriendUserInfo? = null,
     @SerialName("item_preview") val itemPreview: List<ItemPreview>? = null
 )
 
 @Serializable
-data class FriendUserInfo(
+internal data class FriendUserInfo(
     @SerialName("id") val id: String? = null,
     @SerialName("username") val username: String? = null,
     @SerialName("email") val email: String? = null,
@@ -34,14 +34,14 @@ data class FriendUserInfo(
 )
 
 @Serializable
-data class ItemPreview(
+internal data class ItemPreview(
     @SerialName("item_id") val itemId: String? = null,
     @SerialName("type") val type: String? = null, // account, liability, insurance, cash, building, land, investment
     @SerialName("asset_detail") val assetDetail: AssetDetailPreview? = null
 )
 
 @Serializable
-data class AssetDetailPreview(
+internal data class AssetDetailPreview(
     @SerialName("id") val id: String? = null,
     @SerialName("name") val name: String? = null,
 

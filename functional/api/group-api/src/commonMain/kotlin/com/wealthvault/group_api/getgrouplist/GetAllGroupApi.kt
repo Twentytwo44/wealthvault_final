@@ -1,9 +1,8 @@
 package com.wealthvault.group_api.getgrouplist
 
-import com.wealthvault.group_api.model.GetGroupResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.domain.social.GroupSummary
 
 interface GetAllGroupApi {
-    @GET("group/")
-    suspend fun getAllGroup(): GetGroupResponse
+    /** Transport-neutral group summaries; wire DTOs stay private to the adapter. */
+    suspend fun getAllGroup(): List<GroupSummary>
 }

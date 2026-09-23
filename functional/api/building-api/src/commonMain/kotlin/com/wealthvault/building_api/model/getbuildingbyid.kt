@@ -6,14 +6,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class BuildingIdResponse(
+internal data class BuildingIdResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: BuildingIdData? = null,
     @SerialName("error") val error: String? = null
 )
 
 @Serializable
-data class BuildingIdData(
+internal data class BuildingIdData(
     @SerialName("id") val id: String? = null,
     @SerialName("user_id") val userId: String? = null,
     @SerialName("type") val type: String? = null,
@@ -33,7 +33,7 @@ data class BuildingIdData(
 )
 
 @Serializable
-data class LocationDataById(
+internal data class LocationDataById(
     @SerialName("location_id") val locationId: String = "",
     @SerialName("address") val address: String = "",
     @SerialName("sub_district") val subDistrict: String = "",
@@ -45,21 +45,21 @@ data class LocationDataById(
 )
 
 @Serializable
-data class InsDataById(
+internal data class InsDataById(
     @SerialName("ins_id") val insId: String = "",
     @SerialName("ins_name") val insName: String = ""
 )
 
 // 🌟 เพิ่ม FileData สำหรับหน้านี้โดยเฉพาะ
 @Serializable
-data class FileDataById(
+internal data class FileDataById(
     @SerialName("id") val id: String = "",
     @SerialName("url") override val url: String = "", // 🌟 ใส่ override หน้า val
     @SerialName("file_type") override val fileType: String = ""
 ) : HasImageUrl // 🌟 ตบเข้า Interface
 
 @Serializable
-data class RefDataById(
+internal data class RefDataById(
     @SerialName("ref_id") val refId: String = "",
     @SerialName("ref_name") val refName: String = ""
 )

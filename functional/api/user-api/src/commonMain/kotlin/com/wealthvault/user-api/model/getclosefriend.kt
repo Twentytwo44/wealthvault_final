@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CloseFriendResponse(
+internal data class CloseFriendResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -16,7 +16,7 @@ data class CloseFriendResponse(
 )
 
 @Serializable
-data class CloseFriendData(
+internal data class CloseFriendData(
     @SerialName("id")
     val id: String,
 

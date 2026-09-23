@@ -9,6 +9,7 @@ PODS:
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
+  - composeApp (1.0)
   - Firebase/Core (12.10.0):
     - Firebase/CoreOnly
     - FirebaseAnalytics (~> 12.10.0)
@@ -132,6 +133,7 @@ PODS:
   - PromisesObjC (2.4.0)
 
 DEPENDENCIES:
+  - composeApp (from `../composeApp`)
   - Firebase/Core
   - Firebase/Messaging
   - GoogleSignIn
@@ -158,9 +160,14 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
 
+EXTERNAL SOURCES:
+  composeApp:
+    :path: "../composeApp"
+
 SPEC CHECKSUMS:
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
+  composeApp: e20fcc088e3b9a921ace416e353d9260052560dd
   Firebase: 99f203d3a114c6ba591f3b32263a9626e450af65
   FirebaseAnalytics: ef2970f65f3a2807e8f47a49cf3b8719d53e9fce
   FirebaseCore: f4428e22415ea3b3eca652c2098413dabf2a23a9
@@ -178,6 +185,6 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
 
-PODFILE CHECKSUM: 604d16fb9eb9f3e50bc83247d292ea8654cb45d8
+PODFILE CHECKSUM: dc3cce404fe938555e06e3f420094142e88191df
 
 COCOAPODS: 1.16.2

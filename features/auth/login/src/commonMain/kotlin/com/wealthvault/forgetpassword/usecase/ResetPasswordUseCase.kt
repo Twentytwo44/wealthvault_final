@@ -1,36 +1,31 @@
 package com.wealthvault.forgetpassword.usecase
 
-import com.wealthvault.`auth-api`.model.ResetPasswordRequest
-import com.wealthvault.core.FlowResult
-import com.wealthvault.core.FlowUseCase
-import com.wealthvault.forgetpassword.data.reset.ResetRepositoryImpl
+import com.wealthvault.domain.auth.PasswordResetRequest
+import com.wealthvault.core.architecture.AppResult
+import com.wealthvault.core.AppUseCase
+import com.wealthvault.core.architecture.toThrowable
+import com.wealthvault.core.observability.AppLogger
+import com.wealthvault.core.observability.NoOpAppLogger
+import com.wealthvault.domain.auth.PasswordResetRepository
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
 
 
 class ResetPasswordUseCase(
-    private val resetRepository: ResetRepositoryImpl,
+    private val resetRepository: PasswordResetRepository,
     // 1. รับ dispatcher เพิ่มเข้ามา
     dispatcher: CoroutineDispatcher,
-): FlowUseCase<ResetPasswordRequest, Boolean>(dispatcher) { // 2. ส่งต่อให้คลาสแม่
+    private val logger: AppLogger = NoOpAppLogger,
+): AppUseCase<PasswordResetRequest, Unit>(dispatcher) {
 
-    override fun execute(parameters: ResetPasswordRequest): Flow<FlowResult<Boolean>> = flow {
-        println("🚀 [ResetPasswordUseCase] Reset Password ")
+    suspend fun resetPassword(parameters: PasswordResetRequest): AppResult<Unit> = invoke(parameters)
 
-        val result = resetRepository.reset(parameters)
-
-        result.onSuccess {
-            println("✅ [ResetPasswordUseCase] Reset Password succes")
-
-            emit(FlowResult.Continue(true))
-        }.onFailure { exception ->
-            println("❌[[ResetPasswordUseCase] Reset Password Failed: ${exception.message}")
-            emit(FlowResult.Failure(exception))
+    override suspend fun execute(parameters: PasswordResetRequest): AppResult<Unit> {
+        logger.debug("Password reset started")
+        return resetRepository.reset(parameters).also { result ->
+            when (result) {
+                is AppResult.Success -> logger.info("Password reset succeeded")
+                is AppResult.Failure -> logger.warn("Password reset failed", result.error.toThrowable())
+            }
         }
-    }.catch { cause ->
-        println("🚨[ResetPasswordUseCase] Reset Password Unexpected Error: ${cause.message}")
-        emit(FlowResult.Failure(cause))
     }
 }

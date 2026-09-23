@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MemberResponse(
+internal data class MemberResponse(
     @SerialName("message")
     val message: String? = null,
 
@@ -17,13 +17,13 @@ data class MemberResponse(
 )
 
 @Serializable
-data class AddMemberRequest(
+internal data class AddMemberRequest(
     @SerialName("target_id")
     val targetIds: String? = null,
 )
 
 @Serializable
-data class GrantAccessRequest(
+internal data class GrantAccessRequest(
     @SerialName("target_id")
     val targetId: String? = null,
 

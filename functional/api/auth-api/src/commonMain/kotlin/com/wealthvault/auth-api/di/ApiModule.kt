@@ -1,6 +1,5 @@
 package com.wealthvault.`auth-api`.di
 
-import com.wealthvault.`auth-api`.HttpClientBuilder
 import com.wealthvault.`auth-api`.fgpassword.ForgetApi
 import com.wealthvault.`auth-api`.fgpassword.ForgetApiImpl
 import com.wealthvault.`auth-api`.googlelink.GoogleLoginApi
@@ -17,51 +16,20 @@ import com.wealthvault.`auth-api`.register.RegisterApi
 import com.wealthvault.`auth-api`.register.RegisterApiImpl
 import com.wealthvault.`auth-api`.rspassword.ResetApi
 import com.wealthvault.`auth-api`.rspassword.ResetApiImpl
-import com.wealthvault.config.Config
 import com.wealthvault.core.KoinConst
-import de.jensklingenberg.ktorfit.Ktorfit
-import io.ktor.client.HttpClient
-import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 object ApiModule {
     val allModules = module {
-        single<Json>(named(KoinConst.KotlinSerialization.AUTH)) {
-            Json {
-                ignoreUnknownKeys = true
-            }
-        }
-
-        single<HttpClient>(named(KoinConst.HttpClient.AUTH)) {
-            HttpClientBuilder(
-                get(named(KoinConst.KotlinSerialization.AUTH)),
-            ).buildDefaultHttpClient()
-        }
-
-        single<Ktorfit>(named(KoinConst.Ktor.AUTH)) {
-            val httpClient: HttpClient = get(named(KoinConst.HttpClient.AUTH))
-            val safeBaseUrl = if (Config.localhost_android.endsWith("/")) {
-                Config.localhost_android
-            } else {
-                "${Config.localhost_android}/"
-            }
-            println("============================================================")
-            println("🚨 [Koin_Setup] Ktorfit (AUTH) กำลังจะใช้ Base URL: $safeBaseUrl")
-            println("============================================================")
-            Ktorfit.Builder()
-                .baseUrl(safeBaseUrl)
-                .httpClient(httpClient)
-                .build()
-        }
-        single<LoginApi> { LoginApiImpl(get(named(KoinConst.Ktor.AUTH))) }
-        single<RegisterApi> { RegisterApiImpl(get(named(KoinConst.Ktor.AUTH))) }
-        single<RefreshTokenApi> { RefreshTokenImpl(get(named(KoinConst.Ktor.AUTH))) }
-        single<ForgetApi> { ForgetApiImpl(get(named(KoinConst.Ktor.AUTH))) }
-        single<ResetApi> { ResetApiImpl(get(named(KoinConst.Ktor.AUTH))) }
-        single<OTPApi> { OTPApiImpl(get(named(KoinConst.Ktor.AUTH))) }
-        single<LineLinkApi> { LineLinkApiImpl(get(named(KoinConst.Ktor.AUTH))) }
-        single<GoogleLoginApi> { GoogleLoginApiImpl(get(named(KoinConst.Ktor.AUTH))) }
+        single<LoginApi> { LoginApiImpl(get(named(KoinConst.HttpClient.PUBLIC))) }
+        single<RegisterApi> { RegisterApiImpl(get(named(KoinConst.HttpClient.PUBLIC))) }
+        single<RefreshTokenApi> { RefreshTokenImpl(get(named(KoinConst.HttpClient.PUBLIC))) }
+        single<ForgetApi> { ForgetApiImpl(get(named(KoinConst.HttpClient.PUBLIC))) }
+        single<ResetApi> { ResetApiImpl(get(named(KoinConst.HttpClient.PUBLIC))) }
+        single<OTPApi> { OTPApiImpl(get(named(KoinConst.HttpClient.PUBLIC))) }
+        single<LineLinkApi> { LineLinkApiImpl(get(named(KoinConst.HttpClient.PUBLIC))) }
+        single<GoogleLoginApi> { GoogleLoginApiImpl(get(named(KoinConst.HttpClient.PUBLIC))) }
     }
 
 

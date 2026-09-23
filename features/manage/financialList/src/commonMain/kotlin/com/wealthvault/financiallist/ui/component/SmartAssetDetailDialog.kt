@@ -17,21 +17,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.wealthvault.account_api.model.BankAccountData
-import com.wealthvault.building_api.model.BuildingIdData
-import com.wealthvault.cash_api.model.CashIdData
+import com.wealthvault.domain.portfolio.BankAccountData
+import com.wealthvault.domain.portfolio.BuildingIdData
+import com.wealthvault.domain.portfolio.CashIdData
 import com.wealthvault.core.components.DetailDialog
 import com.wealthvault.core.components.DetailImageRow
 import com.wealthvault.core.components.DetailRow
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
-import com.wealthvault.financiallist.data.FinanciallistRepositoryImpl
-import com.wealthvault.insurance_api.model.InsuranceIdData
-import com.wealthvault.investment_api.model.InvestmentIdData
-import com.wealthvault.land_api.model.LandIdData
-import com.wealthvault.liability_api.model.LiabilityIdData
-import com.wealthvault_final.`financial-asset`.ui.components.maptype.* // 🌟 Import ไฟล์ Map
+import com.wealthvault.financiallist.usecase.FinanciallistUseCase
+import com.wealthvault.domain.portfolio.InsuranceIdData
+import com.wealthvault.domain.portfolio.InvestmentIdData
+import com.wealthvault.domain.portfolio.LandIdData
+import com.wealthvault.domain.portfolio.LiabilityIdData
+import com.wealthvault.core.architecture.getOrNull
+import com.wealthvault.core.model.Money
+import com.wealthvault.core.model.FixedDecimal
+import com.wealthvault.financiallist.ui.form.*
 import org.koin.compose.koinInject
 
 // 🌟 Helper สำหรับหาชื่อภาษาไทยจาก List ของ Pair
@@ -44,7 +47,7 @@ private fun mapTypeLabel(key: String?, mapList: List<Pair<String, String>>): Str
 fun SmartAssetDetailDialog(
     assetId: String,
     assetType: String,
-    repository: FinanciallistRepositoryImpl = koinInject(),
+    useCase: FinanciallistUseCase = koinInject(),
     showBottomMenu: Boolean = false,
     onDismiss: () -> Unit,
     onDelete: (String) -> Unit = {},
@@ -59,13 +62,13 @@ fun SmartAssetDetailDialog(
     LaunchedEffect(assetId, assetType) {
         isLoading = true
         detailData = when (assetType.lowercase()) {
-            "account" -> repository.getAccountById(assetId).getOrNull()
-            "cash" -> repository.getCashById(assetId).getOrNull()
-            "investment" -> repository.getInvestmentById(assetId).getOrNull()
-            "insurance" -> repository.getInsuranceById(assetId).getOrNull()
-            "building" -> repository.getBuildingById(assetId).getOrNull()
-            "land" -> repository.getLandById(assetId).getOrNull()
-            "liability" -> repository.getLiabilityById(assetId).getOrNull()
+            "account" -> useCase.getAccountById(assetId).getOrNull()
+            "cash" -> useCase.getCashById(assetId).getOrNull()
+            "investment" -> useCase.getInvestmentById(assetId).getOrNull()
+            "insurance" -> useCase.getInsuranceById(assetId).getOrNull()
+            "building" -> useCase.getBuildingById(assetId).getOrNull()
+            "land" -> useCase.getLandById(assetId).getOrNull()
+            "liability" -> useCase.getLiabilityById(assetId).getOrNull()
             else -> null
         }
         isLoading = false
@@ -111,7 +114,7 @@ fun SmartAssetDetailDialog(
                     DetailRow("เลขบัญชี", itemData.bankAccount)
                     // 🌟 Map ประเภทบัญชี
                     DetailRow("ประเภท", mapTypeLabel(itemData.type, bankAccountTypes))
-                    DetailRow("ยอดเงิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("ยอดเงิน", "${formatAmount(itemData.amount ?: Money(0))} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
@@ -124,7 +127,7 @@ fun SmartAssetDetailDialog(
                     onEdit = { onEdit(itemData) },
                     onShare = onShare
                 ) {
-                    DetailRow("มูลค่า", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("มูลค่า", "${formatAmount(itemData.amount ?: Money(0))} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
@@ -152,11 +155,14 @@ fun SmartAssetDetailDialog(
                         DetailRow("สัญลักษณ์", itemData.symbol)
                     }
 
-                    DetailRow("จำนวน", formatAmount(itemData.quantity ?: 0.0))
-                    DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(itemData.costPerPrice ?: 0.0)} บาท")
+                    DetailRow("จำนวน", itemData.quantity?.decimalString() ?: "0")
+                    DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(itemData.costPerPrice ?: Money(0))} บาท")
                     // 🌟 Map ประเภทการลงทุน
                     DetailRow("ประเภท", mapTypeLabel(itemData.type, investmentTypes))
-                    DetailRow("มูลค่ารวม", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    val totalValue = itemData.amount
+                        ?: itemData.costPerPrice?.times(itemData.quantity ?: FixedDecimal(0, 4))
+                        ?: Money(0)
+                    DetailRow("มูลค่ารวม", "${formatAmount(totalValue)} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
@@ -171,7 +177,7 @@ fun SmartAssetDetailDialog(
                 ) {
                     DetailRow("เลขกรมธรรม์", itemData.policyNumber)
                     DetailRow("บริษัท", itemData.companyName)
-                    DetailRow("วงเงินคุ้มครอง", "${formatAmount(itemData.coverageAmount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("วงเงินคุ้มครอง", "${formatAmount(itemData.coverageAmount ?: Money(0))} บาท", isHighlight = true)
                     DetailRow("ระยะเวลาคุ้มครอง", "${itemData.coveragePeriod} ปี")
                     // 🌟 Map ประเภทประกัน
                     DetailRow("ประเภทประกัน", mapTypeLabel(itemData.type, insuranceTypes))
@@ -192,7 +198,7 @@ fun SmartAssetDetailDialog(
                     // 🌟 Map ประเภทสิ่งปลูกสร้าง
                     DetailRow("ประเภท", mapTypeLabel(itemData.type, buildingTypes))
                     DetailRow("พื้นที่", "${formatAmount(itemData.area ?: 0.0)} ตร.ม.")
-                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: Money(0))} บาท", isHighlight = true)
                     val addressStr = itemData.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
                     DetailRow("ที่อยู่", addressStr)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
@@ -209,7 +215,7 @@ fun SmartAssetDetailDialog(
                 ) {
                     DetailRow("เลขโฉนด", itemData.deedNum)
                     DetailRow("ขนาดพื้นที่", "${formatAmount(itemData.area ?: 0.0)} ตารางวา")
-                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: Money(0))} บาท", isHighlight = true)
                     val addressStr = itemData.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
                     DetailRow("ที่อยู่", addressStr)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
@@ -235,11 +241,11 @@ fun SmartAssetDetailDialog(
                     else mapTypeLabel(itemData.type, expenseTypes)
                     DetailRow("ประเภท", mappedType)
 
-                    DetailRow("เงินต้น/ยอดหนี้", "${formatAmount(itemData.principal ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("เงินต้น/ยอดหนี้", "${formatAmount(itemData.principal ?: Money(0))} บาท", isHighlight = true)
 
-                    val rate = itemData.interestRate ?: 0.0
-                    if (rate > 0) {
-                        DetailRow(label = "ดอกเบี้ย", value = "$rate %")
+                    val rate = itemData.interestRate
+                    if (rate != null && rate.unscaled != 0L) {
+                        DetailRow(label = "ดอกเบี้ย", value = "${rate.decimalString()} %")
                     }
 
                     DetailRow(

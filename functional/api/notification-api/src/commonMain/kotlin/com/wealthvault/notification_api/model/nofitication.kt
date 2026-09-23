@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class NotificationResponse(
+internal data class NotificationResponse(
     @SerialName("data")
     val data: List<NotificationData>? = emptyList(),
 
@@ -24,7 +24,7 @@ data class NotificationResponse(
     )
 
 @Serializable
-data class NotificationData(
+internal data class NotificationData(
     @SerialName("ID")
     val id: String? = null,
 

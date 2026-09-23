@@ -1,9 +1,7 @@
 package com.wealthvault.`user-api`.user
 
-import com.wealthvault.`user-api`.model.UserDataResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.domain.profile.UserData
 
 interface UserApi {
-    @GET("user")
-    suspend fun getUser(): UserDataResponse
+    suspend fun getUser(): UserData
 }

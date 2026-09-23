@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class GroupMsgResponse(
+internal data class GroupMsgResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -21,7 +21,7 @@ data class GroupMsgResponse(
 
 
 @Serializable
-data class GroupMsgData(
+internal data class GroupMsgData(
 
     @SerialName("sender_id")
     val senderId: String? = null,
@@ -51,7 +51,7 @@ data class GroupMsgData(
     )
 
 @Serializable
-data class MessageMetadata(
+internal data class MessageMetadata(
     @SerialName("action_url")
     val assetUrl: String? = null,
 
@@ -87,7 +87,7 @@ data class MessageMetadata(
     )
 
     @Serializable
-    data class ChatAction(
+    internal data class ChatAction(
         @SerialName("action")
         val action: String,
         @SerialName("group_id")
@@ -95,7 +95,7 @@ data class MessageMetadata(
     )
 
     @Serializable
-    data class WsUpdateResponse(
+    internal data class WsUpdateResponse(
         @SerialName("event")
         val event: String? = null,
         @SerialName("type")
@@ -105,7 +105,7 @@ data class MessageMetadata(
     )
 
     @Serializable
-    data class WsPayload(
+    internal data class WsPayload(
         @SerialName("count")
         val count: Int? = null,
         @SerialName("group_id")

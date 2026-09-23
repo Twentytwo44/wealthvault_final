@@ -3,14 +3,20 @@ package com.wealthvault.google_auth
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
+class GoogleAuthContractTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun googleUserPreservesBackendIdentityFields() {
+        val user = GoogleUser(
+            idToken = "id-token",
+            accessToken = "access-token",
+            email = "user@example.com",
+            displayName = "User",
+            photoUrl = null,
+            userId = "user-1"
+        )
+
+        assertEquals("user-1", user.userId)
+        assertEquals("id-token", user.idToken)
+        assertEquals("user@example.com", user.email)
     }
 }

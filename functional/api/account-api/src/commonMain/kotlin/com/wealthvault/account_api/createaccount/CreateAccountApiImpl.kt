@@ -1,9 +1,10 @@
 package com.wealthvault.account_api.createaccount
 
-import com.wealthvault.account_api.model.BankAccountRequest
-import com.wealthvault.account_api.model.BankAccountResponse
+import com.wealthvault.account_api.requireDomainData
+import com.wealthvault.account_api.toWire
 import com.wealthvault.config.Config
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.domain.portfolio.BankAccountRequest
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -12,25 +13,22 @@ import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 
-class CreateAccountApiImpl(private val ktorfit: Ktorfit) : CreateAccountApi {
-    override suspend fun create(request: BankAccountRequest): BankAccountResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
-
-        return client.post("${Config.localhost_android}asset/account/") {
+class CreateAccountApiImpl(private val client: HttpClient) : CreateAccountApi {
+    override suspend fun create(request: BankAccountRequest) = client.post("${Config.localhost_android}asset/account/") {
+            val wireRequest = request.toWire()
             setBody(
                 MultiPartFormDataContent(
                     formData {
 
-                        append("name", request.name)
-                        append("description", request.description)
-                        append("bank_name", request.bankName)
-                        append("bank_account", request.bankAccount)
-                        append("type", request.type)
-                        append("amount", request.amount)
+                        append("name", wireRequest.name)
+                        append("description", wireRequest.description)
+                        append("bank_name", wireRequest.bankName)
+                        append("bank_account", wireRequest.bankAccount)
+                        append("type", wireRequest.type)
+                        append("amount", wireRequest.amount)
 
 
-                        request.files.forEach { fileData ->
+                        wireRequest.files.forEach { fileData ->
                             append("files", fileData.bytes, Headers.build {
 
                                 // ✅ 1. ใส่ ContentType ตามชนิดไฟล์จริงๆ (image/jpeg หรือ application/pdf)
@@ -46,6 +44,5 @@ class CreateAccountApiImpl(private val ktorfit: Ktorfit) : CreateAccountApi {
                     }
                 )
             )
-        }.body()
-    }
+        }.body<com.wealthvault.account_api.model.BankAccountResponse>().requireDomainData()
 }

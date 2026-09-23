@@ -1,8 +1,8 @@
 package com.wealthvault.build_logic.config
 
 object AppModule {
-    const val app = ":app"
-    const val navigation = ":navigation"
+    const val composeApp = ":composeApp"
+    const val androidApp = ":androidApp"
 }
 
 object FeatureModules {
@@ -11,14 +11,17 @@ object FeatureModules {
 }
 
 object FunctionalModules {
-    const val api = ":functional:api"
-//    const val coint = ":functional:coin"
-    const val dataStore = ":functional:data-store"
-//    const val db = ":functional:db"
-//    const val navigation = ":functional:navigation"
+    // Legacy functional modules are intentionally absent from the build graph.
+    // New code depends on the bounded-context data/domain modules below.
+    const val authData = ":data:auth"
+    const val portfolioData = ":data:portfolio"
+    const val socialData = ":data:social"
 }
 
 object BaseModule {
     const val config = ":base:config"
     const val core = ":base:core"
+    const val network = ":base:network"
+    const val security = ":base:security"
+    const val database = ":base:database"
 }

@@ -1,9 +1,7 @@
 package com.wealthvault.account_api.getaccount
 
-import com.wealthvault.account_api.model.AccountResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.domain.portfolio.AccountData
 
 interface GetAccountApi {
-    @GET("asset/account/")
-    suspend fun getAccount(): AccountResponse
+    suspend fun getAccount(): List<AccountData>
 }

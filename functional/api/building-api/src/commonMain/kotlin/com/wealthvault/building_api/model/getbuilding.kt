@@ -4,14 +4,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetBuildingResponse(
+internal data class GetBuildingResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: List<GetBuildingData>? = null,
     @SerialName("error") val error: String? = null
 )
 
 @Serializable
-data class GetBuildingData(
+internal data class GetBuildingData(
     @SerialName("id") val id: String? = null,
     @SerialName("user_id") val userId: String? = null,
     @SerialName("type") val type: String? = null,
@@ -28,7 +28,7 @@ data class GetBuildingData(
 )
 
 @Serializable
-data class LocationDataAll(
+internal data class LocationDataAll(
     @SerialName("location_id") val locationId: String = "",
     @SerialName("address") val address: String = "",
     @SerialName("sub_district") val subDistrict: String = "",
@@ -40,14 +40,14 @@ data class LocationDataAll(
 )
 
 @Serializable
-data class InsDataAll(
+internal data class InsDataAll(
     @SerialName("ins_id") val insId: String = "",
     @SerialName("ins_name") val insName: String = ""
 )
 
 // 🌟 เพิ่ม FileData ไว้สำหรับหน้านี้โดยเฉพาะ
 @Serializable
-data class FileDataAll(
+internal data class FileDataAll(
     @SerialName("id") val id: String = "",
     @SerialName("url") val url: String = "",
     @SerialName("file_type") val fileType: String = ""

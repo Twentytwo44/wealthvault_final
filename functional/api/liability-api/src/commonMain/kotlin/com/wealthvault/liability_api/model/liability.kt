@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class LiabilityRequest(
+internal data class LiabilityRequest(
 
     @SerialName("type")
     val type: String? = null,
@@ -41,7 +41,7 @@ data class LiabilityRequest(
     )
 
 @Serializable
-data class LiabilityResponse(
+internal data class LiabilityResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -53,7 +53,7 @@ data class LiabilityResponse(
 )
 
 @Serializable
-data class LiabilityData(
+internal data class LiabilityData(
     @SerialName("id")
     val id: String? = null,
 
@@ -70,7 +70,7 @@ data class LiabilityData(
     val creditor: String? = null,
 
     @SerialName("principal")
-    val principal: Int? = null,
+    val principal: Double? = null,
 
     @SerialName("interest_rate")
     val interestRate: Double? = null,
@@ -94,7 +94,7 @@ data class LiabilityData(
 )
 
 @Serializable
-data class LiabilityUploadData(
+internal data class LiabilityUploadData(
     val bytes: ByteArray,
     val mimeType: String,
     val fileName: String

@@ -17,8 +17,6 @@ kotlinStdlib = "2.3.0"
 runner = "1.5.2"
 core = "1.5.0"
 ktor = "3.4.0"
-ktorfit = "2.7.2"
-ksp = "2.3.4"
 coroutines = "1.10.2"
 koin = "4.1.1"
 dataStore = "1.2.0"
@@ -28,6 +26,13 @@ mokkery = "3.1.1"
 compose-plugin = "1.7.0"
 imagepicker-kmp = "1.0.8"
 filekit = "0.8.2"
+sqlDelight = "2.3.2"
+benchmark = "1.4.1"
+uiautomator = "2.3.0"
+profileInstaller = "1.4.1"
+startupRuntime = "1.2.0"
+errorProneAnnotations = "2.36.0"
+kover = "0.9.9"
 
 
 [libraries]
@@ -67,9 +72,6 @@ ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.re
 
 ktor-log = {module = "io.ktor:ktor-client-logging", version.ref = "ktor"}
 
-# Ktorfit (Type-safe client เหมือน Retrofit)
-ktorfit-lib = { module = "de.jensklingenberg.ktorfit:ktorfit-lib", version.ref = "ktorfit" }
-
 # Coroutines
 coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -87,21 +89,31 @@ compose-material = { module = "org.jetbrains.compose.material:material", version
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.7.0" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging-ktx" }
 
+sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqlDelight" }
+sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
+sqldelight-native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelight" }
+benchmark-macro = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark" }
+uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+profile-installer = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileInstaller" }
+startup-runtime = { module = "androidx.startup:startup-runtime", version.ref = "startupRuntime" }
+error-prone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorProneAnnotations" }
+
 
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
+androidTest = { id = "com.android.test", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 androidLint = { id = "com.android.lint", version.ref = "agp" }
-ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
 wealth-vault-lib = { id = "com.wealthvault.build_logic.library"}
 wealth-vault-compose = { id = "com.wealthvault.build_logic.compose"}

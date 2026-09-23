@@ -4,12 +4,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ResetPasswordRequest(
+internal data class ResetPasswordRequest(
     val resettoken: String,
     val password: String
 )
 @Serializable
-data class ResetPasswordResponse(
+internal data class ResetPasswordResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -21,7 +21,7 @@ data class ResetPasswordResponse(
 )
 
 @Serializable
-data class ResetPasswordData(
+internal data class ResetPasswordData(
     @SerialName("success")
     val success: Boolean,
 

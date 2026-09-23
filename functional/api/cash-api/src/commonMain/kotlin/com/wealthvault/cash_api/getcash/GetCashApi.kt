@@ -1,9 +1,7 @@
 package com.wealthvault.cash_api.getcash
 
-import com.wealthvault.cash_api.model.GetCashResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.domain.portfolio.GetCashData
 
 interface GetCashApi {
-    @GET("asset/cash")
-    suspend fun getCash(): GetCashResponse
+    suspend fun getCash(): List<GetCashData>
 }

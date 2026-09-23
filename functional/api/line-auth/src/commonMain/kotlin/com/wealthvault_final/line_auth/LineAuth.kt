@@ -1,5 +1,6 @@
-package com.wealthvault_final.line_auth
+package com.wealthvault.line_auth
 
-interface LineAuth {
-    fun login()
-}
+import com.wealthvault.domain.profile.LineSignInProvider
+
+/** Compatibility facade implemented by the platform LINE adapters. */
+interface LineAuth : LineSignInProvider

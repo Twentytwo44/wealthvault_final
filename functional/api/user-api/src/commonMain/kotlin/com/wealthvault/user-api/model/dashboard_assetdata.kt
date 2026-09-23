@@ -8,14 +8,14 @@ import kotlinx.serialization.Serializable
 // ==========================================
 
 @Serializable
-data class FileData(
+internal data class FileData(
     @SerialName("id") val id: String = "",
     @SerialName("url") val url: String = "",
     @SerialName("file_type") val fileType: String = ""
 )
 
 @Serializable
-data class LocationData(
+internal data class LocationData(
     @SerialName("location_id") val locationId: String = "",
     @SerialName("address") val address: String = "",
     @SerialName("sub_district") val subDistrict: String = "",
@@ -27,7 +27,7 @@ data class LocationData(
 )
 
 @Serializable
-data class RefData(
+internal data class RefData(
     @SerialName("ref_id") val refId: String = "",
     @SerialName("ref_name") val refName: String = ""
 )
@@ -38,13 +38,13 @@ data class RefData(
 // ==========================================
 
 @Serializable
-data class AccountDetailResponse(
+internal data class AccountDetailResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: AccountData? = null
 )
 
 @Serializable
-data class AccountData(
+internal data class AccountData(
     @SerialName("id") val id: String = "",
     @SerialName("user_id") val userId: String = "",
     @SerialName("name") val name: String = "",
@@ -64,13 +64,13 @@ data class AccountData(
 // ==========================================
 
 @Serializable
-data class CashDetailResponse(
+internal data class CashDetailResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: GetCashData? = null
 )
 
 @Serializable
-data class GetCashData(
+internal data class GetCashData(
     @SerialName("id") val id: String = "",
     @SerialName("user_id") val userId: String = "",
     @SerialName("name") val name: String = "",
@@ -87,13 +87,13 @@ data class GetCashData(
 // ==========================================
 
 @Serializable
-data class InvestDetailResponse(
+internal data class InvestDetailResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: GetInvestmentData? = null
 )
 
 @Serializable
-data class GetInvestmentData(
+internal data class GetInvestmentData(
     @SerialName("id") val id: String = "",
     @SerialName("user_id") val userId: String = "",
     @SerialName("name") val name: String = "",
@@ -115,13 +115,13 @@ data class GetInvestmentData(
 // ==========================================
 
 @Serializable
-data class InsuranceDetailResponse(
+internal data class InsuranceDetailResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: GetInsuranceData? = null
 )
 
 @Serializable
-data class GetInsuranceData(
+internal data class GetInsuranceData(
     @SerialName("id") val id: String = "",
     @SerialName("user_id") val userId: String = "",
     @SerialName("name") val name: String = "",
@@ -144,13 +144,13 @@ data class GetInsuranceData(
 // ==========================================
 
 @Serializable
-data class LandDetailResponse(
+internal data class LandDetailResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: GetLandData? = null
 )
 
 @Serializable
-data class GetLandData(
+internal data class GetLandData(
     @SerialName("id") val id: String = "",
     @SerialName("user_id") val userId: String = "",
     @SerialName("name") val name: String = "",
@@ -173,13 +173,13 @@ data class GetLandData(
 // ถ้า Backend ปรับให้ส่งเป็น Object ก้อนเดียว ให้ลบ List<> ออกนะครับ
 
 @Serializable
-data class BuildingDetailResponse(
+internal data class BuildingDetailResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: List<GetBuildingData>? = emptyList() // 🌟 ตาม JSON เป็น List
 )
 
 @Serializable
-data class GetBuildingData(
+internal data class GetBuildingData(
     @SerialName("id") val id: String = "",
     @SerialName("user_id") val userId: String = "",
     @SerialName("type") val type: String = "",
@@ -201,13 +201,13 @@ data class GetBuildingData(
 // ==========================================
 
 @Serializable
-data class LiabilityDetailResponse(
+internal data class LiabilityDetailResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: LiabilityData? = null
 )
 
 @Serializable
-data class LiabilityData(
+internal data class LiabilityData(
     @SerialName("id") val id: String = "",
     @SerialName("user_id") val userId: String = "",
     @SerialName("type") val type: String = "",

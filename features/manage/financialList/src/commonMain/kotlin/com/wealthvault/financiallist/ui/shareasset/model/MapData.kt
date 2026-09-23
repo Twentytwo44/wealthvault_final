@@ -22,5 +22,6 @@ data class FriendTargetModel(
 // มัดรวมกันเพื่อส่งกลับไปให้ ViewModel
 data class ShareCombinedData(
     val mappedGroups: List<GroupTargetModel>,
-    val mappedFriends: List<FriendTargetModel>
+    val mappedFriends: List<FriendTargetModel>,
+    val mappedEmails: List<ShareInfo> = emptyList(),
 )

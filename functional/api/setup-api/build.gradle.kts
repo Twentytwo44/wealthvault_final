@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
 
 
@@ -17,7 +16,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.wealthvault_final.setup_api"
+        namespace = "com.wealthvault.api.setup"
         compileSdk = 36
         minSdk = 24
 
@@ -70,15 +69,19 @@ kotlin {
 
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
-                implementation(libs.ktorfit.lib)
                 implementation("io.ktor:ktor-client-logging:3.4.0")
-                implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.3.4")
 
 
                 implementation(project(":base:core"))
                 implementation(project(":base:config"))
-                implementation(project(":functional:data-store"))
-                implementation(project(":functional:api:auth-api"))
+                implementation(project(":domain:auth"))
+            }
+        }
+
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.coroutines)
             }
         }
 

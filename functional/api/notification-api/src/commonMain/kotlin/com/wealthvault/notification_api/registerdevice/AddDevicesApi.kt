@@ -1,11 +1,11 @@
 package com.wealthvault.notification_api.registerdevice
 
-import com.wealthvault.notification_api.model.DeviceRequest
-import com.wealthvault.notification_api.model.DeviceResponse
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.POST
+import com.wealthvault.domain.notification.DeviceMutationResult
 
 interface AddDevicesApi {
-    @POST("devices/register/")
-    suspend fun addDevices(@Body request: DeviceRequest): DeviceResponse
+    suspend fun addDevices(
+        token: String?,
+        platform: String?,
+        deviceName: String?,
+    ): DeviceMutationResult
 }

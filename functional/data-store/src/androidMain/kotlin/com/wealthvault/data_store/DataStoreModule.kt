@@ -8,6 +8,7 @@ import org.koin.dsl.module
 object androidDataStoreModule  {
 
     val allModules = module {
+        single<SecureStorage> { AndroidSecureStorage(androidContext()) }
         single<DataStore<Preferences>> {
     createAndroidDataStore(androidContext())
 }}

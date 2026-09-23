@@ -1,78 +1,45 @@
 package com.wealthvault.login.ui
 
-// Import ของที่เราต้องใช้
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.ic_auth_email
-import com.wealthvault.core.generated.resources.ic_auth_eye
-import com.wealthvault.core.generated.resources.ic_auth_eye_slash
-import com.wealthvault.core.generated.resources.ic_auth_google
-import com.wealthvault.core.generated.resources.ic_auth_lock
-// 🌟 Import ภาพประกอบหน้า Login (เช็คชื่อไฟล์ในโปรเจกต์คุณแชมป์ด้วยนะครับ)
 import com.wealthvault.core.generated.resources.login
-import com.wealthvault.core.theme.LightBorder
-import com.wealthvault.core.theme.LightMuted
 import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSurface
-import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.theme.WealthVaultTheme
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.theme.WvWaveGradientStart
@@ -80,10 +47,7 @@ import com.wealthvault.core.theme.WvBgGradientEnd
 import com.wealthvault.core.theme.WvBgGradientStart
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.forgetpassword.ui.ForgetPasswordScreen
-import com.wealthvault.introduction.ui.IntroScreen
-import com.wealthvault.main.SharedScreen
-import com.wealthvault.navigation.MainScreen
-import com.wealthvault.register.ui.RegisterScreen
+import com.wealthvault.core.navigation.SharedScreen
 import org.jetbrains.compose.resources.painterResource
 
 class LoginScreen() : Screen {
@@ -91,54 +55,31 @@ class LoginScreen() : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<LoginScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
+        val registerScreen = rememberScreen(SharedScreen.Register)
 
         LoginContent(
-            username = screenModel.username,
-            onUsernameChange = {
-                screenModel.username = it
-                screenModel.errorMessage = null // ทริค UX: ล้าง Error ทันทีเมื่อผู้ใช้เริ่มพิมพ์แก้
-            },
-            password = screenModel.password,
-            onPasswordChange = {
-                screenModel.password = it
-                screenModel.errorMessage = null // ทริค UX: ล้าง Error ทันทีเมื่อผู้ใช้เริ่มพิมพ์แก้
-            },
-            isLoading = screenModel.isLoading,
-            errorMessage = screenModel.errorMessage,
+            username = uiState.username,
+            onUsernameChange = { screenModel.onAction(LoginUiAction.UsernameChanged(it)) },
+            password = uiState.password,
+            onPasswordChange = { screenModel.onAction(LoginUiAction.PasswordChanged(it)) },
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.errorMessage,
             onLoginClick = {
-                // 🌟 1. กำหนดรูปแบบของอีเมล (ต้องมี @ และ . ตามด้วยตัวอักษร)
-                val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,}$".toRegex()
-
-                // 🌟 2. เช็คค่าว่างก่อน
-                if (screenModel.username.isBlank() || screenModel.password.isBlank()) {
-                    screenModel.errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"
-                }
-                // 🌟 3. เช็ครูปแบบอีเมล
-                else if (!screenModel.username.matches(emailRegex)) {
-                    screenModel.errorMessage = "รูปแบบอีเมลไม่ถูกต้อง"
-                }
-                // 🌟 4. ถ้าถูกต้องทั้งหมด ค่อยเรียกใช้ API
-                else {
-                    screenModel.onLoginClick { state ->
-                        when (state) {
-                            is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
-                            is LoginState.GoToMain -> navigator.replaceAll(MainScreen())
-                            else -> {}
-                        }
-                    }
+                validateLoginInput(uiState.username, uiState.password)?.let { message ->
+                    screenModel.onAction(LoginUiAction.ValidationFailed(message))
+                } ?: run {
+                    // SessionState is routed centrally by AppCoordinator.
+                    // The callback remains for compatibility with older
+                    // callers but this screen no longer owns global routing.
+                    screenModel.onLoginClick()
                 }
             },
             onGoogleClick = {
-                screenModel.onGoogleClick { state ->
-                    when (state) {
-                        is LoginState.GoToIntro -> navigator.replaceAll(IntroScreen())
-                        is LoginState.GoToMain -> navigator.replaceAll(MainScreen())
-                        else -> {}
-                    }
-                }
+                screenModel.onGoogleClick()
             },
             onForgotPasswordClick = { navigator.push(ForgetPasswordScreen()) },
-            onRegisterClick = { navigator.push(RegisterScreen()) }
+            onRegisterClick = { navigator.push(registerScreen) }
         )
     }
 }
@@ -156,9 +97,6 @@ fun LoginContent(
     onForgotPasswordClick: () -> Unit,
     onRegisterClick: () -> Unit
 ) {
-    // เช็คว่ามี Error ไหม
-    val hasError = errorMessage != null
-
     WealthVaultTheme {
         WavyBackground {
 
@@ -209,214 +147,20 @@ fun LoginContent(
                     contentScale = ContentScale.Fit
                 )
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // --- ช่องอีเมล ---
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        // ใช้ Row เพื่อวาง "อีเมล" ไว้ซ้าย และ "ข้อความ Error" ไว้ขวา
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Bottom // จัดให้อยู่ระดับเดียวกัน
-                        ) {
-                            Text(
-                                text = "อีเมล",
-                                color = LightPrimary, // กลับไปใช้สีเดิม ไม่แดงแล้ว
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                LoginFields(
+                    username = username,
+                    onUsernameChange = onUsernameChange,
+                    password = password,
+                    onPasswordChange = onPasswordChange,
+                    errorMessage = errorMessage,
+                )
 
-                            // แสดง Error ตรงมุมขวาบน
-                            if (hasError) {
-                                Text(
-                                    text = errorMessage,
-                                    color = RedErr,
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            }
-                        }
-
-                        BasicTextField(
-                            value = username,
-                            onValueChange = onUsernameChange,
-                            singleLine = true,
-                            textStyle = LocalTextStyle.current.copy(color = Color.Black), // สีตัวหนังสือ
-                            cursorBrush = SolidColor(LightPrimary), // สีเคอร์เซอร์กระพริบ
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp), // ล็อกความสูง 44.dp ตามมาตรฐาน
-                            decorationBox = { innerTextField ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(LightSurface, RoundedCornerShape(percent = 30))
-                                        .border(1.dp, LightBorder, RoundedCornerShape(percent = 30))
-                                        .padding(horizontal = 16.dp), // ระยะห่างซ้าย-ขวา ด้านใน
-                                    verticalAlignment = Alignment.CenterVertically // จัดทุกอย่างให้อยู่กึ่งกลางพอดีเป๊ะ
-                                ) {
-                                    // Leading Icon
-                                    Icon(
-                                        painter = painterResource(Res.drawable.ic_auth_email),
-                                        contentDescription = "email",
-                                        tint = LightPrimary,
-                                        modifier = Modifier.size(24.dp) // ปรับขนาดไอคอนเล็กน้อยให้ดูดี
-                                    )
-
-                                    Spacer(modifier = Modifier.width(12.dp))
-
-                                    // ช่องพิมพ์ข้อความ
-                                    Box(modifier = Modifier.weight(1f)) {
-                                        if (username.isEmpty()) {
-                                            // Placeholder (ข้อความจางๆ ตอนยังไม่พิมพ์)
-                                            Text("อีเมล", color = Color.Gray)
-                                        }
-                                        innerTextField() // ตัวควบคุมการพิมพ์ข้อความจะอยู่ตรงนี้
-                                    }
-                                }
-                            }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-                    var isPasswordVisible by remember { mutableStateOf(false) }
-
-                    // --- ช่องรหัสผ่าน ---
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "รหัสผ่าน",
-                            color = LightPrimary, // กลับไปใช้สีเดิม ไม่แดงแล้ว
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
-                        )
-                        BasicTextField(
-                            value = password,
-                            onValueChange = onPasswordChange,
-                            singleLine = true,
-                            // ส่วนสำคัญ: จัดการการซ่อน/แสดงรหัสผ่าน
-                            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                            textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                            cursorBrush = SolidColor(LightPrimary),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp), // สูง 44.dp ตามที่ต้องการ
-                            decorationBox = { innerTextField ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(LightSurface, RoundedCornerShape(percent = 30))
-                                        .border(1.dp, LightBorder, RoundedCornerShape(percent = 30))
-                                        .padding(start = 16.dp, end = 4.dp), // ลด padding ขวาหน่อยเพื่อให้ปุ่มลูกตาไม่ห่างเกิน
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    // Leading Icon (แม่กุญแจ)
-                                    Icon(
-                                        painter = painterResource(Res.drawable.ic_auth_lock),
-                                        contentDescription = "lock",
-                                        tint = LightPrimary,
-                                        modifier = Modifier.size(24.dp) // ปรับขนาดไอคอนเล็กน้อยให้ดูดี
-                                    )
-
-                                    Spacer(modifier = Modifier.width(12.dp))
-
-                                    // ช่องกรอกรหัสผ่าน
-                                    Box(modifier = Modifier.weight(1f)) {
-                                        if (password.isEmpty()) {
-                                            Text("รหัสผ่าน", color = Color.Gray)
-                                        }
-                                        innerTextField()
-                                    }
-
-                                    // Trailing Icon (ปุ่มลูกตา)
-                                    val icon = if (isPasswordVisible) painterResource(Res.drawable.ic_auth_eye)
-                                    else painterResource(Res.drawable.ic_auth_eye_slash)
-
-                                    IconButton(
-                                        onClick = { isPasswordVisible = !isPasswordVisible },
-                                        modifier = Modifier.size(44.dp) // ขนาดปุ่มมาตรฐานเพื่อให้กดง่าย
-                                    ) {
-                                        Icon(
-                                            painter = icon,
-                                            contentDescription = "Toggle Password Visibility",
-                                            tint = LightPrimary,
-                                            modifier = Modifier.size(22.dp) // ปรับขนาดไอคอนให้ดูพอดีกับกรอบ
-                                        )
-                                    }
-                                }
-                            }
-                        )
-                    }
-
-                    // --- ปุ่มลืมรหัสผ่าน ---
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        Text(
-                            text = "ลืมรหัสผ่าน",
-                            color = LightMuted,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.clickable { onForgotPasswordClick() }.padding(vertical = 2.dp, horizontal = 6.dp)
-                        )
-                    }
-
-                    // คืนพื้นที่ว่างให้สวยงาม
-                    Spacer(modifier = Modifier.height(26.dp))
-
-                    // --- ปุ่มเข้าสู่ระบบ ---
-                    Button(
-                        onClick = onLoginClick,
-                        modifier = Modifier.fillMaxWidth().height(46.dp),
-                        shape = RoundedCornerShape(percent = 30),
-                        colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
-                    ) {
-                        Text("เข้าสู่ระบบ", style = MaterialTheme.typography.bodyLarge, color = LightSurface)
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // --- ยังไม่มีบัญชี ---
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "ยังไม่มีบัญชี ", color = LightMuted, style = MaterialTheme.typography.bodyMedium)
-                        Text(
-                            text = "สร้างบัญชี?",
-                            color = LightPrimary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            textDecoration = TextDecoration.Underline,
-                            modifier = Modifier.clickable { onRegisterClick() }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // --- เส้นคั่น หรือ ---
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)) {
-                        HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
-                        Text(text = " หรือ ", color = LightMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 8.dp))
-                        HorizontalDivider(modifier = Modifier.weight(1f), color = LightBorder, thickness = 2.dp)
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // --- ปุ่ม Google ---
-                    OutlinedButton(
-                        onClick = onGoogleClick,
-                        modifier = Modifier.fillMaxWidth().height(46.dp).padding(horizontal = 48.dp),
-                        shape = RoundedCornerShape(percent = 30),
-                        border = BorderStroke(1.dp, LightBorder),
-                        colors = ButtonDefaults.outlinedButtonColors(containerColor = LightSurface)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(painter = painterResource(Res.drawable.ic_auth_google), contentDescription = "Google Logo", modifier = Modifier.size(24.dp), tint = Color.Unspecified)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Google", color = LightPrimary, style = MaterialTheme.typography.bodyLarge)
-                        }
-                    }
-
-                    // 🌟 เพิ่ม Spacer ด้านล่างสุดเพื่อให้เลื่อนลงมาแล้วมีระยะเว้นสวยๆ เวลาคีย์บอร์ดเด้ง
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
+                LoginActions(
+                    onLoginClick = onLoginClick,
+                    onGoogleClick = onGoogleClick,
+                    onForgotPasswordClick = onForgotPasswordClick,
+                    onRegisterClick = onRegisterClick,
+                )
             }
         }
     }

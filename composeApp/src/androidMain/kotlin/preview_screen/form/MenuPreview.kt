@@ -2,7 +2,7 @@
 //
 //import androidx.compose.runtime.Composable
 //import androidx.compose.ui.tooling.preview.Preview
-//import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreen
+//import com.wealthvault.`financial-asset`.ui.menu.MenuScreen
 //
 //@Preview(showBackground = true, name = "Preview")
 //@Composable

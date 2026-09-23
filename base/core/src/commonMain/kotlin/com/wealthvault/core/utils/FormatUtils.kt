@@ -1,5 +1,6 @@
 package com.wealthvault.core.utils
 
+import com.wealthvault.core.model.Money
 import kotlin.math.roundToLong
 
 fun formatAmount(amount: Number): String {
@@ -20,6 +21,22 @@ fun formatAmount(amount: Number): String {
         val decString = decPart.toString().padStart(2, '0').trimEnd('0')
         "$sign$intString.$decString"
     }
+}
+
+/** Formats fixed-point money without converting it back through Double. */
+fun formatAmount(amount: Money): String {
+    val decimal = amount.decimalString()
+    val negative = decimal.startsWith('-')
+    val unsigned = decimal.removePrefix("-")
+    val parts = unsigned.split('.', limit = 2)
+    val groupedWhole = parts[0]
+        .reversed()
+        .chunked(3)
+        .joinToString(",")
+        .reversed()
+    val fraction = parts.getOrNull(1).orEmpty().trimEnd('0')
+    val sign = if (negative) "-" else ""
+    return if (fraction.isEmpty()) "$sign$groupedWhole" else "$sign$groupedWhole.$fraction"
 }
 
 // แปลง 2000-02-03 -> 03/02/2543

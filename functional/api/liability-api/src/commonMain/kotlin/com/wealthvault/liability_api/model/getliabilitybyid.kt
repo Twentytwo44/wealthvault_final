@@ -5,14 +5,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LiabilityIdResponse(
+internal data class LiabilityIdResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: LiabilityIdData? = null,
     @SerialName("error") val error: String? = null
 )
 
 @Serializable
-data class LiabilityIdData(
+internal data class LiabilityIdData(
     @SerialName("id") val id: String,
     @SerialName("user_id") val userId: String,
     @SerialName("type") val type: String? = null,

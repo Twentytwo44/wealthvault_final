@@ -1,12 +1,8 @@
 package com.wealthvault.investment_api.updateinvestment
 
-import com.wealthvault.investment_api.model.InvestmentRequest
-import com.wealthvault.investment_api.model.InvestmentResponse
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.PATCH
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.portfolio.InvestmentData
+import com.wealthvault.domain.portfolio.InvestmentRequest
 
 interface UpdateInvestmentApi {
-    @PATCH("asset/invest/{id}")
-    suspend fun updateInvestment(@Path("id") id: String, @Body request: InvestmentRequest): InvestmentResponse
+    suspend fun updateInvestment(id: String, request: InvestmentRequest): InvestmentData
 }

@@ -2,9 +2,11 @@ package com.wealthvault.investment_api.updateinvestment
 
 
 import com.wealthvault.config.Config
-import com.wealthvault.investment_api.model.InvestmentRequest
-import com.wealthvault.investment_api.model.InvestmentResponse
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.domain.portfolio.InvestmentData
+import com.wealthvault.domain.portfolio.InvestmentRequest
+import com.wealthvault.investment_api.requireDomainData
+import com.wealthvault.investment_api.toWire
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -13,33 +15,31 @@ import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 
-class UpdateInvestmentApiImpl(private val ktorfit: Ktorfit) : UpdateInvestmentApi {
-    override suspend fun updateInvestment(id: String, request: InvestmentRequest): InvestmentResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
-
+class UpdateInvestmentApiImpl(private val client: HttpClient) : UpdateInvestmentApi {
+    override suspend fun updateInvestment(id: String, request: InvestmentRequest): InvestmentData {
         return client.patch("${Config.localhost_android}asset/invest/${id}") {
+            val wireRequest = request.toWire()
             setBody(
                 MultiPartFormDataContent(
                     formData {
                         // ส่งข้อมูลที่เป็น Text/String จาก request object
 
-                        append("name", request.name ?: "")
-                        append("description", request.description ?: "")
-                        append("symbol", request.symbol ?: "")
-                        append("broker_name", request.brokerName ?: "")
-                        append("quantity", request.quantity ?: "")
-                        append("cost_per_price", request.costPerPrice ?: "")
+                        append("name", wireRequest.name ?: "")
+                        append("description", wireRequest.description ?: "")
+                        append("symbol", wireRequest.symbol ?: "")
+                        append("broker_name", wireRequest.brokerName ?: "")
+                        append("quantity", wireRequest.quantity ?: "")
+                        append("cost_per_price", wireRequest.costPerPrice ?: "")
 
-                        append("type", request.type ?: "")
-                        append("amount", request.quantity ?: "")
-                        append("files", request.symbol ?: "")
+                        append("type", wireRequest.type ?: "")
+                        append("amount", wireRequest.quantity ?: "")
+                        append("files", wireRequest.symbol ?: "")
 
-                        request.deleteListId.forEach { fileData ->
+                        wireRequest.deleteListId.forEach { fileData ->
                             append("delete_file_ids", fileData)
                         }
 
-                        request.files.forEach { fileData ->
+                        wireRequest.files.forEach { fileData ->
                             append("files", fileData.bytes ?: byteArrayOf(), Headers.build {
 
                                 // ✅ 1. ใส่ ContentType ตามชนิดไฟล์จริงๆ (image/jpeg หรือ application/pdf)
@@ -55,6 +55,6 @@ class UpdateInvestmentApiImpl(private val ktorfit: Ktorfit) : UpdateInvestmentAp
                     }
                 )
             )
-        }.body()
+        }.body<com.wealthvault.investment_api.model.InvestmentResponse>().requireDomainData()
     }
 }

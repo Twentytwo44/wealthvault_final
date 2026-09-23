@@ -1,10 +1,7 @@
 package com.wealthvault.cash_api.getcashtbyid
 
-import com.wealthvault.cash_api.model.CashIdResponse
-import de.jensklingenberg.ktorfit.http.GET
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.portfolio.CashIdData
 
 interface GetCashByIdApi {
-    @GET("asset/cash/{id}/")
-    suspend fun getCashById(@Path("id") id: String): CashIdResponse
+    suspend fun getCashById(id: String): CashIdData?
 }

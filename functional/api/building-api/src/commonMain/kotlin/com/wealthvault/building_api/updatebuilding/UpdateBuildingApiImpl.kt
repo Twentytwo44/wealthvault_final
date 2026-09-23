@@ -2,10 +2,13 @@ package com.wealthvault.building_api.updatebuilding
 
 
 
-import com.wealthvault.building_api.model.BuildingRequest
 import com.wealthvault.building_api.model.BuildingResponse
 import com.wealthvault.config.Config
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.building_api.requireDomainData
+import com.wealthvault.building_api.toWire
+import com.wealthvault.domain.portfolio.BuildingData
+import com.wealthvault.domain.portfolio.BuildingRequest
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -14,43 +17,41 @@ import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 
-class UpdateBuildingApiImpl(private val ktorfit: Ktorfit) : UpdateBuildingApi {
-    override suspend fun updateBuilding(id: String, request: BuildingRequest): BuildingResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
-
+class UpdateBuildingApiImpl(private val client: HttpClient) : UpdateBuildingApi {
+    override suspend fun updateBuilding(id: String, request: BuildingRequest): BuildingData {
+        val wireRequest = request.toWire()
         return client.patch("${Config.localhost_android}asset/building/${id}/") {
             setBody(
                 MultiPartFormDataContent(
                     formData {
 
-                        append("name", request.name ?: "")
-                        append("type", request.type ?: "")
-                        append("area", request.area ?: 0.0)
-                        append("amount", request.amount ?: 0.0)
-                        append("description", request.description ?: "")
-                        append("location.address", request.locationAddress ?: "")
-                        append("location.sub_district", request.locationSubDistrict ?: "")
-                        append("location.district", request.locationDistrict ?: "")
-                        append("location.province", request.locationProvince ?: "")
-                        append("location.postal_code", request.locationPostalCode ?: "")
-                        request.insIds.forEach { insData ->
+                        append("name", wireRequest.name ?: "")
+                        append("type", wireRequest.type ?: "")
+                        append("area", wireRequest.area ?: 0.0)
+                        append("amount", wireRequest.amount ?: 0.0)
+                        append("description", wireRequest.description ?: "")
+                        append("location.address", wireRequest.locationAddress ?: "")
+                        append("location.sub_district", wireRequest.locationSubDistrict ?: "")
+                        append("location.district", wireRequest.locationDistrict ?: "")
+                        append("location.province", wireRequest.locationProvince ?: "")
+                        append("location.postal_code", wireRequest.locationPostalCode ?: "")
+                        wireRequest.insIds.forEach { insData ->
                             append("ins_ids", insData.insId ?: "")
                         }
-                        request.referenceIds.forEach { refData ->
+                        wireRequest.referenceIds.forEach { refData ->
                             append("reference_ids", refData.areaId ?: "")
                         }
 
-                        request.deleteListId.forEach { fileData ->
+                        wireRequest.deleteListId.forEach { fileData ->
                             append("delete_file_ids", fileData)
                         }
 
-                        request.deleteRefListId.forEach { data ->
+                        wireRequest.deleteRefListId.forEach { data ->
                             append("delete_reference_ids", data.areaId ?: "" )
                         }
 
 
-                        request.files.forEach { fileData ->
+                        wireRequest.files.forEach { fileData ->
                             append("files", fileData.bytes, Headers.build {
 
                                 // ✅ 1. ใส่ ContentType ตามชนิดไฟล์จริงๆ (image/jpeg หรือ application/pdf)
@@ -66,6 +67,6 @@ class UpdateBuildingApiImpl(private val ktorfit: Ktorfit) : UpdateBuildingApi {
                     }
                 )
             )
-        }.body()
+        }.body<BuildingResponse>().requireDomainData()
     }
 }

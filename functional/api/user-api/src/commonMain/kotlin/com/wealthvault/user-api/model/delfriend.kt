@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DeleteFriendResponse( // 🌟 แนะนำให้ใช้ชื่อนี้เพื่อให้สื่อความหมายครับ
+internal data class DeleteFriendResponse( // 🌟 แนะนำให้ใช้ชื่อนี้เพื่อให้สื่อความหมายครับ
     @SerialName("status")
     val status: String? = null,
 
@@ -20,7 +20,7 @@ data class DeleteFriendResponse( // 🌟 แนะนำให้ใช้ชื
 )
 
 @Serializable
-data class DeleteFriendData(
+internal data class DeleteFriendData(
     @SerialName("success")
     val success: Boolean? = null
 )

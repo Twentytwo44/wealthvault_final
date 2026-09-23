@@ -10,7 +10,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.data_store"
+        namespace = "com.wealthvault.data.store"
         compileSdk = 36
         minSdk = 24
 
@@ -67,6 +67,7 @@ kotlin {
                 implementation(libs.dataStore.preferences)
 
                 implementation(project(":base:core"))
+                implementation(project(":domain:auth"))
                 implementation("androidx.datastore:datastore-preferences:1.2.0")
 
                 // Coroutines
@@ -84,6 +85,7 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
             }
         }
 

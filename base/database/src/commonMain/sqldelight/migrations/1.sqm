@@ -1,0 +1,10 @@
+-- Existing installs already have schema version 1 with dashboard and
+-- notification snapshots. Add the bounded-context snapshot table without
+-- touching or deleting existing cached data.
+CREATE TABLE IF NOT EXISTS feature_snapshot (
+    namespace TEXT NOT NULL,
+    cache_key TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    updated_at_epoch_millis INTEGER NOT NULL,
+    PRIMARY KEY (namespace, cache_key)
+);

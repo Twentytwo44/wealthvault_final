@@ -1,10 +1,7 @@
 package com.wealthvault.group_api.groupmsg
 
-import com.wealthvault.group_api.model.GroupMsgResponse
-import de.jensklingenberg.ktorfit.http.GET
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.social.GroupMessage
 
 interface GetGroupMsgApi {
-    @GET("group/{id}/msg/")
-    suspend fun getGroupMsg(@Path("id") id: String): GroupMsgResponse
+    suspend fun getGroupMsg(id: String): List<GroupMessage>
 }

@@ -5,13 +5,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TokenRequest(
+internal data class TokenRequest(
     @SerialName("token")
     val token: String,
 
 )
 @Serializable
-data class TokenResponse(
+internal data class TokenResponse(
     @SerialName("line_id")
     val lineId: String? = null,
 
@@ -24,4 +24,3 @@ data class TokenResponse(
     @SerialName("error")
     val error: String? = null
 )
-

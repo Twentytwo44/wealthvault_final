@@ -14,7 +14,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.navigation"
+        namespace = "com.wealthvault.navigation"
         compileSdk = 36
         minSdk = 24
 
@@ -37,25 +37,11 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "navigationKit"
-
-    iosX64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
-
-    iosArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
-
-    iosSimulatorArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
+    // The application owns the only iOS framework. Keep native targets for
+    // KMP metadata/tests without publishing a standalone embed task.
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     // Source set declarations.
     // Declaring a target automatically creates a source set with the same name. By default, the
@@ -64,7 +50,6 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
         commonMain {
-
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
@@ -91,10 +76,6 @@ kotlin {
 //                implementation(project(":features:manage:financialList"))
 //                implementation(project(":features:social"))
 //                implementation(project(":features:profile"))
-                implementation(project(":navigation-point"))
-
-
-
 
 
 
@@ -139,5 +120,21 @@ kotlin {
 compose {
     resources {
         publicResClass = true
+    }
+}
+
+// `main` currently has no Compose resource source set; the Compose plugin
+// otherwise registers an Android-device copy task without an output directory
+// and makes the navigation smoke test impossible to compile. If resources are
+// added later, the normal task is left enabled automatically.
+val hasComposeResources = listOf(
+    file("src/commonMain/composeResources"),
+    file("src/androidDeviceTest/composeResources"),
+).any { it.exists() }
+if (!hasComposeResources) {
+    tasks.configureEach {
+        if (name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets") {
+            enabled = false
+        }
     }
 }

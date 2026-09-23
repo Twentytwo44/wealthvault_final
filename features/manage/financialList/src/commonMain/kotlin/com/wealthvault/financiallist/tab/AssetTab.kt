@@ -9,7 +9,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_nav_asset
 import com.wealthvault.financiallist.ui.asset.AssetScreen
-import com.wealthvault.main.SharedScreen
+import com.wealthvault.core.navigation.SharedScreen
 import org.jetbrains.compose.resources.painterResource
 
 object AssetTab : Tab {

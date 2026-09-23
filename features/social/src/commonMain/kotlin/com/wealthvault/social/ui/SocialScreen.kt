@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,9 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -42,23 +39,8 @@ class SocialScreen : Screen {
         var currentTab by rememberSaveable { mutableStateOf("เพื่อน") }
         val navigator = LocalNavigator.currentOrThrow
 
-        // 🌟 3. ดึง Lifecycle มาใช้งาน
-        val lifecycleOwner = LocalLifecycleOwner.current
-
-        // 🌟 4. ใช้ DisposableEffect ดัก ON_RESUME แทน เพื่อให้จุดแดงอัปเดตเสมอ
-        // ไม่ว่าจะกด Back กลับมา หรือสลับแอปกลับมา
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    println("🔄 SocialScreen ตื่นแล้ว! อัปเดตสถานะจุดแดงคำขอเป็นเพื่อน...")
-                    screenModel.fetchPendingFriendsBadge()
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
+        LaunchedEffect(screenModel) {
+            screenModel.fetchPendingFriendsBadge()
         }
 
         var rootNavigator = navigator

@@ -17,12 +17,20 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+__pycache__/
+*.py[cod]
 
 # Local signing material and generated release outputs must stay out of new commits.
 *.jks
 *.keystore
-composeApp/release/*.apk
-composeApp/release/baselineProfiles/**/*.dm
+composeApp/release/
+composeApp/composeApp.podspec
+
+# Local measurement exports are runner inputs, not source artifacts.
+build/performance/
+build/coverage/
+**/build/performance/
+**/build/coverage/
 
 **/google-services.json
 

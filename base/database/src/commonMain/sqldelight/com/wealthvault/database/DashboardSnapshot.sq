@@ -1,0 +1,17 @@
+CREATE TABLE dashboard_snapshot (
+    id INTEGER NOT NULL PRIMARY KEY,
+    payload TEXT NOT NULL,
+    updated_at_epoch_millis INTEGER NOT NULL
+);
+
+selectLatest:
+SELECT payload, updated_at_epoch_millis
+FROM dashboard_snapshot
+WHERE id = 1;
+
+upsert:
+INSERT OR REPLACE INTO dashboard_snapshot(id, payload, updated_at_epoch_millis)
+VALUES (1, ?, ?);
+
+clear:
+DELETE FROM dashboard_snapshot;

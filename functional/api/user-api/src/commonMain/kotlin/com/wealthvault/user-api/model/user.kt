@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class UserDataResponse(
+internal data class UserDataResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -17,7 +17,7 @@ data class UserDataResponse(
 )
 
 @Serializable
-data class UserData(
+internal data class UserData(
     @SerialName("id")
     val id: String? = null,
 
@@ -59,7 +59,7 @@ data class UserData(
 
 )
 @Serializable
-data class SearchUserResponse(
+internal data class SearchUserResponse(
     @SerialName("status") val status: String? = null,
     // 🌟 รับเป็น List<FriendData> เพราะ Backend ส่งมาเป็น Array [ { ... } ]
     @SerialName("data") val data: List<FriendData>? = null,

@@ -1,4 +1,4 @@
-package com.wealthvault_final.line_auth.di
+package com.wealthvault.line_auth.di
 
 import org.koin.dsl.module
 

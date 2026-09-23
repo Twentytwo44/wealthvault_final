@@ -15,7 +15,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.wealthvault.login"
+        namespace = "com.wealthvault.api.googleauth"
 
     }
     cocoapods {
@@ -49,6 +49,7 @@ kotlin {
                 implementation("androidx.datastore:datastore-preferences-core:1.1.1")
 
                 implementation(libs.coroutines)
+                implementation(project(":base:core"))
 
 
 
@@ -98,4 +99,3 @@ kotlin {
 //implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
 //implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
 //implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
-

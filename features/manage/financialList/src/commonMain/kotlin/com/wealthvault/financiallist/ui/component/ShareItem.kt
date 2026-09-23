@@ -16,14 +16,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wealthvault.core.theme.LightMuted
-import com.wealthvault.share_api.model.EmailDataList
-import com.wealthvault.share_api.model.FriendDataList
-import com.wealthvault.share_api.model.GroupDataList
-import com.wealthvault.share_api.model.ItemShareTargetsResponse
+import com.wealthvault.domain.social.EmailShareTarget
+import com.wealthvault.domain.social.FriendShareTarget
+import com.wealthvault.domain.social.GroupShareTarget
+import com.wealthvault.domain.social.ShareTargets
 
 
 @Composable
-fun ShareItem1(option: GroupDataList,) {
+fun ShareItem1(option: GroupShareTarget,) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -37,7 +37,7 @@ fun ShareItem1(option: GroupDataList,) {
     }
 }
 @Composable
-fun ShareItem2(option: FriendDataList,) {
+fun ShareItem2(option: FriendShareTarget,) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -51,7 +51,7 @@ fun ShareItem2(option: FriendDataList,) {
     }
 }
 @Composable
-fun ShareItem3(option: EmailDataList,) {
+fun ShareItem3(option: EmailShareTarget,) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -68,7 +68,7 @@ fun ShareItem3(option: EmailDataList,) {
 @Composable
 fun ShareTargetList(
     label: String,
-    shareTargets: ItemShareTargetsResponse
+    shareTargets: ShareTargets
 ) {
     Text(
         text = label,
@@ -82,7 +82,10 @@ fun ShareTargetList(
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             // 🌟 ส่ง list เข้าไปตรงๆ (ใช้ ?: emptyList() เผื่อเป็น null)
-            items(shareTargets.friends ?: emptyList()) { friend ->
+            items(
+                items = shareTargets.friends ?: emptyList(),
+                key = { friend -> friend.friendId ?: friend.userName ?: friend.hashCode() },
+            ) { friend ->
                 ShareItem2(friend) // friend จะมี type เป็น FriendDataList
             }
         }
@@ -93,7 +96,10 @@ fun ShareTargetList(
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             // 🌟 ส่ง list เข้าไปตรงๆ (ใช้ ?: emptyList() เผื่อเป็น null)
-            items(shareTargets.groups ?: emptyList()) { group ->
+            items(
+                items = shareTargets.groups ?: emptyList(),
+                key = { group -> group.groupId ?: group.groupName ?: group.hashCode() },
+            ) { group ->
                 ShareItem1(group) // friend จะมี type เป็น FriendDataList
             }
         }
@@ -104,7 +110,10 @@ fun ShareTargetList(
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             // 🌟 ส่ง list เข้าไปตรงๆ (ใช้ ?: emptyList() เผื่อเป็น null)
-            items(shareTargets.emails ?: emptyList()) { email ->
+            items(
+                items = shareTargets.emails ?: emptyList(),
+                key = { email -> email.email ?: email.hashCode() },
+            ) { email ->
                 ShareItem3(email) // friend จะมี type เป็น FriendDataList
             }
         }

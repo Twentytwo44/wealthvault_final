@@ -43,7 +43,7 @@ fun FriendSelectionList(
                 name = it.friendName,
                 userId = it.friendId,
                 typeData = "F",
-                subText = it.email ?: "",
+                subText = it.email,
                 profileUrl = it.profile,
                 isShared = it.isShared
             )
@@ -82,7 +82,10 @@ fun FriendSelectionList(
             modifier = Modifier.weight(1f, fill = false),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(availableData) { item ->
+            items(
+                items = availableData,
+                key = { item -> item.userId.ifBlank { "${item.typeData}:${item.name}" } },
+            ) { item ->
                 val isChecked = tempSelected.any { it.userId == item.userId }
 
                 Surface(

@@ -1,18 +1,14 @@
 package com.wealthvault.notification_api.getalldevice
 
 import com.wealthvault.config.Config
-import com.wealthvault.notification_api.model.GetDeviceResponse
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.notification_api.toDomain
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 
-class GetAllDeviceApiImpl(private val ktorfit: Ktorfit) : GetAllDeviceApi {
-    override suspend fun getAllDevices(): GetDeviceResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
+class GetAllDeviceApiImpl(private val client: HttpClient) : GetAllDeviceApi {
+    override suspend fun getAllDevices(): List<com.wealthvault.domain.notification.DeviceInfo> =
+        client.get("${Config.localhost_android}/devices/") {
 
-        return client.get("${Config.localhost_android}/devices/") {
-
-        }.body()
-    }
+        }.body<com.wealthvault.notification_api.model.GetDeviceResponse>().toDomain()
 }

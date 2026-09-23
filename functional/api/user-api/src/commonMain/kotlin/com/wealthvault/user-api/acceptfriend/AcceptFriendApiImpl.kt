@@ -3,20 +3,17 @@ package com.wealthvault.`user-api`.acceptfriend
 import com.wealthvault.`user-api`.model.AcceptFriendRequest
 import com.wealthvault.`user-api`.model.AcceptFriendResponse
 import com.wealthvault.config.Config
-import de.jensklingenberg.ktorfit.Ktorfit
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 
-class AcceptFriendApiImpl(private val ktorfit: Ktorfit) : AcceptFriendApi {
-    override suspend fun acceptFriend(request: AcceptFriendRequest): AcceptFriendResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
-
-        // ยิงเองตรงๆ แบบไม่ง้อ Generator
-        return client.post("${Config.localhost_android}friend/accept") {
-            setBody(request)
+class AcceptFriendApiImpl(private val client: HttpClient) : AcceptFriendApi {
+    override suspend fun acceptFriend(requesterId: String, action: String): String? {
+        val response: AcceptFriendResponse = client.post("${Config.localhost_android}friend/accept") {
+            setBody(AcceptFriendRequest(requesterId = requesterId, action = action))
         }.body()
+        response.error?.let { error -> throw IllegalStateException(error) }
+        return response.data?.success
     }
 }
-

@@ -1,0 +1,50 @@
+# Ratcheting baseline captured after the auth, dashboard, notification,
+# profile, and social boundary migrations in this checkpoint. Directional
+# dependency metrics are kept at zero so new layer leaks fail CI immediately.
+# Lower these numbers as each migration PR removes a violation.
+feature_to_feature_dependencies=0
+feature_to_feature_imports=0
+feature_to_data_dependencies=0
+feature_to_infrastructure_dependencies=0
+feature_to_compatibility_dependencies=0
+feature_to_app_dependencies=0
+domain_to_forbidden_dependencies=0
+domain_to_domain_dependencies=0
+data_to_feature_dependencies=0
+data_to_data_dependencies=0
+data_to_app_dependencies=0
+compatibility_to_data_dependencies=0
+legacy_source_root_edges=0
+feature_source_root_edges=0
+data_presentation_imports=0
+public_legacy_api_model_declarations=0
+public_data_transport_declarations=0
+feature_api_model_imports=0
+presentation_api_model_imports=0
+presentation_legacy_model_imports=0
+presentation_repository_impl_imports=0
+presentation_data_package_imports=0
+compatibility_api_model_imports=0
+composition_root_legacy_transport_imports=0
+composition_root_session_storage_imports=0
+domain_api_model_imports=0
+api_qualified_references_outside_data=0
+domain_infrastructure_imports=0
+domain_transport_serialization_imports=0
+domain_transport_serialization_dependencies=0
+domain_floating_point_financial_fields=0
+presentation_session_storage_imports=0
+feature_ktorfit_imports=0
+feature_transport_serialization_imports=0
+feature_transport_serialization_dependencies=0
+presentation_ktorfit_imports=0
+presentation_session_implementation_imports=0
+presentation_websocket_implementation_imports=0
+api_imports_outside_data=0
+feature_infrastructure_imports=0
+lifecycle_resume_observers=0
+production_println_calls=0
+production_print_calls=0
+legacy_namespace_references=0
+screen_model_udf_gaps=0
+large_screen_route_files=0

@@ -1,16 +1,15 @@
 package com.wealthvault.profile
 
 import kotlin.test.Test
+import com.wealthvault.domain.profile.UserData
 import kotlin.test.assertEquals
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
+class ProfileContractTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun userDataUsesSafeDefaults() {
+        val user = UserData()
+
+        assertEquals(null, user.id)
+        assertEquals(false, user.shareEnabled)
     }
 }

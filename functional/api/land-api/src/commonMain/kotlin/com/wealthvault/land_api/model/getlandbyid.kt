@@ -5,14 +5,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LandIdResponse(
+internal data class LandIdResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: LandIdData? = null,
     @SerialName("error") val error: String? = null
 )
 
 @Serializable
-data class LandIdData(
+internal data class LandIdData(
     @SerialName("id") val id: String,
     @SerialName("user_id") val userId: String,
     @SerialName("name") val name: String? = null,
@@ -36,7 +36,7 @@ data class LandIdData(
 )
 
 @Serializable
-data class LocationById(
+internal data class LocationById(
     @SerialName("location_id") val locationId: String = "",
     @SerialName("address") val address: String = "",
     @SerialName("sub_district") val subDistrict: String = "",
@@ -56,8 +56,7 @@ data class LocationById(
 //) : HasImageUrl
 
 @Serializable
-data class RefData(
+internal data class RefData(
     @SerialName("ref_id") val refId: String,
     @SerialName("ref_name") val refName: String
 )
-

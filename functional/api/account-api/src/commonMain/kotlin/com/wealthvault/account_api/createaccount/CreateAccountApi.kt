@@ -1,11 +1,8 @@
 package com.wealthvault.account_api.createaccount
 
-import com.wealthvault.account_api.model.BankAccountRequest
-import com.wealthvault.account_api.model.BankAccountResponse
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.POST
+import com.wealthvault.domain.portfolio.BankAccountData
+import com.wealthvault.domain.portfolio.BankAccountRequest
 
 interface CreateAccountApi {
-    @POST("asset/account/")
-    suspend fun create(@Body request: BankAccountRequest): BankAccountResponse
+    suspend fun create(request: BankAccountRequest): BankAccountData
 }

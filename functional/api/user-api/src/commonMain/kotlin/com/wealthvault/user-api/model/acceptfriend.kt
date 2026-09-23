@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class AcceptFriendRequest(
+internal data class AcceptFriendRequest(
     @SerialName("requester_id")
     val requesterId: String,
 
@@ -14,7 +14,7 @@ data class AcceptFriendRequest(
 )
 
 @Serializable
-data class AcceptFriendResponse(
+internal data class AcceptFriendResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -26,9 +26,8 @@ data class AcceptFriendResponse(
 )
 
 @Serializable
-data class AcceptFriendData(
+internal data class AcceptFriendData(
     @SerialName("success")
     val success: String? = null,
 
 )
-

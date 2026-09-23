@@ -1,10 +1,8 @@
-package com.wealthvault_final.setup_api.di
+package com.wealthvault.setup_api.di
 
-import com.wealthvault.config.Config
 import com.wealthvault.core.KoinConst
-import com.wealthvault.data_store.SessionStore
-import com.wealthvault_final.setup_api.HttpClientBuilder
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.domain.auth.SessionTokenStore
+import com.wealthvault.setup_api.HttpClientBuilder
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -12,30 +10,24 @@ import org.koin.dsl.module
 object GlobalApiModule {
     val allModules = module {
 
-        // --- 1. Global HttpClient ---
-        single<HttpClient>(named(KoinConst.HttpClient.GLOBAL)) {
-            // Depend on the storage boundary so the HTTP layer is storage-agnostic.
+        // Public endpoints (login, registration, recovery, and refresh) use a
+        // separate client so they can never accidentally inherit a stale
+        // Authorization header or the authenticated 401 interceptor.
+        single<HttpClient>(named(KoinConst.HttpClient.PUBLIC)) {
             HttpClientBuilder(
                 json = get(named(KoinConst.KotlinSerialization.GLOBAL)),
-                tokenStore = get<SessionStore>()
-            ).build(withAuth = true) // เรียกใช้ฟังก์ชัน build ที่เราแก้ชื่อใหม่
+            ).build(withAuth = false)
         }
 
-        // --- 2. Global Ktorfit ---
-        single<Ktorfit>(named(KoinConst.Ktor.GLOBAL)) {
-
-            // 🌟 เช็คและเติมเครื่องหมาย / ต่อท้ายให้อัตโนมัติ (ถ้ายังไม่มี)
-//            val safeBaseUrl = if (Config.localhost_android.endsWith("/")) {
-//                Config.localhost_android
-//            } else {
-//                "${Config.localhost_android}/"
-//            }
-
-            Ktorfit.Builder()
-                .baseUrl(Config.localhost_android) // 🌟 ใช้ URL ที่ปลอดภัยแล้ว
-                // ต้องระบุ named ให้ชัดเจนตอน get HttpClient
-                .httpClient(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL)))
-                .build()
+        // The authenticated client remains a singleton and owns the
+        // single-flight refresh interceptor. GLOBAL is an alias for this
+        // qualifier, so compatibility API adapters keep their existing Koin
+        // wiring while auth APIs move to PUBLIC.
+        single<HttpClient>(named(KoinConst.HttpClient.AUTHENTICATED)) {
+            HttpClientBuilder(
+                json = get(named(KoinConst.KotlinSerialization.GLOBAL)),
+                tokenStore = get<SessionTokenStore>(),
+            ).build(withAuth = true)
         }
     }
 }

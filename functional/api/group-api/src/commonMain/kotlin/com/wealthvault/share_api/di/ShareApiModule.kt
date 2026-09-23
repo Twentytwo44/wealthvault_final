@@ -15,6 +15,7 @@ import com.wealthvault.share_api.unsharefriend.UnShareFriendApi
 import com.wealthvault.share_api.unsharefriend.UnShareFriendApiImpl
 import com.wealthvault.share_api.unsharegroup.UnShareGroupApi
 import com.wealthvault.share_api.unsharegroup.UnShareGroupApiImpl
+import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -27,13 +28,13 @@ object ShareApiModule {
             }
         }
 
-        single<ShareItemApi> { ShareItemApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetItemShareTargetsApi> { GetItemShareTargetsApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetShareGroupApi> { GetShareGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetShareFriendApi> { GetShareFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UnShareGroupApi> { UnShareGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UnShareFriendApi> { UnShareFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetItemToShareApi> { GetItemToShareApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<ShareItemApi> { ShareItemApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetItemShareTargetsApi> { GetItemShareTargetsApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetShareGroupApi> { GetShareGroupApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetShareFriendApi> { GetShareFriendApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UnShareGroupApi> { UnShareGroupApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UnShareFriendApi> { UnShareFriendApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetItemToShareApi> { GetItemToShareApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
 
 
     }

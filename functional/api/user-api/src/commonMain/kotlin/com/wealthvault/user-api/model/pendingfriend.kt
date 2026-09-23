@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PendingFriendResponse(
+internal data class PendingFriendResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -16,14 +16,14 @@ data class PendingFriendResponse(
 )
 
 @Serializable
-data class PendingFriendArray(
+internal data class PendingFriendArray(
     // 🌟 แก้ให้ตรงกับ JSON จริงที่เป็นคำว่า "friends" (มี s)
     @SerialName("friends")
     val friends: List<PendingFriendData>? = null
 )
 
 @Serializable
-data class PendingFriendData(
+internal data class PendingFriendData(
     @SerialName("id") val id: String? = null,
     @SerialName("username") val username: String? = null,
     @SerialName("email") val email: String? = null,

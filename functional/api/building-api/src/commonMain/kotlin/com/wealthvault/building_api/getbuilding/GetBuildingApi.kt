@@ -1,9 +1,7 @@
 package com.wealthvault.building_api.getbuilding
 
-import com.wealthvault.building_api.model.GetBuildingResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.domain.portfolio.GetBuildingData
 
 interface GetBuildingApi {
-    @GET("asset/building/")
-    suspend fun getBuilding(): GetBuildingResponse
+    suspend fun getBuilding(): List<GetBuildingData>
 }

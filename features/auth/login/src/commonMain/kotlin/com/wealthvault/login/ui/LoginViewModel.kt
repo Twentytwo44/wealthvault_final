@@ -1,23 +1,29 @@
 package com.wealthvault.login.ui
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.wealthvault.`auth-api`.model.LoginRequest
-import com.wealthvault.`auth-api`.model.TokenRequest
-import com.wealthvault.core.FlowResult
-import com.wealthvault.data_store.DeviceInfo
-import com.wealthvault.data_store.TokenStore
-import com.wealthvault.google_auth.GoogleAuthRepository
-import com.wealthvault.login.data.device.RegisterDeviceRepositoryImpl
-import com.wealthvault.login.data.google.GoogleRepositoryImpl
+import com.wealthvault.core.architecture.AppResult
+import com.wealthvault.core.architecture.AppError
+import com.wealthvault.core.architecture.UiState
+import com.wealthvault.core.architecture.toThrowable
+import com.wealthvault.core.observability.AppLogger
+import com.wealthvault.core.observability.NoOpAppLogger
+import com.wealthvault.domain.auth.LoginCredentials
+import com.wealthvault.domain.auth.ProviderToken
+import com.wealthvault.domain.auth.ProviderAuthRepository
+import com.wealthvault.domain.auth.GoogleSignInProvider
 import com.wealthvault.login.usecase.LoginUseCase
-import com.wealthvault.notification_api.model.DeviceRequest
-import com.wealthvault.splashscreen.data.UserRepositoryImpl
-import com.wealthvault_final.notification.PushNotificationHelper
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 sealed class LoginState {
@@ -28,19 +34,78 @@ sealed class LoginState {
 
 class LoginScreenModel(
     private val loginUseCase: LoginUseCase,
-    private val googleRepository: GoogleAuthRepository,
-    private val pushHelper: PushNotificationHelper,
-    private val addDeviceRepository: RegisterDeviceRepositoryImpl,
-    private val tokenStore: TokenStore,
-    private val authRepository: UserRepositoryImpl,
-    private val googleLink: GoogleRepositoryImpl
+    private val googleRepository: GoogleSignInProvider,
+    private val googleLink: ProviderAuthRepository,
+    private val logger: AppLogger = NoOpAppLogger,
 ) : ScreenModel {
 
-    // UI State
-    var username by mutableStateOf("")
-    var password by mutableStateOf("")
-    var isLoading by mutableStateOf(false)
-    var errorMessage by mutableStateOf<String?>(null)
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState = _uiState.asStateFlow()
+
+    /**
+     * Shared application contract exposed during the compatibility migration.
+     * The legacy form state remains available to existing routes, while new
+     * callers can consume one standard loading/error envelope.
+     */
+    val appUiState: StateFlow<UiState<LoginUiState>> = uiState
+        .map { state ->
+            UiState(
+                data = state,
+                isLoading = state.isLoading,
+                error = state.errorMessage?.let { AppError.Unknown(IllegalStateException(it)) },
+            )
+        }
+        .stateIn(
+            screenModelScope,
+            SharingStarted.Eagerly,
+            UiState(data = LoginUiState()),
+        )
+
+    private val _effects = MutableSharedFlow<LoginUiEffect>(extraBufferCapacity = 1)
+    val effects = _effects.asSharedFlow()
+
+    /** One authentication request at a time, including provider sign-in. */
+    private var authJob: Job? = null
+
+    var username: String
+        get() = _uiState.value.username
+        set(value) {
+            _uiState.update { it.copy(username = value) }
+        }
+    var password: String
+        get() = _uiState.value.password
+        set(value) {
+            _uiState.update { it.copy(password = value) }
+        }
+    var isLoading: Boolean
+        get() = _uiState.value.isLoading
+        set(value) {
+            _uiState.update { it.copy(isLoading = value) }
+        }
+    var errorMessage: String?
+        get() = _uiState.value.errorMessage
+        set(value) {
+            _uiState.update { it.copy(errorMessage = value) }
+        }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onAction(action: LoginUiAction, onNavigate: (LoginState) -> Unit = {}) {
+        when (action) {
+            is LoginUiAction.UsernameChanged -> _uiState.update {
+                it.copy(username = action.value, errorMessage = null)
+            }
+            is LoginUiAction.PasswordChanged -> _uiState.update {
+                it.copy(password = action.value, errorMessage = null)
+            }
+            is LoginUiAction.ValidationFailed -> _uiState.update {
+                it.copy(isLoading = false, errorMessage = action.message)
+            }
+            // Authentication routing is owned by AppCoordinator. Keep the
+            // callback parameter for source compatibility with older callers,
+            // but do not let a feature-owned callback navigate globally.
+            LoginUiAction.Submit -> onLoginClick()
+        }
+    }
 
     // 🌟 ฟังก์ชันสำหรับแปลง Error จาก Backend / Network ให้เป็นภาษาไทยที่อ่านง่าย
     private fun parseErrorMessage(rawError: String?): String {
@@ -66,152 +131,94 @@ class LoginScreenModel(
         }
     }
 
-    fun onLoginClick(onNavigate: (LoginState) -> Unit) {
+    @Suppress("UNUSED_PARAMETER")
+    fun onLoginClick(onNavigate: (LoginState) -> Unit) = onLoginClick()
+
+    fun onLoginClick() {
+        if (isLoading || authJob?.isActive == true) return
         if (username.isBlank() || password.isBlank()) {
             errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"
             return
         }
-        screenModelScope.launch {
-            isLoading = true
-            errorMessage = null
 
-            val request = LoginRequest(username, password)
-
-            loginUseCase(request).collect { flowResult ->
-                when (flowResult) {
-                    is FlowResult.Start -> { isLoading = true }
-
-                    is FlowResult.Continue -> {
-                        if (flowResult.data) {
-                            println("🎉 Login Success! กำลังเช็คข้อมูลส่วนตัว...")
-                            checkUserDataAndNavigate(onNavigate)
-                        }
-                    }
-
-                    is FlowResult.Failure -> {
-                        isLoading = false
-                        // 🌟 นำข้อความ Error ไปผ่านตัวกรองก่อนแสดงผล
-                        errorMessage = parseErrorMessage(flowResult.cause?.message)
-                    }
-
-                    is FlowResult.Ended -> {
-                        // ปล่อยผ่าน
-                    }
-                }
-            }
-        }
-    }
-
-    private suspend fun checkUserDataAndNavigate(onNavigate: (LoginState) -> Unit) {
-        try {
-            delay(200)
-            onGetFCMToken()
-            delay(200)
-
-            val userResult = authRepository.getUser()
-
-            if (userResult.isFailure) {
-                throw Exception(userResult.exceptionOrNull()?.message ?: "ดึงข้อมูลโปรไฟล์ล้มเหลว")
-            }
-
-            val userData = userResult.getOrNull()
-            val birthday = userData?.birthday
-
-            if (birthday.isNullOrBlank() || birthday.startsWith("1970-01-01")) {
-                println("🐣 No Birthday found -> Go To Intro")
-                onNavigate(LoginState.GoToIntro)
-            } else {
-                println("✅ Birthday exists -> Go To Main")
-                onNavigate(LoginState.GoToMain)
-            }
-        } catch (e: Exception) {
-            println("❌ Error checking user data: ${e.message}")
-            // 🌟 ผ่านตัวกรองเผื่อว่าเน็ตหลุดตอนเช็คข้อมูล User พอดี
-            errorMessage = "ดึงข้อมูลโปรไฟล์ไม่สำเร็จ: " + parseErrorMessage(e.message)
-        } finally {
-            isLoading = false
-        }
-    }
-
-    fun onGetFCMToken() {
-        pushHelper.getDeviceTokenInfo(
-            onSuccess = { deviceInfo ->
-                println("============================================================")
-                println("Test FCM Token: ${deviceInfo.fcmToken}")
-                println("Platform: ${deviceInfo.platform}")
-                println("Device Name: ${deviceInfo.deviceName}")
-                println("============================================================")
-
-                screenModelScope.launch {
-                    try {
-                        val request = DeviceRequest(
-                            token = deviceInfo.fcmToken,
-                            platform = deviceInfo.platform,
-                            deviceName = deviceInfo.deviceName
-                        )
-                        val info = DeviceInfo(
-                            fcmToken = deviceInfo.fcmToken,
-                            platform = deviceInfo.platform,
-                            deviceName = deviceInfo.deviceName,
-                        )
-                        tokenStore.saveDeviceInfo(info)
-                        addDeviceRepository.addDevice(request)
-                        println("✅ ส่ง Device Token ขึ้น Server สำเร็จ!")
-                    } catch (e: Exception) {
-                        println("❌ ส่ง Device Token ไม่สำเร็จ: ${e.message}")
-                    }
-                }
-            },
-            onError = { error ->
-                println("❌ ไม่สามารถดึง FCM Token จากเครื่องได้: $error")
-            }
-        )
-    }
-
-    fun onGoogleClick(onNavigate: (LoginState) -> Unit) {
-        screenModelScope.launch {
-            isLoading = true
-            errorMessage = null
-
+        // Set this before launching so two taps in the same UI frame cannot
+        // enqueue two requests before the coroutine gets scheduled.
+        isLoading = true
+        errorMessage = null
+        authJob = screenModelScope.launch {
             try {
-                val user = googleRepository.login()
+                val request = LoginCredentials(username = username, password = password)
 
-                println("Google User = $user")
+                when (val result = loginUseCase.login(request)) {
+                    is AppResult.Success -> {
+                        logger.info("Login succeeded; session routing will continue centrally")
+                    }
+                    is AppResult.Failure -> {
+                        _effects.tryEmit(com.wealthvault.login.ui.LoginUiEffect.ShowError(result.error))
+                        errorMessage = parseErrorMessage(result.error.toThrowable().message)
+                    }
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                logger.warn("Login request failed unexpectedly", error)
+                errorMessage = parseErrorMessage(error.message)
+            } finally {
+                isLoading = false
+                authJob = null
+            }
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onGoogleClick(onNavigate: (LoginState) -> Unit = {}) {
+        if (isLoading || authJob?.isActive == true) return
+        isLoading = true
+        errorMessage = null
+        authJob = screenModelScope.launch {
+            try {
+                val signInResult = googleRepository.signIn()
+                val user = when (signInResult) {
+                    is AppResult.Success -> signInResult.value
+                    is AppResult.Failure -> throw signInResult.error.toThrowable()
+                }
+
+                logger.debug("Google identity received")
 
                 if (user == null) {
                     errorMessage = "ยกเลิกการเข้าสู่ระบบผ่าน Google"
-                    isLoading = false
                     return@launch
                 }
 
-                val request = TokenRequest(
+                val request = ProviderToken(
                     token = user.idToken
                 )
 
-                val response = googleLink.glogin(request)
-
-                response.onSuccess { data ->
-                    if (data.success == true) {
-                        println("🎉 Google Login Success!")
-                        checkUserDataAndNavigate(onNavigate)
-                    } else {
-                        errorMessage = "เข้าสู่ระบบด้วย Google ไม่สำเร็จ"
-                        isLoading = false
+                when (val response = googleLink.login(request)) {
+                    is com.wealthvault.core.architecture.AppResult.Success -> {
+                        val data = response.value
+                        if (data.success == true) {
+                            logger.info("Google login succeeded; session routing will continue centrally")
+                        } else {
+                            errorMessage = "เข้าสู่ระบบด้วย Google ไม่สำเร็จ"
+                        }
+                    }
+                    is com.wealthvault.core.architecture.AppResult.Failure -> {
+                        val exception = response.error.toThrowable()
+                        logger.warn("Google login failed", exception)
+                        errorMessage = parseErrorMessage(exception.message)
                     }
                 }
 
-                response.onFailure { exception ->
-                    exception.printStackTrace()
-                    // 🌟 นำข้อความ Error ไปผ่านตัวกรองก่อนแสดงผล
-                    errorMessage = parseErrorMessage(exception.message)
-                    isLoading = false
-                }
-
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                e.printStackTrace()
+                logger.warn("Google login request failed", e)
                 // 🌟 นำข้อความ Error ไปผ่านตัวกรองก่อนแสดงผล
                 errorMessage = parseErrorMessage(e.message)
+            } finally {
                 isLoading = false
+                authJob = null
             }
         }
     }

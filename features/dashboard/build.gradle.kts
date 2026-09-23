@@ -14,7 +14,6 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
-                implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
                 implementation(libs.compose.components.resources)
                 implementation(libs.compose.ui)
@@ -25,32 +24,17 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
-                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 
-                implementation(project(":functional:api:auth-api"))
-                implementation(project(":functional:data-store"))
                 implementation(project(":base:core"))
-
-                implementation("androidx.datastore:datastore-preferences-core:1.1.1")
-                implementation(project(":functional:api:user-api"))
-
-                implementation(project(":features:manage:form"))
-                implementation(project(":features:notification"))
-                implementation(project(":navigation-point"))
-                implementation(project(":functional:api:notification-api"))
-
-
-
-
+                implementation(project(":domain:portfolio"))
 
             }
         }
         commonTest {
             dependencies {
-                dependencies {
-
-                }
+                implementation(kotlin("test"))
+                implementation(libs.coroutines.test)
             }
         }
     }

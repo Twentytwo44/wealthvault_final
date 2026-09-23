@@ -1,24 +1,18 @@
 package com.wealthvault.navigation
 
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import cafe.adriel.voyager.core.screen.Screen
+import com.wealthvault.core.navigation.SharedScreen
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-import org.junit.Test
-import org.junit.runner.RunWith
-
-import org.junit.Assert.*
-
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-@RunWith(AndroidJUnit4::class)
-class ExampleInstrumentedTest {
+/** Device-side smoke test for the navigation contract used by the app root. */
+class NavigationInstrumentedContractTest {
     @Test
-    fun useAppContext() {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.example.navigation.test", appContext.packageName)
+    fun mainDestinationRemainsTypedAndScreenBacked() {
+        val mainScreen: Screen = MainScreen()
+
+        assertEquals(MainScreen::class, mainScreen::class)
+        assertEquals("Main", SharedScreen.Main::class.simpleName)
+        assertEquals(false, SharedScreen.Main::class == SharedScreen.Login::class)
     }
 }

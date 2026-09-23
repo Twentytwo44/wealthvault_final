@@ -1,54 +1,33 @@
 package com.wealthvault.login.usecase
 
-import com.wealthvault.`auth-api`.model.LoginRequest
-import com.wealthvault.core.FlowResult
-import com.wealthvault.core.FlowUseCase
-import com.wealthvault.data_store.TokenStore
-import com.wealthvault.login.data.AuthRepositoryImpl
+import com.wealthvault.core.AppUseCase
+import com.wealthvault.core.observability.AppLogger
+import com.wealthvault.core.observability.NoOpAppLogger
+import com.wealthvault.core.architecture.AppResult
+import com.wealthvault.core.architecture.toThrowable
+import com.wealthvault.domain.auth.AuthRepository
+import com.wealthvault.domain.auth.AuthenticatedSession
+import com.wealthvault.domain.auth.LoginCredentials
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 
 class LoginUseCase(
-    private val authRepository: AuthRepositoryImpl,
+    private val authRepository: AuthRepository,
 
     // 1. รับ dispatcher เพิ่มเข้ามา
     dispatcher: CoroutineDispatcher,
-    private val tokenStore: TokenStore
-): FlowUseCase<LoginRequest, Boolean>(dispatcher) { // 2. ส่งต่อให้คลาสแม่
+    private val logger: AppLogger = NoOpAppLogger,
+): AppUseCase<LoginCredentials, AuthenticatedSession>(dispatcher) {
 
-    override fun execute(parameters: LoginRequest): Flow<FlowResult<Boolean>> = flow {
-        println("🚀 [LoginUseCase] Starting Login Action for: ${parameters.email}")
+    /** Named entry point kept for readable presentation call sites. */
+    suspend fun login(parameters: LoginCredentials): AppResult<AuthenticatedSession> = invoke(parameters)
 
-        val result = authRepository.login(parameters)
-
-        result.onSuccess {
-            println("✅ [LoginUseCase] Login Success")
-            println("TokenStore:, ${tokenStore.accessToken.first()}")
-            println("RefreshStore:, ${tokenStore.refreshToken.first()}")
-
-
-            emit(FlowResult.Continue(true))
-        }.onFailure { exception ->
-            println("❌ [LoginUseCase] Login Failed: ${exception.message}")
-            emit(FlowResult.Failure(exception))
+    override suspend fun execute(parameters: LoginCredentials): AppResult<AuthenticatedSession> {
+        logger.debug("Login started")
+        return authRepository.login(parameters).also { result ->
+            when (result) {
+                is AppResult.Success -> logger.info("Login succeeded")
+                is AppResult.Failure -> logger.warn("Login failed", result.error.toThrowable())
+            }
         }
-    }.catch { cause ->
-        println("🚨 [LoginUseCase] Unexpected Error: ${cause.message}")
-
-        // 🌟 เปลี่ยนมาเช็คแค่ message ง่ายๆ พอครับ
-        val errorMsg = cause.message?.lowercase() ?: ""
-        if (errorMsg.contains("refused") || errorMsg.contains("failed to connect") || errorMsg.contains("timeout")) {
-
-            println("============================================================")
-            println("🕵️‍♂️ จับตาดู! Ktor พยายามยิง API ขัดข้อง!")
-            // พิมพ์แค่ StackTrace พอ จะได้ไม่ติดเรื่อง io.ktor...
-            cause.printStackTrace()
-            println("============================================================")
-        }
-
-        emit(FlowResult.Failure(cause))
     }
 }

@@ -1,11 +1,8 @@
 package com.wealthvault.share_api.itemsharetargets
 
-import com.wealthvault.share_api.model.ItemShareTargetsResponse
-import de.jensklingenberg.ktorfit.http.GET
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.social.ShareTargets
 
 interface GetItemShareTargetsApi {
-    @GET("share/item/{type}/{id}/shared-targets")
-    suspend fun getItemShareTargets(@Path("type") type: String, @Path("id") id: String): ItemShareTargetsResponse
+    suspend fun getItemShareTargets(type: String, id: String): ShareTargets
 
 }

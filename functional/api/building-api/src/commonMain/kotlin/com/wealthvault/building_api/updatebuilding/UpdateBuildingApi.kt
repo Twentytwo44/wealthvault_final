@@ -1,13 +1,8 @@
 package com.wealthvault.building_api.updatebuilding
 
-import com.wealthvault.building_api.model.BuildingRequest
-import com.wealthvault.building_api.model.BuildingResponse
-
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.PATCH
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.portfolio.BuildingData
+import com.wealthvault.domain.portfolio.BuildingRequest
 
 interface UpdateBuildingApi {
-    @PATCH("asset/building/{id}/")
-    suspend fun updateBuilding(@Path("id") id: String, @Body request: BuildingRequest): BuildingResponse
+    suspend fun updateBuilding(id: String, request: BuildingRequest): BuildingData
 }

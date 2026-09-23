@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ItemToShareResponse(
+internal data class ItemToShareResponse(
     @SerialName("items")
     val items: List<ItemToShareData>? = null,
 
@@ -17,7 +17,7 @@ data class ItemToShareResponse(
 )
 
 @Serializable
-data class ItemToShareData(
+internal data class ItemToShareData(
     @SerialName("id")
     val id: String? = null,
 

@@ -6,6 +6,7 @@ import org.koin.dsl.module
 
 object iosDataStoreModule {
     val allModules = module {
+        single<SecureStorage> { IosSecureStorage() }
 
         single<DataStore<Preferences>> {
             createDataStore()

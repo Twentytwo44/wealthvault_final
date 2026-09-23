@@ -2,6 +2,7 @@ package com.wealthvault.liability_api.di
 
 
 import com.wealthvault.core.KoinConst
+import io.ktor.client.HttpClient
 import com.wealthvault.investment_api.createcash.CreateLiabilityApi
 import com.wealthvault.investment_api.createcash.CreateLiabilityApiImpl
 import com.wealthvault.liability_api.deleteliability.DeleteLiabilityApi
@@ -25,11 +26,11 @@ object LiabilityApiModule {
             }
         }
 
-        single<CreateLiabilityApi> { CreateLiabilityApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetLiabilityApi> { GetLiabilityApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetLiabilityByIdApi> { GetLiabilityByIdApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UpdateLiabilityApi> { UpdateLiabilityApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<DeleteLiabilityApi> { DeleteLiabilityApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<CreateLiabilityApi> { CreateLiabilityApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetLiabilityApi> { GetLiabilityApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetLiabilityByIdApi> { GetLiabilityByIdApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UpdateLiabilityApi> { UpdateLiabilityApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<DeleteLiabilityApi> { DeleteLiabilityApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
 
 
 

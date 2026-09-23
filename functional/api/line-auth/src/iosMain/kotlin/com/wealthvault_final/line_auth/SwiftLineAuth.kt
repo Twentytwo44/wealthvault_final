@@ -1,6 +1,6 @@
-package com.wealthvault_final.line_auth
+package com.wealthvault.line_auth
 
-import com.wealthvault_final.line_auth.model.LineUser
+import com.wealthvault.line_auth.model.LineUser
 
 interface SwiftLineAuth {
     fun login(onSuccess: (LineUser) -> Unit, onError: (String) -> Unit)

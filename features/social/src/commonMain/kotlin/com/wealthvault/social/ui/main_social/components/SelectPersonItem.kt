@@ -28,7 +28,7 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.`user-api`.model.FriendData
+import com.wealthvault.domain.profile.FriendData
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -60,7 +60,7 @@ fun SelectPersonItem(
                     .background(LightBg),
                 contentAlignment = Alignment.Center
             ) {
-                if (friend.profile?.toString()?.isNotEmpty() == true) {
+                if (!friend.profile.isNullOrBlank()) {
                     AsyncImage(
                         model = friend.profile,
                         contentDescription = "Profile Picture",
@@ -92,7 +92,7 @@ fun SelectPersonItem(
                 // 🌟 แถม: ถ้ามี Email ก็โชว์ให้เหมือนโค้ดตัวบนด้วยครับ
                 if (!friend.email.isNullOrEmpty()) {
                     Text(
-                        text = friend.email!!,
+                        text = friend.email.orEmpty(),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF9E918B)
                     )

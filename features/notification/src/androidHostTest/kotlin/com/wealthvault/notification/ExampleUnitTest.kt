@@ -1,16 +1,16 @@
 package com.wealthvault.notification
 
 import kotlin.test.Test
+import com.wealthvault.notification.viewmodel.NotificationUiState
 import kotlin.test.assertEquals
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
+class NotificationStateContractTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun defaultStateHasNoNotifications() {
+        val state = NotificationUiState()
+
+        assertEquals(emptyList(), state.items)
+        assertEquals(false, state.isLoading)
+        assertEquals(false, state.isRefreshing)
     }
 }

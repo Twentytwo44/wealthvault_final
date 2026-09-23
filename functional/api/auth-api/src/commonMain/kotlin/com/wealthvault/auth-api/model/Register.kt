@@ -4,12 +4,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RegisterRequest(
+internal data class RegisterRequest(
     val email: String,
     val password: String
 )
 @Serializable
-data class RegisterResponse(
+internal data class RegisterResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -21,7 +21,7 @@ data class RegisterResponse(
 )
 
 @Serializable
-data class RegisterData(
+internal data class RegisterData(
     @SerialName("user_id")
     val userId: String,
 )

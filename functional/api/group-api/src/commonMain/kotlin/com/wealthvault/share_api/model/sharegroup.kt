@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ShareGroupResponse(
+internal data class ShareGroupResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -16,7 +16,7 @@ data class ShareGroupResponse(
 )
 
 @Serializable
-data class ShareGroupData(
+internal data class ShareGroupData(
     @SerialName("group_item_id")
     val groupItemId: String? = null,
 
@@ -34,7 +34,7 @@ data class ShareGroupData(
 
 )
 @Serializable
-data class ShareFriendResponse(
+internal data class ShareFriendResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -46,7 +46,7 @@ data class ShareFriendResponse(
 )
 
 @Serializable
-data class ShareFriendData(
+internal data class ShareFriendData(
     @SerialName("shared_item_id")
     val groupItemId: String? = null,
 
@@ -65,7 +65,7 @@ data class ShareFriendData(
     )
 
 @Serializable
-data class AssetDetail(
+internal data class AssetDetail(
     // (Common Fields)
     @SerialName("id")
     val id: String? = null,

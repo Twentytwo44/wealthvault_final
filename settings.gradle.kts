@@ -1,4 +1,4 @@
-rootProject.name = "Wealthvault_final"
+rootProject.name = "WealthVault"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -20,25 +20,16 @@ dependencyResolutionManagement {
 
 include(":composeApp")
 include(":androidApp")
+include(":benchmarks")
+include(":data:auth")
+include(":data:dashboard")
+include(":data:notification")
+include(":data:profile")
+include(":data:social")
+include(":data:portfolio")
+include(":base:network")
+include(":base:security")
 
-include(":functional:api:auth-api")
-include(":functional:data-store")
-include(":functional:setting-app")
-include(":functional:api:google-auth")
-include(":functional:api:user-api")
-include(":functional:api:account-api")
-include(":functional:api:cash-api")
-include(":functional:api:insurance-api")
-include(":functional:api:investment-api")
-include(":functional:api:building-api")
-include(":functional:api:land-api")
-include(":functional:api:liability-api")
-include(":functional:api:line-auth")
-include(":functional:notification")
-include(":functional:api:setup-api")
-include(":functional:api:group-api")
-include(":functional:api:notification-api")
-include(":functional:api:websocket-api")
 
 
 
@@ -47,7 +38,6 @@ include(":functional:api:websocket-api")
 
 
 include(":features:auth:login")
-include(":features:auth:register")
 
 include(":features:dashboard")
 include(":features:notification")
@@ -55,12 +45,16 @@ include(":features:notification")
 
 include(":base:core")
 include(":base:config")
+include(":base:database")
+include(":domain:auth")
+include(":domain:profile")
+include(":domain:social")
+include(":domain:portfolio")
+include(":domain:notification")
 //include(":build-logic")
 include(":features:profile")
 include(":main")
 
-include(":features:manage:form")
 include(":features:manage:financialList")
 
 include(":features:social")
-include(":navigation-point")

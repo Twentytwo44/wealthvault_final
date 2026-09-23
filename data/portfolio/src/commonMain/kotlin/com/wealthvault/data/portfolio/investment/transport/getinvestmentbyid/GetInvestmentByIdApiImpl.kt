@@ -1,0 +1,14 @@
+package com.wealthvault.data.portfolio.investment.transport.getinvestmentbyid
+
+import com.wealthvault.config.Config
+import com.wealthvault.data.portfolio.investment.transport.toDomainData
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+
+class GetInvestmentByIdApiImpl(private val client: HttpClient) : GetInvestmentByIdApi {
+    override suspend fun getInvestmentById(id: String) = client
+        .get("${Config.localhost_android}asset/invest/$id")
+        .body<com.wealthvault.data.portfolio.investment.transport.model.InvestmentIdResponse>()
+        .toDomainData()
+}

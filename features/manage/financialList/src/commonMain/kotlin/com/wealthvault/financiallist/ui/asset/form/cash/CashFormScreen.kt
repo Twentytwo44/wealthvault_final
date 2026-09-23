@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -45,11 +46,12 @@ import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
-import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
-import com.wealthvault_final.`financial-asset`.model.CashModel
-import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
-import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
+import com.wealthvault.core.model.Attachment
+import com.wealthvault.financiallist.ui.form.*
+import com.wealthvault.domain.portfolio.CashModel
+import com.wealthvault.core.model.Money
+import com.wealthvault.financiallist.ui.form.FormErrorBanner
+import com.wealthvault.financiallist.ui.form.formErrorMessage
 import org.jetbrains.compose.resources.painterResource
 
 data class CashFormScreen(val id: String, val cashData: CashModel) : Screen {
@@ -57,8 +59,11 @@ data class CashFormScreen(val id: String, val cashData: CashModel) : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<CashScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
         CashInputForm(
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
             onBackClick = { navigator.pop() },
             onNextClick = { data, addedList, deletedList ->
                 screenModel.updateForm(data)
@@ -75,16 +80,45 @@ data class CashFormScreen(val id: String, val cashData: CashModel) : Screen {
     }
 }
 
+/** Create flow owned by the financial-list feature. */
+data object CreateCashFormScreen : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val screenModel = getScreenModel<CashScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
+
+        CashInputForm(
+            title = "ข้อมูลเงินสด ทองคำ",
+            submitLabel = "ต่อไป",
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
+            onBackClick = { navigator.pop() },
+            onNextClick = { data, addedList, deletedList ->
+                screenModel.updateForm(data)
+                screenModel.updateAttachment(addedList, deletedList)
+                screenModel.submitCreate { id ->
+                    navigator.push(com.wealthvault.financiallist.ui.shareasset.ShareAssetScreen("cash", id))
+                }
+            },
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CashInputForm(
     onBackClick: () -> Unit = {},
     onNextClick: (CashModel, List<Attachment>, List<Attachment>) -> Unit,
-    cashData: CashModel? = null
+    cashData: CashModel? = null,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    title: String = "แก้ไขข้อมูลเงินสด",
+    submitLabel: String = "ยืนยันการแก้ไข",
 ) {
     // 🌟 1. ดึงข้อมูลเดิมมาตั้งค่าเริ่มต้นเพื่อให้ User แก้ไขง่ายๆ
     var cashName by remember { mutableStateOf(cashData?.cashName ?: "") }
-    var amount by remember { mutableStateOf(cashData?.amount?.toString() ?: "") }
+    var amount by remember { mutableStateOf(cashData?.amount?.decimalString() ?: "") }
     var description by remember { mutableStateOf(cashData?.description ?: "") }
 
     val originalAssets = remember {
@@ -104,7 +138,7 @@ fun CashInputForm(
     }
 
     // 🌟 ตรวจสอบความถูกต้องของข้อมูล
-    val isFormValid = cashName.isNotBlank() && amount.isNotBlank()
+    val isFormValid = cashName.isNotBlank() && Money.fromDecimal(amount) != null
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -127,7 +161,7 @@ fun CashInputForm(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "แก้ไขข้อมูลเงินสด",
+                        text = title,
                         style = MaterialTheme.typography.titleLarge,
                         color = LightPrimary
                     )
@@ -141,7 +175,7 @@ fun CashInputForm(
                         val data = CashModel(
                             cashName = cashName,
                             description = description,
-                            amount = amount.toDoubleOrNull() ?: 0.0,
+                            amount = Money.fromDecimal(amount) ?: Money(0),
                             attachments = currentAssets
                         )
 
@@ -155,9 +189,9 @@ fun CashInputForm(
                     modifier = Modifier.fillMaxWidth().height(46.dp), // 🌟 สูง 50.dp
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp), // 🌟 โค้ง 12.dp
-                    enabled = isFormValid
+                    enabled = isFormValid && !isLoading
                 ) {
-                    Text("ยืนยันการแก้ไข", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                    Text(if (isLoading) "กำลังบันทึก..." else submitLabel, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                 }
             }
         }
@@ -170,6 +204,8 @@ fun CashInputForm(
                 .verticalScroll(rememberScrollState())
         ) {
 
+            FormErrorBanner(errorMessage)
+
             AssetTextField(
                 value = cashName,
                 onValueChange = { cashName = it },
@@ -180,7 +216,7 @@ fun CashInputForm(
             AssetTextField(
                 value = amount,
                 onValueChange = { newValue ->
-                    if (newValue.isEmpty() || newValue.all { it.isDigit() || it == '.' }) {
+                    if (isDecimalInput(newValue)) {
                         amount = newValue
                     }
                 },

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class UpdateUserDataRequest(
+internal data class UpdateUserDataRequest(
     @SerialName("username") val username: String,
     @SerialName("first_name") val firstName: String,
     @SerialName("last_name") val lastName: String,
@@ -17,7 +17,7 @@ data class UpdateUserDataRequest(
 )
 
 @Serializable
-data class UpdateUserDataResponse(
+internal data class UpdateUserDataResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -29,7 +29,7 @@ data class UpdateUserDataResponse(
 )
 
 @Serializable
-data class UpdateUserData(
+internal data class UpdateUserData(
     @SerialName("id")
     val id: String? = null,
 

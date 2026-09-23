@@ -1,6 +1,6 @@
 package com.wealthvault.group_api.creategroup
 
-import com.wealthvault.group_api.model.GroupResponse
+import com.wealthvault.domain.social.GroupResult
 
 interface CreateGroupApi {
     // 🌟 ไม่ต้องใช้ @POST ตรงนี้แล้ว เพราะเราจะเขียน Custom Request ใน Impl แทน
@@ -8,5 +8,5 @@ interface CreateGroupApi {
         groupName: String,
         memberIds: List<String>,
         imageBytes: ByteArray? // 🌟 รับรูปเป็น ByteArray เพื่อเตรียมอัปโหลด
-    ): GroupResponse
+    ): GroupResult
 }

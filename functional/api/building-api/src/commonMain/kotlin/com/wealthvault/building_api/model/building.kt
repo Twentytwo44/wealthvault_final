@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class BuildingRequest(
+internal data class BuildingRequest(
     @SerialName("type")
     val type: String? = null,
 
@@ -57,7 +57,7 @@ data class BuildingRequest(
     )
 
 @Serializable
-data class BuildingResponse(
+internal data class BuildingResponse(
     @SerialName("status")
     val status: String?  = null,
 
@@ -69,7 +69,7 @@ data class BuildingResponse(
 )
 
 @Serializable
-data class BuildingData(
+internal data class BuildingData(
     @SerialName("id") val id: String? = null,
     @SerialName("user_id") val userId: String? = null,
     @SerialName("type") val type: String? = null,
@@ -86,7 +86,7 @@ data class BuildingData(
 )
 
 @Serializable
-data class LocationData(
+internal data class LocationData(
     @SerialName("location_id") val locationId: String = "",
     @SerialName("address") val address: String = "",
     @SerialName("sub_district") val subDistrict: String = "",
@@ -98,7 +98,7 @@ data class LocationData(
 )
 
 @Serializable
-data class InsData(
+internal data class InsData(
     @SerialName("ins_id")
     val insId: String? = null,
 
@@ -109,14 +109,14 @@ data class InsData(
 
 
 @Serializable
-data class BuildingFileUploadData(
+internal data class BuildingFileUploadData(
     val bytes: ByteArray,
     val mimeType: String? = null,
     val fileName: String? = null
 )
 
 @Serializable
-data class BuildingReferenceData(
+internal data class BuildingReferenceData(
     val areaName: String? = null,
     val areaId: String? = null
 )
@@ -124,14 +124,14 @@ data class BuildingReferenceData(
 
 
 @Serializable
-data class InsReferenceData(
+internal data class InsReferenceData(
     val insName: String? = null,
     val insId: String? = null
 )
 
 
 @Serializable
-data class FileData(
+internal data class FileData(
     @SerialName("id") val id: String = "",
     @SerialName("url") val url: String = "",
     @SerialName("file_type") val fileType: String = ""

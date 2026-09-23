@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -45,13 +46,13 @@ import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
-import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
-import com.wealthvault_final.`financial-asset`.model.StockModel
-import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
-import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
-import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
-import com.wealthvault_final.`financial-asset`.ui.components.maptype.investmentTypes
+import com.wealthvault.core.model.Attachment
+import com.wealthvault.core.model.FixedDecimal
+import com.wealthvault.core.model.Money
+import com.wealthvault.financiallist.ui.form.*
+import com.wealthvault.domain.portfolio.StockModel
+import com.wealthvault.financiallist.ui.form.FormErrorBanner
+import com.wealthvault.financiallist.ui.form.formErrorMessage
 import org.jetbrains.compose.resources.painterResource
 
 class StockFormScreen(val id: String, val assetData: StockModel? = null) : Screen {
@@ -59,8 +60,11 @@ class StockFormScreen(val id: String, val assetData: StockModel? = null) : Scree
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<StockScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
         AssetInputForm(
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
             onBackClick = { navigator.pop() },
             onNextClick = { data, addedList, deletedList ->
                 screenModel.updateForm(data)
@@ -77,18 +81,47 @@ class StockFormScreen(val id: String, val assetData: StockModel? = null) : Scree
     }
 }
 
+/** Create flow owned by the financial-list feature. */
+data object CreateStockFormScreen : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val screenModel = getScreenModel<StockScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
+
+        AssetInputForm(
+            title = "ข้อมูลหุ้น/กองทุน",
+            submitLabel = "ต่อไป",
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
+            onBackClick = { navigator.pop() },
+            onNextClick = { data, addedList, deletedList ->
+                screenModel.updateForm(data)
+                screenModel.updateAttachment(addedList, deletedList)
+                screenModel.submitCreate { id ->
+                    navigator.push(com.wealthvault.financiallist.ui.shareasset.ShareAssetScreen("investment", id))
+                }
+            },
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetInputForm(
     onBackClick: () -> Unit = {},
     onNextClick: (StockModel, List<Attachment>, List<Attachment>) -> Unit,
-    assetData: StockModel? = null
+    assetData: StockModel? = null,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    title: String = "ข้อมูลหุ้น/กองทุน",
+    submitLabel: String = "ยืนยันการแก้ไข",
 ) {
     // 🌟 1. ตั้งค่าเริ่มต้นจากข้อมูลเก่าเพื่อให้พร้อมแก้ไข
     var stockName by remember { mutableStateOf(assetData?.stockName ?: "") }
     var type by remember { mutableStateOf(assetData?.type ?: "") }
-    var quantity by remember { mutableStateOf(assetData?.quantity?.toString() ?: "") }
-    var costPerPrice by remember { mutableStateOf(assetData?.costPerPrice?.toString() ?: "") }
+    var quantity by remember { mutableStateOf(assetData?.quantity?.decimalString() ?: "") }
+    var costPerPrice by remember { mutableStateOf(assetData?.costPerPrice?.decimalString() ?: "") }
     var description by remember { mutableStateOf(assetData?.description ?: "") }
     var brokerName by remember { mutableStateOf(assetData?.brokerName ?: "") }
     var stockSymbol by remember { mutableStateOf(assetData?.stockSymbol ?: "") }
@@ -133,7 +166,7 @@ fun AssetInputForm(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "ข้อมูลหุ้น/กองทุน",
+                        text = title,
                         style = MaterialTheme.typography.titleLarge,
                         color = LightPrimary
                     )
@@ -146,11 +179,11 @@ fun AssetInputForm(
                     onClick = {
                         val data = StockModel(
                             stockName = stockName,
-                            quantity = quantity.toDoubleOrNull() ?: 0.0,
+                            quantity = FixedDecimal.fromDecimal(quantity, scale = 4) ?: FixedDecimal(0, 4),
                             description = description,
                             stockSymbol = stockSymbol,
                             brokerName = brokerName,
-                            costPerPrice = costPerPrice.toDoubleOrNull() ?: 0.0,
+                            costPerPrice = Money.fromDecimal(costPerPrice) ?: Money(0),
                             attachments = currentAssets, // 🌟 ใช้รายการภาพล่าสุด
                             type = type
                         )
@@ -165,9 +198,9 @@ fun AssetInputForm(
                     modifier = Modifier.fillMaxWidth().height(46.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = isFormValid
+                    enabled = isFormValid && !isLoading
                 ) {
-                    Text("ยืนยันการแก้ไข", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                    Text(if (isLoading) "กำลังบันทึก..." else submitLabel, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                 }
             }
         }
@@ -179,6 +212,8 @@ fun AssetInputForm(
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+
+            FormErrorBanner(errorMessage)
 
             DropdownInput(
                 label = "ประเภทการลงทุน",

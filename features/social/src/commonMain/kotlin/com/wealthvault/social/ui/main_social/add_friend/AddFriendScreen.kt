@@ -30,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,9 +43,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -59,8 +55,8 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.social.ui.components.SocialSearchBar
-import com.wealthvault.`user-api`.model.FriendData
-import com.wealthvault.`user-api`.model.PendingFriendData
+import com.wealthvault.domain.profile.FriendData
+import com.wealthvault.domain.social.PendingFriend
 import org.jetbrains.compose.resources.painterResource
 
 class AddFriendScreen : Screen {
@@ -76,28 +72,12 @@ class AddFriendScreen : Screen {
         val searchResult by screenModel.searchResult.collectAsStateWithLifecycle()
         val addFriendSuccess by screenModel.addFriendSuccess.collectAsStateWithLifecycle()
         val pendingFriends by screenModel.pendingFriends.collectAsStateWithLifecycle()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
         val popupMessage by screenModel.popupMessage.collectAsStateWithLifecycle()
 
-        // 🌟 1. ดึง Lifecycle มา
-        val lifecycleOwner = LocalLifecycleOwner.current
-
-        // 🌟 2. ใช้ DisposableEffect แทน เพื่อดึงรายการ "คำขอเป็นเพื่อน" ใหม่เสมอตอนแอปตื่น
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    println("🔄 AddFriendScreen ตื่นแล้ว! โหลดรายการคำขอเป็นเพื่อนใหม่...")
-                    screenModel.fetchPendingFriends()
-
-                    // 💡 หมายเหตุ: เราไม่สั่งค้นหาเพื่อน (searchUser) ตรงนี้นะครับ
-                    // ปล่อยให้มันโชว์ผลลัพธ์เดิมที่ผู้ใช้ค้นหาค้างไว้ถูกต้องแล้วครับ
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
+        LaunchedEffect(screenModel) {
+            screenModel.fetchPendingFriends()
         }
 
         // 🌟 3. จัดการตอนเพิ่มเพื่อนสำเร็จ (เพิ่มการเคลียร์ State ก่อน Pop ป้องกันบัค)
@@ -118,6 +98,9 @@ class AddFriendScreen : Screen {
                 hasSearched = hasSearched,
                 isSearching = isSearching,
                 pendingFriends = pendingFriends,
+                isPendingLoading = uiState.isLoading && pendingFriends.isEmpty() && !hasSearched,
+                pendingError = if (!hasSearched) uiState.error?.let(::addFriendErrorMessage) else null,
+                onRetryPending = { screenModel.onAction(AddFriendUiAction.FetchPending) },
                 onBackClick = { navigator.pop() },
                 onAddFriendClick = { friend ->
                     friend.id?.let { targetId -> screenModel.addFriend(targetId) }
@@ -157,266 +140,6 @@ class AddFriendScreen : Screen {
                     containerColor = Color.White,
                     shape = RoundedCornerShape(16.dp)
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun AddFriendContent(
-    searchQuery: String,
-    onSearchChange: (String) -> Unit,
-    onSearchClick: () -> Unit,
-    searchResult: FriendData?,
-    hasSearched: Boolean,
-    isSearching: Boolean,
-    pendingFriends: List<PendingFriendData>,
-    onBackClick: () -> Unit,
-    onAddFriendClick: (FriendData) -> Unit,
-    onRespondToRequest: (String, Boolean) -> Unit
-) {
-    val themeColor = Color(0xFFC27A5A)
-    var requestSent by remember(searchResult) { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(LightBg)
-            .statusBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 24.dp)
-    ) {
-        // --- 1. Header ---
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 10.dp)) {
-            Icon(painter = painterResource(Res.drawable.ic_common_back), contentDescription = "Back", tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onBackClick() })
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "เพิ่มเพื่อน", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
-        }
-
-        // --- 2. ช่องค้นหา + ปุ่มค้นหา ---
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            SocialSearchBar(
-                searchQuery = searchQuery,
-                onSearchChange = { onSearchChange(it) },
-                placeholderText = "ค้นหาด้วย Email",
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Button(
-                onClick = onSearchClick,
-                enabled = searchQuery.isNotBlank() && !isSearching,
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = themeColor, disabledContainerColor = themeColor.copy(alpha = 0.5f)),
-                modifier = Modifier.height(44.dp)
-            ) {
-                if (isSearching) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                } else {
-                    Text("ค้นหา", color = Color.White, style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // --- 3. ลอจิกสลับหน้าจอ ---
-        if (hasSearched && searchQuery.isNotEmpty()) {
-
-            Text("ผลการค้นหา", style = MaterialTheme.typography.titleSmall, color = Color(0xFF3A2F2A), modifier = Modifier.padding(bottom = 16.dp))
-
-            if (!isSearching) {
-                if (searchResult != null) {
-                    // เจอคน
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(16.dp)).padding(10.dp)
-                    ) {
-                        Box(modifier = Modifier.size(46.dp).clip(CircleShape).background(LightBg), contentAlignment = Alignment.Center) {
-                            if (!searchResult.profile.isNullOrEmpty()) {
-                                AsyncImage(model = searchResult.profile, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                            } else {
-                                Icon(painter = painterResource(Res.drawable.ic_nav_profile), contentDescription = null, tint = LightPrimary, modifier = Modifier.size(28.dp))
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(text = searchResult.username ?: searchResult.firstName ?: "ไม่ระบุชื่อ", style = MaterialTheme.typography.bodyLarge, color = Color(0xFF3A2F2A))
-                            Text(text = searchResult.email ?: "", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
-                        }
-
-                        if (searchResult.isFriend == true) {
-                            Text("เป็นเพื่อนแล้ว", color = Color(0xFF9E918B), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(end = 8.dp))
-                        } else {
-                            Button(
-                                onClick = { requestSent = true; onAddFriendClick(searchResult) },
-                                enabled = !requestSent,
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = themeColor,
-                                    disabledContainerColor = Color.LightGray
-                                ),
-                                // 🌟 วิธีที่ 1: ตั้งค่า Padding เป็น 0 เพื่อให้เราคุมพื้นที่ข้างในเองได้เต็มที่
-                                contentPadding = PaddingValues(horizontal = 12.dp),
-                                modifier = Modifier
-                                    .height(36.dp)
-                            ) {
-                                // 🌟 วิธีที่ 2: ใช้ Box หรือ Row ครอบแล้วสั่ง Alignment.Center
-                                Box(
-                                    modifier = Modifier.fillMaxHeight(), // ยืดให้เต็มปุ่ม
-                                    contentAlignment = Alignment.Center // บังคับให้ลูก (Text) อยู่ตรงกลางเป๊ะทั้งแนวตั้งและแนวนอน
-                                ) {
-                                    Text(
-                                        text = if (requestSent) "กำลังส่ง..." else "ส่งคำขอ",
-                                        color = Color.White,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        textAlign = TextAlign.Center // เพิ่มความมั่นใจว่าตัวหนังสือจะอยู่กลางบรรทัด
-                                    )
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // ไม่เจอคน
-                    Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
-                        Text(text = "ไม่พบผู้ใช้นี้\nโปรดตรวจสอบความถูกต้องอีกครั้ง", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, textAlign = TextAlign.Center)
-                    }
-                }
-            }
-
-        } else {
-            // คำขอเป็นเพื่อน
-            Text("คำขอเป็นเพื่อน", style = MaterialTheme.typography.titleSmall, color = Color(0xFF3A2F2A), modifier = Modifier.padding(bottom = 16.dp))
-
-            if (pendingFriends.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("ยังไม่มีคำขอเป็นเพื่อนในขณะนี้", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(pendingFriends) { request ->
-                        FriendRequestItem(
-                            request = request,
-                            themeColor = themeColor,
-                            onAccept = { request.id?.let { onRespondToRequest(it, true) } },
-                            onReject = { request.id?.let { onRespondToRequest(it, false) } }
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun FriendRequestItem(
-    request: PendingFriendData,
-    themeColor: Color,
-    onAccept: () -> Unit,
-    onReject: () -> Unit
-) {
-    val displayName = request.username?.takeIf { it.isNotBlank() }
-        ?: request.firstName?.takeIf { it.isNotBlank() }
-        ?: "ไม่ระบุชื่อ"
-
-    // 🌟 เปลี่ยนจาก Row หลัก เป็น Column เพื่อให้ขึ้นบรรทัดใหม่ได้
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(16.dp))
-            .padding(12.dp) // เพิ่ม padding อีกนิดให้ดูโปร่ง
-    ) {
-        // --- ส่วนบน: ข้อมูลโปรไฟล์ ---
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier.size(46.dp).clip(CircleShape).background(LightBg),
-                contentAlignment = Alignment.Center
-            ) {
-                if (!request.profile.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = request.profile,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_nav_profile),
-                        contentDescription = null,
-                        tint = LightPrimary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = displayName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold, // เน้นชื่อหน่อย
-                    color = Color(0xFF3A2F2A)
-                )
-                Text(
-                    text = request.email ?: "",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp)) // ระยะห่างระหว่างโปรไฟล์กับปุ่ม
-
-        // --- ส่วนล่าง: ปุ่ม ปฏิเสธ และ ยอมรับ (ขยายเต็มกว้าง) ---
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // --- ปุ่ม ปฏิเสธ (Outlined) ---
-            OutlinedButton(
-                onClick = onReject,
-                modifier = Modifier
-                    .weight(1f) // 🌟 แบ่งพื้นที่คนละคนครึ่งเพื่อให้เต็มความกว้าง
-                    .height(34.dp),
-                contentPadding = PaddingValues(0.dp),
-                border = BorderStroke(1.dp, Color.LightGray),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "ปฏิเสธ",
-                        color = Color.Gray,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            // --- ปุ่ม ยอมรับ (Filled) ---
-            Button(
-                onClick = onAccept,
-                modifier = Modifier
-                    .weight(1f) // 🌟 แบ่งพื้นที่คนละคนครึ่ง
-                    .height(34.dp),
-                contentPadding = PaddingValues(0.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = themeColor),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "ยอมรับ",
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
             }
         }
     }

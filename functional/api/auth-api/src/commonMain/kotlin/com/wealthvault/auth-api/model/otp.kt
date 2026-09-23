@@ -4,12 +4,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class OTPRequest(
+internal data class OTPRequest(
     val email: String,
     val otp: String
 )
 @Serializable
-data class OTPResponse(
+internal data class OTPResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -21,7 +21,7 @@ data class OTPResponse(
 )
 
 @Serializable
-data class OTPData(
+internal data class OTPData(
     @SerialName("success")
     val success: Boolean,
 

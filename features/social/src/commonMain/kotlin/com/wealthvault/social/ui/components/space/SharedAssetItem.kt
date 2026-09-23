@@ -51,12 +51,13 @@ import com.wealthvault.core.generated.resources.ic_asset_type_investment
 import com.wealthvault.core.generated.resources.ic_asset_type_land
 import com.wealthvault.core.generated.resources.ic_asset_type_loan
 import com.wealthvault.core.generated.resources.ic_common_clock
+import com.wealthvault.core.model.Money
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.painterResource
@@ -68,7 +69,7 @@ fun SharedAssetItem(
     assetName: String,
     assetType: String,
     imageUrl: String? = null,
-    value: Double? = null,
+    value: Money? = null,
     sharedAt: String? = null,
     showDelete: Boolean = false,
     isFirstItem: Boolean = false,

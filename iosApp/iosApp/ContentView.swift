@@ -20,6 +20,8 @@ struct ContentView: View {
     var body: some View {
         ComposeView(lineAuth: lineAuth)
             .ignoresSafeArea()
+            .onAppear {
+                StartupSignpost.shared.end()
+            }
     }
 }
-

@@ -1,18 +1,14 @@
 package com.wealthvault.`user-api`.user
 
 import com.wealthvault.config.Config
-import com.wealthvault.`user-api`.model.UserDataResponse
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.user_api.requireDomainUser
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 
-class UserApiImpl(private val ktorfit: Ktorfit) : UserApi {
-    override suspend fun getUser(): UserDataResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
+class UserApiImpl(private val client: HttpClient) : UserApi {
+    override suspend fun getUser() =
+        client.get("${Config.localhost_android}user/") {
 
-        return client.get("${Config.localhost_android}user/") {
-
-        }.body()
-    }
+        }.body<com.wealthvault.`user-api`.model.UserDataResponse>().requireDomainUser()
 }

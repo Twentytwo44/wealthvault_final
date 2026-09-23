@@ -1,13 +1,15 @@
-package com.wealthvault.wealthvault_final
+package com.wealthvault.app
 
 import androidx.compose.ui.window.ComposeUIViewController
-import com.wealthvault.wealthvault_final.di.initKoin
-import com.wealthvault_final.line_auth.SwiftLineAuth
+import com.wealthvault.app.di.initKoin
+import com.wealthvault.app.di.registerAppNavigation
+import com.wealthvault.security.line.SwiftLineAuth
 import platform.UIKit.UIViewController
 
 
 
 fun MainViewController(lineAuth: SwiftLineAuth): UIViewController {
+    registerAppNavigation()
 
     val controller = ComposeUIViewController {
         App()

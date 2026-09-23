@@ -1,12 +1,10 @@
 package com.wealthvault.notification.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,94 +15,62 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator // 🌟 Import เพิ่ม
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.architecture.AppError
+import com.wealthvault.core.architecture.CacheFreshness
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
-import com.wealthvault.core.generated.resources.ic_common_solid_right
 import com.wealthvault.core.generated.resources.ic_form_email_outline
-import com.wealthvault.core.generated.resources.ic_nav_profile
+import com.wealthvault.core.model.NotificationItem
+import com.wealthvault.core.navigation.SharedScreen
 import com.wealthvault.core.theme.LightBg
-import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightMuted
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.utils.getScreenModel
 import com.wealthvault.notification.viewmodel.NotificationScreenModel
-import com.wealthvault.notification_api.model.NotificationData
-import com.wealthvault.social.ui.main_social.add_friend.AddFriendScreen
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import com.wealthvault.notification.viewmodel.NotificationUiAction
 import org.jetbrains.compose.resources.painterResource
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class NotificationScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<NotificationScreenModel>()
         val navigator = LocalNavigator.currentOrThrow
-        val notificationData by screenModel.notificationData.collectAsStateWithLifecycle()
-        val isLoading by screenModel.isLoading.collectAsStateWithLifecycle() // 🌟 ดึงค่าโหลด
-
-        val lifecycleOwner = LocalLifecycleOwner.current
-
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                when (event) {
-                    Lifecycle.Event.ON_RESUME -> {
-                        println("🔄 หน้าแจ้งเตือนตื่นแล้ว! โหลดข้อมูลล่าสุด...")
-                        screenModel.fetchNotifications()
-                    }
-                    Lifecycle.Event.ON_PAUSE -> {
-                        println("👋 ผู้ใช้ละสายตาจากหน้านี้... สั่งเคลียร์เป็นอ่านทั้งหมด")
-                        screenModel.markAllAsReadBackground()
-                    }
-                    else -> {}
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-        }
+        val addFriendScreen = rememberScreen(SharedScreen.AddFriend)
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
         NotificationContent(
             onBackClick = {
-                // 🌟 ยิงคำสั่งอ่านทั้งหมดทันทีที่กด Back เพื่อความชัวร์ (ไม่ต้องรอ Lifecycle)
                 screenModel.markAllAsReadBackground()
                 navigator.pop()
             },
-            onReadClick = { data -> screenModel.readNotification(data) },
-            onNavigateToAddFriend = { navigator.push(AddFriendScreen()) },
-            notificationData = notificationData,
-            isLoading = isLoading // 🌟 โยนลงไปให้ฟังก์ชันวาด UI
+            onReadClick = screenModel::readNotification,
+            onNavigateToAddFriend = { navigator.push(addFriendScreen) },
+            notificationData = uiState.items,
+            isLoading = uiState.isLoading,
+            freshness = uiState.freshness,
+            errorMessage = uiState.error?.let(::notificationErrorMessage),
+            onRetry = { screenModel.onAction(NotificationUiAction.Refresh) },
         )
     }
 }
@@ -114,79 +80,104 @@ fun NotificationContent(
     onBackClick: () -> Unit,
     onReadClick: (String) -> Unit,
     onNavigateToAddFriend: () -> Unit,
-    notificationData: List<NotificationData>,
-    isLoading: Boolean // 🌟 รับค่า isLoading
+    notificationData: List<NotificationItem>,
+    isLoading: Boolean,
+    freshness: CacheFreshness = CacheFreshness.Fresh,
+    errorMessage: String? = null,
+    onRetry: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(LightBg)
             .statusBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 24.dp)
+            .padding(horizontal = 24.dp, vertical = 24.dp),
     ) {
-        // --- Header ---
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
         ) {
             Icon(
                 painter = painterResource(Res.drawable.ic_common_back),
                 contentDescription = "Back",
                 tint = LightPrimary,
-                modifier = Modifier.size(24.dp).clickable { onBackClick() }
+                modifier = Modifier.size(24.dp).clickable { onBackClick() },
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(text = "การแจ้งเตือน", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
         }
 
-        // --- ส่วนเนื้อหา ---
-        // 🌟 เพิ่มเงื่อนไขเช็ค isLoading
-        if (isLoading && notificationData.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = LightPrimary)
-            }
-        } else if (notificationData.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_form_email_outline),
-                        contentDescription = "Empty",
-                        tint = LightMuted.copy(alpha = 0.5f),
-                        modifier = Modifier.size(60.dp)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "ยังไม่มีการแจ้งเตือน",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = LightMuted
-                    )
+        if (freshness != CacheFreshness.Fresh) {
+            NotificationCacheStatusBanner(freshness = freshness, isRefreshing = isLoading)
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        when {
+            isLoading && notificationData.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = LightPrimary)
                 }
             }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(notificationData) { notification ->
-                    val isRead = notification.isRead == true
-
-                    when (notification.entityType) {
-                        "FRIEND_REQUEST" -> {
+            notificationData.isEmpty() && errorMessage != null -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text(
+                            text = errorMessage,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = LightMuted,
+                        )
+                        Button(
+                            onClick = onRetry,
+                            colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+                        ) {
+                            Text("ลองใหม่", color = Color.White)
+                        }
+                    }
+                }
+            }
+            notificationData.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_form_email_outline),
+                            contentDescription = "Empty",
+                            tint = LightMuted.copy(alpha = 0.5f),
+                            modifier = Modifier.size(60.dp),
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "ยังไม่มีการแจ้งเตือน",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = LightMuted,
+                        )
+                    }
+                }
+            }
+            else -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    itemsIndexed(
+                        items = notificationData,
+                        key = { index, item -> item.id ?: "${item.entityType}:${item.createdAt}:$index" },
+                    ) { _, notification ->
+                        val isRead = notification.isRead == true
+                        if (notification.entityType == "FRIEND_REQUEST") {
                             InviteNotificationCard(
                                 title = notification.message ?: "",
                                 time = notification.createdAt ?: "",
-                                metadata = notification.metaData ?: "{}",
+                                isCompleted = notification.isCompleted == true,
                                 isRead = isRead,
                                 onNavigateToAddFriend = {
                                     onReadClick(notification.id ?: "")
                                     onNavigateToAddFriend()
-                                }
+                                },
                             )
-                        }
-                        else -> {
+                        } else {
                             StandardNotificationCard(
                                 title = notification.message ?: "",
                                 time = notification.createdAt ?: "",
@@ -200,172 +191,29 @@ fun NotificationContent(
     }
 }
 
-/**
- * 🌟 Helper: ไอคอนแจ้งเตือน
- */
 @Composable
-private fun NotificationLeadingIcon(iconRes: org.jetbrains.compose.resources.DrawableResource, isRead: Boolean) {
+private fun NotificationCacheStatusBanner(
+    freshness: CacheFreshness,
+    isRefreshing: Boolean,
+) {
+    val message = when {
+        isRefreshing -> "กำลังอัปเดตการแจ้งเตือน…"
+        freshness == CacheFreshness.Offline -> "กำลังแสดงการแจ้งเตือนที่บันทึกไว้ ออฟไลน์อยู่"
+        else -> "การแจ้งเตือนอาจเก่า แตะลองใหม่เพื่ออัปเดต"
+    }
     Box(
         modifier = Modifier
-            .size(32.dp)
-            .clip(CircleShape)
-            .background(if (isRead) LightBg else LightSoftWhite),
-        contentAlignment = Alignment.Center
+            .fillMaxWidth()
+            .background(LightSoftWhite, RoundedCornerShape(12.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = null,
-            tint = if (isRead) LightMuted else LightPrimary,
-            modifier = Modifier.size(16.dp)
-        )
+        Text(text = message, color = LightMuted, style = MaterialTheme.typography.bodySmall)
     }
 }
 
-/**
- * 🌟 การ์ดแจ้งเตือนแบบมาตรฐาน
- */
-@Composable
-fun StandardNotificationCard(
-    title: String,
-    time: String,
-    isRead: Boolean,
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = if (isRead) LightSoftWhite.copy(0.6f) else LightSoftWhite),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp,  LightBorder)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
-
-            // แถวบน: ไอคอน และ ข้อความหลัก
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
-            ) {
-                NotificationLeadingIcon(iconRes = Res.drawable.ic_form_email_outline, isRead = isRead)
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (isRead) LightMuted else LightText,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // แถวล่าง: วันที่ และ Badge (ดันชิดซ้าย)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (!isRead) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFE57373))) // จุดแดง/ส้ม
-                    Spacer(modifier = Modifier.width(6.dp))
-                }
-                Text(
-                    text = time.take(10), // ดึงแค่วันที่ YYYY-MM-DD
-                    style = MaterialTheme.typography.labelSmall,
-                    color = LightMuted
-                )
-            }
-        }
-    }
-}
-
-/**
- * 🌟 การ์ดแจ้งเตือนเพื่อน
- */
-@Composable
-fun InviteNotificationCard(
-    title: String,
-    time: String,
-    metadata: String,
-    isRead: Boolean,
-    onNavigateToAddFriend: () -> Unit
-) {
-    val jsonElement = try { Json.parseToJsonElement(metadata) } catch (e: Exception) { null }
-    val isCompleted = jsonElement?.jsonObject?.get("is_completed")?.jsonPrimitive?.booleanOrNull ?: false
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = if (isRead) LightSoftWhite.copy(0.6f) else LightSoftWhite),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, LightBorder)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
-
-            // แถวบน: ไอคอน และ ข้อความหลัก
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
-            ) {
-                NotificationLeadingIcon(iconRes = Res.drawable.ic_nav_profile, isRead = isRead)
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (isRead) LightMuted else LightText,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // แถวล่าง: จัดเรียงให้อยู่บรรทัดเดียวกัน (วันที่อยู่ซ้าย - ปุ่มอยู่ขวา)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // ส่วนซ้าย: วันที่และจุด Unread
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (!isRead) {
-                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFE57373)))
-                        Spacer(modifier = Modifier.width(6.dp))
-                    }
-                    Text(
-                        text = time.take(10),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = LightMuted
-                    )
-                }
-
-                // ส่วนขวา: ปุ่มจัดการคำขอ หรือ สถานะ
-                if (isCompleted) {
-                    Text(
-                        text = "✓ ตอบรับคำขอแล้ว",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isRead) LightMuted else LightPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                } else {
-                    Button(
-                        onClick = onNavigateToAddFriend,
-                        colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.height(32.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
-                    ) {
-                        Text("จัดการคำขอ", color = Color.White, fontSize = 13.sp)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_common_solid_right),
-                            contentDescription = null,
-                            tint = LightSoftWhite,
-                            modifier = Modifier.size(12.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
+private fun notificationErrorMessage(error: AppError): String = when (error) {
+    AppError.Unauthorized -> "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่"
+    AppError.NotFound -> "ไม่พบการแจ้งเตือน"
+    is AppError.Network -> "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่"
+    is AppError.Unknown -> "โหลดการแจ้งเตือนไม่สำเร็จ กรุณาลองใหม่"
 }

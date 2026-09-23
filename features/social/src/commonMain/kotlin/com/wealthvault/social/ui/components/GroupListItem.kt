@@ -21,12 +21,12 @@ import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.generated.resources.ic_nav_social
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.group_api.model.GetAllGroupData
+import com.wealthvault.domain.social.GroupSummary
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun GroupListItem(
-    group: GetAllGroupData,
+    group: GroupSummary,
     onClick: () -> Unit
 ) {
     val displayName = group.groupName ?: "Unknown Group"

@@ -1,14 +1,13 @@
-package com.wealthvault.wealthvault_final
+package com.wealthvault.app
 
 import ForgetModule
 import android.app.Application
 import com.google.firebase.FirebaseApp
-import com.wealthvault.data_store.androidDataStoreModule
-import com.wealthvault.financiallist.di.financiallistModule
-import com.wealthvault.google_auth.di.GoogleAuthAndroidModule
-import com.wealthvault.wealthvault_final.di.AllModules
-import com.wealthvault_final.notification.di.NotificationModule
-import com.wealthvault.di.dashboardModule
+import com.wealthvault.core.observability.platformLogger
+import com.wealthvault.security.androidSecurityStorageModule
+import com.wealthvault.database.androidDatabaseModule
+import com.wealthvault.app.di.AllModules
+import com.wealthvault.data.auth.AuthAndroidDataModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -18,7 +17,7 @@ class MyApplication : Application() {
         try {
             FirebaseApp.initializeApp(this)
         } catch (error: Throwable) {
-            error.printStackTrace()
+            platformLogger().error("Firebase initialization failed", error)
         }
         super.onCreate()
 
@@ -27,11 +26,9 @@ class MyApplication : Application() {
             androidLogger()
             modules(
                 AllModules.modules +
-                    androidDataStoreModule.allModules +
-                    GoogleAuthAndroidModule.allModules +
-                    NotificationModule.allModules +
-                    financiallistModule +
-                    dashboardModule +
+                    androidSecurityStorageModule +
+                    androidDatabaseModule +
+                    AuthAndroidDataModule.allModules +
                     ForgetModule.allModules,
             )
         }

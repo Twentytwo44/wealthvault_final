@@ -1,16 +1,15 @@
 package com.wealthvault.financiallist
 
 import kotlin.test.Test
+import com.wealthvault.core.model.Money
 import kotlin.test.assertEquals
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
+class FinancialListContractTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun moneyIsStoredAsMinorUnits() {
+        val money = Money(minorUnits = 12345)
+
+        assertEquals(12345L, money.minorUnits)
+        assertEquals("THB", money.currencyCode)
     }
 }

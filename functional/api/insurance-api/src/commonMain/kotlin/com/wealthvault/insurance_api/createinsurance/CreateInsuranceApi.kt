@@ -1,11 +1,8 @@
 package com.wealthvault.insurance_api.createcash
 
-import com.wealthvault.insurance_api.model.InsuranceRequest
-import com.wealthvault.insurance_api.model.InsuranceResponse
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.POST
+import com.wealthvault.domain.portfolio.InsuranceData
+import com.wealthvault.domain.portfolio.InsuranceRequest
 
 interface CreateInsuranceApi {
-    @POST("asset/insurance/")
-    suspend fun create(@Body request: InsuranceRequest): InsuranceResponse
+    suspend fun create(request: InsuranceRequest): InsuranceData
 }

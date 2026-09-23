@@ -1,64 +1,64 @@
-package com.wealthvault.wealthvault_final.di
+package com.wealthvault.app.di
 
-import com.wealthvault.account_api.di.AccountApiModule
 import com.wealthvault.core.di.coreModule
-import com.wealthvault.`auth-api`.di.ApiModule
-import com.wealthvault.building_api.di.BuildingApiModule
-import com.wealthvault.cash_api.di.CashApiModule
-import com.wealthvault.data_store.di.DataStoreModule
-import com.wealthvault.google_auth.di.GoogleAuthMainModule
-import com.wealthvault.group_api.di.GroupApiModule
-import com.wealthvault.insurance_api.di.InsuranceApiModule
+import com.wealthvault.database.databaseModule
+import com.wealthvault.security.SecuritySessionModule
+import com.wealthvault.data.auth.AuthDataModule
+import com.wealthvault.data.dashboard.DashboardDataModule
+import com.wealthvault.data.profile.ProfileDataModule
+import com.wealthvault.data.notification.NotificationDataModule
+import com.wealthvault.data.portfolio.PortfolioDataModule
+import com.wealthvault.data.social.SocialDataModule
+import com.wealthvault.di.dashboardModule
 import com.wealthvault.introduction.di.IntroModule
-import com.wealthvault.investment_api.di.InvestmentApiModule
-import com.wealthvault.land_api.di.LandApiModule
-import com.wealthvault.liability_api.di.LiabilityApiModule
 import com.wealthvault.login.di.LoginModule
-import com.wealthvault.notification.di.NotificationModule
-import com.wealthvault.notification_api.di.NotificationApiModule
+import com.wealthvault.notification.di.NotificationModule as FeatureNotificationModule
+import com.wealthvault.push.di.pushNotificationModule
 import com.wealthvault.profile.di.ProfileModule
+import com.wealthvault.financiallist.di.financiallistModule
 import com.wealthvault.register.di.RegisterModule
-import com.wealthvault.share_api.di.ShareApiModule
 import com.wealthvault.social.di.SocialModule
 import com.wealthvault.splashscreen.di.GetUserModule
-import com.wealthvault.`user-api`.di.UserApiModule
-import com.wealthvault.websocket_api.di.WebSocketApiModule
-import com.wealthvault_final.`financial-asset`.di.FinancialAssetModule
-import com.wealthvault_final.setup_api.di.GlobalApiModule
+import com.wealthvault.network.NetworkDataModule
+import com.wealthvault.app.navigation.AppCoordinator
+import com.wealthvault.app.navigation.SessionDeviceRegistrar
 import org.koin.core.module.Module
+import org.koin.dsl.module
 
 
 object AllModules {
     val modules = arrayListOf<Module>().apply {
 
         add(coreModule)
-        add(DataStoreModule.allModules)
-
-
-        // setup httpclientbuilder
-        add(GlobalApiModule.allModules)
-        // function:api
-        add(GoogleAuthMainModule.allModules)
-        add(AccountApiModule.allModules)
-        add(ApiModule.allModules)
-        add(BuildingApiModule.allModules)
-        add(CashApiModule.allModules)
-        add(InsuranceApiModule.allModules)
-        add(InvestmentApiModule.allModules)
-        add(LandApiModule.allModules)
-        add(LiabilityApiModule.allModules)
-        add(UserApiModule.allModules)
+        add(
+            module {
+                single { SessionDeviceRegistrar(get(), get(), get(), get()) }
+                single { AppCoordinator(get(), get(), get(), get()) }
+            },
+        )
+        add(databaseModule)
+        addAll(SecuritySessionModule.allModules)
+        // Bounded-context facades own legacy transport wiring during the
+        // staged migration. The app composition root never imports endpoint
+        // implementations directly.
+        addAll(NetworkDataModule.allModules)
+        addAll(AuthDataModule.allModules)
+        addAll(DashboardDataModule.allModules)
+        addAll(ProfileDataModule.allModules)
+        addAll(PortfolioDataModule.allModules)
+        addAll(SocialDataModule.allModules)
 
         add(LoginModule.allModules)
         add(RegisterModule.allModules)
+        add(dashboardModule)
         add(ProfileModule.allModules)
-        add(FinancialAssetModule.allModules)
-        add(GroupApiModule.allModules)
-        add(ShareApiModule.allModules)
+        // Shared financial-list graph is part of the composition root on both
+        // Android and iOS; platform launchers must not assemble it separately.
+        add(financiallistModule)
         add(SocialModule.allModules)
-        add(NotificationApiModule.allModules)
-        add(WebSocketApiModule.module)
-        add(NotificationModule.allModules)
+        addAll(NotificationDataModule.allModules)
+        add(FeatureNotificationModule.allModules)
+        add(pushNotificationModule)
         add(GetUserModule.allModules)
         add(IntroModule.allModules)
 

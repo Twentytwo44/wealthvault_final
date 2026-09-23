@@ -17,6 +17,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
                apply(versionCatalogPlugin("kotlinMultiplatform"))
                apply(versionCatalogPlugin("androidKotlinMultiplatformLibrary"))
                apply(versionCatalogPlugin("androidLint"))
+               apply(versionCatalogPlugin("kover"))
            }
 
             extensions.configure<KotlinMultiplatformExtension> {
@@ -35,25 +36,15 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
                     }
                 }
 
-                val xcfName = "configKit"
-
-                iosX64 {
-                    binaries.framework {
-                        baseName = xcfName
-                    }
-                }
-
-                iosArm64 {
-                    binaries.framework {
-                        baseName = xcfName
-                    }
-                }
-
-                iosSimulatorArm64 {
-                    binaries.framework {
-                        baseName = xcfName
-                    }
-                }
+                // Library modules are consumed by the application framework and do not
+                // publish standalone iOS frameworks.  In particular, adding a direct
+                // `binaries.framework` here creates `embedAndSignAppleFrameworkForXcode`
+                // for every library.  That task is incompatible with CocoaPods-backed
+                // modules (for example data:auth and features:profile).  The composition
+                // root owns the single framework declaration instead.
+                iosX64()
+                iosArm64()
+                iosSimulatorArm64()
 
                 sourceSets {
                     commonMain {
@@ -81,6 +72,10 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
 
                     getByName("androidDeviceTest") {
                         dependencies {
+                            // Device tests inherit commonTest sources. Keep
+                            // kotlin.test available there as well as on the
+                            // host and native test compilations.
+                            implementation(versionCatalogLibrary("kotlin-test"))
                             implementation(versionCatalogLibrary("androidx-runner"))
                             implementation(versionCatalogLibrary("androidx-core"))
                             implementation(versionCatalogLibrary("androidx-testExt-junit"))

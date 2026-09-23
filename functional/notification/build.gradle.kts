@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.androidLint)
     alias(libs.plugins.composeCompiler)
 
-    alias(libs.plugins.ksp)
     alias(libs.plugins.mokkery)
     alias(libs.plugins.kotlin.serialization)
 
@@ -19,7 +18,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.wealthvault_final.notification"
+        namespace = "com.wealthvault.notificationservice"
         compileSdk = 36
         minSdk = 24
 
@@ -63,6 +62,9 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
         commonMain {
+            // Repository and transport code is compiled by data:notification;
+            // this module keeps only the platform push-service implementation.
+            kotlin.exclude("com/wealthvault/data/notification/**")
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
@@ -75,17 +77,25 @@ kotlin {
 
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
-                implementation(libs.ktorfit.lib)
 
-                implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.3.4")
 
 
                 implementation(project(":base:core"))
                 implementation(project(":base:config"))
-                implementation(project(":functional:data-store"))
-                implementation(project(":functional:api:auth-api"))
+                implementation(project(":base:security"))
+                implementation(project(":domain:notification"))
+                implementation(project(":domain:social"))
+                implementation(project(":domain:auth"))
 
                 // Add KMP dependencies here
+            }
+        }
+
+        commonTest {
+            kotlin.exclude("com/wealthvault/data/notification/**")
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.coroutines.test)
             }
         }
 
@@ -97,6 +107,8 @@ kotlin {
 
             }
         }
+
+        iosMain { }
 
     }
 

@@ -1,6 +1,7 @@
 package com.wealthvault.land_api.di
 
 import com.wealthvault.core.KoinConst
+import io.ktor.client.HttpClient
 import com.wealthvault.investment_api.createcash.CreateLandApi
 import com.wealthvault.investment_api.createcash.CreateLandApiImpl
 import com.wealthvault.land_api.deleteland.DeleteLandApi
@@ -24,11 +25,11 @@ object LandApiModule {
             }
         }
 
-        single<CreateLandApi> { CreateLandApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetLandApi> { GetLandApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetLandByIdApi> { GetLandByIdApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UpdateLandApi> { UpdateLandApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<DeleteLandApi> { DeleteLandApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<CreateLandApi> { CreateLandApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetLandApi> { GetLandApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetLandByIdApi> { GetLandByIdApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UpdateLandApi> { UpdateLandApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<DeleteLandApi> { DeleteLandApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
 
 
 

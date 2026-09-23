@@ -2,33 +2,58 @@ package com.wealthvault.financiallist.ui.asset.form.cash
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.wealthvault.cash_api.model.CashFileUploadData
-import com.wealthvault.cash_api.model.CashRequest
-import com.wealthvault.financiallist.data.cash.CashRepositoryImpl
-import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
-import com.wealthvault_final.`financial-asset`.model.CashModel
+import com.wealthvault.domain.portfolio.CashFileUploadData
+import com.wealthvault.domain.portfolio.CashRequest
+import com.wealthvault.domain.portfolio.UpdateCashRepository
+import com.wealthvault.domain.portfolio.CreateCashRepository
+import com.wealthvault.core.model.Attachment
+import com.wealthvault.core.model.Money
+import com.wealthvault.domain.portfolio.CashModel
+import com.wealthvault.core.architecture.FormAction
+import com.wealthvault.core.architecture.FormEffect
+import com.wealthvault.core.architecture.UiState
+import com.wealthvault.core.architecture.UiStateHolder
+import com.wealthvault.core.architecture.toAppError
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class CashScreenModel(
-    private val cashRepository: CashRepositoryImpl
+    private val cashRepository: UpdateCashRepository,
+    private val createCashRepository: CreateCashRepository,
 ) : ScreenModel {
     // 📦 ถังเก็บข้อมูล
 
     private val _cashData = MutableStateFlow(CashModel(
         cashName = "",
-        amount = 0.0,
+        amount = Money(0),
         description = "",
         attachments = emptyList()
     ))
+    val state = _cashData.asStateFlow()
+    private val udf = UiStateHolder(_cashData.value)
+    val uiState: StateFlow<UiState<CashModel>> = udf.state
+    val effects = udf.effects
+    private var submitJob: Job? = null
     private val _addedAttachments = MutableStateFlow<List<Attachment>>(emptyList())
     private val _deleteAttachments = MutableStateFlow<List<Attachment>>(emptyList())
 
+    fun onAction(action: FormAction<CashModel>) {
+        when (action) {
+            is FormAction.Changed -> updateForm(action.value)
+            is FormAction.AttachmentsChanged -> updateAttachment(action.added, action.deleted)
+            is FormAction.Submit -> submitCash(action.id)
+        }
+    }
+
 
     fun updateForm(data: CashModel) {
-        println("data update succes " + data.cashName)
         _cashData.update { it.copy(cashName = data.cashName, amount = data.amount, description = data.description, attachments = data.attachments) }
+        udf.set(_cashData.value, isLoading = false, error = null)
     }
 
     fun updateAttachment(addedList: List<Attachment>,deletedList: List<Attachment>) {
@@ -58,7 +83,7 @@ class CashScreenModel(
 
         return CashRequest(
             name = current.cashName,
-            amount = current.amount ,
+            amount = current.amount,
             description = current.description,
             files = allFiles,
             deleteListId = _deleteAttachments.value.map { it.id ?: "" }
@@ -67,8 +92,10 @@ class CashScreenModel(
 
 
 
-    fun submitCash(id:String,onSuccess: () -> Unit) {
-        screenModelScope.launch {
+    fun submitCash(id:String,onSuccess: () -> Unit = {}) {
+        if (submitJob?.isActive == true) return
+        udf.loading()
+        val job = screenModelScope.launch {
             try {
 //                isLoading = true
 //                errorMessage = null
@@ -86,22 +113,52 @@ class CashScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Cash
                     // สมมติว่า field id อยู่ใน cashResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = cashResponse.id.toString()
-                    println("✅ [ScreenModel] Cash Edit ID: $createdItemId")
+                    udf.success()
+                    udf.emit(FormEffect.Saved)
                     onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Edit Cash Failed")
+                    udf.failure(cashResult.exceptionOrNull()?.toAppError()
+                        ?: IllegalStateException("Cash update failed").toAppError())
                 }
 
-            } catch (e: Exception) {
-                println("❌ [ScreenModel] Exception: ${e.message}")
-//                errorMessage = e.message ?: "เกิดข้อผิดพลาดในการเชื่อมต่อ"
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                udf.failure(e.toAppError())
             } finally {
 //                isLoading = false
-                println("🏁 [ScreenModel] Process Finished.")
             }
         }
+        submitJob = job
+        job.invokeOnCompletion { if (submitJob === job) submitJob = null }
+    }
+
+    /** Creates a new cash asset and returns its domain id to the share step. */
+    fun submitCreate(onSuccess: (String) -> Unit = {}) {
+        if (submitJob?.isActive == true) return
+        udf.loading()
+        val job = screenModelScope.launch {
+            try {
+                when (val result = createCashRepository.create(asRequest().copy(deleteListId = emptyList()))) {
+                    is com.wealthvault.core.architecture.AppResult.Success -> {
+                        val id = result.value.id?.takeIf { it.isNotBlank() }
+                            ?: error("Cash create response did not include an id")
+                        udf.success()
+                        udf.emit(FormEffect.Saved)
+                        onSuccess(id)
+                    }
+                    is com.wealthvault.core.architecture.AppResult.Failure -> udf.failure(result.error)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                udf.failure(e.toAppError())
+            }
+        }
+        submitJob = job
+        job.invokeOnCompletion { if (submitJob === job) submitJob = null }
     }
 
 }

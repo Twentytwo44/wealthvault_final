@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class LandRequest(
+internal data class LandRequest(
 
 
     @SerialName("name")
@@ -52,7 +52,7 @@ data class LandRequest(
     )
 
 @Serializable
-data class LandResponse(
+internal data class LandResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -64,7 +64,7 @@ data class LandResponse(
 )
 
 @Serializable
-data class LandData(
+internal data class LandData(
     @SerialName("id")
     val id: String? = null,
 
@@ -99,7 +99,7 @@ data class LandData(
 )
 
 @Serializable
-data class Location(
+internal data class Location(
     @SerialName("location_id")
     val locationId: String? = null,
 
@@ -127,7 +127,7 @@ data class Location(
     )
 
 @Serializable
-data class LandFileUploadData(
+internal data class LandFileUploadData(
     val bytes: ByteArray? = null,
     val mimeType: String? = null,
     val fileName: String? = null,
@@ -135,11 +135,10 @@ data class LandFileUploadData(
 
 
 @Serializable
-data class  LandReferenceData(
+internal data class  LandReferenceData(
     val areaName: String? = null,
     val areaId: String? = null,
 )
-
 
 
 

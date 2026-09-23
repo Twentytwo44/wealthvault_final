@@ -24,6 +24,7 @@ import com.wealthvault.group_api.removemember.RemoveMemberApi
 import com.wealthvault.group_api.removemember.RemoveMemberApiImpl
 import com.wealthvault.group_api.updategroup.UpdateGroupApi
 import com.wealthvault.group_api.updategroup.UpdateGroupApiImpl
+import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -36,18 +37,18 @@ object GroupApiModule {
             }
         }
 
-        single<AddMemberApi> { AddMemberApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<CreateGroupApi> { CreateGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetAllGroupApi> { GetAllGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetGroupApi> { GetGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetGroupMemberApi> { GetGroupMemberApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetGroupMsgApi> { GetGroupMsgApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UpdateGroupApi> { UpdateGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GrantAccessApi> { GrantAccessApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<RemoveMemberApi> { RemoveMemberApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<LeaveGroupApi> { LeaveGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<AddMemberApi> { AddMemberApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<CreateGroupApi> { CreateGroupApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetAllGroupApi> { GetAllGroupApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetGroupApi> { GetGroupApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetGroupMemberApi> { GetGroupMemberApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetGroupMsgApi> { GetGroupMsgApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UpdateGroupApi> { UpdateGroupApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GrantAccessApi> { GrantAccessApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<RemoveMemberApi> { RemoveMemberApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<LeaveGroupApi> { LeaveGroupApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
 
-        single<DeleteGroupApi> { DeleteGroupApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<DeleteGroupApi> { DeleteGroupApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
     }
 
     fun single(definition: Any) {}

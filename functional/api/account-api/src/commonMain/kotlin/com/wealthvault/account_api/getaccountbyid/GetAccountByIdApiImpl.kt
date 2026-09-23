@@ -1,17 +1,14 @@
 package com.wealthvault.account_api.getaccountbyid
 
-import com.wealthvault.account_api.model.BankAccountResponse
+import com.wealthvault.account_api.toDomainData
 import com.wealthvault.config.Config
-import de.jensklingenberg.ktorfit.Ktorfit
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 
-class GetAccountByIdApiImpl(private val ktorfit: Ktorfit) : GetAccountByIdApi {
-    override suspend fun getAccountById(id: String): BankAccountResponse {
-        val client = ktorfit.httpClient
-
-        return client.get("${Config.localhost_android}asset/account/${id}/") {
-
-        }.body()
-    }
+class GetAccountByIdApiImpl(private val client: HttpClient) : GetAccountByIdApi {
+    override suspend fun getAccountById(id: String) = client
+        .get("${Config.localhost_android}asset/account/$id/")
+        .body<com.wealthvault.account_api.model.BankAccountResponse>()
+        .toDomainData()
 }

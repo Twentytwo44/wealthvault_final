@@ -1,17 +1,14 @@
 package com.wealthvault.account_api.getaccount
 
-import com.wealthvault.account_api.model.AccountResponse
+import com.wealthvault.account_api.requireDomainData
 import com.wealthvault.config.Config
-import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.HttpClient
 
-class GetAccountApiImpl(private val ktorfit: Ktorfit) : GetAccountApi {
-    override suspend fun getAccount(): AccountResponse { // 🌟 เปลี่ยนเป็น AccountResponse
-        val client = ktorfit.httpClient
-
-        return client.get("${Config.localhost_android}asset/account/") {
-
-        }.body()
-    }
+class GetAccountApiImpl(private val client: HttpClient) : GetAccountApi {
+    override suspend fun getAccount() = client
+        .get("${Config.localhost_android}asset/account/")
+        .body<com.wealthvault.account_api.model.AccountResponse>()
+        .requireDomainData()
 }

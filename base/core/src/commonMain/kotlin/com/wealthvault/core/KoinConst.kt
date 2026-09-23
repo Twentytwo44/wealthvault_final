@@ -4,27 +4,23 @@ object KoinConst {
     object KotlinSerialization {
         const val GLOBAL = "global-kotlin-serialization"
 
-        const val AUTH = "auth-kotlin-serialization"
         const val USER = "user-kotlin-serialization"
         const val WEBSOCKET = "websocket-kotlin-serialization"
     }
 
     object HttpClient {
 
-        const val GLOBAL = "global-http-client"
+        /** Client for endpoints that must never carry an access token. */
+        const val PUBLIC = "public-http-client"
 
-        const val AUTH = "auth-http-client"
+        /** Client for application endpoints that require session auth. */
+        const val AUTHENTICATED = "authenticated-http-client"
+
+        /** Compatibility qualifier used by migrated non-auth API adapters. */
+        const val GLOBAL = AUTHENTICATED
+
         const val USER = "user-http-client"
         const val WEBSOCKET = "websocket-http-client"
-    }
-
-    object Ktor {
-
-        const val GLOBAL = "global-ktorfit"
-
-        const val AUTH = "auth-ktorfit"
-        const val USER = "user-ktorfit"
-        const val WEBSOCKET = "websocket-ktorfit"
     }
 
     object DataStore {

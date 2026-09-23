@@ -1,36 +1,30 @@
 package com.wealthvault.forgetpassword.usecase
 
-import com.wealthvault.`auth-api`.model.OTPRequest
-import com.wealthvault.core.FlowResult
-import com.wealthvault.core.FlowUseCase
-import com.wealthvault.forgetpassword.data.otp.OTPRepositoryImpl
+import com.wealthvault.domain.auth.OtpVerificationRequest
+import com.wealthvault.core.architecture.AppResult
+import com.wealthvault.core.AppUseCase
+import com.wealthvault.core.architecture.toThrowable
+import com.wealthvault.core.observability.AppLogger
+import com.wealthvault.core.observability.NoOpAppLogger
+import com.wealthvault.domain.auth.OtpRepository
 // ลบ import io.ktor.http.parameters ทิ้งไปแล้ว!
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
 
 class OTPUseCase(
-    private val otpRepository: OTPRepositoryImpl,
+    private val otpRepository: OtpRepository,
     dispatcher: CoroutineDispatcher,
-): FlowUseCase<OTPRequest, String>(dispatcher) {
+    private val logger: AppLogger = NoOpAppLogger,
+): AppUseCase<OtpVerificationRequest, String>(dispatcher) {
 
-    override fun execute(parameters: OTPRequest): Flow<FlowResult<String>> = flow {
-        println("🚀 [OTPUseCase] Confirm OTP to : ${parameters.email}")
+    suspend fun verify(parameters: OtpVerificationRequest): AppResult<String> = invoke(parameters)
 
-        val result = otpRepository.otp(parameters)
-
-        result.onSuccess { token -> // 🌟 ตอนนี้รับ Token ได้สำเร็จแล้ว!
-            println("✅ [OTPUseCase] Confirm OTP Success. Token: $token")
-            emit(FlowResult.Continue(token))
-
-        }.onFailure { exception ->
-            println("❌[OTPUseCase] Confirm OTP Failed: ${exception.message}")
-            emit(FlowResult.Failure(exception))
+    override suspend fun execute(parameters: OtpVerificationRequest): AppResult<String> {
+        logger.debug("Password recovery OTP verification started")
+        return otpRepository.verify(parameters).also { result ->
+            when (result) {
+                is AppResult.Success -> logger.info("Password recovery OTP verified")
+                is AppResult.Failure -> logger.warn("Password recovery OTP verification failed", result.error.toThrowable())
+            }
         }
-
-    }.catch { cause ->
-        println("🚨[OTPUseCase] Unexpected Error: ${cause.message}")
-        emit(FlowResult.Failure(cause))
     }
 }

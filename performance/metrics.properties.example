@@ -1,0 +1,18 @@
+# Copy to build/performance/metrics.properties after a release benchmark run.
+# The verifier requires at least five warm-up/measurement samples.
+schema_version=1
+sample_count=<at-least-five>
+# Exporter output must replace every placeholder below with a measured value.
+# This example is documentation only and is never consumed by CI.
+cold_start_p95_ms=<measured>
+warm_start_p95_ms=<measured>
+cached_dashboard_ttc_ms=<measured>
+android_jank_percent=<measured>
+ios_hitch_ms_per_s=<measured>
+retained_memory_delta_mb=<measured>
+android_release_apk_bytes=<measured>
+ios_framework_growth_percent=<measured>
+gradle_configuration_ms=<measured>
+warm_incremental_build_ms=<measured>
+clean_android_build_ms=<measured>
+ios_simulator_link_ms=<measured>

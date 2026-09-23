@@ -18,17 +18,72 @@ To build and run the development version of the Android app, use the run configu
 in your IDE’s toolbar or build it directly from the terminal:
 - on macOS/Linux
   ```shell
-  ./gradlew :composeApp:assembleDebug
+  ./gradlew :androidApp:assembleDebug
   ```
 - on Windows
   ```shell
-  .\gradlew.bat :composeApp:assembleDebug
+  .\gradlew.bat :androidApp:assembleDebug
   ```
+
+The Android application shell lives in `/androidApp`; `/composeApp` is now the
+shared Compose library. Keep the Firebase configuration file at
+`androidApp/google-services.json` for local Android builds. Release signing is
+configured with the `releaseStoreFile`, `releaseStorePassword`,
+`releaseKeyAlias`, and `releaseKeyPassword` Gradle properties (or their
+`RELEASE_*` environment variable equivalents).
 
 ### Build and Run iOS Application
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+Prepare the generated ComposeApp pod and workspace, then open the workspace in Xcode:
+
+```shell
+./gradlew :composeApp:generateDummyFramework :composeApp:podspec
+pod install --project-directory=iosApp
+open iosApp/iosApp.xcworkspace
+```
+
+The CocoaPods workspace owns framework integration; the Xcode project should not
+invoke a separate Kotlin `embedAndSign` build phase.
+
+### Verification and measured gates
+
+For the normal usability-first checkpoint, run the deterministic gate below.
+It checks dependency boundaries, database migrations, Android debug/release
+builds, host tests, and active device-test contracts without requiring a
+connected device or runtime benchmark:
+
+```shell
+./gradlew verifyUsability
+./gradlew verifyUsabilityIos   # macOS/Xcode runner
+```
+
+The architecture ratchet and Android Kover exporter run with:
+
+```shell
+./gradlew verifyArchitecture -PstrictArchitecture=true
+./gradlew verifyDatabaseMigrations
+./gradlew koverXmlReportAndroidAll
+python3 tools/export_kover_coverage.py \
+  --output build/coverage/inputs/android-kover.properties
+```
+
+The iOS workspace contains a shared `iosAppTests` XCTest target. Run it with
+coverage on a simulator and export the measured `xccov` result with:
+
+```shell
+xcodebuild -workspace iosApp/iosApp.xcworkspace -scheme iosApp \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  -resultBundlePath /tmp/wealthvault-ios-tests.xcresult \
+  -enableCodeCoverage YES test
+python3 tools/export_ios_xctest_coverage.py \
+  --result-bundle /tmp/wealthvault-ios-tests.xcresult \
+  --output build/coverage/inputs/ios-xctest.properties
+```
+
+Coverage and performance collectors reject missing, conflicting, or placeholder
+measurements. Normal pull requests use the usability and strict coverage gates;
+the full performance budget gate runs from the manual `run_performance`
+workflow input once fixed-device measurements are available.
 
 ---
 

@@ -1,9 +1,8 @@
 package com.wealthvault.notification_api.notification
 
-import com.wealthvault.notification_api.model.NotificationResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.core.model.NotificationItem
 
 interface GetNotificationsApi {
-    @GET("notifications")
-    suspend fun getNotifications(): NotificationResponse
+    /** Returns domain-safe items; the wire response stays private to the adapter. */
+    suspend fun getNotifications(): List<NotificationItem>
 }

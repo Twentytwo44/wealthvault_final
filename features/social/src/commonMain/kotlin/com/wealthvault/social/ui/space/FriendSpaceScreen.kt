@@ -29,7 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,9 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -61,7 +58,7 @@ import com.wealthvault.social.ui.components.space.SpaceTopBar
 import com.wealthvault.social.ui.manage_shared.SharedAssetManageScreen
 import com.wealthvault.social.ui.manage_shared.SharedAssetScreen
 import com.wealthvault.social.ui.profile.FriendProfileScreen
-import com.wealthvault.`user-api`.model.MessageItem
+import com.wealthvault.domain.social.MessageItem
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
@@ -83,23 +80,8 @@ class FriendSpaceScreen(
         val reversedMessages = remember(messages) { messages.reversed() }
         val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
 
-        // 🌟 1. ดึง Lifecycle มา
-        val lifecycleOwner = LocalLifecycleOwner.current
-
-        // 🌟 2. ลบ LaunchedEffect(friendId) ทิ้ง และใช้ ON_RESUME แทน
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    println("🔄 FriendSpace ตื่นแล้ว! สั่งโหลดข้อความของ $friendName ใหม่...")
-                    // สั่งดึงข้อมูลใหม่ทุกครั้งที่กลับมาหน้านี้
-                    screenModel.fetchMessages(friendId)
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
+        LaunchedEffect(friendId) {
+            screenModel.fetchMessages(friendId)
         }
 
         WealthVaultTheme {
@@ -193,7 +175,10 @@ fun FriendSpaceContent(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                     contentPadding = PaddingValues(start = 2.dp, end = 6.dp, top = 16.dp, bottom = 300.dp)
                 ) {
-                    items(messages) { msg ->
+                    items(
+                        items = messages,
+                        key = { msg -> msg.id ?: msg.createdAt ?: msg.hashCode() },
+                    ) { msg ->
                         val isMe = msg.isMe == true
                         val titleText = if (isMe) "คุณได้แชร์ทรัพย์สินนี้กับ $friendName" else "$friendName ได้แชร์ทรัพย์สินนี้กับคุณ"
 

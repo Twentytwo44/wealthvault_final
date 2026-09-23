@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 // ตัว Request สำหรับ Create/Update ปล่อยไว้เหมือนเดิมได้ (ถ้าเพื่อนยังใช้แบบนี้)
 @Serializable
-data class BankAccountRequest(
+internal data class BankAccountRequest(
 
 
     @SerialName("name")
@@ -37,14 +37,14 @@ data class BankAccountRequest(
 
 // ตัวรับ Response (เพิ่ม Files และเปลี่ยน amount)
 @Serializable
-data class BankAccountResponse(
+internal data class BankAccountResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: BankAccountData? = null,
     @SerialName("error") val error: String? = null
 )
 
 @Serializable
-data class BankAccountData(
+internal data class BankAccountData(
     @SerialName("id") val id: String,
     @SerialName("user_id") val userId: String,
     @SerialName("name") val name: String? = null,
@@ -62,7 +62,7 @@ data class BankAccountData(
 
 
 @Serializable
-data class BankAccountFileUploadData(
+internal data class BankAccountFileUploadData(
     val bytes: ByteArray,
     val mimeType: String,
     val fileName: String

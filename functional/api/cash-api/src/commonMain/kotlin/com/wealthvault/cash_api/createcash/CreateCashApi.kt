@@ -1,11 +1,8 @@
 package com.wealthvault.cash_api.createcash
 
-import com.wealthvault.cash_api.model.CashRequest
-import com.wealthvault.cash_api.model.CashResponse
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.POST
+import com.wealthvault.domain.portfolio.CashData
+import com.wealthvault.domain.portfolio.CashRequest
 
 interface CreateCashApi {
-    @POST("asset/cash")
-    suspend fun create(@Body request: CashRequest): CashResponse
+    suspend fun create(request: CashRequest): CashData
 }

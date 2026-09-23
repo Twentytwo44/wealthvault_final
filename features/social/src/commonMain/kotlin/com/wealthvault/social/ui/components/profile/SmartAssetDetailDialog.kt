@@ -24,27 +24,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.wealthvault.account_api.model.BankAccountData
-import com.wealthvault.building_api.model.BuildingIdData
-import com.wealthvault.cash_api.model.CashIdData
+import com.wealthvault.domain.portfolio.BankAccountData
+import com.wealthvault.domain.portfolio.BuildingIdData
+import com.wealthvault.domain.portfolio.CashIdData
 import com.wealthvault.core.components.DetailDialog
 import com.wealthvault.core.components.DetailImageRow
 import com.wealthvault.core.components.DetailRow
+import com.wealthvault.core.model.FixedDecimal
+import com.wealthvault.core.model.Money
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.utils.formatAmount
 import com.wealthvault.core.utils.formatThaiDate
-import com.wealthvault.insurance_api.model.InsuranceIdData
-import com.wealthvault.investment_api.model.InvestmentIdData
-import com.wealthvault.land_api.model.LandIdData
-import com.wealthvault.liability_api.model.LiabilityIdData
-import com.wealthvault.social.data.SocialRepositoryImpl
+import com.wealthvault.domain.portfolio.InsuranceIdData
+import com.wealthvault.domain.portfolio.InvestmentIdData
+import com.wealthvault.domain.portfolio.LandIdData
+import com.wealthvault.domain.portfolio.LiabilityIdData
+import com.wealthvault.domain.social.SocialRepository
 import org.koin.compose.koinInject
 
 @Composable
 fun SmartAssetDetailDialog(
     assetId: String,
     assetType: String,
-    repository: SocialRepositoryImpl = koinInject(),
+    repository: SocialRepository = koinInject(),
     showBottomMenu: Boolean = false,
     onDismiss: () -> Unit,
     onDelete: (String) -> Unit = {},
@@ -108,7 +110,7 @@ fun SmartAssetDetailDialog(
                     DetailRow("ธนาคาร", itemData.bankName)
                     DetailRow("เลขบัญชี", itemData.bankAccount)
                     DetailRow("ประเภท", itemData.type)
-                    DetailRow("ยอดเงิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("ยอดเงิน", "${formatAmount(itemData.amount ?: Money(0))} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
@@ -119,7 +121,7 @@ fun SmartAssetDetailDialog(
                     subtitle = subtitleText, title = itemData.name ?: "", updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
                     showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete(itemData.name ?: "") }, onEdit = onEdit, onShare = onShare
                 ) {
-                    DetailRow("มูลค่า", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("มูลค่า", "${formatAmount(itemData.amount ?: Money(0))} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
@@ -131,10 +133,13 @@ fun SmartAssetDetailDialog(
                     showBottomMenu = showBottomMenu, onDismiss = onDismiss, onDelete = { onDelete("${itemData.name} (${itemData.symbol})") }, onEdit = onEdit, onShare = onShare
                 ) {
                     DetailRow("โบรกเกอร์", itemData.brokerName)
-                    DetailRow("จำนวน", formatAmount(itemData.quantity ?: 0.0))
-                    DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(itemData.costPerPrice ?: 0.0)} บาท")
+                    DetailRow("จำนวน", itemData.quantity?.decimalString() ?: "0")
+                    DetailRow("ราคาทุนต่อหน่วย", "${formatAmount(itemData.costPerPrice ?: Money(0))} บาท")
                     DetailRow("ประเภท", itemData.type)
-                    DetailRow("มูลค่ารวม", "${formatAmount((itemData.quantity ?: 0.0) * (itemData.costPerPrice ?: 0.0))} บาท", isHighlight = true)
+                    val totalValue = itemData.amount
+                        ?: itemData.costPerPrice?.times(itemData.quantity ?: FixedDecimal(0, 4))
+                        ?: Money(0)
+                    DetailRow("มูลค่ารวม", "${formatAmount(totalValue)} บาท", isHighlight = true)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
                     DetailImageRow(files = itemData.files)
                 }
@@ -147,7 +152,7 @@ fun SmartAssetDetailDialog(
                 ) {
                     DetailRow("เลขกรมธรรม์", itemData.policyNumber)
                     DetailRow("บริษัท", itemData.companyName)
-                    DetailRow("วงเงินคุ้มครอง", "${formatAmount(itemData.coverageAmount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("วงเงินคุ้มครอง", "${formatAmount(itemData.coverageAmount ?: Money(0))} บาท", isHighlight = true)
                     DetailRow("ระยะเวลาคุ้มครอง", "${itemData.coveragePeriod} ปี")
                     DetailRow("วันเริ่มสัญญา", formatThaiDate(itemData.conDate))
                     DetailRow("วันสิ้นสุดสัญญา", formatThaiDate(itemData.expDate))
@@ -163,7 +168,7 @@ fun SmartAssetDetailDialog(
                 ) {
                     DetailRow("ประเภท", itemData.type ?: "")
                     DetailRow("พื้นที่", "${formatAmount(itemData.area ?: 0.0)} ตร.ม.")
-                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: Money(0))} บาท", isHighlight = true)
                     val addressStr = itemData.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
                     DetailRow("ที่อยู่", addressStr)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
@@ -178,7 +183,7 @@ fun SmartAssetDetailDialog(
                 ) {
                     DetailRow("เลขโฉนด", itemData.deedNum)
                     DetailRow("ขนาดพื้นที่", "${formatAmount(itemData.area ?: 0.0)} ตารางวา")
-                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("มูลค่าประเมิน", "${formatAmount(itemData.amount ?: Money(0))} บาท", isHighlight = true)
                     val addressStr = itemData.location?.let { "${it.address} ${it.subDistrict} ${it.district} ${it.province} ${it.postalCode}".trim() } ?: "-"
                     DetailRow("ที่อยู่", addressStr)
                     DetailRow("คำอธิบาย", itemData.description ?: "-", isLast = itemData.files.isNullOrEmpty())
@@ -202,12 +207,12 @@ fun SmartAssetDetailDialog(
                     DetailRow("ประเภท", if (isLoan) "หนี้สิน" else "รายจ่าย")
 
                     // 🌟 แก้เส้นแดงที่ 1: เติม ?: 0.0 เพื่อให้ formatAmount ทำงานได้
-                    DetailRow("เงินต้น/ยอดหนี้", "${formatAmount(itemData.principal ?: 0.0)} บาท", isHighlight = true)
+                    DetailRow("เงินต้น/ยอดหนี้", "${formatAmount(itemData.principal ?: Money(0))} บาท", isHighlight = true)
 
                     // 🌟 แก้เส้นแดงที่ 2: ดึงค่ามาใส่ตัวแปรก่อน (ดัก null เป็น 0.0) Kotlin จะได้ไม่งง
-                    val rate = itemData.interestRate ?: 0.0
-                    if (rate > 0) {
-                        DetailRow(label = "ดอกเบี้ย", value = "$rate %")
+                    val rate = itemData.interestRate
+                    if (rate != null && rate.unscaled != 0L) {
+                        DetailRow(label = "ดอกเบี้ย", value = "${rate.decimalString()} %")
                     }
 
                     DetailRow(

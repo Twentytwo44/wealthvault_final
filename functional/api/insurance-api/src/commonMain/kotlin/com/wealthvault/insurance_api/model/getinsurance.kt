@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class GetInsuranceResponse(
+internal data class GetInsuranceResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -17,7 +17,7 @@ data class GetInsuranceResponse(
 )
 
 @Serializable
-data class GetInsuranceData(
+internal data class GetInsuranceData(
 
     @SerialName("id")
     val id: String? = null,
@@ -41,7 +41,7 @@ data class GetInsuranceData(
     val coveragePeriod: Int? = null,
 
     @SerialName("coverage_amount")
-    val coverageAmount: Int? = null,
+    val coverageAmount: Double? = null,
 
     @SerialName("con_date")
     val conDate: String? = null,
@@ -60,4 +60,3 @@ data class GetInsuranceData(
 
 
 )
-

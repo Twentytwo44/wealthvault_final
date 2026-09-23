@@ -1,5 +1,5 @@
 # Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
+platform :ios, '15.0'
 
 use_frameworks!
 
@@ -8,6 +8,7 @@ target 'iosApp' do
   use_frameworks!
 
   # Pods for iosApp
+  pod 'composeApp', :path => '../composeApp'
   pod 'GoogleSignIn'
 
   # Pods for Line
@@ -17,4 +18,22 @@ target 'iosApp' do
   pod 'Firebase/Core'
   pod 'Firebase/Messaging'
 
+end
+
+# GoogleDataTransport's generated sources include <nanopb/pb.h>.  Keep the
+# repository-level nanopb headers on the Pods target so a clean derived-data
+# build (including iosAppTests and CI) does not depend on a stale local build.
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    next unless target.name == 'GoogleDataTransport'
+
+    target.build_configurations.each do |configuration|
+      existing = configuration.build_settings['HEADER_SEARCH_PATHS']
+      paths = existing.is_a?(Array) ? existing.dup : [existing].compact
+      paths << '$(inherited)'
+      paths << '$(PODS_TARGET_SRCROOT)'
+      paths << '$(PODS_ROOT)'
+      configuration.build_settings['HEADER_SEARCH_PATHS'] = paths.uniq
+    end
+  end
 end

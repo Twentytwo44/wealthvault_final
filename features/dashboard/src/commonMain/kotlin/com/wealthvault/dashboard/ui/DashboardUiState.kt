@@ -1,10 +1,13 @@
 package com.wealthvault.dashboard.ui
 
-import com.wealthvault.`user-api`.model.DashboardDataResponse
+import com.wealthvault.core.architecture.AppError
+import com.wealthvault.core.architecture.CacheFreshness
+import com.wealthvault.core.model.DashboardData
 
 data class DashboardUiState(
-    val data: DashboardDataResponse? = null,
+    val data: DashboardData? = null,
     val isLoading: Boolean = false,
     val hasUnreadNotifications: Boolean = false,
-    val error: Throwable? = null,
+    val error: AppError? = null,
+    val freshness: CacheFreshness = CacheFreshness.Fresh,
 )

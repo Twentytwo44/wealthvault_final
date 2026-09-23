@@ -1,6 +1,7 @@
 package com.wealthvault.investment_api.di
 
 import com.wealthvault.core.KoinConst
+import io.ktor.client.HttpClient
 import com.wealthvault.investment_api.createinvestment.CreateInvestmentApi
 import com.wealthvault.investment_api.createinvestment.CreateInvestmentApiImpl
 
@@ -24,11 +25,11 @@ object InvestmentApiModule {
             }
         }
 
-        single<CreateInvestmentApi> { CreateInvestmentApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetInvestmentApi> { GetInvestmentApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetInvestmentByIdApi> { GetInvestmentByIdApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UpdateInvestmentApi> { UpdateInvestmentApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<DeleteInvestmentApi> { DeleteInvestmentApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<CreateInvestmentApi> { CreateInvestmentApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetInvestmentApi> { GetInvestmentApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetInvestmentByIdApi> { GetInvestmentByIdApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UpdateInvestmentApi> { UpdateInvestmentApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<DeleteInvestmentApi> { DeleteInvestmentApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
 
 
 

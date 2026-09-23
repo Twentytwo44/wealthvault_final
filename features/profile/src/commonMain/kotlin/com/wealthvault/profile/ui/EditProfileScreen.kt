@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,16 +29,11 @@ import com.wealthvault.core.generated.resources.ic_common_calendar
 import com.wealthvault.core.generated.resources.ic_common_pen
 import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.theme.LightBg
-import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.WvWaveGradientEnd
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 
 class EditProfileScreen() : Screen {
@@ -67,28 +60,6 @@ class EditProfileScreen() : Screen {
     }
 }
 
-fun formatToApiDate(displayDate: String): String {
-    if (displayDate.isBlank()) return ""
-
-    if (displayDate.contains("-") && displayDate.length >= 10) {
-        return displayDate.take(10)
-    }
-
-    if (displayDate.contains("/")) {
-        val parts = displayDate.split("/")
-        if (parts.size == 3) {
-            val day = parts[0].padStart(2, '0')
-            val month = parts[1].padStart(2, '0')
-            val thaiYear = parts[2].toIntOrNull() ?: return displayDate
-            val engYear = thaiYear - 543
-
-            return "$engYear-$month-$day"
-        }
-    }
-
-    return displayDate
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileContent(
@@ -97,10 +68,37 @@ fun EditProfileContent(
     onSaveClick: () -> Unit
 ) {
     val userData by screenModel.userState.collectAsStateWithLifecycle()
+    val uiState by screenModel.uiState.collectAsStateWithLifecycle()
+    val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
     val isSaving by screenModel.isSaving.collectAsStateWithLifecycle()
     val saveSuccess by screenModel.saveSuccess.collectAsStateWithLifecycle()
 
     val profileImageByteArray by screenModel.profileImageByteArray.collectAsStateWithLifecycle()
+
+    if (userData == null && isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = LightPrimary)
+        }
+        return
+    }
+
+    if (userData == null && uiState.error != null) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text("ไม่สามารถโหลดข้อมูลโปรไฟล์ได้", color = Color.Gray)
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = { screenModel.fetchUser() },
+                colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
+            ) {
+                Text("ลองใหม่", color = Color.White)
+            }
+        }
+        return
+    }
 
     var username by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
@@ -110,7 +108,6 @@ fun EditProfileContent(
     var phone by remember { mutableStateOf("") }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
 
     val scope = rememberCoroutineScope()
     val imagePicker = rememberImagePickerLauncher(
@@ -291,101 +288,12 @@ fun EditProfileContent(
     }
 
     if (showDatePicker) {
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val instant = Instant.fromEpochMilliseconds(millis)
-                        val localDate = instant.toLocalDateTime(TimeZone.UTC)
-
-                        val day = localDate.dayOfMonth.toString().padStart(2, '0')
-                        val month = localDate.monthNumber.toString().padStart(2, '0')
-                        val engYear = localDate.year.toString()
-
-                        apiBirthDate = "$engYear-$month-$day"
-                        birthDate = formatThaiDate(apiBirthDate)
-                    }
-                    showDatePicker = false
-                }) {
-                    Text("ตกลง", color = LightPrimary)
-                }
+        EditProfileDatePicker(
+            onDismiss = { showDatePicker = false },
+            onDateSelected = { selectedDate ->
+                apiBirthDate = selectedDate
+                birthDate = formatThaiDate(selectedDate)
             },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("ยกเลิก", color = Color.Gray)
-                }
-            }
-        ) {
-            DatePicker(
-                state = datePickerState,
-                colors = DatePickerDefaults.colors(
-                    selectedDayContainerColor = LightPrimary,
-                    todayDateBorderColor = LightPrimary,
-                    todayContentColor = LightPrimary
-                )
-            )
-        }
-    }
-}
-
-@Composable
-fun ProfileTextField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    readOnly: Boolean = false,
-    placeholder: String = "",
-    trailingIcon: @Composable (() -> Unit)? = null
-) {
-    Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = LightPrimary
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            readOnly = readOnly,
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF3A2F2A)),
-            cursorBrush = SolidColor(LightPrimary),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp),
-            decorationBox = { innerTextField ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(LightSoftWhite, RoundedCornerShape(12.dp))
-                        .border(
-                            width = 1.dp,
-                            color = LightBorder.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        if (value.isEmpty()) {
-                            Text(
-                                text = placeholder,
-                                color = Color.LightGray,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                        innerTextField()
-                    }
-
-                    if (trailingIcon != null) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        trailingIcon()
-                    }
-                }
-            }
         )
     }
 }

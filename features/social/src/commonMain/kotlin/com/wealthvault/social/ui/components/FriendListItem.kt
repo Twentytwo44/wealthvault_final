@@ -21,8 +21,8 @@ import com.wealthvault.core.generated.resources.ic_nav_profile
 import com.wealthvault.core.generated.resources.ic_social_crown
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.`user-api`.model.FriendData
-import com.wealthvault.group_api.model.GroupMemberItem // 🌟 1. Import ตัวนี้เพิ่มเข้ามา
+import com.wealthvault.domain.profile.FriendData
+import com.wealthvault.domain.social.GroupMember
 import org.jetbrains.compose.resources.painterResource
 
 // =======================================================
@@ -40,11 +40,11 @@ fun FriendListItem(
 }
 
 // =======================================================
-// 🌟 2. สำหรับใช้ใน "หน้ากลุ่ม" (รับ GroupMemberItem เพิ่มเข้ามาใหม่)
+// 🌟 2. สำหรับใช้ใน "หน้ากลุ่ม"
 // =======================================================
 @Composable
 fun FriendListItem(
-    member: GroupMemberItem,
+    member: GroupMember,
     isLeader: Boolean = false,
     onClick: () -> Unit
 ) {

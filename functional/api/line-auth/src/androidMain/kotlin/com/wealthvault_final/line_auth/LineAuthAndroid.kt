@@ -1,4 +1,4 @@
-package com.wealthvault_final.line_auth
+package com.wealthvault.line_auth
 
 import android.content.Context
 import android.content.Intent

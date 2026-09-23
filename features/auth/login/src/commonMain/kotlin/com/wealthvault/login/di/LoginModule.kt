@@ -1,10 +1,4 @@
 package com.wealthvault.login.di
-import com.wealthvault.login.data.AuthNetworkDataSource
-import com.wealthvault.login.data.AuthRepositoryImpl
-import com.wealthvault.login.data.device.RegisterDeviceDataSource
-import com.wealthvault.login.data.device.RegisterDeviceRepositoryImpl
-import com.wealthvault.login.data.google.GoogleNetworkDataSource
-import com.wealthvault.login.data.google.GoogleRepositoryImpl
 import com.wealthvault.login.ui.LoginScreenModel
 import com.wealthvault.login.usecase.LoginUseCase
 import org.koin.dsl.module
@@ -12,26 +6,9 @@ import org.koin.dsl.module
 object LoginModule {
     val allModules = module {
 
-        factory { AuthNetworkDataSource(get()) }
+        factory { LoginUseCase(get(), get(), get()) }
 
-        single<AuthRepositoryImpl> {
-            AuthRepositoryImpl(
-                networkDataSource = get(),
-                localDataSource = get()
-            )
-        }
-        factory { LoginUseCase(get(),get(),get() )}
+        factory { LoginScreenModel(get(), get(), get(), get()) }
 
-        factory { LoginScreenModel(get(),get(),get(),get(),get(),get(),get()) }
-
-        factory { RegisterDeviceDataSource(get()) }
-        single<RegisterDeviceRepositoryImpl>{
-            RegisterDeviceRepositoryImpl(get())
-        }
-
-        factory { GoogleNetworkDataSource(get()) }
-        single<GoogleRepositoryImpl>{
-            GoogleRepositoryImpl(get(),get())
-        }
     }
 }

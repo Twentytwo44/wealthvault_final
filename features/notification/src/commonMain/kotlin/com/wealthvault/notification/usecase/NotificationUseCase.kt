@@ -1,39 +1,26 @@
 package com.wealthvault.notification.usecase
 
-import com.wealthvault.core.FlowResult
-import com.wealthvault.core.FlowUseCase
-import com.wealthvault.notification.data.notification.NotificationRepositoryImpl
-import com.wealthvault.notification_api.model.NotificationData
+import com.wealthvault.core.AppUseCase
+import com.wealthvault.core.architecture.AppResult
+import com.wealthvault.core.architecture.toThrowable
+import com.wealthvault.domain.notification.NotificationRepository
+import com.wealthvault.domain.notification.NotificationSnapshot
+import com.wealthvault.core.observability.AppLogger
+import com.wealthvault.core.observability.NoOpAppLogger
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
 
 class NotificationUseCase(
-    private val notificationRepository: NotificationRepositoryImpl,
-    dispatcher: CoroutineDispatcher
-): FlowUseCase<Unit, List<NotificationData>>(dispatcher) {
+    private val notificationRepository: NotificationRepository,
+    dispatcher: CoroutineDispatcher,
+    private val logger: AppLogger = NoOpAppLogger,
+): AppUseCase<Unit, NotificationSnapshot>(dispatcher) {
 
-    // 💡 หมายเหตุ: ถ้า FlowUseCase ของคุณบังคับให้รับ parameter ด้วย อย่าลืมใส่เป็น execute(parameters: Unit) นะครับ
-    override fun execute(parameters: Unit): Flow<FlowResult<List<NotificationData>>> = flow {
-        // 1. เรียก Repository ดึงข้อมูลแจ้งเตือน
+    override suspend fun execute(parameters: Unit): AppResult<NotificationSnapshot> {
         val result = notificationRepository.getNoti()
-
-        result.onSuccess { notifications -> // ✅ แก้ชื่อจาก cash เป็น notifications ให้สื่อความหมาย
-            // ✅ เปลี่ยน Log ให้ตรงกับ UseCase และใช้ .size แทน .name เพราะเป็น List
-            println("✅ [NotificationUseCase] ดึงข้อมูลสำเร็จ จำนวน: ${notifications.size} รายการ")
-
-            // 2. ส่งข้อมูล List<NotificationData> กลับไปให้ UI ผ่าน FlowResult
-            emit(FlowResult.Continue(notifications))
-
-        }.onFailure { exception ->
-            println("❌ [NotificationUseCase] ดึงข้อมูลไม่สำเร็จ: ${exception.message}")
-
-            // 3. ส่ง Error กลับไป
-            emit(FlowResult.Failure(exception))
+        when (result) {
+            is AppResult.Success -> logger.debug("Notification list loaded: ${result.value.value.size} items")
+            is AppResult.Failure -> logger.warn("Notification list request failed", result.error.toThrowable())
         }
-    }.catch { cause ->
-        println("🚨 [NotificationUseCase] เกิดข้อผิดพลาดไม่คาดคิด: ${cause.message}")
-        emit(FlowResult.Failure(cause))
+        return result
     }
 }

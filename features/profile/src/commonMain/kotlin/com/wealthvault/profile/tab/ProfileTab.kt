@@ -9,7 +9,7 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_nav_profile
-import com.wealthvault.main.SharedScreen
+import com.wealthvault.core.navigation.SharedScreen
 import com.wealthvault.profile.ui.ProfileScreen
 import org.jetbrains.compose.resources.painterResource
 

@@ -1,16 +1,17 @@
-package com.wealthvault_final.line_auth
+package com.wealthvault.line_auth
 
 import kotlin.test.Test
+import com.wealthvault.line_auth.model.LineUser
 import kotlin.test.assertEquals
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
+class LineAuthContractTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun lineUserKeepsOptionalTokensOptional() {
+        val user = LineUser(userId = "line-1", displayName = "User")
+
+        assertEquals("line-1", user.userId)
+        assertEquals("User", user.displayName)
+        assertEquals(null, user.accessToken)
+        assertEquals(null, user.idToken)
     }
 }

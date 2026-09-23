@@ -1,36 +1,31 @@
 package com.wealthvault.forgetpassword.usecase
 
-import com.wealthvault.`auth-api`.model.ForgetPasswordRequest
-import com.wealthvault.core.FlowResult
-import com.wealthvault.core.FlowUseCase
-import com.wealthvault.forgetpassword.data.forget.ForgetRepositoryImpl
+import com.wealthvault.domain.auth.PasswordRecoveryRequest
+import com.wealthvault.core.architecture.AppResult
+import com.wealthvault.core.AppUseCase
+import com.wealthvault.core.architecture.toThrowable
+import com.wealthvault.core.observability.AppLogger
+import com.wealthvault.core.observability.NoOpAppLogger
+import com.wealthvault.domain.auth.PasswordRecoveryRepository
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
 
 
 class ForgetUsecase(
-    private val forgetRepository: ForgetRepositoryImpl,
+    private val forgetRepository: PasswordRecoveryRepository,
     // 1. รับ dispatcher เพิ่มเข้ามา
     dispatcher: CoroutineDispatcher,
-): FlowUseCase<ForgetPasswordRequest, Boolean>(dispatcher) { // 2. ส่งต่อให้คลาสแม่
+    private val logger: AppLogger = NoOpAppLogger,
+): AppUseCase<PasswordRecoveryRequest, Unit>(dispatcher) {
 
-    override fun execute(parameters: ForgetPasswordRequest): Flow<FlowResult<Boolean>> = flow {
-        println("🚀 [ForgetUseCase] Send OTP to : ${parameters.email}")
+    suspend fun requestOtp(parameters: PasswordRecoveryRequest): AppResult<Unit> = invoke(parameters)
 
-        val result = forgetRepository.forgetpassword(parameters)
-
-        result.onSuccess {
-            println("✅ [ForgetUseCase] Send OTP Success")
-
-            emit(FlowResult.Continue(true))
-        }.onFailure { exception ->
-            println("❌[ForgetUseCase] Send OTP Failed: ${exception.message}")
-            emit(FlowResult.Failure(exception))
+    override suspend fun execute(parameters: PasswordRecoveryRequest): AppResult<Unit> {
+        logger.debug("Password recovery OTP requested")
+        return forgetRepository.requestOtp(parameters).also { result ->
+            when (result) {
+                is AppResult.Success -> logger.info("Password recovery OTP sent")
+                is AppResult.Failure -> logger.warn("Password recovery OTP failed", result.error.toThrowable())
+            }
         }
-    }.catch { cause ->
-        println("🚨[ForgetUseCase] Unexpected Error: ${cause.message}")
-        emit(FlowResult.Failure(cause))
     }
 }

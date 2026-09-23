@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Session tokens are migrated to Android Keystore-backed encrypted
+    preferences. Exclude both the encrypted store and the legacy DataStore
+    file from Auto Backup so neither a ciphertext blob nor a pre-migration
+    plaintext token can be transferred to another installation.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="wealthvault_secure_session.xml" />
+    <exclude domain="file" path="default.preferences_pb" />
+</full-backup-content>

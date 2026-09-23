@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class FriendResponse(
+internal data class FriendResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -18,12 +18,12 @@ data class FriendResponse(
 
 
 @Serializable
-data class FriendArray(
+internal data class FriendArray(
     @SerialName("friends")
     val friend: List<FriendData>? = null
 )
 @Serializable
-data class FriendData(
+internal data class FriendData(
     @SerialName("id")
     val id: String? = null,
 

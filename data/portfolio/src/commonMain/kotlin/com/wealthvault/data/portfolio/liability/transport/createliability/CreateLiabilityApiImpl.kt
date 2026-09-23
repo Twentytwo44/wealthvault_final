@@ -1,0 +1,51 @@
+package com.wealthvault.data.portfolio.investment.transport.createcash
+
+
+
+import com.wealthvault.config.Config
+import com.wealthvault.domain.portfolio.LiabilityRequest
+import com.wealthvault.data.portfolio.liability.transport.requireDomainData
+import com.wealthvault.data.portfolio.liability.transport.toWire
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+
+class CreateLiabilityApiImpl(private val client: HttpClient) : CreateLiabilityApi {
+    override suspend fun create(request: LiabilityRequest) = client.post("${Config.localhost_android}lia/") {
+            val wireRequest = request.toWire()
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+
+                        append("name", wireRequest.name ?: "")
+                        append("type", wireRequest.type ?: "")
+                        append("creditor", wireRequest.creditor ?: "")
+                        append("principal", wireRequest.principal ?: 0.0)
+                        append("interest_rate", wireRequest.interestRate ?: "")
+                        append("description", wireRequest.description ?: "")
+                        append("started_at", wireRequest.startedAt ?: "")
+                        append("ended_at", wireRequest.endedAt ?: "")
+
+                        wireRequest.files.forEach { fileData ->
+                            append("files", fileData.bytes, Headers.build {
+
+                                // ✅ 1. ใส่ ContentType ตามชนิดไฟล์จริงๆ (image/jpeg หรือ application/pdf)
+                                append(HttpHeaders.ContentType, fileData.mimeType)
+
+                                // ✅ 2. ใส่ชื่อไฟล์ที่มีนามสกุลถูกต้อง (.jpg หรือ .pdf)
+                                append(HttpHeaders.ContentDisposition, "filename=\"${fileData.fileName}\"")
+
+                            })
+                        }
+
+
+                    }
+                )
+            )
+        }.body<com.wealthvault.data.portfolio.liability.transport.model.LiabilityResponse>().requireDomainData()
+}

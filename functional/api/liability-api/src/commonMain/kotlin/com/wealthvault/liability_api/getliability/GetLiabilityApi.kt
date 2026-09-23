@@ -1,9 +1,7 @@
 package com.wealthvault.liability_api.getliability
 
-import com.wealthvault.liability_api.model.GetLiabilityResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.domain.portfolio.GetLiabilityData
 
 interface GetLiabilityApi {
-    @GET("lia")
-    suspend fun getLiability(): GetLiabilityResponse
+    suspend fun getLiability(): List<GetLiabilityData>
 }

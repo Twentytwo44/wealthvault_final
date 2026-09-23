@@ -2,19 +2,14 @@ package com.wealthvault.`user-api`.pendingfriend
 
 import com.wealthvault.`user-api`.model.PendingFriendResponse
 import com.wealthvault.config.Config
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.user_api.requireDomainPendingFriends
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 
-class PendingFriendApiImpl(private val ktorfit: Ktorfit) : PendingFriendApi {
-    override suspend fun pendingFriend(): PendingFriendResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
-
-        // ยิงเองตรงๆ แบบไม่ง้อ Generator
-        return client.get("${Config.localhost_android}friend/pending") {
-            // สำหรับ GET ไม่ต้องใส่ setBody() ครับ
-            // หากต้องการส่งค่าเพิ่ม ให้ใช้ parameter() แทน เช่น parameter("page", 1)
-        }.body()
-    }
+class PendingFriendApiImpl(private val client: HttpClient) : PendingFriendApi {
+    override suspend fun pendingFriend() = client
+        .get("${Config.localhost_android}friend/pending")
+        .body<PendingFriendResponse>()
+        .requireDomainPendingFriends()
 }

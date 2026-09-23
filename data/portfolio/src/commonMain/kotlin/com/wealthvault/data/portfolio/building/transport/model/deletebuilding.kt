@@ -1,0 +1,27 @@
+package com.wealthvault.data.portfolio.building.transport.model
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+
+@Serializable
+internal data class DeleteBuildingResponse(
+    @SerialName("status")
+    val status: String? = null,
+
+    @SerialName("data")
+    val data: DeleteBuildingData? = null,
+
+    @SerialName("error")
+    val error: String? = null
+)
+
+@Serializable
+internal data class DeleteBuildingData(
+    @SerialName("success")
+    val success: String? = null,
+
+
+
+)
+

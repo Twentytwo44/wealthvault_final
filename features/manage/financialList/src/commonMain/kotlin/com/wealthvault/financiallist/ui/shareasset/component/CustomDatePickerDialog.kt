@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.utils.formatThaiDate
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
@@ -32,8 +32,8 @@ fun CustomDatePickerDialog(
                     val millis = datePickerState.selectedDateMillis
                     if (millis != null) {
                         val localDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC)
-                        val day = localDate.dayOfMonth.toString().padStart(2, '0')
-                        val month = localDate.monthNumber.toString().padStart(2, '0')
+                        val day = localDate.day.toString().padStart(2, '0')
+                        val month = (localDate.month.ordinal + 1).toString().padStart(2, '0')
                         val engYear = localDate.year.toString()
 
                         val apiDateStr = "$engYear-$month-$day"

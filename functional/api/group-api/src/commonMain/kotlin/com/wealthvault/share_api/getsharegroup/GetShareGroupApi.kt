@@ -1,11 +1,8 @@
 package com.wealthvault.share_api.getsharegroup
 
-import com.wealthvault.share_api.model.ShareGroupResponse
-import de.jensklingenberg.ktorfit.http.GET
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.social.ShareGroup
 
 interface GetShareGroupApi {
-    @GET("group/{id}/item/")
-    suspend fun getShareGroup(@Path("id") id: String): ShareGroupResponse
+    suspend fun getShareGroup(id: String): List<ShareGroup>
 
 }

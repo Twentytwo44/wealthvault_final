@@ -5,11 +5,11 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class RefreshRequest(
+internal data class RefreshRequest(
     val refreshtoken : String
 )
 @Serializable
-data class RefreshResponse(
+internal data class RefreshResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -21,7 +21,7 @@ data class RefreshResponse(
 )
 
 @Serializable
-data class RefreshData(
+internal data class RefreshData(
     @SerialName("success")
     val success: Boolean,
 

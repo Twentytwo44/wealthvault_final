@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class ItemShareTargetsResponse(
+internal data class ItemShareTargetsResponse(
     @SerialName("groups")
     val groups: List<GroupDataList>? = null,
 
@@ -20,7 +20,7 @@ data class ItemShareTargetsResponse(
 )
 
 @Serializable
-data class GroupDataList(
+internal data class GroupDataList(
     @SerialName("group_id")
     val groupId: String? = null,
 
@@ -38,7 +38,7 @@ data class GroupDataList(
 )
 
 @Serializable
-data class FriendDataList(
+internal data class FriendDataList(
     @SerialName("friend_id")
     val friendId: String? = null,
 
@@ -53,7 +53,7 @@ data class FriendDataList(
 )
 
 @Serializable
-data class EmailDataList(
+internal data class EmailDataList(
     @SerialName("email")
     val email: String? = null,
 

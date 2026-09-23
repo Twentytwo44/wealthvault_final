@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class DeleteLandResponse(
+internal data class DeleteLandResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -17,12 +17,11 @@ data class DeleteLandResponse(
 )
 
 @Serializable
-data class DeleteLandData(
+internal data class DeleteLandData(
     @SerialName("success")
     val success: String? = null,
 
 
 
 )
-
 

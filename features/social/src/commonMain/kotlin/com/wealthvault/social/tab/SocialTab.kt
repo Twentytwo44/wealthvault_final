@@ -6,8 +6,9 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_nav_social
-import com.wealthvault.main.SharedScreen
+import com.wealthvault.core.navigation.SharedScreen
 import com.wealthvault.social.ui.SocialScreen
+import com.wealthvault.social.ui.main_social.add_friend.AddFriendScreen
 import org.jetbrains.compose.resources.painterResource
 
 object SocialTab : Tab {
@@ -29,4 +30,5 @@ object SocialTab : Tab {
 
 val socialTabModule = screenModule {
     register<SharedScreen.SocialTab> { SocialTab }
+    register<SharedScreen.AddFriend> { AddFriendScreen() }
 }

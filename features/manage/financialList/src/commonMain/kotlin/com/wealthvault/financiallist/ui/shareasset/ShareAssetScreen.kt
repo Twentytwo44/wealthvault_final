@@ -41,7 +41,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -57,13 +56,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.wealthvault.core.architecture.AppError
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.generated.resources.ic_common_plus
@@ -117,22 +114,11 @@ data class ShareAssetScreen(val type: String, val id: String) : Screen {
         val screenModel = getScreenModel<ShareScreenModel>()
         val friendState by screenModel.friendState.collectAsStateWithLifecycle()
         val groupState by screenModel.groupState.collectAsStateWithLifecycle()
+        val emailState by screenModel.emailState.collectAsStateWithLifecycle()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
-        // 🌟 1. ดึง Lifecycle มาใช้งาน
-        val lifecycleOwner = LocalLifecycleOwner.current
-
-        // 🌟 2. ใช้ ON_RESUME เพื่อให้รายชื่อเพื่อน/กลุ่มที่แชร์อยู่ อัปเดตล่าสุดเสมอ
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    println("🔄 ShareAssetScreen ตื่นแล้ว! โหลดข้อมูลตั้งต้นใหม่...")
-                    screenModel.initData(id, type)
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
+        LaunchedEffect(id, type) {
+            screenModel.initData(id, type)
         }
 
         ShareAssetContent(
@@ -156,238 +142,11 @@ data class ShareAssetScreen(val type: String, val id: String) : Screen {
                 )
             },
             friendData = friendState,
-            groupData = groupState
+            groupData = groupState,
+            emailData = emailState,
+            isLoading = uiState.isLoading,
+            error = uiState.error,
+            onRetryClick = { screenModel.initData(id, type) },
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ShareAssetContent(
-    onBackClick: () -> Unit = {},
-    onPrepareUnshare: (ShareInfo, (ShareInfo) -> Unit) -> Unit = { _, _ -> },
-    onNextClick: (ShareTo, List<ShareInfo>) -> Unit = { _, _ -> },
-    friendData: List<FriendTargetModel> = emptyList(),
-    groupData: List<GroupTargetModel> = emptyList(),
-) {
-    val selectedFriends = remember { mutableStateListOf<ShareInfo>() }
-    val selectedEmails = remember { mutableStateListOf<ShareInfo>() }
-    val itemsToUnshare = remember { mutableStateListOf<ShareInfo>() }
-
-    LaunchedEffect(friendData, groupData) {
-        val preSelected = mutableListOf<ShareInfo>()
-
-        friendData.filter { it.isShared }.forEach { friend ->
-            preSelected.add(
-                ShareInfo(
-                    name = friend.friendName,
-                    userId = friend.friendId,
-                    typeData = "F",
-                    subText = friend.email ?: "", // กันค่า null
-                    profileUrl = friend.profile,
-                    isShared = true,
-                    date = friend.sharedAt
-                )
-            )
-        }
-
-        groupData.filter { it.isShared }.forEach { group ->
-            preSelected.add(
-                ShareInfo(
-                    name = group.groupName,
-                    userId = group.groupId,
-                    typeData = "G",
-                    subText = "${group.memberCount}",
-                    profileUrl = group.groupProfile,
-                    isShared = true,
-                    date = group.sharedAt
-                )
-            )
-        }
-
-        preSelected.forEach { item ->
-            if (selectedFriends.none { it.userId == item.userId }) selectedFriends.add(item)
-        }
-    }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var showEmailSheet by remember { mutableStateOf(false) }
-    var showEmailInfoTooltip by remember { mutableStateOf(false) }
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = LightBg,
-        topBar = {
-            Column(modifier = Modifier.statusBarsPadding()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp, top = 20.dp)
-                ) {
-                    Icon(painterResource(Res.drawable.ic_common_back), null, tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onBackClick() })
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text("แชร์ทรัพย์สิน", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
-                        Text("คุณต้องการให้ใครเห็นทรัพย์สินนี้บ้าง?", style = MaterialTheme.typography.bodyMedium, color = LightPrimary.copy(alpha = 0.7f))
-                    }
-                }
-            }
-        },
-        bottomBar = {
-            Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
-                Button(
-                    onClick = {
-                        val dataToSend = ShareTo(
-                            friend = selectedFriends.filter { it.typeData == "F" },
-                            email = selectedEmails.toList(),
-                            group = selectedFriends.filter { it.typeData == "G" },
-                        )
-                        onNextClick(dataToSend, itemsToUnshare.toList())
-                    },
-                    modifier = Modifier.fillMaxWidth().height(46.dp), // 🌟 ปรับสูง 46.dp
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
-                ) {
-                    Text("ยืนยัน", color = Color.White, style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-        }
-    ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp)) {
-
-            SectionHeader(title = "เลือกเพื่อนหรือกลุ่มที่ต้องการแชร์", onAddClick = { showBottomSheet = true })
-
-            Card(
-                modifier = Modifier.fillMaxWidth().height(260.dp),
-                shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, LightBorder.copy(0.5f)),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-            ) {
-                if (selectedFriends.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("ยังไม่ได้เลือกเพื่อนหรือกลุ่ม", color = Color.Gray.copy(0.6f), style = MaterialTheme.typography.bodyMedium)
-                    }
-                } else {
-                    LazyColumn(modifier = Modifier.padding(12.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(selectedFriends) { friend ->
-                            ShareItemWithDelete(data = friend, onDelete = {
-                                if (friend.isShared == true) onPrepareUnshare(friend) { itemsToUnshare.add(it) }
-                                selectedFriends.remove(friend)
-                            })
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Column {
-                    SectionHeader(
-                        title = "แชร์ให้คนที่ไม่มีบัญชี",
-                        showInfo = true,
-                        onInfoClick = { showEmailInfoTooltip = !showEmailInfoTooltip },
-                        onAddClick = { showEmailSheet = true }
-                    )
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth().height(200.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        border = BorderStroke(1.dp, LightBorder.copy(0.5f)),
-                        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-                    ) {
-                        if (selectedEmails.isEmpty()) {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("ยังไม่มีการเพิ่มอีเมล", color = Color.Gray.copy(0.6f), style = MaterialTheme.typography.bodyMedium)
-                            }
-                        } else {
-                            LazyColumn(modifier = Modifier.padding(12.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                items(selectedEmails) { email ->
-                                    ShareItemWithDelete(data = email, onDelete = {
-                                        if (email.isShared == true) itemsToUnshare.add(email)
-                                        selectedEmails.remove(email)
-                                    })
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 🌟 Tooltip: ย้ายมาไว้นอก Column แต่อยู่ใน Box เดียวกัน
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = showEmailInfoTooltip,
-                    enter = fadeIn() + scaleIn(),
-                    exit = fadeOut() + scaleOut(),
-                    modifier = Modifier
-                        .align(Alignment.TopCenter) // ตอนนี้จะใช้ TopCenter ได้แล้วเพราะอยู่ใน Box
-                        .zIndex(5f)
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .offset(y = 42.dp)
-                            .shadow(12.dp, RoundedCornerShape(16.dp)),
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color.White,
-                        border = BorderStroke(1.dp, LightPrimary.copy(alpha = 0.1f))
-                    ) {
-                        Row(
-                            modifier = Modifier.clickable { showEmailInfoTooltip = false }.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Default.Info, null, tint = LightPrimary, modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "หากผู้รับยังไม่มีบัญชี Wealth & Vault ระบบจะส่งคำเชิญให้ผ่านอีเมลเพื่อให้เข้าถึงข้อมูลนี้ได้",
-                                color = LightText.copy(0.8f),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // --- Sheets ---
-        if (showBottomSheet) {
-            ModalBottomSheet(onDismissRequest = { showBottomSheet = false }, sheetState = sheetState, containerColor = LightBg) {
-                FriendSelectionList(
-                    alreadySelected = selectedFriends.toList(), friendData = friendData, groupData = groupData,
-                    onConfirm = { items ->
-                        val newItems = items.filter { newItem -> selectedFriends.none { it.userId == newItem.userId } }
-                        selectedFriends.addAll(newItems)
-                        scope.launch { sheetState.hide() }.invokeOnCompletion { if (!sheetState.isVisible) showBottomSheet = false }
-                    }
-                )
-            }
-        }
-
-        if (showEmailSheet) {
-            ModalBottomSheet(onDismissRequest = { showEmailSheet = false }, containerColor = LightBg) {
-                AddEmailContent(
-                    onConfirm = { email, date, apiDate ->
-                        if (email.isNotBlank() && !selectedEmails.any { it.userId == email }) {
-                            selectedEmails.add(ShareInfo(name = email, userId = email, date = date, apiDate = apiDate, typeData = "E", subText = email))
-                        }
-                        showEmailSheet = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SectionHeader(title: String, showInfo: Boolean = false, onInfoClick: () -> Unit = {}, onAddClick: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().height(48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(title, color = LightPrimary, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-            if (showInfo) {
-                Spacer(modifier = Modifier.width(6.dp))
-                Icon(Icons.Default.Info, null, modifier = Modifier.size(20.dp).clickable { onInfoClick() }, tint = LightPrimary.copy(alpha = 0.6f))
-            }
-        }
-        IconButton(onClick = onAddClick) { Icon(painterResource(Res.drawable.ic_common_plus), null, tint = LightPrimary, modifier = Modifier.size(24.dp)) }
     }
 }

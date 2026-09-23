@@ -2,7 +2,8 @@ package com.wealthvault.group_api.creategroup
 
 import com.wealthvault.config.Config
 import com.wealthvault.group_api.model.GroupResponse
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.group_api.requireDomainResult
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -11,14 +12,12 @@ import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 
-class CreateGroupApiImpl(private val ktorfit: Ktorfit) : CreateGroupApi {
+class CreateGroupApiImpl(private val client: HttpClient) : CreateGroupApi {
     override suspend fun createGroup(
         groupName: String,
         memberIds: List<String>,
         imageBytes: ByteArray?
-    ): GroupResponse {
-        val client = ktorfit.httpClient
-
+    ): com.wealthvault.domain.social.GroupResult {
         // 🌟 เช็ค Endpoint ให้ชัวร์นะครับ (ใน Postman คือ /api/group)
         return client.post("${Config.localhost_android}group/") {
             setBody(
@@ -42,6 +41,6 @@ class CreateGroupApiImpl(private val ktorfit: Ktorfit) : CreateGroupApi {
                     }
                 )
             )
-        }.body()
+        }.body<GroupResponse>().requireDomainResult()
     }
 }

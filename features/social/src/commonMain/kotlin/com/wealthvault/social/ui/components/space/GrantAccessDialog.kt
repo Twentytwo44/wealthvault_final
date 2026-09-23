@@ -50,8 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.share_api.model.ShareGroupData
-import com.wealthvault.social.data.SocialRepositoryImpl
+import com.wealthvault.domain.social.ShareGroup
+import com.wealthvault.domain.social.SocialRepository
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import com.wealthvault.core.generated.resources.Res
@@ -67,7 +67,7 @@ import com.wealthvault.core.generated.resources.ic_form_check
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightSoftWhite
 import org.jetbrains.compose.resources.painterResource
-import com.wealthvault.data_store.TokenStore // 🌟 เปลี่ยนมา import ตัวนี้แทน
+import com.wealthvault.domain.auth.SessionManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 
@@ -83,12 +83,12 @@ fun InlineGrantAccessCard(
     targetName: String,
     targetUserId: String,
     themeColor: Color,
-    repository: SocialRepositoryImpl = koinInject(),
-    tokenStore: TokenStore = koinInject(), // 🌟 2. Inject TokenManager เข้ามา
+    repository: SocialRepository = koinInject(),
+    sessionManager: SessionManager = koinInject(),
     onSaveSuccess: (List<String>) -> Unit
 ) {
     var isLoading by remember { mutableStateOf(true) }
-    var assetList by remember { mutableStateOf<List<ShareGroupData>>(emptyList()) }
+    var assetList by remember { mutableStateOf<List<ShareGroup>>(emptyList()) }
     val selectedAssets = remember { mutableStateListOf<String>() }
 
     val scrollState = rememberScrollState()
@@ -98,7 +98,7 @@ fun InlineGrantAccessCard(
 
         // 🌟 อ่านค่า User ID จาก TokenStore
         // เนื่องจาก TokenStore มักเก็บค่าเป็น Flow เราจะใช้ .first() เพื่อเอาค่าล่าสุดมาตัวเดียว
-        val currentUserId = tokenStore.getUserId.firstOrNull()
+        val currentUserId = sessionManager.getUserId.firstOrNull()
 
         val result = repository.getShareGroupItems(groupId)
         val allItems = result.getOrNull() ?: emptyList()

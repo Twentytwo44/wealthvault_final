@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -43,14 +44,13 @@ import com.wealthvault.core.generated.resources.ic_common_calendar
 import com.wealthvault.core.theme.*
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
-import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
-import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
-import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
-import com.wealthvault_final.`financial-obligations`.model.LiabilityModel
-import com.wealthvault_final.`financial-obligations`.ui.liability.LiabilityInputForm
-import com.wealthvault_final.`financial-obligations`.ui.liability.viewmodel.LiabilityScreenModel
-import kotlinx.datetime.Instant
+import com.wealthvault.core.model.Attachment
+import com.wealthvault.financiallist.ui.form.*
+import com.wealthvault.domain.portfolio.LiabilityModel
+import com.wealthvault.core.model.Money
+import com.wealthvault.financiallist.ui.form.FormErrorBanner
+import com.wealthvault.financiallist.ui.form.formErrorMessage
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
@@ -60,11 +60,13 @@ class LiabilityFormScreen(val id:String,val debtData: LiabilityModel) : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<com.wealthvault.financiallist.ui.debt.form.debt.LiabilityScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
         LiabilityInputForm(
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
             onBackClick = { navigator.pop() } ,
             onNextClick = { data,addedList,deletedList ->
-                println("data asset input: ${data.attachments}")
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList,deletedList)
                 screenModel.submitLiability(id,
@@ -78,16 +80,58 @@ class LiabilityFormScreen(val id:String,val debtData: LiabilityModel) : Screen {
     }
 }
 
+data object CreateLiabilityFormScreen : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val screenModel = getScreenModel<LiabilityScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
+        val initialData = remember {
+            LiabilityModel(
+                type = "LIABILITY_TYPE_LOAN",
+                name = "",
+                principal = Money(0),
+                interestRate = "",
+                description = "",
+                startedAt = "",
+                endedAt = "",
+                creditor = "",
+                attachments = emptyList(),
+            )
+        }
+
+        LiabilityInputForm(
+            debtData = initialData,
+            title = "ข้อมูลหนี้สิน",
+            submitLabel = "ต่อไป",
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
+            onBackClick = { navigator.pop() },
+            onNextClick = { data, addedList, deletedList ->
+                screenModel.updateForm(data)
+                screenModel.updateAttachment(addedList, deletedList)
+                screenModel.submitCreate { id ->
+                    navigator.push(com.wealthvault.financiallist.ui.shareasset.ShareAssetScreen("liability", id))
+                }
+            },
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiabilityInputForm(
     onBackClick: () -> Unit = {},
     onNextClick: (LiabilityModel, List<Attachment>, List<Attachment>) -> Unit,
-    debtData: LiabilityModel
+    debtData: LiabilityModel,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    title: String = "แก้ไขข้อมูลหนี้สิน",
+    submitLabel: String = "ยืนยันการแก้ไข",
 ) {
     // 🌟 1. State เริ่มต้นจากข้อมูลเก่า (Support Edit Mode)
     var name by remember { mutableStateOf(debtData.name) }
-    var principal by remember { mutableStateOf(if (debtData.principal == 0.0) "" else debtData.principal.toString()) }
+    var principal by remember { mutableStateOf(if (debtData.principal.minorUnits == 0L) "" else debtData.principal.decimalString()) }
     var interestRate by remember { mutableStateOf(debtData.interestRate) }
     var creditor by remember { mutableStateOf(debtData.creditor) }
     var description by remember { mutableStateOf(debtData.description) }
@@ -108,7 +152,7 @@ fun LiabilityInputForm(
     val currentAssets = remember { mutableStateListOf<Attachment>().apply { addAll(debtData.attachments) } }
     val filePicker = rememberFilePicker { newFiles -> currentAssets.addAll(newFiles) }
 
-    val isFormValid = name.isNotBlank() && principal.isNotBlank() && apiStartedAt.isNotBlank()
+    val isFormValid = name.isNotBlank() && Money.fromDecimal(principal) != null && apiStartedAt.isNotBlank()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -125,7 +169,7 @@ fun LiabilityInputForm(
                         modifier = Modifier.size(24.dp).clickable { onBackClick() }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(text = "แก้ไขข้อมูลหนี้สิน", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
+                    Text(text = title, style = MaterialTheme.typography.titleLarge, color = LightPrimary)
                 }
             }
         },
@@ -135,7 +179,7 @@ fun LiabilityInputForm(
                     onClick = {
                         val data = LiabilityModel(
                             name = name, type = "LIABILITY_TYPE_LOAN",
-                            principal = principal.toDoubleOrNull() ?: 0.0,
+                            principal = Money.fromDecimal(principal) ?: Money(0),
                             interestRate = interestRate, startedAt = apiStartedAt,
                             endedAt = apiEndedAt, creditor = creditor,
                             description = description, attachments = currentAssets.toList()
@@ -148,9 +192,9 @@ fun LiabilityInputForm(
                     modifier = Modifier.fillMaxWidth().height(46.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = isFormValid
+                    enabled = isFormValid && !isLoading
                 ) {
-                    Text("ยืนยันการแก้ไข", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                    Text(if (isLoading) "กำลังบันทึก..." else submitLabel, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                 }
             }
         }
@@ -158,25 +202,26 @@ fun LiabilityInputForm(
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp).verticalScroll(rememberScrollState())
         ) {
+            FormErrorBanner(errorMessage)
             AssetTextField(value = name, onValueChange = { name = it }, label = "ชื่อรายการ*", placeholder = "กรอกชื่อรายการ")
 
-            com.wealthvault_final.`financial-obligations`.ui.liability.CustomTextField(
+            CustomTextField(
                 value = principal, onValueChange = { if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) principal = it },
                 label = "จำนวนเงิน*", placeholder = "0.00", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            com.wealthvault_final.`financial-obligations`.ui.liability.CustomTextField(
+            CustomTextField(
                 value = interestRate, onValueChange = { if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) interestRate = it },
                 label = "ดอกเบี้ยต่อปี (%)", placeholder = "0.00", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            com.wealthvault_final.`financial-obligations`.ui.liability.CustomTextField(
+            CustomTextField(
                 value = startedAtDisplay, onValueChange = { }, label = "วันที่เริ่มสัญญา*", placeholder = "เลือกวันที่", readOnly = true,
                 trailingIcon = { Icon(painterResource(Res.drawable.ic_common_calendar), null, tint = LightPrimary, modifier = Modifier.size(24.dp)) },
                 onClick = { showStartDatePicker = true }
             )
 
-            com.wealthvault_final.`financial-obligations`.ui.liability.CustomTextField(
+            CustomTextField(
                 value = endedAtDisplay, onValueChange = { }, label = "วันที่สิ้นสุดสัญญา", placeholder = "เลือกวันที่", readOnly = true,
                 trailingIcon = { Icon(painterResource(Res.drawable.ic_common_calendar), null, tint = LightPrimary, modifier = Modifier.size(24.dp)) },
                 onClick = { showEndDatePicker = true }
@@ -201,7 +246,7 @@ fun LiabilityInputForm(
                     TextButton(onClick = {
                         startDatePickerState.selectedDateMillis?.let { millis ->
                             val localDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC)
-                            apiStartedAt = "${localDate.year}-${localDate.monthNumber.toString().padStart(2, '0')}-${localDate.dayOfMonth.toString().padStart(2, '0')}"
+                            apiStartedAt = "${localDate.year}-${(localDate.month.ordinal + 1).toString().padStart(2, '0')}-${localDate.day.toString().padStart(2, '0')}"
                             startedAtDisplay = formatThaiDate(apiStartedAt)
                         }
                         showStartDatePicker = false
@@ -218,7 +263,7 @@ fun LiabilityInputForm(
                     TextButton(onClick = {
                         endDatePickerState.selectedDateMillis?.let { millis ->
                             val localDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC)
-                            apiEndedAt = "${localDate.year}-${localDate.monthNumber.toString().padStart(2, '0')}-${localDate.dayOfMonth.toString().padStart(2, '0')}"
+                            apiEndedAt = "${localDate.year}-${(localDate.month.ordinal + 1).toString().padStart(2, '0')}-${localDate.day.toString().padStart(2, '0')}"
                             endedAtDisplay = formatThaiDate(apiEndedAt)
                         }
                         showEndDatePicker = false

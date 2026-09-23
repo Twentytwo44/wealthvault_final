@@ -1,16 +1,16 @@
 package com.wealthvault.dashboard
 
 import kotlin.test.Test
+import com.wealthvault.core.architecture.CacheFreshness
 import kotlin.test.assertEquals
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
+class DashboardStateContractTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun defaultStateIsEmptyAndFresh() {
+        val state = com.wealthvault.dashboard.ui.DashboardUiState()
+
+        assertEquals(null, state.data)
+        assertEquals(false, state.isLoading)
+        assertEquals(CacheFreshness.Fresh, state.freshness)
     }
 }

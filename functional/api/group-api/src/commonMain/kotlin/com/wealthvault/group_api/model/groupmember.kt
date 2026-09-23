@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GroupMemberResponse(
+internal data class GroupMemberResponse(
     @SerialName("status") val status: String? = null,
     // 🌟 เปลี่ยน data มารับเป็น Wrapper object ตามโครงสร้าง JSON
     @SerialName("data") val data: GroupMemberDataWrapper? = null,
@@ -13,14 +13,14 @@ data class GroupMemberResponse(
 
 // 🌟 สร้าง Wrapper มารับค่า members และ total
 @Serializable
-data class GroupMemberDataWrapper(
+internal data class GroupMemberDataWrapper(
     @SerialName("members") val members: List<GroupMemberItem> = emptyList(),
     @SerialName("total") val total: Int? = null
 )
 
 // 🌟 นี่คือข้อมูลของคน (สมาชิก) จริงๆ ตามที่ JSON ส่งมา
 @Serializable
-data class GroupMemberItem(
+internal data class GroupMemberItem(
     @SerialName("id") val id: String? = null,
     @SerialName("username") val username: String? = null,
     @SerialName("email") val email: String? = null,

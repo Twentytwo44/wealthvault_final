@@ -1,106 +1,62 @@
 package com.wealthvault.profile.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import com.wealthvault.core.generated.resources.Res
-import com.wealthvault.core.generated.resources.ic_common_back
-import com.wealthvault.core.generated.resources.ic_common_plus
-import com.wealthvault.core.theme.LightBg
-import com.wealthvault.core.theme.LightBorder
+import com.wealthvault.core.architecture.AppError
 import com.wealthvault.core.theme.LightMuted
-import com.wealthvault.core.theme.LightPrimary
-import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.LightText
 import com.wealthvault.core.theme.RedErr
 import com.wealthvault.core.utils.LocalRootNavigator
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.profile.ui.components.ClosePersonItem
 import com.wealthvault.profile.ui.components.SelectPersonItem
-import com.wealthvault.`user-api`.model.CloseFriendData
-import com.wealthvault.`user-api`.model.FriendData
-import com.wealthvault.`user-api`.model.UserData
+import com.wealthvault.domain.profile.CloseFriendData
+import com.wealthvault.domain.profile.FriendData
+import com.wealthvault.domain.profile.UserData
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.painterResource
 
 class ShareSettingScreen : Screen {
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<ShareSettingScreenModel>()
         val rootNavigator = LocalRootNavigator.current
-        val lifecycleOwner = LocalLifecycleOwner.current
-
         // 🌟 ดึงค่า Loading มาจาก ScreenModel
         val isLoading by screenModel.isLoading.collectAsStateWithLifecycle()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    println("🔄 ShareSettingScreen ตื่นแล้ว! สั่งโหลดข้อมูลผู้ใช้และเพื่อนสนิทแบบต่อคิว...")
-                    // 🌟 ใช้ฟังก์ชันที่รวมร่างแล้ว
-                    screenModel.fetchShareSettingData()
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
+        LaunchedEffect(screenModel) {
+            screenModel.fetchShareSettingData()
         }
 
         val userData by screenModel.userState.collectAsStateWithLifecycle()
@@ -112,7 +68,9 @@ class ShareSettingScreen : Screen {
             closeFriends = closeFriends,
             allFriends = allFriends,
             isLoading = isLoading, // 🌟 ส่งสถานะลงไปให้ UI วาด
+            error = uiState.error,
             onBackClick = { rootNavigator.pop() },
+            onRetryClick = { screenModel.fetchShareSettingData() },
             onSettingsChanged = { newEnabled, newAge ->
                 screenModel.updateShareSettings(newEnabled, newAge)
             },
@@ -136,7 +94,9 @@ fun ShareSettingContent(
     closeFriends: List<CloseFriendData>,
     allFriends: List<FriendData>,
     isLoading: Boolean, // 🌟 รับสถานะ Loading ตรงนี้
+    error: AppError?,
     onBackClick: () -> Unit,
+    onRetryClick: () -> Unit,
     onSettingsChanged: (Boolean, Int) -> Unit,
     onRemoveFriend: (String) -> Unit,
     onAddFriends: (List<String>) -> Unit,
@@ -169,158 +129,33 @@ fun ShareSettingContent(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(LightBg)
-            .statusBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 24.dp)
-    ) {
-        // --- Header ---
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 32.dp)
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_common_back),
-                contentDescription = "Back",
-                tint = themeColor,
-                modifier = Modifier.size(24.dp).clickable { onBackClick() }
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "ตั้งค่าการแชร์ทรัพย์สิน", style = MaterialTheme.typography.titleLarge, color = themeColor)
-        }
-
-        // 🌟 ถ้าระบบกำลังโหลด (isLoading) ให้โชว์วงกลมหมุนๆ แล้ว Return ออกไปเลย
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = themeColor)
-            }
-            return
-        }
-
-        // 🌟 ถ้าโหลดเสร็จแต่ได้ค่า Null มา (พังจริงๆ) ก็โชว์แบบเดิม
-        if (userData == null) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("ไม่สามารถโหลดข้อมูลได้", color = Color.Gray)
-            }
-            return
-        }
-
-        // --- Toggle Switch ---
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "แชร์ทรัพย์สินทั้งหมดให้คนใกล้ชิดตามกำหนด",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF3A2F2A),
-                modifier = Modifier.weight(1f)
-            )
-            Switch(
-                checked = isSharingEnabled,
-                onCheckedChange = { newValue ->
-                    isSharingEnabled = newValue
-                    val finalAge = sharedAgeText.toIntOrNull() ?: 0
-                    onSettingsChanged(newValue, finalAge)
-                },
-                thumbContent = { },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = LightSoftWhite,
-                    checkedTrackColor = LightPrimary,
-                    uncheckedThumbColor = LightSoftWhite,
-                    uncheckedTrackColor = Color(0xFFE8DDD7),
-                    uncheckedBorderColor = Color.Transparent
-                )
-            )
-        }
-
-        // --- Age Setting ---
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "เปิดให้เห็นทรัพย์สินเมื่อถึงอายุ", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A2F2A))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                BasicTextField(
-                    value = sharedAgeText,
-                    onValueChange = { if (it.all { char -> char.isDigit() }) sharedAgeText = it },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center, color = Color(0xFF3A2F2A)),
-                    cursorBrush = SolidColor(themeColor),
-                    modifier = Modifier
-                        .width(70.dp)
-                        .height(44.dp), // ล็อกความสูง
-                    decorationBox = { innerTextField ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(LightSoftWhite, RoundedCornerShape(12.dp))
-                                .border(1.dp, LightBorder, RoundedCornerShape(12.dp)),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically // ตัวหนังสือไม่จม
-                        ) {
-                            innerTextField()
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "ปี", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-            }
-        }
-
-        // --- Close People List Header ---
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "คนใกล้ชิด", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A2F2A))
-            Icon(
-                painter = painterResource(Res.drawable.ic_common_plus),
-                contentDescription = "Add",
-                tint = themeColor,
-                modifier = Modifier.size(24.dp)
-                    .clickable {
-                        onPlusClick()
-                        showSheet = true
-                    }
-            )
-        }
-
-        // --- รายการคนใกล้ชิด ---
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            if (closeFriends.isEmpty()) {
-                item {
-                    Text(
-                        text = "ยังไม่มีคนใกล้ชิด",
-                        color = Color.Gray,
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
-                    )
-                }
-            } else {
-                items(closeFriends) { friend ->
-                    ClosePersonItem(
-                        friend = friend,
-                        showDelete = true,
-                        isEnabled = true,
-                        onDeleteClick = {
-                            friendToDelete = friend
-                            showDeleteDialog = true
-                        }
-                    )
-                }
-            }
-        }
-    }
+    ShareSettingBody(
+        userData = userData,
+        closeFriends = closeFriends,
+        isLoading = isLoading,
+        error = error,
+        themeColor = themeColor,
+        isSharingEnabled = isSharingEnabled,
+        sharedAgeText = sharedAgeText,
+        onBackClick = onBackClick,
+        onRetryClick = onRetryClick,
+        onSharingEnabledChange = { newValue ->
+            isSharingEnabled = newValue
+            val finalAge = sharedAgeText.toIntOrNull() ?: 0
+            onSettingsChanged(newValue, finalAge)
+        },
+        onSharedAgeTextChange = { value ->
+            if (value.all { char -> char.isDigit() }) sharedAgeText = value
+        },
+        onPlusClick = {
+            onPlusClick()
+            showSheet = true
+        },
+        onDeleteClick = { friend ->
+            friendToDelete = friend
+            showDeleteDialog = true
+        },
+    )
 
     // --- AlertDialog สำหรับยืนยันการลบ ---
     if (showDeleteDialog && friendToDelete != null) {
@@ -419,7 +254,12 @@ fun ShareSettingContent(
                             )
                         }
                     } else {
-                        items(availableToAdd) { friend ->
+                        items(
+                            items = availableToAdd,
+                            key = { friend ->
+                                friend.id ?: friend.email ?: friend.username ?: friend.hashCode()
+                            },
+                        ) { friend ->
                             SelectPersonItem(
                                 friend = friend,
                                 isSelected = selectedFriendIds.contains(friend.id),

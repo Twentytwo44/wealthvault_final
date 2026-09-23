@@ -1,4 +1,4 @@
-package com.wealthvault.wealthvault_final
+package com.wealthvault.app
 
 class Greeting {
     private val platform = getPlatform()

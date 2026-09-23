@@ -2,9 +2,10 @@ package com.wealthvault.liability_api.updateliability
 
 
 import com.wealthvault.config.Config
-import com.wealthvault.liability_api.model.LiabilityRequest
-import com.wealthvault.liability_api.model.LiabilityResponse
-import de.jensklingenberg.ktorfit.Ktorfit
+import com.wealthvault.domain.portfolio.LiabilityRequest
+import com.wealthvault.liability_api.requireDomainData
+import com.wealthvault.liability_api.toWire
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -13,30 +14,27 @@ import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 
-class UpdateLiabilityApiImpl(private val ktorfit: Ktorfit) : UpdateLiabilityApi {
-    override suspend fun updateLiability(id: String, request: LiabilityRequest): LiabilityResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
-
-        return client.patch("${Config.localhost_android}lia/${id}") {
+class UpdateLiabilityApiImpl(private val client: HttpClient) : UpdateLiabilityApi {
+    override suspend fun updateLiability(id: String, request: LiabilityRequest) = client.patch("${Config.localhost_android}lia/$id") {
+            val wireRequest = request.toWire()
             setBody(
                 MultiPartFormDataContent(
                     formData {
 
-                        append("name", request.name ?: "")
-                        append("type", request.type ?: "")
-                        append("creditor", request.creditor ?: "")
-                        append("principal", request.principal ?: 0.0)
-                        append("interest_rate", request.interestRate ?: "")
-                        append("description", request.description ?: "")
-                        append("started_at", request.startedAt ?: "")
-                        append("ended_at", request.endedAt ?: "")
+                        append("name", wireRequest.name ?: "")
+                        append("type", wireRequest.type ?: "")
+                        append("creditor", wireRequest.creditor ?: "")
+                        append("principal", wireRequest.principal ?: 0.0)
+                        append("interest_rate", wireRequest.interestRate ?: "")
+                        append("description", wireRequest.description ?: "")
+                        append("started_at", wireRequest.startedAt ?: "")
+                        append("ended_at", wireRequest.endedAt ?: "")
 
-                        request.deleteListId.forEach { fileData ->
+                        wireRequest.deleteListId.forEach { fileData ->
                             append("delete_file_ids", fileData)
                         }
 
-                        request.files.forEach { fileData ->
+                        wireRequest.files.forEach { fileData ->
                             append("files", fileData.bytes, Headers.build {
 
                                 // ✅ 1. ใส่ ContentType ตามชนิดไฟล์จริงๆ (image/jpeg หรือ application/pdf)
@@ -52,6 +50,5 @@ class UpdateLiabilityApiImpl(private val ktorfit: Ktorfit) : UpdateLiabilityApi 
                     }
                 )
             )
-        }.body()
-    }
+        }.body<com.wealthvault.liability_api.model.LiabilityResponse>().requireDomainData()
 }

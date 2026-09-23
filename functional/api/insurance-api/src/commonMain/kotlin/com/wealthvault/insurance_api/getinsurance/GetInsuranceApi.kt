@@ -1,9 +1,7 @@
 package com.wealthvault.insurance_api.getinsurance
 
-import com.wealthvault.insurance_api.model.GetInsuranceResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.domain.portfolio.GetInsuranceData
 
 interface GetInsuranceApi {
-    @GET("asset/insurance/")
-    suspend fun getInsurance(): GetInsuranceResponse
+    suspend fun getInsurance(): List<GetInsuranceData>
 }

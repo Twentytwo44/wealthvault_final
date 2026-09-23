@@ -1,12 +1,9 @@
 package com.wealthvault.investment_api.createcash
 
 
-import com.wealthvault.land_api.model.LandRequest
-import com.wealthvault.land_api.model.LandResponse
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.POST
+import com.wealthvault.domain.portfolio.LandData
+import com.wealthvault.domain.portfolio.LandRequest
 
 interface CreateLandApi {
-    @POST("asset/land")
-    suspend fun create(@Body request: LandRequest): LandResponse
+    suspend fun create(request: LandRequest): LandData
 }

@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -50,12 +51,13 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
-import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
-import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
-import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
-import com.wealthvault_final.`financial-obligations`.model.ExpenseModel
-import kotlinx.datetime.Instant
+import com.wealthvault.core.model.Attachment
+import com.wealthvault.financiallist.ui.form.*
+import com.wealthvault.domain.portfolio.ExpenseModel
+import com.wealthvault.core.model.Money
+import com.wealthvault.financiallist.ui.form.FormErrorBanner
+import com.wealthvault.financiallist.ui.form.formErrorMessage
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
@@ -65,12 +67,13 @@ class ExpenseFormScreen(val id:String,val debtData: ExpenseModel) : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<com.wealthvault.financiallist.ui.debt.form.expense.ExpenseScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
         ExpenseInputForm(
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
             onBackClick = { navigator.pop() } ,
             onNextClick = { data,addedList,deletedList ->
-                println("data asset input: ${data.attachments}")
-                println("data: ${data}")
                 screenModel.updateForm(data)
                 screenModel.updateAttachment(addedList,deletedList)
                 screenModel.submitLiability(id,
@@ -84,16 +87,58 @@ class ExpenseFormScreen(val id:String,val debtData: ExpenseModel) : Screen {
     }
 }
 
+data object CreateExpenseFormScreen : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val screenModel = getScreenModel<ExpenseScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
+        val initialData = remember {
+            ExpenseModel(
+                type = "LIABILITY_TYPE_EXPENSE",
+                name = "",
+                principal = Money(0),
+                interestRate = "",
+                description = "",
+                startedAt = "",
+                endedAt = "",
+                creditor = "",
+                attachments = emptyList(),
+            )
+        }
+
+        ExpenseInputForm(
+            debtData = initialData,
+            title = "ข้อมูลค่าใช้จ่ายระยะยาว",
+            submitLabel = "ต่อไป",
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
+            onBackClick = { navigator.pop() },
+            onNextClick = { data, addedList, deletedList ->
+                screenModel.updateForm(data)
+                screenModel.updateAttachment(addedList, deletedList)
+                screenModel.submitCreate { id ->
+                    navigator.push(com.wealthvault.financiallist.ui.shareasset.ShareAssetScreen("liability", id))
+                }
+            },
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseInputForm(
     onBackClick: () -> Unit = {},
     onNextClick: (ExpenseModel, List<Attachment>, List<Attachment>) -> Unit,
-    debtData: ExpenseModel
+    debtData: ExpenseModel,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    title: String = "แก้ไขข้อมูลค่าใช้จ่าย",
+    submitLabel: String = "ยืนยันการแก้ไข",
 ) {
     // 🌟 1. State เริ่มต้นจากข้อมูลเก่า (Edit Mode)
     var name by remember { mutableStateOf(debtData.name) }
-    var principal by remember { mutableStateOf(if (debtData.principal == 0.0) "" else debtData.principal.toString()) }
+    var principal by remember { mutableStateOf(if (debtData.principal.minorUnits == 0L) "" else debtData.principal.decimalString()) }
     var creditor by remember { mutableStateOf(debtData.creditor) }
     var description by remember { mutableStateOf(debtData.description) }
 
@@ -108,7 +153,7 @@ fun ExpenseInputForm(
     val currentAssets = remember { mutableStateListOf<Attachment>().apply { addAll(debtData.attachments) } }
     val filePicker = rememberFilePicker { newFiles -> currentAssets.addAll(newFiles) }
 
-    val isFormValid = name.isNotBlank() && principal.isNotBlank() && apiStartedAt.isNotBlank()
+    val isFormValid = name.isNotBlank() && Money.fromDecimal(principal) != null && apiStartedAt.isNotBlank()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -125,7 +170,7 @@ fun ExpenseInputForm(
                         modifier = Modifier.size(24.dp).clickable { onBackClick() }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(text = "แก้ไขข้อมูลค่าใช้จ่าย", style = MaterialTheme.typography.titleLarge, color = LightPrimary)
+                    Text(text = title, style = MaterialTheme.typography.titleLarge, color = LightPrimary)
                 }
             }
         },
@@ -135,7 +180,7 @@ fun ExpenseInputForm(
                     onClick = {
                         val data = ExpenseModel(
                             name = name, type = "LIABILITY_TYPE_EXPENSE",
-                            principal = principal.toDoubleOrNull() ?: 0.0,
+                            principal = Money.fromDecimal(principal) ?: Money(0),
                             interestRate = "", startedAt = apiStartedAt,
                             endedAt = "", creditor = creditor,
                             description = description, attachments = currentAssets.toList()
@@ -148,9 +193,9 @@ fun ExpenseInputForm(
                     modifier = Modifier.fillMaxWidth().height(46.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = isFormValid
+                    enabled = isFormValid && !isLoading
                 ) {
-                    Text("ยืนยันการแก้ไข", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                    Text(if (isLoading) "กำลังบันทึก..." else submitLabel, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                 }
             }
         }
@@ -158,14 +203,15 @@ fun ExpenseInputForm(
         Column(
             modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp).verticalScroll(rememberScrollState())
         ) {
+            FormErrorBanner(errorMessage)
             AssetTextField(value = name, onValueChange = { name = it }, label = "ผู้ให้บริการ / ชื่อรายการ*", placeholder = "กรอกชื่อรายการ")
 
-            com.wealthvault_final.`financial-obligations`.ui.expense.CustomTextField(
+            CustomTextField(
                 value = principal, onValueChange = { if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) principal = it },
                 label = "ยอดชำระต่อรอบ*", placeholder = "0.00", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            com.wealthvault_final.`financial-obligations`.ui.expense.CustomTextField(
+            CustomTextField(
                 value = statedAtDisplay, onValueChange = { }, label = "วันที่เริ่มสัญญา*", placeholder = "เลือกวันที่", readOnly = true,
                 trailingIcon = { Icon(painterResource(Res.drawable.ic_common_calendar), null, tint = LightPrimary, modifier = Modifier.size(24.dp)) },
                 onClick = { showDatePicker = true }
@@ -189,7 +235,7 @@ fun ExpenseInputForm(
                     TextButton(onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             val localDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC)
-                            apiStartedAt = "${localDate.year}-${localDate.monthNumber.toString().padStart(2, '0')}-${localDate.dayOfMonth.toString().padStart(2, '0')}"
+                            apiStartedAt = "${localDate.year}-${(localDate.month.ordinal + 1).toString().padStart(2, '0')}-${localDate.day.toString().padStart(2, '0')}"
                             statedAtDisplay = formatThaiDate(apiStartedAt)
                         }
                         showDatePicker = false

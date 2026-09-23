@@ -1,9 +1,7 @@
 package com.wealthvault.`user-api`.dashboard
 
-import com.wealthvault.`user-api`.model.DashboardDataResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.core.model.DashboardData
 
 interface DashboardApi {
-    @GET("dashboard")
-    suspend fun getDashboard(): DashboardDataResponse
+    suspend fun getDashboard(): DashboardData
 }

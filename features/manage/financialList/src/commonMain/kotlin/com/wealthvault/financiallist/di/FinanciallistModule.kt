@@ -2,32 +2,6 @@ package com.wealthvault.financiallist.di
 
 
 
-import com.wealthvault.financiallist.data.FinanciallistDataSource
-import com.wealthvault.financiallist.data.FinanciallistRepositoryImpl
-import com.wealthvault.financiallist.data.account.BankAccountNetworkDataSource
-import com.wealthvault.financiallist.data.account.BankAccountRepositoryImpl
-import com.wealthvault.financiallist.data.building.BuildingNetworkDataSource
-import com.wealthvault.financiallist.data.building.BuildingRepositoryImpl
-import com.wealthvault.financiallist.data.cash.CashNetworkDataSource
-import com.wealthvault.financiallist.data.cash.CashRepositoryImpl
-import com.wealthvault.financiallist.data.debt.LiabilityNetworkDataSource
-import com.wealthvault.financiallist.data.debt.LiabilityRepositoryImpl
-import com.wealthvault.financiallist.data.friend.FriendNetworkDataSource
-import com.wealthvault.financiallist.data.friend.FriendRepositoryImpl
-import com.wealthvault.financiallist.data.group.GroupNetworkDataSource
-import com.wealthvault.financiallist.data.group.GroupRepositoryImpl
-import com.wealthvault.financiallist.data.insurance.InsuranceNetworkDataSource
-import com.wealthvault.financiallist.data.insurance.InsuranceRepositoryImpl
-import com.wealthvault.financiallist.data.investment.AssetNetworkDataSource
-import com.wealthvault.financiallist.data.investment.AssetRepositoryImpl
-import com.wealthvault.financiallist.data.land.LandNetworkDataSource
-import com.wealthvault.financiallist.data.land.LandRepositoryImpl
-import com.wealthvault.financiallist.data.share.ShareItemNetworkDataSource
-import com.wealthvault.financiallist.data.share.ShareItemRepositoryImpl
-import com.wealthvault.financiallist.data.share.ShareTargetsNetworkDatasource
-import com.wealthvault.financiallist.data.share.ShareTargetsRepositoryImpl
-import com.wealthvault.financiallist.data.share.UnshareNetworkDataSource
-import com.wealthvault.financiallist.data.share.UnshareRepositoryImpl
 import com.wealthvault.financiallist.ui.asset.AssetScreenModel
 import com.wealthvault.financiallist.ui.asset.form.account.BankAccountScreenModel
 import com.wealthvault.financiallist.ui.asset.form.building.BuildingScreenModel
@@ -41,26 +15,27 @@ import com.wealthvault.financiallist.ui.debt.form.expense.ExpenseScreenModel
 import com.wealthvault.financiallist.ui.shareasset.ShareScreenModel
 import com.wealthvault.financiallist.ui.shareasset.usecase.GetShareAssetUseCase
 import com.wealthvault.financiallist.usecase.FinanciallistUseCase
-import com.wealthvault_final.`financial-asset`.ui.menu.MenuScreenModel
-import com.wealthvault_final.`financial-asset`.ui.realestate.RealEstateScreenModel
-import com.wealthvault_final.`financial-obligations`.ui.menu.ObMenuScreenModel
 import org.koin.dsl.module
+import com.wealthvault.domain.portfolio.BuildingReferenceRepository
+import com.wealthvault.domain.portfolio.InsuranceReferenceRepository
+import com.wealthvault.domain.portfolio.LandReferenceRepository
+import com.wealthvault.domain.portfolio.UpdateBankAccountRepository
+import com.wealthvault.domain.portfolio.UpdateBuildingRepository
+import com.wealthvault.domain.portfolio.UpdateCashRepository
+import com.wealthvault.domain.portfolio.UpdateInsuranceRepository
+import com.wealthvault.domain.portfolio.UpdateInvestmentRepository
+import com.wealthvault.domain.portfolio.UpdateLandRepository
+import com.wealthvault.domain.portfolio.UpdateLiabilityRepository
+import com.wealthvault.domain.profile.FriendDirectoryRepository
+import com.wealthvault.domain.social.GroupDirectoryRepository
+import com.wealthvault.domain.social.ShareItemRepository
+import com.wealthvault.domain.social.ShareTargetsRepository
+import com.wealthvault.domain.social.UnshareRepository
 
 val financiallistModule = module {
-    // 🌟 ใส่ get() ให้ครบ 7 ตัวตาม API ที่เรารับเข้ามา
-    single { // หรือ factory {
-        FinanciallistDataSource(
-            get(), get(), get(), get(), get(), get(), get(), // 7 ตัวแรกของ Get All
-            get(), get(), get(), get(), get(), get(), get(), // 7 ตัวของ Get By ID
-
-            // 🌟 เพิ่ม get() ตรงนี้อีก 7 ตัว สำหรับ Delete API ครับ!
-            get(), get(), get(), get(), get(), get(), get()
-        )
-    }
-    single { FinanciallistRepositoryImpl(get()) }
     factory { FinanciallistUseCase(get()) }
 
-    factory { AssetScreenModel(get(),get()) }
+    factory { AssetScreenModel(get(), get(), get()) }
     factory { DebtScreenModel(get(),get()) }
 
 
@@ -68,112 +43,13 @@ val financiallistModule = module {
     factory { ShareScreenModel(get(), get(), get()) }
     factory { GetShareAssetUseCase(get(), get(), get()) }
 
-    // friend
-    factory { FriendNetworkDataSource(get()) }
-    single<FriendRepositoryImpl> {
-        FriendRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-
-    // group
-    factory { GroupNetworkDataSource(get()) }
-    single<GroupRepositoryImpl> {
-        GroupRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-
-    // share
-    factory { ShareItemNetworkDataSource(get()) }
-    single<ShareItemRepositoryImpl> {
-        ShareItemRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-
-    // share target
-    factory { ShareTargetsNetworkDatasource(get()) }
-    single<ShareTargetsRepositoryImpl> {
-        ShareTargetsRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-
-    // cash
-    factory { CashScreenModel(get()) }
-    factory { CashNetworkDataSource(get()) }
-    single<CashRepositoryImpl> {
-        CashRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-
-    // building
-    factory { BuildingScreenModel(get(),get(),get()) }
-    factory { BuildingNetworkDataSource(get()) }
-    single<BuildingRepositoryImpl> {
-        BuildingRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-
-    // insurance
-    factory { InsuranceScreenModel(get()) }
-    factory { InsuranceNetworkDataSource(get()) }
-    single<InsuranceRepositoryImpl> {
-        InsuranceRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-
-    // stock
-    factory { StockScreenModel(get()) }
-    factory { AssetNetworkDataSource(get()) }
-    single<AssetRepositoryImpl> {
-        AssetRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-
-    // land
-    factory { LandScreenModel(get(),get()) }
-    factory { LandNetworkDataSource(get()) }
-    single<LandRepositoryImpl> {
-        LandRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-    // lia
-    factory { LiabilityScreenModel(get()) }
-    factory { ExpenseScreenModel(get()) }
-    factory { LiabilityNetworkDataSource(get()) }
-    single<LiabilityRepositoryImpl> {
-        LiabilityRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-    // acc
-    factory { BankAccountScreenModel(get()) }
-    factory { BankAccountNetworkDataSource(get()) }
-    single<BankAccountRepositoryImpl> {
-        BankAccountRepositoryImpl(
-            networkDataSource = get(),
-        )
-    }
-    factory { UnshareNetworkDataSource(get(), get()) }
-    single { UnshareRepositoryImpl(get(), get(), get(), get()) }
-
-    factory { MenuScreenModel() }
-
-    // 🌟 2. เพิ่มของฝั่งหนี้สินด้วย (ถ้ามีหน้าเมนูฝั่งนั้น)
-    factory { ObMenuScreenModel() }
-    factory { RealEstateScreenModel() }
-
-
-
-
-
-
+    factory { CashScreenModel(get(), get()) }
+    factory { BuildingScreenModel(get(),get(),get(),get()) }
+    factory { InsuranceScreenModel(get(), get()) }
+    factory { StockScreenModel(get(), get()) }
+    factory { LandScreenModel(get(),get(),get()) }
+    factory { LiabilityScreenModel(get(), get()) }
+    factory { ExpenseScreenModel(get(), get()) }
+    factory { BankAccountScreenModel(get(), get()) }
 
 }

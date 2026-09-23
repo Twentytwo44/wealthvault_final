@@ -11,7 +11,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_nav_dashboard
 import com.wealthvault.dashboard.ui.DashboardScreen
-import com.wealthvault.main.SharedScreen
+import com.wealthvault.core.navigation.SharedScreen
 import org.jetbrains.compose.resources.painterResource
 
 object DashboardTab : Tab {

@@ -38,6 +38,8 @@ class CreateGroupScreen : Screen {
         val snackbarHostState = remember { SnackbarHostState() }
 
         val allFriends by screenModel.friends.collectAsStateWithLifecycle()
+        val friendsLoading by screenModel.friendsLoading.collectAsStateWithLifecycle()
+        val friendsError by screenModel.friendsError.collectAsStateWithLifecycle()
 
         LaunchedEffect(Unit) {
             screenModel.fetchFriends()
@@ -62,6 +64,9 @@ class CreateGroupScreen : Screen {
                 title = "สร้างกลุ่ม",
                 buttonText = "สร้างกลุ่ม",
                 availableFriends = allFriends,
+                friendsLoading = friendsLoading,
+                friendsErrorMessage = friendsError?.let(::formGroupErrorMessage),
+                onRetryFriends = { screenModel.onAction(FormGroupUiAction.FetchFriends) },
                 isLoading = isLoading,
                 onBackClick = { navigator.pop() },
                 onSaveClick = { groupName, selectedMemberIds, imageBytes ->

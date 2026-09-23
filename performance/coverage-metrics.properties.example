@@ -1,0 +1,11 @@
+# Copy this shape to build/coverage/metrics.properties only after exporters
+# produce measured values. Do not use this example as a CI result.
+schema_version=1
+overall_line_coverage_percent=<measured>
+domain_line_coverage_percent=<measured>
+data_line_coverage_percent=<measured>
+reducer_line_coverage_percent=<measured>
+money_branch_coverage_percent=<measured>
+auth_branch_coverage_percent=<measured>
+session_refresh_branch_coverage_percent=<measured>
+cache_migration_branch_coverage_percent=<measured>

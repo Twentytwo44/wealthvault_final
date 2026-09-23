@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class InvestmentRequest(
+internal data class InvestmentRequest(
     val name: String? = null,
     val symbol: String? = null,
     val type: String? = null,
@@ -20,7 +20,7 @@ data class InvestmentRequest(
 )
 
 @Serializable
-data class InvestmentResponse(
+internal data class InvestmentResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -32,7 +32,7 @@ data class InvestmentResponse(
 )
 
 @Serializable
-data class InvestmentData(
+internal data class InvestmentData(
     @SerialName("id")
     val id: String? = null,
 
@@ -73,7 +73,7 @@ data class InvestmentData(
 )
 
 @Serializable
-data class FileArray(
+internal data class FileArray(
     @SerialName("id")
     val id: String? = null,
 
@@ -87,7 +87,7 @@ data class FileArray(
 
 
 @Serializable
-data class FileUploadData(
+internal data class FileUploadData(
     val bytes: ByteArray? = null,
     val mimeType: String? = null,
     val fileName: String? = null,

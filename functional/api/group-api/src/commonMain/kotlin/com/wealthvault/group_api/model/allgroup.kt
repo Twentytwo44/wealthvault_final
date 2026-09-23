@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class GetGroupResponse(
+internal data class GetGroupResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -19,7 +19,7 @@ data class GetGroupResponse(
 
 
 @Serializable
-data class GetAllGroupData(
+internal data class GetAllGroupData(
 
     @SerialName("id")
     val id: String? = null,
@@ -44,4 +44,3 @@ data class GetAllGroupData(
 
 
     )
-

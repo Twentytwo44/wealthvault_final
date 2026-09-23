@@ -1,12 +1,8 @@
 package com.wealthvault.cash_api.updatecash
 
-import com.wealthvault.cash_api.model.CashRequest
-import com.wealthvault.cash_api.model.CashResponse
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.PATCH
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.portfolio.CashData
+import com.wealthvault.domain.portfolio.CashRequest
 
 interface UpdateCashApi {
-    @PATCH("asset/cash/{id}/")
-    suspend fun updateCash(@Path("id") id: String, @Body request: CashRequest): CashResponse
+    suspend fun updateCash(id: String, request: CashRequest): CashData
 }

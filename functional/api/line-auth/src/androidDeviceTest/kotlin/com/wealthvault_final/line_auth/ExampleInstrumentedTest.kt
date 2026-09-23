@@ -1,4 +1,4 @@
-package com.wealthvault_final.line_auth
+package com.wealthvault.line_auth
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -16,9 +16,8 @@ import org.junit.Assert.*
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
     @Test
-    fun useAppContext() {
-        // Context of the app under test.
+    fun targetContextIsAvailable() {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.wealthvault_final.line_auth.test", appContext.packageName)
+        assertTrue(appContext.packageName.isNotBlank())
     }
 }

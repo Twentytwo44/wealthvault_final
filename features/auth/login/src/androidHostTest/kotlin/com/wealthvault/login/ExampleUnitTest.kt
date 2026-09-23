@@ -1,16 +1,15 @@
 package com.wealthvault.login
 
 import kotlin.test.Test
+import com.wealthvault.domain.auth.LoginCredentials
 import kotlin.test.assertEquals
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
+class LoginContractTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun credentialsKeepUserInputAtDomainBoundary() {
+        val credentials = LoginCredentials(username = "user@example.com", password = "secret")
+
+        assertEquals("user@example.com", credentials.username)
+        assertEquals("secret", credentials.password)
     }
 }

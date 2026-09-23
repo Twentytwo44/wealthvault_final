@@ -1,12 +1,8 @@
 package com.wealthvault.account_api.updateaccount
 
-import com.wealthvault.account_api.model.BankAccountRequest
-import com.wealthvault.account_api.model.BankAccountResponse
-import de.jensklingenberg.ktorfit.http.Body
-import de.jensklingenberg.ktorfit.http.PATCH
-import de.jensklingenberg.ktorfit.http.Path
+import com.wealthvault.domain.portfolio.BankAccountData
+import com.wealthvault.domain.portfolio.BankAccountRequest
 
 interface UpdateAccountApi {
-    @PATCH("asset/account/{id}/")
-    suspend fun updateAccount(@Path("id") id: String, @Body request: BankAccountRequest): BankAccountResponse
+    suspend fun updateAccount(id: String, request: BankAccountRequest): BankAccountData
 }

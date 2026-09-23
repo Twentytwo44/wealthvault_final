@@ -1,0 +1,17 @@
+CREATE TABLE notification_snapshot (
+    id INTEGER NOT NULL PRIMARY KEY,
+    payload TEXT NOT NULL,
+    updated_at_epoch_millis INTEGER NOT NULL
+);
+
+selectLatest:
+SELECT payload, updated_at_epoch_millis
+FROM notification_snapshot
+WHERE id = 1;
+
+upsert:
+INSERT OR REPLACE INTO notification_snapshot(id, payload, updated_at_epoch_millis)
+VALUES (1, ?, ?);
+
+clear:
+DELETE FROM notification_snapshot;

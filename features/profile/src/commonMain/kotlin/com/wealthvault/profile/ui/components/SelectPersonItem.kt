@@ -36,7 +36,7 @@ import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightBorder
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
-import com.wealthvault.`user-api`.model.FriendData
+import com.wealthvault.domain.profile.FriendData
 import org.jetbrains.compose.resources.painterResource
 
 @Composable

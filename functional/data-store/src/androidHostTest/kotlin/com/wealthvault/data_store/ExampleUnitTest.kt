@@ -3,14 +3,13 @@ package com.wealthvault.data_store
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
+class SessionContractTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun emptyTokenStartsSignedOut() {
+        val token = AuthToken(accessToken = null, refreshToken = null)
+
+        assertEquals(null, token.accessToken)
+        assertEquals(null, token.refreshToken)
+        assertEquals(SessionState.SignedOut, SessionState.SignedOut)
     }
 }

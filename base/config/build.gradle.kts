@@ -10,7 +10,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.example.config"
+        namespace = "com.wealthvault.config"
         compileSdk = 36
         minSdk = 24
 
@@ -31,25 +31,11 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "configKit"
-
-    iosX64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
-
-    iosArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
-
-    iosSimulatorArm64 {
-        binaries.framework {
-            baseName = xcfName
-        }
-    }
+    // The application owns the only iOS framework. Keep native targets for
+    // KMP metadata/tests without publishing a standalone embed task.
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     // Source set declarations.
     // Declaring a target automatically creates a source set with the same name. By default, the

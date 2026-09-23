@@ -45,7 +45,7 @@ import com.wealthvault.core.theme.LightMuted
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.theme.LightSoftWhite
 import com.wealthvault.core.theme.RedErr
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.painterResource

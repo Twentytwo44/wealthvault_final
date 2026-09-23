@@ -1,0 +1,43 @@
+package com.wealthvault.data.notification.transport.model
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+
+@Serializable
+internal data class GetDeviceResponse(
+    @SerialName("data")
+    val data: List<DeviceItem>? = null,
+
+    @SerialName("success")
+    val success: Boolean? = null
+)
+
+@Serializable
+internal data class DeviceItem(
+    @SerialName("ID")
+    val id: String? = null,
+
+    @SerialName("UserID")
+    val userId: String? = null,
+
+    @SerialName("Token")
+    val token: String? = null,
+
+    @SerialName("Platform")
+    val platform: String? = null,
+
+    @SerialName("DeviceName")
+    val deviceName: String? = null,
+
+    @SerialName("IsActive")
+    val isActive: Boolean? = null,
+
+    @SerialName("CreatedAt")
+    val createdAt: String? = null,
+
+    @SerialName("UpdatedAt")
+    val updatedAt: String? = null
+)
+
+

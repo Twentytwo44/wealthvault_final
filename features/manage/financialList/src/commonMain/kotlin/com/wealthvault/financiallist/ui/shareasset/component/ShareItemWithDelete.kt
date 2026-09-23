@@ -24,7 +24,7 @@ import com.wealthvault.core.generated.resources.ic_nav_social
 import com.wealthvault.core.theme.*
 import com.wealthvault.core.utils.formatThaiDate
 import com.wealthvault.financiallist.ui.shareasset.model.ShareInfo
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.painterResource

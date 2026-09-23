@@ -30,31 +30,17 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.wealthvault_logo
-import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault.login.ui.LoginScreen
-import com.wealthvault.navigation.MainScreen
 import org.jetbrains.compose.resources.painterResource
 
 class SplashScreen : Screen {
     @Composable
     override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val screenModel = getScreenModel<SplashScreenModel>()
-        val state by screenModel.state.collectAsStateWithLifecycle()
-
         val alphaAnimation = remember { Animatable(0f) }
 
         LaunchedEffect(Unit) {
-            // 🌟 1. สั่งให้ Model เริ่มเช็ก Authentication ทันทีที่เปิดหน้าจอ
-            screenModel.checkAuthentication()
-
-            // 🌟 2. เริ่มเล่นแอนิเมชันเฟด
             alphaAnimation.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
@@ -62,15 +48,6 @@ class SplashScreen : Screen {
                     easing = FastOutSlowInEasing
                 )
             )
-        }
-
-        // 🌟 3. จัดการการเปลี่ยนหน้า (ใช้ replaceAll ถูกต้องแล้วครับ!)
-        LaunchedEffect(state) {
-            when (state) {
-                is SplashState.GoToLogin -> navigator.replaceAll(LoginScreen())
-                is SplashState.GoToMain -> navigator.replaceAll(MainScreen())
-                else -> {} // ยังคงอยู่ในหน้า Loading
-            }
         }
 
         Box(

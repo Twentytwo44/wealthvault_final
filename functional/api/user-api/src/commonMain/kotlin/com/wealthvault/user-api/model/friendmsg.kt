@@ -4,13 +4,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MessageResponse(
+internal data class MessageResponse(
     @SerialName("messages")
     val messages: List<MessageItem>? = null
 )
 
 @Serializable
-data class MessageItem(
+internal data class MessageItem(
     @SerialName("id")
     val id: String? = null,
 
@@ -40,7 +40,7 @@ data class MessageItem(
 )
 
 @Serializable
-data class MessageMetadata(
+internal data class MessageMetadata(
     @SerialName("asset_id")
     val assetId: String? = null,
 

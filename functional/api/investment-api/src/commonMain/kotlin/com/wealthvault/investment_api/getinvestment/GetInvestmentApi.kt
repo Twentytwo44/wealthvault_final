@@ -1,9 +1,7 @@
 package com.wealthvault.investment_api.getinvestment
 
-import com.wealthvault.investment_api.model.GetInvestmentResponse
-import de.jensklingenberg.ktorfit.http.GET
+import com.wealthvault.domain.portfolio.GetInvestmentData
 
 interface GetInvestmentApi {
-    @GET("asset/invest")
-    suspend fun getInvestment(): GetInvestmentResponse
+    suspend fun getInvestment(): List<GetInvestmentData>
 }

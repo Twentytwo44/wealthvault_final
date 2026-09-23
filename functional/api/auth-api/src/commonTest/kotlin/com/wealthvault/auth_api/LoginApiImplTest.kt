@@ -1,8 +1,6 @@
 package com.wealthvault.auth_api
 
 import com.wealthvault.`auth-api`.login.LoginApiImpl
-import com.wealthvault.`auth-api`.model.LoginRequest
-import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -45,7 +43,7 @@ class LoginApiImplTest {
             )
         }
 
-        // 3. สร้าง HttpClient และ Ktorfit
+        // 3. สร้าง HttpClient ตัวจริงที่ใช้โดย API adapter
         val client = HttpClient(mockEngine) {
             // เพิ่มส่วนนี้เข้าไปเพื่อให้ HttpClient รู้จักวิธีจัดการ LoginRequest เป็น JSON
             install(ContentNegotiation) {
@@ -60,24 +58,15 @@ class LoginApiImplTest {
             }
         }
 
-        val ktorfit = Ktorfit.Builder()
-            .httpClient(client)
-            .baseUrl("http://localhost:8080/api/")
-            .build()
-
         // 4. สร้าง LoginApiImpl (ตัวที่เราต้องการเทสจริงๆ)
-        val apiImpl = LoginApiImpl(ktorfit)
+        val apiImpl = LoginApiImpl(client)
 
         // 5. รันการทดสอบ
-        val response = apiImpl.login(LoginRequest("test@example.invalid", "test-password"))
-        println("--- API Response Result ---")
-        println("Status: ${response.status}")
-        println("User ID: ${response.data?.userId}")
-        println("Access Token Length: ${response.data?.accessToken?.length}")
+        val response = apiImpl.login("test@example.invalid", "test-password")
 
         // ตรวจสอบเงื่อนไขตาม JSON จริง
-        assertEquals("login success", response.status) // แก้ให้ตรงกับ JSON จริง "login success"
-        assertEquals("02d120bb-0f5d-4684-af22-14f78a0db1dd", response.data?.userId)
+        assertEquals("02d120bb-0f5d-4684-af22-14f78a0db1dd", response.userId)
+        assertEquals("eyJhbGciOiJIUzI1Ni...", response.accessToken)
 
     }
 }

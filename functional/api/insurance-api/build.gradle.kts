@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
 
 
@@ -79,15 +78,15 @@ kotlin {
 
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
-                implementation(libs.ktorfit.lib)
 
-                implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.3.4")
 
 
                 implementation(project(":base:core"))
                 implementation(project(":base:config"))
-                implementation(project(":functional:data-store"))
-                implementation(project(":functional:api:auth-api"))
+                implementation(project(":base:security"))
+                // Map legacy insurance wire DTOs to domain contracts inside
+                // this adapter before returning values to consumers.
+                implementation(project(":domain:portfolio"))
 
 
 

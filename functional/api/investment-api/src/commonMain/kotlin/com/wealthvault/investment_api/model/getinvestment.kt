@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class GetInvestmentResponse(
+internal data class GetInvestmentResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -19,7 +19,7 @@ data class GetInvestmentResponse(
 )
 
 @Serializable
-data class GetInvestmentData(
+internal data class GetInvestmentData(
 
     @SerialName("id")
     val id: String? = null,
@@ -61,4 +61,3 @@ data class GetInvestmentData(
 
 
     )
-

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class DeviceRequest(
+internal data class DeviceRequest(
     @SerialName("token")
     val token: String? = null,
 
@@ -17,14 +17,14 @@ data class DeviceRequest(
 )
 
 @Serializable
-data class UnDeviceRequest(
+internal data class UnDeviceRequest(
     @SerialName("token")
     val token: String? = null,
 )
 
 
 @Serializable
-data class GetDeviceResponse(
+internal data class GetDeviceResponse(
     @SerialName("data")
     val data: List<DeviceItem>? = null,
 
@@ -33,7 +33,7 @@ data class GetDeviceResponse(
 )
 
 @Serializable
-data class DeviceItem(
+internal data class DeviceItem(
     @SerialName("ID")
     val id: String? = null,
 
@@ -62,7 +62,7 @@ data class DeviceItem(
 
 
 @Serializable
-data class DeviceResponse(
+internal data class DeviceResponse(
     @SerialName("message")
     val message: String? = null,
 

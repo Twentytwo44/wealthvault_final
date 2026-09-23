@@ -1,0 +1,47 @@
+package com.wealthvault.`financial-asset`.ui.bankaccount.viewmodel
+
+import cafe.adriel.voyager.core.model.ScreenModel
+import com.wealthvault.domain.portfolio.BankAccountModel
+import com.wealthvault.core.model.Money
+import com.wealthvault.core.architecture.FormAction
+import com.wealthvault.core.architecture.UiState
+import com.wealthvault.core.architecture.UiStateHolder
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+class BankAccountScreenModel : ScreenModel {
+    // 📦 ถังเก็บข้อมูล
+    private val _state = MutableStateFlow(
+        BankAccountModel(
+            type = "",
+            bankName = "",
+            bankId = "",
+            name = "",
+            amount = Money(0),
+            description = "",
+            attachments = emptyList()
+
+        )
+    )
+    val state = _state.asStateFlow()
+    private val udf = UiStateHolder(_state.value)
+    val uiState: StateFlow<UiState<BankAccountModel>> = udf.state
+    val effects = udf.effects
+
+    fun onAction(action: FormAction<BankAccountModel>) {
+        when (action) {
+            is FormAction.Changed -> updateForm(action.value)
+            is FormAction.AttachmentsChanged -> updateForm(_state.value.copy(attachments = action.added))
+            is FormAction.Submit -> Unit
+        }
+    }
+
+    // ✍️ ฟังก์ชันอัปเดตข้อมูลจากหน้าฟอร์ม
+    fun updateForm(data: BankAccountModel) {
+        _state.update { it.copy(name = data.name, type = data.type, bankName = data.bankName, bankId = data.bankId, amount = data.amount, description = data.description, attachments = data.attachments) }
+        udf.set(_state.value, isLoading = false, error = null)
+    }
+
+}

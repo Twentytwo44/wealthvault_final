@@ -5,14 +5,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CashIdResponse(
+internal data class CashIdResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: CashIdData? = null,
     @SerialName("error") val error: String? = null
 )
 
 @Serializable
-data class CashIdData(
+internal data class CashIdData(
     @SerialName("id") val id: String,
     @SerialName("user_id") val userId: String,
     @SerialName("name") val name: String? = null,

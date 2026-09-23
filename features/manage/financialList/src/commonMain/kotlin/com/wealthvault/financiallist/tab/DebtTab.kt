@@ -7,7 +7,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.wealthvault.core.generated.resources.Res
 import com.wealthvault.core.generated.resources.ic_nav_debt
 import com.wealthvault.financiallist.ui.debt.DebtScreen
-import com.wealthvault.main.SharedScreen
+import com.wealthvault.core.navigation.SharedScreen
 import org.jetbrains.compose.resources.painterResource
 
 object DebtTab : Tab {
@@ -29,4 +29,3 @@ object DebtTab : Tab {
 val debtTabModule = screenModule {
     register<SharedScreen.DebtTab> { DebtTab }
 }
-

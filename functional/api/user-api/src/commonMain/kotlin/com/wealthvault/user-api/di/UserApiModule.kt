@@ -41,21 +41,23 @@ object UserApiModule {
             }
         }
 
-        single<AcceptFriendApi> { AcceptFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<AddFriendApi> { AddFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<FriendApi> { FriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UserApi> { UserApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<PendingFriendApi> { PendingFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UpdateUserApi> {UpdateUserApiImpl(ktorfit = get(named(KoinConst.Ktor.AUTH)), tokenStore = get())}
-        single<CloseFriendApi> { CloseFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<UpdateCloseFriendApi> { UpdateCloseFriendApiImpl(tokenStore = get()) }
+        single<AcceptFriendApi> { AcceptFriendApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<AddFriendApi> { AddFriendApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<FriendApi> { FriendApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UserApi> { UserApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<PendingFriendApi> { PendingFriendApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UpdateUserApi> { UpdateUserApiImpl(client = get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<CloseFriendApi> { CloseFriendApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<UpdateCloseFriendApi> {
+            UpdateCloseFriendApiImpl(client = get<HttpClient>(named(KoinConst.HttpClient.GLOBAL)))
+        }
         single<DashboardApi> {
             DashboardApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL)))
         }
-        single<GetUserByEmailApi> { GetUserByEmailApiImpl(get(named(KoinConst.Ktor.GLOBAL)))}
-        single<GetFriendMsgApi> { GetFriendMsgApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<GetFriendProfileApi> { GetFriendProfileApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
-        single<DeleteFriendApi> { DeleteFriendApiImpl(get(named(KoinConst.Ktor.GLOBAL))) }
+        single<GetUserByEmailApi> { GetUserByEmailApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL)))}
+        single<GetFriendMsgApi> { GetFriendMsgApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<GetFriendProfileApi> { GetFriendProfileApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
+        single<DeleteFriendApi> { DeleteFriendApiImpl(get<HttpClient>(named(KoinConst.HttpClient.GLOBAL))) }
     }
 
 

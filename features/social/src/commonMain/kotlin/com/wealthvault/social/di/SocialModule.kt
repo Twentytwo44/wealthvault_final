@@ -1,8 +1,5 @@
 package com.wealthvault.social.di
 
-import com.wealthvault.core.KoinConst
-import com.wealthvault.social.data.SocialDataSource
-import com.wealthvault.social.data.SocialRepositoryImpl
 import com.wealthvault.social.ui.SocialScreenModel
 import com.wealthvault.social.ui.main_social.add_friend.AddFriendScreenModel
 import com.wealthvault.social.ui.main_social.form_group.FormGroupScreenModel
@@ -20,19 +17,7 @@ import org.koin.dsl.module
 object SocialModule {
     val allModules = module {
 
-        factory {
-            SocialDataSource(
-                get(), get(), get(), get(), get(), get(), get(),
-                get(), get(), get(), get(), get(), get(), get(),
-                get(), get(), get(), get(), get(),
-                get(), get(), get(), get(), get(),
-                get(), get(), get(), get(), get(), get(), get(), get()
-            )
-        }
-
         factory { SocialScreenModel(repository = get()) }
-
-        single { SocialRepositoryImpl(get()) }
         factory { FriendScreenModel(repository = get()) }
         factory { GroupScreenModel(repository = get()) }
         factory { FormGroupScreenModel(repository = get()) }
@@ -42,9 +27,8 @@ object SocialModule {
         factory<GroupSpaceScreenModel> {
             GroupSpaceScreenModel(
                 repository = get(),
-                webSocketService = get(),
-                json = get(named(KoinConst.KotlinSerialization.WEBSOCKET)),
-                tokenStore = get()
+                groupChatGateway = get(),
+                sessionManager = get()
             )
         }
         factory { GroupProfileScreenModel(repository = get()) }

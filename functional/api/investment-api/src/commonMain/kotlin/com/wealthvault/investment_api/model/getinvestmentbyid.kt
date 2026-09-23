@@ -5,14 +5,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InvestmentIdResponse(
+internal data class InvestmentIdResponse(
     @SerialName("status") val status: String? = null,
     @SerialName("data") val data: InvestmentIdData? = null,
     @SerialName("error") val error: String? = null
 )
 
 @Serializable
-data class InvestmentIdData(
+internal data class InvestmentIdData(
     @SerialName("id") val id: String,
     @SerialName("user_id") val userId: String,
     @SerialName("name") val name: String? = null,
@@ -35,5 +35,4 @@ data class InvestmentIdData(
 //    @SerialName("url") override val url: String = "", // 🌟 สืบทอด HasImageUrl
 //    @SerialName("file_type") override val fileType: String = ""
 //) : HasImageUrl
-
 

@@ -2,24 +2,37 @@ package com.wealthvault.financiallist.ui.debt.form.expense
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.wealthvault.financiallist.data.debt.LiabilityRepositoryImpl
-import com.wealthvault.liability_api.model.LiabilityRequest
-import com.wealthvault.liability_api.model.LiabilityUploadData
-import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
-import com.wealthvault_final.`financial-obligations`.model.ExpenseModel
+import com.wealthvault.domain.portfolio.CreateLiabilityRepository
+import com.wealthvault.domain.portfolio.UpdateLiabilityRepository
+import com.wealthvault.domain.portfolio.LiabilityRequest
+import com.wealthvault.domain.portfolio.LiabilityUploadData
+import com.wealthvault.core.model.Attachment
+import com.wealthvault.core.model.FixedDecimal
+import com.wealthvault.core.model.Money
+import com.wealthvault.domain.portfolio.ExpenseModel
+import com.wealthvault.core.architecture.FormAction
+import com.wealthvault.core.architecture.FormEffect
+import com.wealthvault.core.architecture.UiState
+import com.wealthvault.core.architecture.UiStateHolder
+import com.wealthvault.core.architecture.toAppError
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class ExpenseScreenModel(
-    private val expenseRepository: LiabilityRepositoryImpl
+    private val expenseRepository: UpdateLiabilityRepository,
+    private val createLiabilityRepository: CreateLiabilityRepository,
 ) : ScreenModel {
     // 📦 ถังเก็บข้อมูล
     private val _state = MutableStateFlow(
         ExpenseModel(
             type = "",
             name = "",
-            principal = 0.0,
+            principal = Money(0),
             interestRate = "",
             description = "",
             startedAt = "",
@@ -30,9 +43,22 @@ class ExpenseScreenModel(
         )
     )
 
+    val state = _state.asStateFlow()
+    private val udf = UiStateHolder(_state.value)
+    val uiState: StateFlow<UiState<ExpenseModel>> = udf.state
+    val effects = udf.effects
+    private var submitJob: Job? = null
+
+    fun onAction(action: FormAction<ExpenseModel>) {
+        when (action) {
+            is FormAction.Changed -> updateForm(action.value)
+            is FormAction.AttachmentsChanged -> updateAttachment(action.added, action.deleted)
+            is FormAction.Submit -> submitLiability(action.id)
+        }
+    }
+
     // ✍️ ฟังก์ชันอัปเดตข้อมูลจากหน้าฟอร์ม
     fun updateForm(data: ExpenseModel) {
-        println("data update succes " + data.name)
         _state.update { it.copy(
             name = data.name,
             type = data.type,
@@ -45,6 +71,7 @@ class ExpenseScreenModel(
             attachments = data.attachments
 
         ) }
+        udf.set(_state.value, isLoading = false, error = null)
     }
 
     private val _addedAttachments = MutableStateFlow<List<Attachment>>(emptyList())
@@ -55,7 +82,7 @@ class ExpenseScreenModel(
         _deleteAttachments.update { deletedList }
     }
 
-    private fun asRequest(): LiabilityRequest {
+    private fun asRequest(type: String = "LIABILITY_TYPE_EXPENSE"): LiabilityRequest {
         val current = _state.value
 
         // ✅ Map ข้อมูลให้มีทั้ง Byte, MimeType และ ชื่อไฟล์
@@ -75,9 +102,9 @@ class ExpenseScreenModel(
 
         return LiabilityRequest(
             name = current.name,
-            type = "LIABILITY_TYPE_EXPENSE",
+            type = type,
             principal = current.principal,
-            interestRate = current.interestRate,
+            interestRate = FixedDecimal.fromDecimal(current.interestRate, scale = 4),
             description = current.description,
             startedAt = current.startedAt,
             endedAt = current.endedAt,
@@ -87,10 +114,37 @@ class ExpenseScreenModel(
         )
     }
 
+    fun submitCreate(onSuccess: (String) -> Unit = {}) {
+        if (submitJob?.isActive == true) return
+        udf.loading()
+        val job = screenModelScope.launch {
+            try {
+                val result = createLiabilityRepository.createLiability(asRequest())
+                val createdId = result.getOrNull()?.id?.takeIf { it.isNotBlank() }
+                if (result.isSuccess && createdId != null) {
+                    udf.success()
+                    udf.emit(FormEffect.Saved)
+                    onSuccess(createdId)
+                } else {
+                    udf.failure(result.exceptionOrNull()?.toAppError()
+                        ?: IllegalStateException("Expense create failed").toAppError())
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                udf.failure(e.toAppError())
+            }
+        }
+        submitJob = job
+        job.invokeOnCompletion { if (submitJob === job) submitJob = null }
+    }
 
 
-    fun submitLiability(id:String,onSuccess: () -> Unit) {
-        screenModelScope.launch {
+
+    fun submitLiability(id:String,onSuccess: () -> Unit = {}) {
+        if (submitJob?.isActive == true) return
+        udf.loading()
+        val job = screenModelScope.launch {
             try {
 //                isLoading = true
 //                errorMessage = null
@@ -100,7 +154,6 @@ class ExpenseScreenModel(
                 val requestBody = asRequest()
 
                 val liabilityResult = expenseRepository.updateLiability(id,requestBody)
-                println("exp result: ${liabilityResult}")
 
                 // ดึงข้อมูลออกมาจาก Result Wrapper
                 val liabilityResponse = liabilityResult.getOrNull()
@@ -109,22 +162,26 @@ class ExpenseScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง Liability
                     // สมมติว่า field id อยู่ใน liabilityResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = liabilityResponse.id.toString()
-                    println("✅ [ScreenModel] Liability Edit ID: $createdItemId")
+                    udf.success()
+                    udf.emit(FormEffect.Saved)
                     onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Edit Liability Failed")
+                    udf.failure(liabilityResult.exceptionOrNull()?.toAppError()
+                        ?: IllegalStateException("Expense update failed").toAppError())
                 }
 
-            } catch (e: Exception) {
-                println("❌ [ScreenModel] Exception: ${e.message}")
-//                errorMessage = e.message ?: "เกิดข้อผิดพลาดในการเชื่อมต่อ"
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                udf.failure(e.toAppError())
             } finally {
 //                isLoading = false
-                println("🏁 [ScreenModel] Process Finished.")
             }
         }
+        submitJob = job
+        job.invokeOnCompletion { if (submitJob === job) submitJob = null }
     }
 
 

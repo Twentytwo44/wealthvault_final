@@ -18,6 +18,37 @@ kotlin {
 
     }
 
+    // The GoogleSignIn CocoaPod is linked by the iOS app through Xcode's
+    // generated Pods xcconfig. Kotlin/Native test binaries are linked by
+    // Gradle directly, so they need the same synthetic pod framework search
+    // paths explicitly. Keep this scoped to the simulator test binary; the
+    // production app continues to receive these paths from CocoaPods.
+    val googleAuthPodFrameworkRoot = rootProject.file(
+        "data/auth/build/cocoapods/synthetic/ios/build/Debug-iphonesimulator",
+    )
+    iosSimulatorArm64 {
+        binaries {
+            configureEach {
+                if (name == "debugTest") {
+                    listOf(
+                        "GoogleSignIn",
+                        "AppAuth",
+                        "GTMAppAuth",
+                        "GTMSessionFetcher",
+                        "AppCheckCore",
+                        "GoogleUtilities",
+                        "PromisesObjC",
+                    )
+                        .forEach { framework ->
+                            val frameworkPath = googleAuthPodFrameworkRoot.resolve(framework).path
+                            linkerOpts("-F$frameworkPath")
+                            linkerOpts("-rpath", frameworkPath)
+                        }
+                }
+            }
+        }
+    }
+
     sourceSets {
         commonMain {
             dependencies {
@@ -30,37 +61,24 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
-                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
                 implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
 
-                implementation(project(":functional:api:auth-api"))
-                implementation(project(":functional:data-store"))
-                implementation(project(":functional:api:google-auth"))
-                implementation(project(":functional:api:line-auth"))
-                implementation(project(":functional:notification"))
-                implementation(project(":functional:api:notification-api"))
-                implementation(project(":navigation-point"))
-                implementation(project(":functional:api:user-api"))
 
 
 
-
-
-                implementation(project(":features:auth:register"))
-                implementation(project(":features:auth:register"))
 
 
                 implementation(project(":base:core"))
-                implementation(project(":main"))
-
-                implementation("androidx.datastore:datastore-preferences-core:1.1.1")
+                implementation(project(":domain:auth"))
+                implementation(project(":domain:profile"))
+                implementation(project(":domain:notification"))
 
                 implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
                 implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
 
                 // 🌟 เช็คว่าตัวสะกดถูกต้องเป๊ะๆ
                 implementation("io.github.onseok:peekaboo-image-picker:0.5.2")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
 
 
 
@@ -78,19 +96,10 @@ kotlin {
                     // สำคัญมากสำหรับการใช้ runTest และคำสั่ง .first() ใน Flow
                     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
 
-                    // 3. หากคุณใช้ Ktor สำหรับ LoginApi (ถ้าใช้ Retrofit จะอยู่อีกส่วน)
-                    implementation("io.ktor:ktor-client-mock:3.4.0")
-
-                    // 4. (ทางเลือก) หากต้องการทำ Mocking
-                    implementation("io.mockative:mockative:2.1.0")
-                    implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.7.2")
-
-
-                    implementation(project(":functional:api:auth-api"))
-                    implementation(project(":functional:data-store"))
                 }
             }
         }
+
     }
 
         // For iOS targets, this is also where you should
@@ -124,4 +133,3 @@ kotlin {
 //implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
 //implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
 //implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
-

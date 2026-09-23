@@ -4,12 +4,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LoginRequest(
+internal data class LoginRequest(
     val email: String,
     val password: String
 )
 @Serializable
-data class LoginResponse(
+internal data class LoginResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -21,7 +21,7 @@ data class LoginResponse(
 )
 
 @Serializable
-data class LoginData(
+internal data class LoginData(
     @SerialName("success")
     val success: Boolean? = null,
 

@@ -14,7 +14,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "com.wealthvault_final.line_auth"
+        namespace = "com.wealthvault.api.lineauth"
         compileSdk = 36
         minSdk = 24
 
@@ -45,6 +45,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
+                implementation(project(":domain:profile"))
                 // Add KMP dependencies here
             }
         }

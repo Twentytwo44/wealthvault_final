@@ -1,18 +1,26 @@
 package com.wealthvault.group_api.getgrouplist
 
 import com.wealthvault.config.Config
+import com.wealthvault.domain.social.GroupSummary
 import com.wealthvault.group_api.model.GetGroupResponse
-import de.jensklingenberg.ktorfit.Ktorfit
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 
-class GetAllGroupApiImpl(private val ktorfit: Ktorfit) : GetAllGroupApi {
-    override suspend fun getAllGroup(): GetGroupResponse {
-        // ใช้ HttpClient ที่อยู่ใน Ktorfit ส่งค่าออกไปจริงๆ
-        val client = ktorfit.httpClient
-
-        return client.get("${Config.localhost_android}group/") {
-
-        }.body()
+class GetAllGroupApiImpl(private val client: HttpClient) : GetAllGroupApi {
+    override suspend fun getAllGroup(): List<GroupSummary> {
+        val response: GetGroupResponse = client.get("${Config.localhost_android}group/").body()
+        response.error?.let { error -> throw IllegalStateException(error) }
+        return response.data.orEmpty().map { item ->
+            GroupSummary(
+                id = item.id,
+                groupName = item.groupName,
+                groupProfile = item.groupProfile,
+                createdBy = item.createdBy,
+                memberCount = item.memberCount,
+                createdAt = item.createdAt,
+                updatedAt = item.updatedAt,
+            )
+        }
     }
 }

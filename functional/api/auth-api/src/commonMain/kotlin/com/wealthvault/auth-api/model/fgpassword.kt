@@ -4,11 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ForgetPasswordRequest(
+internal data class ForgetPasswordRequest(
     val email: String,
 )
 @Serializable
-data class ForgetPasswordResponse(
+internal data class ForgetPasswordResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -20,7 +20,7 @@ data class ForgetPasswordResponse(
 )
 
 @Serializable
-data class ForgetPasswordData(
+internal data class ForgetPasswordData(
     @SerialName("success")
     val success: Boolean,
 

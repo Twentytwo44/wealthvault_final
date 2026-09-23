@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class ShareItemResponse(
+internal data class ShareItemResponse(
     @SerialName("status")
     val status: String? = null,
 
@@ -17,7 +17,7 @@ data class ShareItemResponse(
 )
 
 @Serializable
-data class ShareItemRequest(
+internal data class ShareItemRequest(
     @SerialName("item_ids")
     val itemIds: String? = null,
 
@@ -35,13 +35,12 @@ data class ShareItemRequest(
 )
 
 @Serializable
-data class TargetItem(
+internal data class TargetItem(
     @SerialName("id")
     val id: String? = null,
 
     @SerialName("share_at")
     val shareAt: String? = null
 )
-
 
 

@@ -1,10 +1,5 @@
 package com.wealthvault.investment_api.deleteinvestment
 
-import com.wealthvault.investment_api.model.DeleteInvestmentResponse
-import de.jensklingenberg.ktorfit.http.DELETE
-import de.jensklingenberg.ktorfit.http.Path
-
 interface DeleteInvestmentApi {
-    @DELETE("asset/invest/{id}/")
-    suspend fun deleteInvestment(@Path("id") id: String): DeleteInvestmentResponse
+    suspend fun deleteInvestment(id: String)
 }

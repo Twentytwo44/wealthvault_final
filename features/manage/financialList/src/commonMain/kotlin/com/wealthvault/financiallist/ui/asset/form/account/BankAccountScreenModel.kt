@@ -2,18 +2,29 @@ package com.wealthvault.financiallist.ui.asset.form.account
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.wealthvault.account_api.model.BankAccountFileUploadData
-import com.wealthvault.account_api.model.BankAccountRequest
-import com.wealthvault.financiallist.data.account.BankAccountRepositoryImpl
-import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
-import com.wealthvault_final.`financial-asset`.model.BankAccountModel
+import com.wealthvault.domain.portfolio.BankAccountFileUploadData
+import com.wealthvault.domain.portfolio.BankAccountRequest
+import com.wealthvault.domain.portfolio.UpdateBankAccountRepository
+import com.wealthvault.domain.portfolio.CreateBankAccountRepository
+import com.wealthvault.core.model.Attachment
+import com.wealthvault.core.model.Money
+import com.wealthvault.domain.portfolio.BankAccountModel
+import com.wealthvault.core.architecture.FormAction
+import com.wealthvault.core.architecture.FormEffect
+import com.wealthvault.core.architecture.UiState
+import com.wealthvault.core.architecture.UiStateHolder
+import com.wealthvault.core.architecture.toAppError
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class BankAccountScreenModel(
-    private val bankAccountRepository: BankAccountRepositoryImpl
+    private val bankAccountRepository: UpdateBankAccountRepository,
+    private val createBankAccountRepository: CreateBankAccountRepository,
 ) : ScreenModel {
     // 📦 ถังเก็บข้อมูล
     private val _accountData = MutableStateFlow(
@@ -22,13 +33,25 @@ class BankAccountScreenModel(
             bankName = "",
             bankId = "",
             name = "",
-            amount = 0.0,
+            amount = Money(0),
             description = "",
             attachments = emptyList()
 
         )
     )
     val state = _accountData.asStateFlow()
+    private val udf = UiStateHolder(_accountData.value)
+    val uiState: StateFlow<UiState<BankAccountModel>> = udf.state
+    val effects = udf.effects
+    private var submitJob: Job? = null
+
+    fun onAction(action: FormAction<BankAccountModel>) {
+        when (action) {
+            is FormAction.Changed -> updateForm(action.value)
+            is FormAction.AttachmentsChanged -> updateAttachment(action.added, action.deleted)
+            is FormAction.Submit -> submitAccount(action.id)
+        }
+    }
 
     // ✍️ ฟังก์ชันอัปเดตข้อมูลจากหน้าฟอร์ม
     private val _addedAttachments = MutableStateFlow<List<Attachment>>(emptyList())
@@ -36,7 +59,6 @@ class BankAccountScreenModel(
 
 
     fun updateForm(data: BankAccountModel) {
-        println("data update succes " + data.name)
         _accountData.update {
             it.copy(
                type = data.type,
@@ -48,6 +70,7 @@ class BankAccountScreenModel(
                 attachments = data.attachments,
 
             ) }
+        udf.set(_accountData.value, isLoading = false, error = null)
     }
 
     fun updateAttachment(addedList: List<Attachment>,deletedList: List<Attachment>) {
@@ -88,8 +111,10 @@ class BankAccountScreenModel(
         )
     }
 
-    fun submitAccount(id:String, onSuccess: () -> Unit) {
-        screenModelScope.launch {
+    fun submitAccount(id:String, onSuccess: () -> Unit = {}) {
+        if (submitJob?.isActive == true) return
+        udf.loading()
+        val job = screenModelScope.launch {
             try {
 //                isLoading = true
 //                errorMessage = null
@@ -107,22 +132,52 @@ class BankAccountScreenModel(
                     // ✅ ดึง ID ที่ได้จาก API ของการสร้าง BankAccount
                     // สมมติว่า field id อยู่ใน bankAccountResponse.data.id หรือตาม Model ของคุณ
                     val createdItemId = bankAccountResponse.id
-                    println("✅ [ScreenModel] BankAccount Edit ID: $createdItemId")
+                    udf.success()
+                    udf.emit(FormEffect.Saved)
                     onSuccess()
 
                 }
                 else {
-                    println("❌ [ScreenModel] Edit BankAccount Failed")
+                    udf.failure(bankAccountResult.exceptionOrNull()?.toAppError()
+                        ?: IllegalStateException("Bank account update failed").toAppError())
                 }
 
-            } catch (e: Exception) {
-                println("❌ [ScreenModel] Exception: ${e.message}")
-//                errorMessage = e.message ?: "เกิดข้อผิดพลาดในการเชื่อมต่อ"
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                udf.failure(e.toAppError())
             } finally {
 //                isLoading = false
-                println("🏁 [ScreenModel] Process Finished.")
             }
         }
+        submitJob = job
+        job.invokeOnCompletion { if (submitJob === job) submitJob = null }
+    }
+
+    /** Creates a new bank account and returns its domain id to the share step. */
+    fun submitCreate(onSuccess: (String) -> Unit = {}) {
+        if (submitJob?.isActive == true) return
+        udf.loading()
+        val job = screenModelScope.launch {
+            try {
+                when (val result = createBankAccountRepository.createBankAccount(asRequest().copy(deleteListId = emptyList()))) {
+                    is com.wealthvault.core.architecture.AppResult.Success -> {
+                        val id = result.value.id.takeIf { it.isNotBlank() }
+                            ?: error("Bank account create response did not include an id")
+                        udf.success()
+                        udf.emit(FormEffect.Saved)
+                        onSuccess(id)
+                    }
+                    is com.wealthvault.core.architecture.AppResult.Failure -> udf.failure(result.error)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                udf.failure(e.toAppError())
+            }
+        }
+        submitJob = job
+        job.invokeOnCompletion { if (submitJob === job) submitJob = null }
     }
 
 }

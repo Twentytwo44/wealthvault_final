@@ -1,8 +1,8 @@
-package com.wealthvault_final.line_auth
+package com.wealthvault.line_auth
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import com.wealthvault_final.line_auth.model.LineUser
+import com.wealthvault.line_auth.model.LineUser
 import org.koin.compose.koinInject
 
 @Composable

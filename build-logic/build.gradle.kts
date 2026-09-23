@@ -7,7 +7,6 @@ group = "com.wealthvault.build_logic"
 dependencies {
     compileOnly(libs.kotlin.gradle.plugin)
     compileOnly(libs.android.build.gradle)
-    implementation(libs.mokkery.gradle)
 }
 
 gradlePlugin {
@@ -30,6 +29,21 @@ gradlePlugin {
         register("kmpApplicationPlugin") {
             id = "com.wealthvault.build_logic.application"
             implementationClass = "com.wealthvault.build_logic.plugin.KmpApplicationConventionPlugin"
+        }
+
+        register("architecturePlugin") {
+            id = "com.wealthvault.build_logic.architecture"
+            implementationClass = "com.wealthvault.build_logic.ArchitectureConventionPlugin"
+        }
+
+        register("performanceBudgetPlugin") {
+            id = "com.wealthvault.build_logic.performance"
+            implementationClass = "com.wealthvault.build_logic.PerformanceBudgetConventionPlugin"
+        }
+
+        register("coveragePlugin") {
+            id = "com.wealthvault.build_logic.coverage"
+            implementationClass = "com.wealthvault.build_logic.CoverageConventionPlugin"
         }
     }
 }

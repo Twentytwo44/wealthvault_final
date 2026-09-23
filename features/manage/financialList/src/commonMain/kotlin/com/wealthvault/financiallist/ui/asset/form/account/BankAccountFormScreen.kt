@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -45,13 +46,12 @@ import com.wealthvault.core.generated.resources.ic_common_back
 import com.wealthvault.core.theme.LightBg
 import com.wealthvault.core.theme.LightPrimary
 import com.wealthvault.core.utils.getScreenModel
-import com.wealthvault_final.`financial-asset`.Imagepicker.Attachment
-import com.wealthvault_final.`financial-asset`.Imagepicker.rememberFilePicker
-import com.wealthvault_final.`financial-asset`.model.BankAccountModel
-import com.wealthvault_final.`financial-asset`.ui.components.AssetTextField
-import com.wealthvault_final.`financial-asset`.ui.components.ReferenceImagepicker
-import com.wealthvault_final.`financial-asset`.ui.components.maptype.DropdownInput
-import com.wealthvault_final.`financial-asset`.ui.components.maptype.bankAccountTypes
+import com.wealthvault.core.model.Attachment
+import com.wealthvault.financiallist.ui.form.*
+import com.wealthvault.domain.portfolio.BankAccountModel
+import com.wealthvault.core.model.Money
+import com.wealthvault.financiallist.ui.form.FormErrorBanner
+import com.wealthvault.financiallist.ui.form.formErrorMessage
 import org.jetbrains.compose.resources.painterResource
 
 class BankAccountFormScreen(val id: String, val bankAccountData: BankAccountModel) : Screen {
@@ -59,8 +59,11 @@ class BankAccountFormScreen(val id: String, val bankAccountData: BankAccountMode
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<BankAccountScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
 
         BankAccountInputForm(
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
             onBackClick = { navigator.pop() },
             onNextClick = { data, addedList, deletedList ->
                 screenModel.updateForm(data)
@@ -78,12 +81,41 @@ class BankAccountFormScreen(val id: String, val bankAccountData: BankAccountMode
     }
 }
 
+/** Create flow owned by the financial-list feature. */
+data object CreateBankAccountFormScreen : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val screenModel = getScreenModel<BankAccountScreenModel>()
+        val uiState by screenModel.uiState.collectAsStateWithLifecycle()
+
+        BankAccountInputForm(
+            title = "ข้อมูลบัญชีธนาคาร",
+            submitLabel = "ต่อไป",
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error?.let(::formErrorMessage),
+            onBackClick = { navigator.pop() },
+            onNextClick = { data, addedList, deletedList ->
+                screenModel.updateForm(data)
+                screenModel.updateAttachment(addedList, deletedList)
+                screenModel.submitCreate { id ->
+                    navigator.push(com.wealthvault.financiallist.ui.shareasset.ShareAssetScreen("bank_account", id))
+                }
+            },
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BankAccountInputForm(
     onBackClick: () -> Unit = {},
     onNextClick: (BankAccountModel, List<Attachment>, List<Attachment>) -> Unit,
-    bankAccountData: BankAccountModel? = null
+    bankAccountData: BankAccountModel? = null,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+    title: String = "แก้ไขบัญชีธนาคาร",
+    submitLabel: String = "ยืนยันการแก้ไข",
 ) {
     // 🌟 1. ดึงข้อมูลเดิมมาตั้งค่าเริ่มต้น (แก้บัคหน้าแก้ไขว่างเปล่า)
     var name by remember { mutableStateOf(bankAccountData?.name ?: "") }
@@ -91,7 +123,7 @@ fun BankAccountInputForm(
     var bankName by remember { mutableStateOf(bankAccountData?.bankName ?: "") }
     var bankId by remember { mutableStateOf(bankAccountData?.bankId ?: "") }
     var description by remember { mutableStateOf(bankAccountData?.description ?: "") }
-    var amount by remember { mutableStateOf(bankAccountData?.amount?.toString() ?: "") }
+    var amount by remember { mutableStateOf(bankAccountData?.amount?.decimalString() ?: "") }
 
     val originalAssets = remember {
         mutableStateListOf<Attachment>().apply {
@@ -110,7 +142,8 @@ fun BankAccountInputForm(
     }
 
     // เช็คข้อมูลจำเป็น
-    val isFormValid = name.isNotBlank() && type.isNotBlank() && bankName.isNotBlank() && bankId.isNotBlank() && amount.isNotBlank()
+    val isFormValid = name.isNotBlank() && type.isNotBlank() && bankName.isNotBlank() &&
+        bankId.isNotBlank() && Money.fromDecimal(amount) != null
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -133,7 +166,7 @@ fun BankAccountInputForm(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "แก้ไขบัญชีธนาคาร",
+                        text = title,
                         style = MaterialTheme.typography.titleLarge,
                         color = LightPrimary
                     )
@@ -150,7 +183,7 @@ fun BankAccountInputForm(
                             bankName = bankName,
                             bankId = bankId,
                             description = description,
-                            amount = amount.toDoubleOrNull() ?: 0.0,
+                            amount = Money.fromDecimal(amount) ?: Money(0),
                             attachments = currentAssets // ใช้รายการปัจจุบัน
                         )
 
@@ -164,9 +197,13 @@ fun BankAccountInputForm(
                     modifier = Modifier.fillMaxWidth().height(46.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = LightPrimary),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = isFormValid
+                    enabled = isFormValid && !isLoading
                 ) {
-                    Text("ยืนยันการแก้ไข", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                    Text(
+                        if (isLoading) "กำลังบันทึก..." else submitLabel,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White,
+                    )
                 }
             }
         }
@@ -178,6 +215,7 @@ fun BankAccountInputForm(
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            FormErrorBanner(errorMessage)
 
             DropdownInput(
                 label = "ประเภทบัญชีธนาคาร",
@@ -211,7 +249,7 @@ fun BankAccountInputForm(
 
             AssetTextField(
                 value = amount,
-                onValueChange = { if (it.isEmpty() || it.all { char -> char.isDigit() }) amount = it },
+                onValueChange = { if (isDecimalInput(it)) amount = it },
                 label = "จำนวน*",
                 placeholder = "0.00",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)

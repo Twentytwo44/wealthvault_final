@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class grantaccess(
+internal data class grantaccess(
     @SerialName("status")
     val status: String? = null,
 

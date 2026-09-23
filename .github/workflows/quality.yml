@@ -1,0 +1,275 @@
+name: WealthVault quality gates
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - optimize-v1
+  workflow_dispatch:
+    inputs:
+      run_performance:
+        description: Run the full five-sample runtime and build performance acceptance gates
+        required: true
+        default: false
+        type: boolean
+
+concurrency:
+  group: wealthvault-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  architecture:
+    name: Architecture ratchet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify dependency direction and forbidden imports
+        run: >-
+          ./gradlew
+          verifyArchitecture
+          verifyDatabaseMigrations
+          -PstrictArchitecture=true
+          --no-daemon
+
+  android:
+    name: Android compile and host tests
+    needs: architecture
+    runs-on: [self-hosted, macos, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Run Android usability gate and compile benchmark target
+        run: >-
+          ./gradlew
+          verifyUsability
+          :benchmarks:compileBenchmarkSources
+          :benchmarks:assembleBenchmark
+          koverXmlReportAndroidAll
+          --no-daemon
+      - name: Export and verify measured Android coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/coverage/inputs
+          python3 tools/export_kover_coverage.py \
+            --root . \
+            --output build/coverage/inputs/android-kover.properties
+          ./gradlew \
+            collectCoverageMetrics \
+            -PcoverageInputs=build/coverage/inputs \
+            -PcoverageMetrics=build/coverage/metrics.properties \
+            --no-daemon
+          ./gradlew \
+            verifyCoverage \
+            -PcoverageMetrics=build/coverage/metrics.properties \
+            -PstrictCoverage=true \
+            --no-daemon
+      - name: Upload Android coverage inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-coverage-inputs
+          path: build/coverage/inputs
+          if-no-files-found: error
+      - name: Verify a usable Android device is attached
+        shell: bash
+        run: |
+          if ! adb devices | awk 'NR > 1 && $2 == "device" { found = 1 } END { exit(found ? 0 : 1) }'; then
+            echo "No Android emulator/device is attached to the self-hosted runner."
+            exit 1
+          fi
+      - name: Run Android production launch smoke test on the configured emulator
+        run: ./gradlew :androidApp:connectedDebugAndroidTest --no-daemon
+      - name: Run Android Macrobenchmark on the configured emulator
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+        run: ./gradlew :benchmarks:connectedBenchmarkAndroidTest --no-daemon
+      - name: Export measured Android benchmark properties
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/performance/android-benchmark build/performance/inputs
+          report="$(find benchmarks/build -type f \( -name benchmarkData.json -o -name '*-benchmarkData.json' \) -print -quit)"
+          if [[ -n "${report}" ]]; then
+            cp "${report}" build/performance/android-benchmark/benchmarkData.json
+          else
+            adb pull /sdcard/Download/wealthvault-benchmark build/performance/android-benchmark
+          fi
+          python3 tools/collect_android_performance.py \
+            --input build/performance/android-benchmark \
+            --output build/performance/inputs/android-benchmark.properties
+          # The release-size task ran before the connected tests. Preserve its
+          # measured output before the build-timing probe performs a clean.
+          test -f androidApp/build/performance/artifacts.properties
+          cp androidApp/build/performance/artifacts.properties \
+            build/performance/inputs/android-artifacts.properties
+      - name: Measure Android Gradle performance (five runs)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+        run: >-
+          python3 tools/measure_gradle_performance.py
+          --runs 5
+          --measurement gradle_configuration_ms help
+          --measurement warm_incremental_build_ms :androidApp:compileDebugKotlin
+          --measurement clean_android_build_ms clean :androidApp:assembleRelease
+          --gradle-arg=--no-daemon
+          --gradle-arg=--no-configuration-cache
+          --output build/performance/inputs/android-build.properties
+      - name: Upload Android measurement inputs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-performance-inputs
+          path: build/performance/inputs
+          if-no-files-found: error
+
+  ios:
+    name: iOS simulator framework
+    needs: architecture
+    runs-on: [self-hosted, macos, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Prepare CocoaPods workspace
+        run: >-
+          ./gradlew
+          :composeApp:generateDummyFramework
+          :composeApp:podspec
+          --no-daemon
+      - name: Install CocoaPods dependencies
+        run: pod install --project-directory=iosApp
+      - name: Build iOS app workspace smoke target
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Leave the OS unspecified so the fixed runner can use its installed
+          # simulator runtime; callers can still pin one with the environment.
+          destination="${IOS_SIMULATOR_DESTINATION:-platform=iOS Simulator,name=iPhone 16 Pro}"
+          xcodebuild \
+            -workspace iosApp/iosApp.xcworkspace \
+            -scheme iosApp \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination "$destination" \
+            build \
+            -quiet
+      - name: Run iOS XCTest and export measured coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          destination="${IOS_SIMULATOR_DESTINATION:-platform=iOS Simulator,name=iPhone 16 Pro}"
+          result_bundle="${RUNNER_TEMP}/wealthvault-ios-tests-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.xcresult"
+          mkdir -p build/coverage/inputs
+          xcodebuild \
+            -workspace iosApp/iosApp.xcworkspace \
+            -scheme iosApp \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination "$destination" \
+            -resultBundlePath "$result_bundle" \
+            -enableCodeCoverage YES \
+            test \
+            -quiet
+          python3 tools/export_ios_xctest_coverage.py \
+            --result-bundle "$result_bundle" \
+            --output build/coverage/inputs/ios-xctest.properties
+      - name: Link framework and run iOS shared tests
+        run: >-
+          ./gradlew
+          verifyUsabilityIos
+          --no-daemon
+      - name: Stage iOS measurement inputs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+        shell: bash
+        run: |
+          mkdir -p build/performance/inputs build/coverage/inputs
+          python3 tools/measure_gradle_performance.py \
+            --runs 5 \
+            --measurement ios_simulator_link_ms :composeApp:linkPodDebugFrameworkIosSimulatorArm64 \
+            --gradle-arg=--no-daemon \
+            --gradle-arg=--no-configuration-cache \
+            --output build/performance/inputs/ios-build.properties
+          touch build/performance/inputs/README.txt
+      - name: Upload iOS measurement inputs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-performance-inputs
+          path: build/performance/inputs
+          if-no-files-found: error
+      - name: Upload iOS coverage inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-coverage-inputs
+          path: build/coverage/inputs
+          if-no-files-found: error
+
+  metrics:
+    name: Aggregate full measured acceptance metrics
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+    needs: [android, ios]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Download Android performance inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: android-performance-inputs
+          path: build/performance/inputs
+      - name: Download iOS performance inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-performance-inputs
+          path: build/performance/inputs
+      - name: Download Android coverage inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: android-coverage-inputs
+          path: build/coverage/inputs
+      - name: Download iOS coverage inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-coverage-inputs
+          path: build/coverage/inputs
+      - name: Collect and verify strict metrics
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew \
+            collectPerformanceMetrics \
+            -PperformanceInputs=build/performance/inputs \
+            -PperformanceMetrics=build/performance/metrics.properties \
+            --no-daemon
+          ./gradlew \
+            collectCoverageMetrics \
+            -PcoverageInputs=build/coverage/inputs \
+            -PcoverageMetrics=build/coverage/metrics.properties \
+            --no-daemon
+          ./gradlew \
+            verifyPerformanceBudgets \
+            verifyCoverage \
+            -PperformanceMetrics=build/performance/metrics.properties \
+            -PcoverageMetrics=build/coverage/metrics.properties \
+            -PstrictPerformance=true \
+            -PstrictCoverage=true \
+            --no-daemon
