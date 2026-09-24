@@ -1,7 +1,7 @@
 package com.wealthvault.social
 
-import com.wealthvault.social.data.websocket.WebSocketGroupChatGateway
-import com.wealthvault.social.data.websocket.WebSocketTransport
+import com.wealthvault.data.social.repository.websocket.WebSocketGroupChatGateway
+import com.wealthvault.data.social.repository.websocket.WebSocketTransport
 import com.wealthvault.domain.social.GroupChatAction
 import com.wealthvault.domain.social.GroupChatEvent
 import kotlinx.serialization.json.Json

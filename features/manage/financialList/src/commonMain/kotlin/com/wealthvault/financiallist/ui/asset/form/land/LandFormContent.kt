@@ -216,14 +216,14 @@ fun LandInputForm(
 
             // --- ส่วนอ้างอิงอาคาร (Master UI Style) ---
             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                ReferenceHeader(title = "อาคาร / สิ่งปลูกสร้างบนที่ดินนี้", onAddClick = { showBuildingsheet = true })
+                LandReferenceHeader(title = "อาคาร / สิ่งปลูกสร้างบนที่ดินนี้", onAddClick = { showBuildingsheet = true })
                 Spacer(modifier = Modifier.height(8.dp))
 
                 if (currentBuilding.isEmpty()) {
-                    EmptyReferenceBox(onClick = { showBuildingsheet = true })
+                    LandEmptyReferenceBox(onClick = { showBuildingsheet = true })
                 } else {
                     currentBuilding.forEach { build ->
-                        ReferenceItem(name = build.areaName) { currentBuilding.remove(build) }
+                        LandReferenceItem(name = build.areaName) { currentBuilding.remove(build) }
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -289,89 +289,5 @@ private fun CustomNumericField(value: String, onValueChange: (String) -> Unit, l
                 }
             }
         )
-    }
-}
-
-@Composable
-private fun ReferenceHeader(title: String, onAddClick: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Text(title, style = MaterialTheme.typography.bodyMedium, color = LightPrimary)
-        Icon(painterResource(Res.drawable.ic_common_plus), null, tint = LightPrimary, modifier = Modifier.size(24.dp).clickable { onAddClick() })
-    }
-}
-
-@Composable
-private fun EmptyReferenceBox(onClick: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxWidth().height(44.dp).background(LightSoftWhite, RoundedCornerShape(12.dp))
-            .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp)).clickable { onClick() },
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Text("ยังไม่มีรายการ", color = Color.LightGray, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(horizontal = 16.dp))
-    }
-}
-
-@Composable
-private fun ReferenceItem(name: String, onRemove: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().height(44.dp).background(LightSoftWhite, RoundedCornerShape(12.dp))
-            .border(1.dp, LightBorder.copy(alpha = 0.5f), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(name, style = MaterialTheme.typography.bodyLarge, color = LightText, modifier = Modifier.weight(1f))
-        Icon(painterResource(Res.drawable.ic_common_bin), null, tint = Color(0xFFDC4A3C).copy(alpha = 0.6f), modifier = Modifier.size(20.dp).clickable { onRemove() })
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BuildingSelectionBottomSheet(
-    alreadySelected: List<RefModel>,
-    onDismiss: () -> Unit,
-    onConfirm: (List<RefModel>) -> Unit,
-    BuildingData: List<GetBuildingData>
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val buildings = remember(BuildingData) { BuildingData.map { RefModel(areaName = it.name?:"", areaId = it.id?:"") } }
-    val tempSelected = remember { mutableStateListOf<RefModel>().apply { addAll(alreadySelected) } }
-
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = Color.White) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding()) {
-            Text("เลือกอาคาร/ตึกอ้างอิง", style = MaterialTheme.typography.titleMedium, color = LightPrimary)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(modifier = Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(
-                    items = buildings,
-                    key = { build -> build.areaId },
-                ) { build ->
-                    val isChecked = tempSelected.any { it.areaId == build.areaId }
-                    Surface(
-                        onClick = { if (isChecked) tempSelected.removeAll { it.areaId == build.areaId } else tempSelected.add(build) },
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (isChecked) LightBg else Color.White,
-                        border = BorderStroke(1.dp, if (isChecked) LightPrimary else LightBorder),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(build.areaName, fontWeight = FontWeight.Medium)
-                                Text("ID อาคาร: ${build.areaId}", fontSize = 12.sp, color = Color.Gray)
-                            }
-                            Checkbox(checked = isChecked, onCheckedChange = null, colors = CheckboxDefaults.colors(checkedColor = LightPrimary))
-                        }
-                    }
-                }
-            }
-
-            Button(
-                onClick = { onConfirm(tempSelected.toList()) },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(46.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = LightPrimary)
-            ) {
-                Text("ตกลง (${tempSelected.size})", color = Color.White)
-            }
-        }
     }
 }

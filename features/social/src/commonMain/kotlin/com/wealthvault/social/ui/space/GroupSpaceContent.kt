@@ -268,10 +268,13 @@ fun GroupSpaceContent(
         }
 
         // --- ส่วนที่ 4: Dialogs ---
-        if (selectedAssetId != null && selectedAssetType != null) {
+        val selectedAsset = selectedAssetId?.let { assetId ->
+            selectedAssetType?.let { assetType -> assetId to assetType }
+        }
+        selectedAsset?.let { (assetId, assetType) ->
             SmartAssetDetailDialog(
-                assetId = selectedAssetId!!,
-                assetType = selectedAssetType!!,
+                assetId = assetId,
+                assetType = assetType,
                 showBottomMenu = false,
                 onDismiss = {
                     selectedAssetId = null

@@ -7,7 +7,7 @@ import com.wealthvault.data.social.share.transport.unsharefriend.UnShareFriendAp
 import com.wealthvault.data.social.share.transport.unsharegroup.UnShareGroupApi
 import com.wealthvault.domain.social.ShareFriend
 import com.wealthvault.domain.social.ShareGroup
-import com.wealthvault.social.data.share.UnshareRepositoryImpl
+import com.wealthvault.data.social.repository.share.UnshareRepositoryImpl
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

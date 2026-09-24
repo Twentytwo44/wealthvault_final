@@ -8,18 +8,21 @@ This file is the measurement contract for the staged architecture migration. A
 release build, a warmed device/simulator, and five repetitions are required
 before changing a budget. The `benchmarks` module now provides five-iteration
 Android cold/warm Macrobenchmarks (startup, frame timing, and peak memory) and
-a Baseline Profile target; a runner must still execute them
+a Baseline Profile producer consumed by the release app; a runner must still execute them
 on a fixed device and pass the resulting properties to
 `verifyPerformanceBudgets -PstrictPerformance=true` before runtime values are
 marked as measured. The verifier also supports a ten-percent regression
 ratchet against a main-branch metrics export; a suspected regression must be
 confirmed by a second fresh run before CI fails.
 
+For the fixed-runner commands and preflight checklist, see
+[`docs/performance-runbook.md`](performance-runbook.md).
+
 ## Current checkpoint
 
 - Branch: `optimize-v1`
 - Android debug APK: 52,735,415 bytes (50.3 MiB)
-- Android release APK: 26,086,488 bytes (24.9 MiB), unsigned, R8 + resource shrinking enabled
+- Android release APK: 25,969,812 bytes (24.8 MiB), unsigned, R8 + resource shrinking enabled
 - Android benchmark APK uses a separate non-debuggable, debug-signed `benchmark`
   build type so Macrobenchmark can install it without requiring production
   signing material; it is not used for release distribution.
@@ -45,13 +48,38 @@ platform's measurements have been included. The aggregation job is expected to
 fail until the self-hosted runners publish real five-run properties; the
 release APK size file alone is intentionally insufficient.
 
+After a successful measured run, the aggregation job uploads
+`performance-metrics` as the main-branch baseline artifact. Later manual
+performance runs search successful `main` workflow runs and pass that artifact
+to `verifyPerformanceBudgets`. A baseline must contain all budget metrics and
+at least five samples; a suspected regression still requires a complete,
+five-sample confirmation export before it can be cleared. The first measured
+main run is the bootstrap point, so no baseline comparison is possible until
+that artifact exists.
+
 The Android job enables AndroidX Macrobenchmark's `benchmarkData.json` output
-and converts its cold-start, warm-start, peak-memory, and startup frame-overrun
-samples with `tools/collect_android_performance.py`. A prefixed report name such as
+and converts its cold-start, warm-start, cached-dashboard, peak-memory, and
+startup frame-overrun samples with `tools/collect_android_performance.py`. A
+prefixed report name such as
 `com.example-benchmarkData.json` is accepted as well as the bare filename.
 Frame overrun from the startup scenario is a diagnostic proxy, not the final
-scrolling-jank gate; metrics that require an app trace, a scrolling scenario,
-or a navigation loop must be supplied as a measured supplement properties file.
+scrolling-jank gate. The benchmark has a dedicated deterministic
+`cachedDashboardContent` route for the cache-hit time-to-content row, while
+`tools/measure_android_navigation_memory.py` performs five fresh samples of ten
+navigation loops and exports the retained-memory row. Metrics that require an
+app trace or a device-specific supplement must still be supplied as measured
+properties; no budget values are inferred from a missing trace.
+The iOS performance XCTest is selected only for an explicit performance run;
+the normal CI test command excludes it with `-skip-testing`. The test drives a
+test-only UIKit scroll probe and records both XCTest's built-in
+scrolling/deceleration signpost and the probe's matching `WealthVaultScroll`
+animation signpost in the resulting `.xcresult` bundle. On the current
+simulator, XCTest exposes those intervals as seconds rather than a
+hitch-time-ratio (`ms/s`) sample, so `tools/export_ios_runtime_performance.py`
+intentionally refuses to turn them into `ios_hitch_ms_per_s`. A fixed
+runner/device must provide the native hitch ratio before the strict iOS
+performance gate can pass; a skipped or incomplete result never creates a
+placeholder value.
 The converter refuses placeholders and the aggregator refuses missing keys.
 
 The fixed runner also executes `tools/measure_gradle_performance.py` five times
@@ -61,13 +89,21 @@ link runs (`:composeApp:linkPodDebugFrameworkIosSimulatorArm64`). These timings
 are uploaded as separate measured property files and are merged only after both
 platform jobs finish. The iOS app workspace is built through the generated
 `composeApp` podspec before the shared framework tests run.
+The iOS job also exports the linked framework's measured byte size. The first
+successful main run is the bootstrap baseline; later runs derive
+`ios_framework_growth_percent` from the previous main artifact instead of
+comparing against a guessed or checked-in number.
 
 To validate the contract locally without device metrics:
 
 ```shell
-./gradlew :benchmarks:compileBenchmarkSources :benchmarks:assembleBenchmark
+./gradlew :benchmarks:compileBenchmarkBenchmarkSources :benchmarks:assembleBenchmarkBenchmark
 ./gradlew verifyPerformanceBudgets
 ```
+
+The CI workflow performs the same baseline lookup automatically when the
+`performance-metrics` artifact is available on `main`; local runs can use the
+explicit property above.
 
 The second command intentionally reports `pending` until
 `build/performance/metrics.properties` exists. CI should run the connected
@@ -130,7 +166,7 @@ second run when the first run exceeds the tolerance:
 | Android jank | < 5% | dedicated scroll benchmark implemented; fixed-runner export pending | pending |
 | iOS hitch time | < 5 ms/s | pending | pending |
 | Retained memory after 10 navigation loops | ≤ +10 MB | pending | pending |
-| Android release APK | ≤ 35 MB | 26,086,488 bytes | pass (local release build) |
+| Android release APK | ≤ 35 MB | 25,969,812 bytes | pass (local release build) |
 | iOS framework growth | ≤ +10% | pending | pending |
 | Gradle configuration | ≤ 5 s | 4.133 s | pass (local five-run probe) |
 | Warm incremental build | ≤ 20 s | pending | pending |

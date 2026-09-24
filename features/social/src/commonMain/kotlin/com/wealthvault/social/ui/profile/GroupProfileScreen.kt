@@ -75,8 +75,9 @@ class GroupProfileScreen(
         }
 
         var rootNavigator = navigator
-        while (rootNavigator.parent != null) {
-            rootNavigator = rootNavigator.parent!!
+        while (true) {
+            val parentNavigator = rootNavigator.parent ?: break
+            rootNavigator = parentNavigator
         }
 
         val screenModel = getScreenModel<GroupProfileScreenModel>()

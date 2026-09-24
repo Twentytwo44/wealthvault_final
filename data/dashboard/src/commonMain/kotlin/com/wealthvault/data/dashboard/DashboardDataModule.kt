@@ -1,9 +1,9 @@
 package com.wealthvault.data.dashboard
 
 import com.wealthvault.core.KoinConst
-import com.wealthvault.dashboard.data.DashboardDataSource
-import com.wealthvault.dashboard.data.DashboardRemoteDataSource
-import com.wealthvault.dashboard.data.DashboardRepositoryImpl
+import com.wealthvault.data.dashboard.repository.DashboardDataSource
+import com.wealthvault.data.dashboard.repository.DashboardRemoteDataSource
+import com.wealthvault.data.dashboard.repository.DashboardRepositoryImpl
 import com.wealthvault.domain.portfolio.DashboardRepository
 import io.ktor.client.HttpClient
 import org.koin.core.module.Module

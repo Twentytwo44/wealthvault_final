@@ -11,6 +11,8 @@ android_jank_percent=<measured>
 ios_hitch_ms_per_s=<measured>
 retained_memory_delta_mb=<measured>
 android_release_apk_bytes=<measured>
+# The iOS exporter also records ios_framework_size_bytes; the collector derives
+# ios_framework_growth_percent from the previous main artifact (or bootstrap).
 ios_framework_growth_percent=<measured>
 gradle_configuration_ms=<measured>
 warm_incremental_build_ms=<measured>

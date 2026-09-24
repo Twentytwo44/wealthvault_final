@@ -60,6 +60,9 @@ domain contracts; data code owns API DTO mapping, persistence, and cache policy.
   graph; active transport and mapper packages use `com.wealthvault.data.auth.*`,
   while the original source tree remains as an uncompiled compatibility
   archive.
+- Auth transport interfaces and implementations are internal to `data:auth`,
+  so the shared framework exports domain contracts rather than endpoint
+  details while keeping the backend contract unchanged.
 - The shared authenticated Ktor client and single-flight refresh coordinator are
   now owned and compiled from `base:network`; the former
   `functional:api:setup-api` project is retired from the graph and active
@@ -188,6 +191,9 @@ values; the current `feature_transport_serialization_imports` count is zero.
 - Domain modules communicate through `core:model` and contracts rather than
   depending directly on another bounded-context domain module;
   `domain_to_domain_dependencies` must remain zero.
+- The device-registration mutation result follows the same shared-model rule:
+  auth and notification adapters use `core:model`, while the old notification
+  package name remains a source-compatible alias for downstream callers.
 - The ratchet also blocks new feature build edges to the retained
   `base:financial-common` compatibility presentation bundle; its current
   `feature_to_compatibility_dependencies` count is zero.
@@ -209,7 +215,7 @@ values; the current `feature_transport_serialization_imports` count is zero.
   contracts. `verifyArchitecture` scans all production `ScreenModel` files and
   ratchets `screen_model_udf_gaps` to zero.
 - `verifyArchitecture` now also enforces a hard 35-module Gradle graph budget;
-  the current settings graph contains 28 registered modules.
+  the current settings graph contains 26 registered modules.
 
 ## Verification
 

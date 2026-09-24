@@ -45,8 +45,9 @@ class GroupScreen : Screen {
         // 🌟 1. ดึง Root Navigator เพื่อซ่อน Bottom Bar
         val navigator = LocalNavigator.currentOrThrow
         var rootNavigator = navigator
-        while (rootNavigator.parent != null) {
-            rootNavigator = rootNavigator.parent!!
+        while (true) {
+            val parentNavigator = rootNavigator.parent ?: break
+            rootNavigator = parentNavigator
         }
 
         LaunchedEffect(Unit) {

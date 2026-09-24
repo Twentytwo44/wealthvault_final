@@ -57,6 +57,29 @@ class StartupBenchmark {
         startActivityAndWait()
     }
 
+    /**
+     * Measures the dashboard route with deterministic, already-materialized
+     * data.  This is the cache-hit proxy used for the dashboard
+     * time-to-content budget; it deliberately avoids the network/session
+     * setup so the result isolates Compose rendering and list composition.
+     */
+    @Test
+    fun cachedDashboardContent() = benchmarkRule.measureRepeated(
+        packageName = APPLICATION_ID,
+        metrics = listOf(
+            StartupTimingMetric(),
+            FrameTimingMetric(),
+        ),
+        iterations = 5,
+        startupMode = StartupMode.WARM,
+        setupBlock = { pressHome() },
+    ) {
+        val dashboardIntent = Intent().setComponent(
+            ComponentName(APPLICATION_ID, "com.wealthvault.app.BenchmarkDashboardActivity"),
+        )
+        startActivityAndWait(dashboardIntent)
+    }
+
     @Test
     fun dashboardScrolling() = benchmarkRule.measureRepeated(
         packageName = APPLICATION_ID,
@@ -100,5 +123,20 @@ class BaselineProfileBenchmark {
     ) {
         pressHome()
         startActivityAndWait()
+        // Keep the profile useful beyond the splash/login classes: the
+        // benchmark-only route renders the real dashboard composable with a
+        // stable list, so profile collection does not depend on backend data.
+        startActivityAndWait(
+            Intent().setComponent(
+                ComponentName(APPLICATION_ID, "com.wealthvault.app.BenchmarkDashboardActivity"),
+            ),
+        )
+        device.waitForIdle()
+        val centerX = device.displayWidth / 2
+        val bottomY = (device.displayHeight * 0.86f).toInt()
+        val topY = (device.displayHeight * 0.20f).toInt()
+        repeat(5) {
+            device.swipe(centerX, bottomY, centerX, topY, 18)
+        }
     }
 }

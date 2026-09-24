@@ -152,6 +152,11 @@ abstract class VerifyArchitectureTask : DefaultTask() {
         val dataBuildFiles = projectBuildInputs.files.filter {
             it.path.contains("${File.separator}data${File.separator}")
         }
+        val androidLauncherBuildFiles = projectBuildInputs.files.filter {
+            it.path.endsWith(
+                "${File.separator}androidApp${File.separator}build.gradle.kts",
+            )
+        }
         // Legacy transport sources are compiled by bounded-context data
         // modules during the staged migration. Scan them with the data layer
         // as well, so a compatibility adapter cannot import presentation or
@@ -181,6 +186,48 @@ abstract class VerifyArchitectureTask : DefaultTask() {
                 !file.path.contains(
                     "${File.separator}functional${File.separator}api${File.separator}line-auth${File.separator}",
                 )
+        }
+        // Package declarations and physical source roots must tell the same
+        // story. Compatibility archives intentionally retain their historical
+        // paths, but an active source set must not reintroduce a
+        // `wealthvault_final`, `data_store`, `setup_api`, or endpoint-suffix
+        // directory after a namespace migration has completed.
+        val activeLegacyPhysicalRoots = productionSources.filter { file ->
+            val path = file.path
+            val isCompatibilityArchive =
+                path.contains("${File.separator}functional${File.separator}") ||
+                    path.contains("${File.separator}base${File.separator}financial-common${File.separator}")
+            !isCompatibilityArchive &&
+                (
+                    path.contains("${File.separator}com${File.separator}wealthvault_final${File.separator}") ||
+                        path.contains("${File.separator}com${File.separator}wealthvault${File.separator}data_store${File.separator}") ||
+                        path.contains("${File.separator}setup_api${File.separator}") ||
+                        path.contains("${File.separator}auth-api${File.separator}") ||
+                        path.contains("${File.separator}notification_api${File.separator}") ||
+                        path.contains("${File.separator}group_api${File.separator}") ||
+                        path.contains("${File.separator}share_api${File.separator}") ||
+                        path.contains("${File.separator}google_auth${File.separator}")
+                    )
+        }
+        val activePlaceholderTestFiles = root.walkTopDown()
+            .filter { file ->
+                file.isFile &&
+                    file.path.contains("${File.separator}src${File.separator}") &&
+                    (file.name.contains("Example") || file.name.contains("Placeholder")) &&
+                    !file.path.contains("${File.separator}functional${File.separator}") &&
+                    !file.path.contains("${File.separator}base${File.separator}financial-common${File.separator}")
+            }
+            .toList()
+        // Every active Kotlin source must live in the migrated namespace. A
+        // default-package declaration can compile on one target and still
+        // bypass the dependency checks, so count only files that contain
+        // real code after comments are removed.
+        val activeUnscopedPackageFiles = productionSources.filter { file ->
+            val source = stripComments(file.readText()).trim()
+            source.isNotEmpty() &&
+                !Pattern.compile("(?m)^\\s*package\\s+com\\.wealthvault(?:\\.|$)")
+                    .matcher(source)
+                    .find()
         }
         val nonDataBoundarySources = featureSources + domainSources + compatibilitySources + compositionRootSources
 
@@ -254,6 +301,16 @@ abstract class VerifyArchitectureTask : DefaultTask() {
                 dataBuildFiles,
                 Pattern.compile("project\\(\\\":(?:androidApp|composeApp|main):"),
             ),
+            // The Android launcher is a platform shell. Its implementation
+            // graph must enter through composeApp, which is the sole
+            // composition root for feature/data/security wiring.
+            "android_launcher_forbidden_project_dependencies" to countMatches(
+                androidLauncherBuildFiles,
+                Pattern.compile(
+                    "(?m)^\\s*implementation\\(project\\(\\\":(?:data|domain|features):|" +
+                        "(?m)^\\s*implementation\\(project\\(\\\":base:(?:config|database|network|security)\\\"",
+                ),
+            ),
             "compatibility_to_data_dependencies" to countMatches(
                 projectBuildInputs.filter { file ->
                     file.path.contains("${File.separator}base${File.separator}financial-common${File.separator}")
@@ -268,6 +325,9 @@ abstract class VerifyArchitectureTask : DefaultTask() {
                     "(?s)kotlin\\.srcDirs\\([^)]*functional/(?:api|data-store|notification)/src",
                 ),
             ),
+            "legacy_physical_source_roots" to activeLegacyPhysicalRoots.size,
+            "active_placeholder_test_files" to activePlaceholderTestFiles.size,
+            "active_unscoped_packages" to activeUnscopedPackageFiles.size,
             "feature_source_root_edges" to countMatches(
                 featureLayerBuildFiles,
                 Pattern.compile("(?s)kotlin\\.srcDirs?\\([^)]*features/[^)]*/src"),

@@ -60,8 +60,9 @@ class DashboardScreen : Screen {
         val financialMenuScreen = rememberScreen(SharedScreen.FinancialMenu)
 
         var rootNavigator = navigator
-        while (rootNavigator.parent != null) {
-            rootNavigator = rootNavigator.parent!!
+        while (true) {
+            val parentNavigator = rootNavigator.parent ?: break
+            rootNavigator = parentNavigator
         }
         var selectedTab by remember { mutableStateOf(DashboardTab.ASSET) }
 

@@ -70,8 +70,9 @@ class FriendSpaceScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         var rootNavigator = navigator
-        while (rootNavigator.parent != null) {
-            rootNavigator = rootNavigator.parent!!
+        while (true) {
+            val parentNavigator = rootNavigator.parent ?: break
+            rootNavigator = parentNavigator
         }
         val screenModel = getScreenModel<FriendSpaceScreenModel>()
 
@@ -249,10 +250,13 @@ fun FriendSpaceContent(
         }
 
         // --- ส่วนที่ 4: Dialogs ---
-        if (selectedAssetId != null && selectedAssetType != null) {
+        val selectedAsset = selectedAssetId?.let { assetId ->
+            selectedAssetType?.let { assetType -> assetId to assetType }
+        }
+        selectedAsset?.let { (assetId, assetType) ->
             SmartAssetDetailDialog(
-                assetId = selectedAssetId!!,
-                assetType = selectedAssetType!!,
+                assetId = assetId,
+                assetType = assetType,
                 showBottomMenu = false,
                 onDismiss = {
                     selectedAssetId = null

@@ -1,4 +1,4 @@
-package preview_screen.manage
+package com.wealthvault.app.preview.manage
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview

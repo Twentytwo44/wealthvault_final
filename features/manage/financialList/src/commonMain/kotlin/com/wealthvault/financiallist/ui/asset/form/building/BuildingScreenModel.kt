@@ -168,66 +168,15 @@ class BuildingScreenModel(
         _deleteIns.update { deletedIns }
     }
 
-    private fun asRequest(): BuildingRequest {
-        val current = _state.value
-
-
-
-        // ✅ Map ข้อมูลให้มีทั้ง Byte, MimeType และ ชื่อไฟล์
-        val allFiles = _addedAttachments.value.mapNotNull { attachment ->
-            val bytes = attachment.platformData as? ByteArray ?: return@mapNotNull null
-
-            // เช็กว่าเป็น PDF หรือ รูปภาพ
-            val isPdf = attachment.name.endsWith(".pdf", ignoreCase = true) || attachment.type.toString().contains("PDF")
-            val mimeType = if (isPdf) "application/pdf" else "image/jpeg"
-            val extension = if (isPdf) "pdf" else "jpg"
-
-            // ตั้งชื่อไฟล์ (เอา symbol มาต่อกับ index หรือเวลาเพื่อไม่ให้ซ้ำ)
-            val fileName = "${current.buildingName}.$extension"
-
-            BuildingFileUploadData(bytes = bytes, mimeType = mimeType, fileName = fileName)
-        }
-
-        return BuildingRequest(
-            type = current.type,
-            name = current.buildingName,
-
-            area = current.area,
-            amount = current.amount,
-            description = current.description,
-            locationAddress = current.locationAddress,
-            locationSubDistrict = current.locationSubDistrict,
-            locationDistrict = current.locationDistrict,
-            locationProvince = current.locationProvince,
-            locationPostalCode = current.locationPostalCode,
-            files = allFiles,
-            insIds = _addedIns.value.map { data ->
-                InsReferenceData(
-                    insName = data.insName,
-                    insId = data.insId
-                )
-            },
-            deleteInsListId = _deleteIns.value.map { data ->
-                InsReferenceData(
-                    insName = data.insName,
-                    insId = data.insId
-                )
-            },
-            referenceIds = _addedRef.value.map { data ->
-                BuildingReferenceData(
-                    areaName = data.areaName,
-                    areaId = data.areaId
-                )
-            },
-            deleteRefListId = _deleteRef.value.map {data ->
-                BuildingReferenceData(
-                    areaName = data.areaName,
-                    areaId = data.areaId
-                )
-            },
-            deleteListId = _deleteAttachments.value.map { it.id ?: "" }
-        )
-    }
+    private fun asRequest(): BuildingRequest = buildBuildingRequest(
+        current = _state.value,
+        addedAttachments = _addedAttachments.value,
+        deletedAttachments = _deleteAttachments.value,
+        addedReferences = _addedRef.value,
+        deletedReferences = _deleteRef.value,
+        addedInsurance = _addedIns.value,
+        deletedInsurance = _deleteIns.value
+    )
 
 
 

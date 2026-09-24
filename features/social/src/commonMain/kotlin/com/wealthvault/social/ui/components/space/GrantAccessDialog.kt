@@ -148,122 +148,15 @@ fun InlineGrantAccessCard(
                     ) {
                         assetList.forEach { asset ->
                             val assetId = asset.groupItemId ?: return@forEach
-                            val assetName = asset.assetDetail?.name ?: "ไม่ระบุชื่อ"
-                            val isChecked = selectedAssets.contains(assetId)
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 4.dp, bottom = 4.dp, end = 8.dp)
-                                    .clickable {
-                                        if (isChecked) selectedAssets.remove(assetId)
-                                        else selectedAssets.add(assetId)
-                                    }
-                            ) {
-                                // 🌟 ส่วนจัดการรูปภาพ
-                                val imageUrl = asset.assetDetail?.image
-                                // เช็คว่ามี URL และลงท้ายด้วยนามสกุลไฟล์รูปภาพหรือไม่
-                                val isImageUrl = imageUrl?.let {
-                                    it.endsWith(".png", ignoreCase = true) ||
-                                            it.endsWith(".jpg", ignoreCase = true) ||
-                                            it.endsWith(".jpeg", ignoreCase = true) ||
-                                            it.endsWith(".webp", ignoreCase = true)
-                                } == true
-
-                                if (isImageUrl) {
-                                    // 🌟 โหลดรูปจริงด้วย Coil
-                                    AsyncImage(
-                                        model = imageUrl,
-                                        contentDescription = assetName,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .size(40.dp)
-                                            .clip(RoundedCornerShape(8.dp))
-                                    )
-                                } else {
-                                    // 🌟 ดึงค่า type ออกมาเช็ค
-                                    val assetType = asset.type ?: ""
-
-                                    // 🌟 จับคู่คำใน type กับรูป Icon ของคุณ Champ
-                                    val iconRes = when {
-                                        assetType.contains("account", ignoreCase = true) -> Res.drawable.ic_asset_type_account
-                                        assetType.contains("building", ignoreCase = true) -> Res.drawable.ic_asset_type_building
-                                        assetType.contains("cash", ignoreCase = true) -> Res.drawable.ic_asset_type_cash
-                                        assetType.contains("expense", ignoreCase = true) -> Res.drawable.ic_asset_type_expense
-                                        assetType.contains("insurance", ignoreCase = true) -> Res.drawable.ic_asset_type_insurance
-                                        assetType.contains("investment", ignoreCase = true) -> Res.drawable.ic_asset_type_investment
-                                        assetType.contains("land", ignoreCase = true) -> Res.drawable.ic_asset_type_land
-                                        assetType.contains("loan", ignoreCase = true) || assetType.contains("liability", ignoreCase = true) -> Res.drawable.ic_asset_type_loan
-                                        else -> null // ถ้าไม่ตรงกับอะไรเลย ให้เป็น null ไว้ไปโชว์ตัวหนังสือแทน
-                                    }
-
-                                    // 🌟 วาดกล่องใส่ Icon
-                                    Box(
-                                        modifier = Modifier
-                                            .size(40.dp)
-                                            .background(LightBg, RoundedCornerShape(8.dp)), // ปรับพื้นหลังให้อ่อนลงนิดนึงจะได้เห็น Icon ชัดๆ
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        if (iconRes != null) {
-                                            // ถ้าจับคู่ Icon เจอ ให้โชว์ Icon
-                                            Icon(
-                                                painter = painterResource(iconRes),
-                                                contentDescription = assetType,
-                                                tint = LightPrimary, // 💡 ใช้สี themeColor ให้เข้ากับธีมของแชท หรือถ้าอยากได้สีเทาเปลี่ยนเป็น Color.DarkGray ได้ครับ
-                                                modifier = Modifier.size(24.dp) // ย่อขนาด Icon ลงนิดนึงให้อยู่ในกรอบ 36dp ได้พอดี
-                                            )
-                                        } else {
-                                            // 🌟 กันเหนียว: ถ้าเกิดมี type แปลกๆ โผล่มาที่ไม่มี Icon ให้กลับมาโชว์ตัวหนังสือ 4 ตัวแรกเหมือนเดิม
-                                            Text(
-                                                text = assetType.take(4).uppercase(),
-                                                fontSize = 9.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.DarkGray,
-                                                maxLines = 1
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.width(12.dp))
-
-                                Text(
-                                    text = assetName,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.Black,
-                                    modifier = Modifier.weight(1f)
-                                )
-
-                                // 🌟 เปลี่ยนจาก Standard Checkbox กลับมาเป็น Custom Box แบบวาดเอง
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(RoundedCornerShape(8.dp)) // ปรับความมนตรงนี้ได้เลย
-                                        .background(if (isChecked) themeColor else Color.Transparent) // ใช้ themeColor ของการ์ด
-                                        .border(
-                                            width = 2.dp,
-                                            color = if (isChecked) themeColor else Color.LightGray,
-                                            shape = RoundedCornerShape(8.dp)
-                                        )
-                                        .clickable {
-                                            // โลจิกสลับค่า เปิด/ปิด
-                                            if (isChecked) selectedAssets.remove(assetId)
-                                            else selectedAssets.add(assetId)
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (isChecked) {
-                                        Icon(
-                                            painter = painterResource(Res.drawable.ic_form_check),
-                                            contentDescription = null,
-                                            tint = LightSoftWhite,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                                }
-
-                            }
+                            InlineGrantAssetRow(
+                                asset = asset,
+                                isChecked = selectedAssets.contains(assetId),
+                                themeColor = themeColor,
+                                onToggle = {
+                                    if (selectedAssets.contains(assetId)) selectedAssets.remove(assetId)
+                                    else selectedAssets.add(assetId)
+                                },
+                            )
                         }
                     }
                 }

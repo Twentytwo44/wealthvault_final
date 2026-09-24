@@ -1,6 +1,6 @@
 package com.wealthvault.data.auth.transport.registerdevice
 
-import com.wealthvault.domain.notification.DeviceMutationResult
+import com.wealthvault.core.model.DeviceMutationResult
 
 internal interface RegisterDeviceApi {
     suspend fun registerDevice(

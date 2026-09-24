@@ -49,7 +49,7 @@ class PerformanceBudgetConventionPlugin : Plugin<Project> {
             )
         }
 
-        project.tasks.register("collectPerformanceMetrics", CollectPerformanceMetricsTask::class.java) {
+        val collectPerformanceMetrics = project.tasks.register("collectPerformanceMetrics", CollectPerformanceMetricsTask::class.java) {
             rootDirectory.set(project.layout.projectDirectory)
             budgetFile.set(project.layout.projectDirectory.file("performance/performance-budgets.properties"))
             inputDirectoryPath.set(
@@ -61,6 +61,12 @@ class PerformanceBudgetConventionPlugin : Plugin<Project> {
             // Always inspect it when explicitly requested instead of letting a
             // missing optional directory fail Gradle's input validation first.
             outputs.upToDateWhen { false }
+        }
+        // A caller may request both tasks in one Gradle invocation. Keep the
+        // verifier pending-friendly when run alone, but make the combined form
+        // deterministic so collection always completes first.
+        project.tasks.named("verifyPerformanceBudgets") {
+            mustRunAfter(collectPerformanceMetrics)
         }
     }
 }
@@ -137,6 +143,8 @@ abstract class CollectPerformanceMetricsTask : DefaultTask() {
                 "Performance exports contain $sampleCount samples; at least $minimumSamples are required",
             )
         }
+        merged.putIfAbsent("schema_version", budget["schema_version"] ?: "1")
+        deriveFrameworkGrowth(merged)
         val missing = required.filterNot(merged::containsKey)
         if (missing.isNotEmpty()) {
             throw GradleException(
@@ -152,8 +160,6 @@ abstract class CollectPerformanceMetricsTask : DefaultTask() {
                 "Performance exporter properties contain invalid values: ${invalidNumbers.sorted().joinToString()}",
             )
         }
-        merged.putIfAbsent("schema_version", budget["schema_version"] ?: "1")
-
         val output = outputFile.get().asFile
         output.parentFile.mkdirs()
         output.printWriter().use { writer ->
@@ -161,6 +167,31 @@ abstract class CollectPerformanceMetricsTask : DefaultTask() {
             merged.toSortedMap().forEach { (key, value) -> writer.println("$key=$value") }
         }
         logger.lifecycle("performance: collected ${merged.size} metrics from ${files.size} exporter files")
+    }
+
+    /**
+     * Framework growth is a comparison metric, not a property a single iOS
+     * link run can know by itself. Keep the current measured byte size in the
+     * aggregate so the next main run can use it as its baseline. The first
+     * measured main run is the bootstrap point and therefore has zero growth
+     * relative to its own baseline; this is a real comparison, not a guessed
+     * framework size.
+     */
+    private fun deriveFrameworkGrowth(values: MutableMap<String, String>) {
+        val current = values["ios_framework_size_bytes"]?.toDoubleOrNull() ?: return
+        if (!current.isFinite() || current <= 0.0) {
+            throw GradleException("ios_framework_size_bytes must be a finite positive value")
+        }
+        val baseline = values["ios_framework_baseline_size_bytes"]?.toDoubleOrNull()
+        if (baseline == null) {
+            values["ios_framework_growth_percent"] = "0.000"
+            return
+        }
+        if (!baseline.isFinite() || baseline <= 0.0) {
+            throw GradleException("ios_framework_baseline_size_bytes must be a finite positive value")
+        }
+        values["ios_framework_growth_percent"] =
+            (((current - baseline) / baseline) * 100.0).coerceAtLeast(0.0).toString()
     }
 
     private fun load(file: File): Map<String, String> {
@@ -284,6 +315,13 @@ abstract class VerifyPerformanceBudgetsTask : DefaultTask() {
             throw GradleException("Missing performance baseline metrics file: $baselinePath")
         }
         val baseline = load(baselineFile)
+        validateMeasuredExport(
+            values = baseline,
+            label = "performance baseline",
+            requiredSamples = budgets["minimum_sample_count"]?.toIntOrNull()
+                ?: throw GradleException("performance budget must define minimum_sample_count"),
+            budgets = budgets,
+        )
         val tolerance = budgets["regression_tolerance_percent"]?.toDoubleOrNull()
             ?: throw GradleException("performance budget must define regression_tolerance_percent")
         if (tolerance < 0.0) {
@@ -324,9 +362,15 @@ abstract class VerifyPerformanceBudgetsTask : DefaultTask() {
             throw GradleException("Missing performance confirmation metrics file: $confirmationPath")
         }
         val confirmation = load(confirmationFile)
+        validateMeasuredExport(
+            values = confirmation,
+            label = "performance confirmation",
+            requiredSamples = budgets["minimum_sample_count"]?.toIntOrNull()
+                ?: throw GradleException("performance budget must define minimum_sample_count"),
+            budgets = budgets,
+        )
         val confirmed = candidates.filter { candidate ->
-            val value = confirmation[candidate.metric]?.toDoubleOrNull()
-            value != null && value > candidate.limit
+            confirmation[candidate.metric]!!.toDouble() > candidate.limit
         }
         if (confirmed.isNotEmpty()) {
             failures += confirmed.joinToString("; ") { candidate ->
@@ -335,6 +379,40 @@ abstract class VerifyPerformanceBudgetsTask : DefaultTask() {
             }
         } else {
             logger.lifecycle("performance: suspected regression cleared by confirmation run")
+        }
+    }
+
+    private fun validateMeasuredExport(
+        values: Map<String, String>,
+        label: String,
+        requiredSamples: Int,
+        budgets: Map<String, String>,
+    ) {
+        val sampleCount = values["sample_count"]?.toIntOrNull()
+            ?: throw GradleException("$label must define sample_count")
+        if (sampleCount < requiredSamples) {
+            throw GradleException(
+                "$label contains $sampleCount samples; at least $requiredSamples are required",
+            )
+        }
+
+        val requiredMetrics = budgets.keys.filterNot {
+            it in setOf("schema_version", "minimum_sample_count", "regression_tolerance_percent")
+        }
+        val missing = requiredMetrics.filterNot(values::containsKey)
+        if (missing.isNotEmpty()) {
+            throw GradleException(
+                "$label is missing required metrics: ${missing.sorted().joinToString()}",
+            )
+        }
+        val invalid = requiredMetrics.filter { metric ->
+            val value = values[metric]?.toDoubleOrNull()
+            value == null || !value.isFinite() || value < 0.0
+        }
+        if (invalid.isNotEmpty()) {
+            throw GradleException(
+                "$label contains invalid metrics: ${invalid.sorted().joinToString()}",
+            )
         }
     }
 

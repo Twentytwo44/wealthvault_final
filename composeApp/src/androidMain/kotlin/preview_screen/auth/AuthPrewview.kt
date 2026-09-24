@@ -1,4 +1,4 @@
-package preview_screen.auth
+package com.wealthvault.app.preview.auth
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,4 +45,3 @@ import com.wealthvault.register.ui.RegisterScreen
 //        onGoogleClick = {}
 //    )
 //}
-

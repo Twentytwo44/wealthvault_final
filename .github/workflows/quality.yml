@@ -19,6 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -55,8 +56,8 @@ jobs:
         run: >-
           ./gradlew
           verifyUsability
-          :benchmarks:compileBenchmarkSources
-          :benchmarks:assembleBenchmark
+          :benchmarks:compileBenchmarkBenchmarkSources
+          :benchmarks:assembleBenchmarkBenchmark
           koverXmlReportAndroidAll
           --no-daemon
       - name: Export and verify measured Android coverage
@@ -115,6 +116,15 @@ jobs:
           test -f androidApp/build/performance/artifacts.properties
           cp androidApp/build/performance/artifacts.properties \
             build/performance/inputs/android-artifacts.properties
+      - name: Measure Android retained memory after navigation loops
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+        run: >-
+          python3 tools/measure_android_navigation_memory.py
+          --package com.wealthvault.wealthvault_final
+          --component com.wealthvault.wealthvault_final/com.wealthvault.app.BenchmarkDashboardActivity
+          --runs 5
+          --loops 10
+          --output build/performance/inputs/android-navigation.properties
       - name: Measure Android Gradle performance (five runs)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
         run: >-
@@ -169,12 +179,19 @@ jobs:
             build \
             -quiet
       - name: Run iOS XCTest and export measured coverage
+        id: ios_tests
         shell: bash
+        env:
+          WEALTHVAULT_RUN_PERFORMANCE: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true && '1' || '0' }}
         run: |
           set -euo pipefail
           destination="${IOS_SIMULATOR_DESTINATION:-platform=iOS Simulator,name=iPhone 16 Pro}"
           result_bundle="${RUNNER_TEMP}/wealthvault-ios-tests-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.xcresult"
           mkdir -p build/coverage/inputs
+          test_filters=()
+          if [[ "${WEALTHVAULT_RUN_PERFORMANCE}" != "1" ]]; then
+            test_filters+=("-skip-testing:iosAppTests/RuntimePerformanceTests")
+          fi
           xcodebuild \
             -workspace iosApp/iosApp.xcworkspace \
             -scheme iosApp \
@@ -183,16 +200,39 @@ jobs:
             -destination "$destination" \
             -resultBundlePath "$result_bundle" \
             -enableCodeCoverage YES \
+            "${test_filters[@]}" \
             test \
             -quiet
           python3 tools/export_ios_xctest_coverage.py \
             --result-bundle "$result_bundle" \
             --output build/coverage/inputs/ios-xctest.properties
+          echo "result_bundle=$result_bundle" >> "$GITHUB_OUTPUT"
+      - name: Export measured iOS hitch performance
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/performance/inputs
+          python3 tools/export_ios_runtime_performance.py \
+            --result-bundle "${{ steps.ios_tests.outputs.result_bundle }}" \
+            --minimum-samples 5 \
+            --output build/performance/inputs/ios-runtime.properties
       - name: Link framework and run iOS shared tests
         run: >-
           ./gradlew
           verifyUsabilityIos
           --no-daemon
+      - name: Measure linked iOS framework size
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          framework="$(find composeApp/build -type d -path '*/podDebugFramework/ComposeApp.framework' -print -quit)"
+          test -n "${framework}"
+          python3 tools/measure_ios_framework_size.py \
+            --framework "${framework}" \
+            --runs 5 \
+            --output build/performance/inputs/ios-framework.properties
       - name: Stage iOS measurement inputs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
         shell: bash
@@ -251,6 +291,51 @@ jobs:
         with:
           name: ios-coverage-inputs
           path: build/coverage/inputs
+      - name: Load latest main performance baseline
+        id: performance_baseline
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          rm -rf build/performance/baseline
+          mkdir -p build/performance/baseline
+          baseline_path=""
+          while IFS= read -r run_id; do
+            [[ -z "${run_id}" ]] && continue
+            rm -rf build/performance/baseline/*
+            if gh run download "${run_id}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --name performance-metrics \
+              --dir build/performance/baseline >/dev/null 2>&1; then
+              candidate="$(find build/performance/baseline -type f -name metrics.properties -print -quit)"
+              if [[ -n "${candidate}" ]]; then
+                baseline_path="${candidate}"
+                size_line="$(grep '^ios_framework_size_bytes=' "${candidate}" || true)"
+                if [[ -n "${size_line}" ]]; then
+                  printf 'ios_framework_baseline_size_bytes=%s\n' "${size_line#*=}" \
+                    > build/performance/inputs/ios-framework-baseline.properties
+                fi
+                break
+              fi
+            fi
+          done < <(
+            gh run list \
+              --repo "${GITHUB_REPOSITORY}" \
+              --workflow quality.yml \
+              --branch main \
+              --status success \
+              --limit 20 \
+              --json databaseId \
+              --jq '.[].databaseId'
+          )
+          if [[ -n "${baseline_path}" ]]; then
+            echo "path=${baseline_path}" >> "${GITHUB_OUTPUT}"
+            echo "Using measured main baseline: ${baseline_path}"
+          else
+            echo "path=" >> "${GITHUB_OUTPUT}"
+            echo "No measured main baseline artifact is available yet; bootstrap run will skip the ratchet."
+          fi
       - name: Collect and verify strict metrics
         shell: bash
         run: |
@@ -265,11 +350,24 @@ jobs:
             -PcoverageInputs=build/coverage/inputs \
             -PcoverageMetrics=build/coverage/metrics.properties \
             --no-daemon
+          performance_args=(
+            verifyPerformanceBudgets
+            -PperformanceMetrics=build/performance/metrics.properties
+            -PstrictPerformance=true
+          )
+          baseline_path="${{ steps.performance_baseline.outputs.path }}"
+          if [[ -n "${baseline_path}" ]]; then
+            performance_args+=("-PperformanceBaselineMetrics=${baseline_path}")
+          fi
           ./gradlew \
-            verifyPerformanceBudgets \
+            "${performance_args[@]}" \
             verifyCoverage \
-            -PperformanceMetrics=build/performance/metrics.properties \
             -PcoverageMetrics=build/coverage/metrics.properties \
-            -PstrictPerformance=true \
             -PstrictCoverage=true \
             --no-daemon
+      - name: Upload measured performance metrics for future main baselines
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
+          path: build/performance/metrics.properties
+          if-no-files-found: error

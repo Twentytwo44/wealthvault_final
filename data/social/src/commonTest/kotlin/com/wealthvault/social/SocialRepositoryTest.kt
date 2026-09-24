@@ -28,9 +28,9 @@ import com.wealthvault.domain.social.ShareFriend
 import com.wealthvault.domain.social.ShareGroup
 import com.wealthvault.domain.social.ShareItems
 import com.wealthvault.domain.social.ShareableItem
-import com.wealthvault.social.data.SocialRemoteDataSource
-import com.wealthvault.social.data.SocialRepositoryImpl
-import com.wealthvault.social.data.toCacheRecord
+import com.wealthvault.data.social.repository.SocialRemoteDataSource
+import com.wealthvault.data.social.repository.SocialRepositoryImpl
+import com.wealthvault.data.social.repository.toCacheRecord
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -142,6 +142,16 @@ class SocialRepositoryTest {
         assertEquals(listOf(PENDING), repository.observePendingFriends().first().value)
     }
 
+    @Test
+    fun missingSharedAssetIsReportedAsNotFoundInsteadOfThrowing() = runTest {
+        val remote = FakeRemote().apply { missingAccount = true }
+        val repository = SocialRepositoryImpl(remote, NoOpAppLogger, MemoryCache(), Json)
+
+        val result = repository.getAccountById("deleted-account")
+
+        assertEquals(AppResult.Failure(AppError.NotFound), result)
+    }
+
     private class MemoryCache : FeatureCache {
         val entries = mutableMapOf<Pair<String, String>, FeatureCacheEntry>()
 
@@ -163,6 +173,7 @@ class SocialRepositoryTest {
     private class FakeRemote : SocialRemoteDataSource {
         var friendsCalls = 0
         var failFriends = false
+        var missingAccount = false
         var friendsGate: CompletableDeferred<Unit>? = null
 
         override suspend fun getAllFriends(): AppResult<List<FriendData>> {
@@ -181,7 +192,8 @@ class SocialRepositoryTest {
         override suspend fun addFriend(targetId: String) = AppResult.Success(true)
         override suspend fun getFriendMessages(friendId: String) = AppResult.Success(listOf(MESSAGE))
         override suspend fun getFriendProfile(friendId: String) = AppResult.Success(PROFILE)
-        override suspend fun getAccountById(id: String) = AppResult.Success(BANK_ACCOUNT)
+        override suspend fun getAccountById(id: String) =
+            if (missingAccount) AppResult.Success(null) else AppResult.Success(BANK_ACCOUNT)
         override suspend fun getBuildingById(id: String) = AppResult.Success(BUILDING)
         override suspend fun getCashById(id: String) = AppResult.Success(CASH)
         override suspend fun getInsuranceById(id: String) = AppResult.Success(INSURANCE)

@@ -214,9 +214,9 @@ fun DebtContent(
     }
 
     // 🌟 เรียกใช้ Smart Dialog กลางแทน
-    if (selectedLiabilityId != null && !showConfirmDelete) {
+    selectedLiabilityId?.takeIf { !showConfirmDelete }?.let { liabilityId ->
         SmartAssetDetailDialog(
-            assetId = selectedLiabilityId!!,
+            assetId = liabilityId,
             assetType = "liability", // ส่ง type เป็น liability
             showBottomMenu = true,
             onDismiss = {
@@ -227,7 +227,7 @@ fun DebtContent(
                 showConfirmDelete = true
             },
             onShare = {
-                navigatorContent.push(ShareAssetScreen("liability", selectedLiabilityId!!))
+                navigatorContent.push(ShareAssetScreen("liability", liabilityId))
             },
             onEdit = { rawData ->
                 if (rawData is LiabilityIdData) {

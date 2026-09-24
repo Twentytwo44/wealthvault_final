@@ -104,8 +104,6 @@ fun GroupFormContent(
 
     val selectedFriendIds = remember { mutableStateListOf<String>() }
     var showSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
-
     var showDeleteDialog by remember { mutableStateOf(false) }
     var friendToDelete by remember { mutableStateOf<FriendData?>(null) }
 
@@ -223,65 +221,20 @@ fun GroupFormContent(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- เลือกสมาชิก ---
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("สมาชิกในกลุ่ม (${groupMemberIds.size})", style = MaterialTheme.typography.titleSmall, color = Color(0xFF3A2F2A))
-                Icon(painter = painterResource(Res.drawable.ic_common_plus), contentDescription = "Add", tint = themeColor, modifier = Modifier.size(24.dp).clickable { showSheet = true })
-            }
-
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                val currentMembers = availableFriends.filter { groupMemberIds.contains(it.id) }
-                if (friendsLoading && availableFriends.isEmpty()) {
-                    item {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxWidth().padding(top = 24.dp)
-                        ) {
-                            CircularProgressIndicator(color = themeColor)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "กำลังโหลดรายชื่อเพื่อน...",
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                } else if (friendsErrorMessage != null && availableFriends.isEmpty()) {
-                    item {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
-                        ) {
-                            Text(
-                                text = friendsErrorMessage,
-                                color = RedErr,
-                                style = MaterialTheme.typography.bodySmall,
-                                textAlign = TextAlign.Center
-                            )
-                            TextButton(onClick = onRetryFriends) {
-                                Text("ลองโหลดอีกครั้ง", color = themeColor)
-                            }
-                        }
-                    }
-                } else if (currentMembers.isEmpty()) {
-                    item { Text("เลือกสมาชิก", color = Color.Gray, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) }
-                } else {
-                    items(
-                        items = currentMembers,
-                        key = { friend ->
-                            friend.id ?: friend.email ?: friend.username ?: friend.hashCode()
-                        },
-                    ) { friend ->
-                        GroupMemberItem(friend = friend, onDeleteClick = {
-                            friendToDelete = friend
-                            showDeleteDialog = true
-                        })
-                    }
-                }
-            }
+            GroupMembersContent(
+                memberIds = groupMemberIds,
+                availableFriends = availableFriends,
+                friendsLoading = friendsLoading,
+                friendsErrorMessage = friendsErrorMessage,
+                onRetryFriends = onRetryFriends,
+                onAddClick = { showSheet = true },
+                onDeleteClick = { friend ->
+                    friendToDelete = friend
+                    showDeleteDialog = true
+                },
+                themeColor = themeColor,
+                modifier = Modifier.weight(1f)
+            )
 
             // --- ปุ่มบันทึก ---
             Button(
@@ -296,184 +249,40 @@ fun GroupFormContent(
             }
         } // จบเนื้อหา Column หลัก
 
-        // --- Dialog ลบเพื่อน (ให้ลอยทับอยู่บนสุด) ---
-        if (showDeleteDialog && friendToDelete != null) {
-            AlertDialog(
-                onDismissRequest = { showDeleteDialog = false },
-                containerColor = Color.White,
-                shape = RoundedCornerShape(20.dp),
-                title = {
-                    Text("ลบสมาชิก", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = LightText)
-                },
-                text = {
-                    Text(
-                        text = "คุณต้องการลบ '${friendToDelete?.username?.takeIf { it.isNotBlank() }
-                            ?: friendToDelete?.firstName?.takeIf { it.isNotBlank() }
-                            ?: "ไม่ระบุชื่อ"}' ออกจากกลุ่มใช่หรือไม่?",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = LightMuted,
-                        lineHeight = 22.sp
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        friendToDelete?.id?.let { groupMemberIds.remove(it) }
-                        showDeleteDialog = false
-                        friendToDelete = null
-                    }) {
-                        Text("ลบออก", color = RedErr, fontWeight = FontWeight.Bold)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("ยกเลิก", color = LightMuted, fontWeight = FontWeight.Medium)
-                    }
+        if (showDeleteDialog) {
+            GroupDeleteMemberDialog(
+                friend = friendToDelete,
+                onDismiss = { showDeleteDialog = false },
+                onConfirm = { friend ->
+                    friend.id?.let { groupMemberIds.remove(it) }
+                    showDeleteDialog = false
+                    friendToDelete = null
                 }
             )
         }
 
-        // --- BottomSheet เลือกเพื่อน (ให้ลอยทับอยู่บนสุด) ---
         if (showSheet) {
-            LaunchedEffect(selectedFriendIds.size) {
-                if (selectedFriendIds.isNotEmpty()) {
-                    sheetState.expand()
-                }
-            }
-
-            ModalBottomSheet(
-                onDismissRequest = {
+            GroupFriendPickerSheet(
+                availableFriends = availableFriends,
+                memberIds = groupMemberIds.toSet(),
+                selectedFriendIds = selectedFriendIds.toSet(),
+                themeColor = themeColor,
+                onSelectedChange = { friendId, isSelected ->
+                    if (isSelected) selectedFriendIds.add(friendId)
+                    else selectedFriendIds.remove(friendId)
+                },
+                onDismiss = {
                     showSheet = false
                     selectedFriendIds.clear()
                 },
-                sheetState = sheetState,
-                containerColor = Color(0xFFFDF7F2),
-                dragHandle = { BottomSheetDefaults.DragHandle(color = Color.LightGray) }
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.75f)
-                        .padding(horizontal = 24.dp)
-                ) {
-                    Text(
-                        text = "เลือกสมาชิกเข้ากลุ่ม",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = LightText,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 10.dp)
-                    )
-
-                    LazyColumn(modifier = Modifier.weight(1f)) {
-                        val availableToAdd = availableFriends.filter { friend ->
-                            !groupMemberIds.contains(friend.id)
-                        }
-
-                        if (availableToAdd.isEmpty()) {
-                            item {
-                                Text(
-                                    "ไม่มีรายชื่อเพื่อนที่สามารถเลือกได้",
-                                    color = Color.Gray,
-                                    modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        } else {
-                            items(
-                                items = availableToAdd,
-                                key = { friend ->
-                                    friend.id ?: friend.email ?: friend.username ?: friend.hashCode()
-                                },
-                            ) { friend ->
-                                SelectPersonItem(
-                                    friend = friend,
-                                    isSelected = selectedFriendIds.contains(friend.id),
-                                    onSelectedChange = { isSelected ->
-                                        if (isSelected) selectedFriendIds.add(friend.id ?: "")
-                                        else selectedFriendIds.remove(friend.id)
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Button(
-                        onClick = {
-                            groupMemberIds.addAll(selectedFriendIds)
-                            selectedFriendIds.clear()
-                            showSheet = false
-                        },
-                        modifier = Modifier.fillMaxWidth().height(46.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = themeColor),
-                        enabled = selectedFriendIds.isNotEmpty()
-                    ) {
-                        Text("เพิ่มเข้ากลุ่ม", color = Color.White, style = MaterialTheme.typography.bodyLarge)
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
+                onConfirm = {
+                    groupMemberIds.addAll(selectedFriendIds)
+                    selectedFriendIds.clear()
+                    showSheet = false
                 }
-            }
+            )
         }
     } // จบ Box
-}
-
-@Composable
-fun GroupMemberItem(
-    friend: FriendData,
-    onDeleteClick: () -> Unit
-) {
-    val displayName = friend.username?.takeIf { it.isNotBlank() }
-        ?: friend.firstName?.takeIf { it.isNotBlank() }
-        ?: "ไม่ระบุชื่อ"
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(LightBg),
-            contentAlignment = Alignment.Center
-        ) {
-            if (!friend.profile.isNullOrEmpty()) {
-                AsyncImage(
-                    model = friend.profile,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_nav_profile),
-                    contentDescription = null,
-                    tint = LightPrimary,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(14.dp))
-
-        Text(
-            text = displayName,
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFF3A2F2A),
-            modifier = Modifier.weight(1f)
-        )
-
-        Text(
-            text = "ลบ",
-            style = MaterialTheme.typography.bodyMedium,
-            color = RedErr,
-            modifier = Modifier
-                .clickable { onDeleteClick() }
-                .padding(8.dp)
-        )
-    }
 }
 
 internal fun formGroupErrorMessage(error: AppError): String = when (error) {

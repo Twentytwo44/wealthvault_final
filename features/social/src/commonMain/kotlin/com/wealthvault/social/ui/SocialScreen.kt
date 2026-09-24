@@ -44,8 +44,9 @@ class SocialScreen : Screen {
         }
 
         var rootNavigator = navigator
-        while (rootNavigator.parent != null) {
-            rootNavigator = rootNavigator.parent!!
+        while (true) {
+            val parentNavigator = rootNavigator.parent ?: break
+            rootNavigator = parentNavigator
         }
 
         SocialContent(

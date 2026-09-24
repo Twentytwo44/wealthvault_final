@@ -44,8 +44,9 @@ class FriendScreen : Screen {
         // 🌟 1. ดึง Root Navigator เพื่อให้หน้า Space เปิดทับ Bottom Bar ขึ้นมาได้
         val navigator = LocalNavigator.currentOrThrow
         var rootNavigator = navigator
-        while (rootNavigator.parent != null) {
-            rootNavigator = rootNavigator.parent!!
+        while (true) {
+            val parentNavigator = rootNavigator.parent ?: break
+            rootNavigator = parentNavigator
         }
 
         LaunchedEffect(Unit) {

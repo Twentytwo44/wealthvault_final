@@ -268,10 +268,10 @@ fun FriendProfileContent(
         }
 
         // Modal ดึงรายละเอียดสินทรัพย์
-        if (selectedItem != null) {
+        selectedItem?.let { item ->
             SmartAssetDetailDialog(
-                assetId = selectedItem!!.itemId ?: "",
-                assetType = selectedItem!!.type ?: "",
+                assetId = item.itemId.orEmpty(),
+                assetType = item.type.orEmpty(),
                 showBottomMenu = false,
                 onDismiss = { selectedItem = null }
             )

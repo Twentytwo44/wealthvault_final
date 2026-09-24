@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.baselineProfile)
 }
 
 // Firebase configuration is local-only; enable the Google Services plugin when
@@ -105,35 +106,24 @@ kotlin {
 
 dependencies {
     implementation(project(":composeApp"))
+    // The platform launcher owns only process-level logging; all data,
+    // security, and feature graph assembly remains inside composeApp.
     implementation(project(":base:core"))
-    implementation(project(":base:database"))
-    implementation(project(":data:auth"))
-    implementation(project(":base:security"))
-    implementation(project(":features:auth:login"))
-    implementation(project(":features:dashboard"))
-    implementation(project(":features:manage:financialList"))
-    implementation(project(":features:notification"))
-    implementation(project(":features:profile"))
-    implementation(project(":features:social"))
-    implementation(project(":main"))
+    baselineProfile(project(":benchmarks"))
 
     androidTestImplementation(libs.androidx.testExt.junit)
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.core)
     androidTestImplementation(libs.uiautomator)
+    androidTestImplementation(libs.koin.core)
     androidTestImplementation(project(":domain:auth"))
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.compose.runtime)
     implementation(libs.compose.uiToolingPreview)
-    implementation(libs.koin.core)
-    implementation(libs.koin.android)
-    implementation("cafe.adriel.voyager:voyager-navigator:1.0.0")
-    implementation("cafe.adriel.voyager:voyager-tab-navigator:1.0.0")
-    implementation("cafe.adriel.voyager:voyager-transitions:1.0.0")
-    implementation("cafe.adriel.voyager:voyager-screenmodel:1.0.0")
     implementation(project.dependencies.platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.profile.installer)
 }
 
 tasks.register("verifyReleaseApkSize") {

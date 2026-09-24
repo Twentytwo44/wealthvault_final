@@ -1,4 +1,4 @@
-package preview_screen.Dashboard
+package com.wealthvault.app.preview.dashboard
 
 
 import androidx.compose.runtime.Composable

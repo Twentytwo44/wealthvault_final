@@ -46,7 +46,7 @@ class CoverageConventionPlugin : Plugin<Project> {
             )
         }
 
-        project.tasks.register("collectCoverageMetrics", CollectCoverageMetricsTask::class.java) {
+        val collectCoverageMetrics = project.tasks.register("collectCoverageMetrics", CollectCoverageMetricsTask::class.java) {
             rootDirectory.set(project.layout.projectDirectory)
             budgetFile.set(project.layout.projectDirectory.file("performance/coverage-budgets.properties"))
             inputDirectoryPath.set(
@@ -58,6 +58,11 @@ class CoverageConventionPlugin : Plugin<Project> {
             // directory after configuration. Keep the failure in the task
             // action so it explains which measured inputs are missing.
             outputs.upToDateWhen { false }
+        }
+        // Keep a combined `collectCoverageMetrics verifyCoverage` invocation
+        // deterministic without changing the pending behavior of verify alone.
+        project.tasks.named("verifyCoverage") {
+            mustRunAfter(collectCoverageMetrics)
         }
     }
 }

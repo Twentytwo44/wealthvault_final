@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.androidTest)
+    alias(libs.plugins.baselineProfile)
 }
 
 android {

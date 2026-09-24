@@ -1,3 +1,4 @@
+package com.wealthvault.forgetpassword.di
 
 import com.wealthvault.forgetpassword.ui.ForgetPasswordScreenModel
 import com.wealthvault.forgetpassword.usecase.ForgetUsecase

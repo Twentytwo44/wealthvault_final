@@ -3,9 +3,9 @@ package com.wealthvault.data.profile
 import com.wealthvault.core.KoinConst
 import com.wealthvault.domain.profile.ProfileRepository
 import com.wealthvault.domain.profile.CurrentUserRepository
-import com.wealthvault.profile.data.ProfileDataSource
-import com.wealthvault.profile.data.ProfileRemoteDataSource
-import com.wealthvault.profile.data.ProfileRepositoryImpl
+import com.wealthvault.data.profile.repository.ProfileDataSource
+import com.wealthvault.data.profile.repository.ProfileRemoteDataSource
+import com.wealthvault.data.profile.repository.ProfileRepositoryImpl
 import io.ktor.client.HttpClient
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named

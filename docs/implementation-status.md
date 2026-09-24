@@ -35,6 +35,13 @@ device or iOS simulator.
 - Cross-context read models used by social now live in `core:model`; the
   profile/portfolio domain modules retain compatibility typealiases, and
   `domain_to_domain_dependencies` is zero.
+- The shared device-registration mutation result now also lives in
+  `core:model`; auth transport no longer depends on `domain:notification`,
+  while a notification-domain typealias preserves source compatibility for
+  older integrations.
+- Auth endpoint interfaces and implementations are now `internal` to
+  `data:auth`; only domain contracts and provider entry points cross the
+  module boundary, keeping transport details out of the exported iOS API.
 - Data modules have no direct data-module edges (`data_to_data_dependencies=0`);
   auth device registration owns its transport adapter instead of reaching into
   notification data.
@@ -49,6 +56,11 @@ device or iOS simulator.
   active repository/form adapters and transport files now use the bounded
   `com.wealthvault.data.portfolio.*` namespace; the architecture ratchet still
   reports zero legacy namespace references and zero public DTO declarations.
+- Active auth, notification, and social transport source roots were also moved
+  from `auth-api`, `notification_api`, `group_api`, and `share_api` directories
+  into their matching `data:<context>:transport` paths. The compatibility
+  `functional/*` archives remain untouched for rollback, while active Android
+  and iOS source paths now follow their declared bounded-context packages.
 - Push-device registration is now launched from an application-scoped
   composition-root job instead of a navigation child scope, so a slow token
   provider cannot be cancelled when the splash/login route is replaced; a
@@ -63,6 +75,14 @@ device or iOS simulator.
   packages no longer use the historical `*_api`, `data_store`, or provider
   namespace names; a source scan confirms zero legacy package references in
   compiled modules.
+- The physical active source roots now match those declarations as well:
+  `base:network` is under `com/wealthvault/network`, `base:security` under
+  `com/wealthvault/security` and `com/wealthvault/push`, and the composition
+  roots are under `com/wealthvault/app`. The preserved `base:financial-common`
+  and `functional/*` trees remain compatibility archives only.
+- Architecture CI now ratchets both physical legacy roots and placeholder test
+  filenames; the current active graph reports `legacy_physical_source_roots=0`
+  and `active_placeholder_test_files=0`.
 - The root `verifyDatabaseMigrations` gate runs SQLDelight's migration verifier
   and is included in both architecture and Android CI jobs, so schema upgrades
   are checked before feature tests run.
@@ -75,6 +95,16 @@ device or iOS simulator.
   decimal doubles there.
 - Ktor clients use shared public/authenticated clients, idempotent retry rules,
   redacted logging, and single-flight refresh.
+- The standalone refresh transport now uses the platform-neutral API endpoint
+  and declares its JSON content type itself, so it cannot accidentally select
+  an iOS-only URL or depend on a caller's `DefaultRequest` plugin to encode
+  the token payload; a MockEngine regression test covers the mapped session.
+- Unauthorized replay compares the access token attached to the failed
+  request with the current session before joining a global single-flight
+  refresh. A slower 401 response cannot treat a token already replaced by
+  another request as a new expiry, and concurrent 401s with different stale
+  token values still share one refresh flight; the network boundary remains
+  covered by concurrent unauthorized regression tests.
 - Google sign-in now exposes only the domain `GoogleIdentity` from the data
   boundary; provider profile fields stay inside the platform adapter, and
   Android credential cancellation propagates instead of being reported as a
@@ -175,6 +205,20 @@ device or iOS simulator.
   disables duplicate submit taps while saving, and keeps a previously shared
   recipient visible until its shared-item lookup succeeds, so a failed
   unshare cannot silently lose the user's pending change.
+- Social profile/space and debt detail dialogs now capture a non-null selection
+  before rendering and before invoking share callbacks. A selection cleared by
+  recomposition can no longer trigger a `!!` crash while a dialog is open.
+- Asset-detail dialogs now keep a local non-null snapshot before dispatching
+  type-specific rendering, and all migrated root-navigation walks stop safely
+  at the root instead of force-unwrapping a parent navigator. This removes the
+  remaining production UI `!!` paths without changing navigation behavior.
+- Social asset-detail lookups now convert a missing/deleted item into the
+  shared `AppError.NotFound` result instead of throwing while mapping a nullable
+  response, so the dialog can render its existing “not found” state safely.
+- Shared API URL construction no longer adds a second slash for device-list and
+  investment-delete requests; the investment delete path is covered by a
+  MockEngine regression test so CRUD does not depend on server-side slash
+  normalization.
 - Share-asset loading now also maps previously shared external email targets
   back into the selection state, preventing a later save from unintentionally
   clearing existing email invitations.
@@ -191,6 +235,9 @@ device or iOS simulator.
   chooses login, onboarding, or main content from the session and profile
   state. This removes feature-owned global navigation and keeps transient
   profile failures usable through the authenticated dashboard.
+- The unused feature-owned `SplashScreenModel` and `GetUserModule` registration
+  were removed after the coordinator migration, so the active graph has one
+  session-routing owner and no duplicate splash navigation path.
 - The profile Compose route receives its LINE provider through a
   composition-root factory; the feature no longer depends on `base:security`.
   The active LINE adapter uses `com.wealthvault.security.line`, while only the
@@ -199,6 +246,10 @@ device or iOS simulator.
 - The composition-root LINE factory is a concrete implementation rather than a
   nested callback lambda, removing the Kotlin/Native export diagnostic while
   keeping provider callbacks outside the profile feature boundary.
+- Android platform DI assembly now lives in `composeApp` alongside the iOS
+  composition root. The launcher keeps only process-level logging and shell
+  dependencies; the architecture ratchet reports zero forbidden Android
+  launcher project edges.
 - Push-device registration now follows the authenticated session in the
   composition root, with a bounded token wait and best-effort backend retry
   behavior. Login no longer performs a duplicate profile lookup or owns a
@@ -331,6 +382,12 @@ device or iOS simulator.
   retain only presentation and feature-level DI bindings. Repository/cache
   tests moved with the data implementations and pass on Android host and iOS
   simulator targets.
+- Dashboard, profile, and social repository implementations now also live under
+  their declared `com.wealthvault.data.<context>.repository` source roots;
+  active files no longer expose the historical feature-named `*/data` paths.
+  The same physical-root normalization is applied to active auth Google
+  adapters, while preserved `functional/*` compatibility archives remain
+  outside the active build graph.
 - The remaining financial-common asset/reference adapters (cash, account,
   investment, land, building, insurance, and liability) now compile in
   `data:portfolio`; their old package paths are compatibility adapters inside
@@ -348,9 +405,19 @@ device or iOS simulator.
   build graph. Their source-compatible archives remain only for rollback;
   active session/push implementations compile behind `base:security`.
 - Android host tests and affected iOS simulator tests pass. The latest release
-  APK is 25,988,184 bytes, below the 35 MB budget. Benchmark source/assembly
+  APK is 25,969,812 bytes, below the 35 MB budget. Benchmark source/assembly
   passes with startup, frame-timing, and peak-memory metrics enabled; the
   release-size task also exports a measured artifact property for CI.
+- AndroidX Baseline Profile is now wired as a real producer/consumer boundary:
+  `benchmarks` owns the profile collection test and `androidApp` consumes it
+  during release builds. The exact variant tasks are
+  `:benchmarks:compileBenchmarkBenchmarkSources` and
+  `:benchmarks:assembleBenchmarkBenchmark`; runtime profile generation remains
+  deferred until a fixed device runner is available.
+- The Android launcher now depends directly only on the composition root,
+  platform adapters, and benchmark-facing contracts; feature/data modules are
+  brought in transitively through `composeApp`, avoiding duplicate launcher
+  edges without changing the packaged app graph.
 - Generated Android `ExampleInstrumentedTest` placeholders were replaced with
   feature UDF/state contract checks, Keystore round-trip coverage, and provider
   construction smoke tests; the active main-navigation device test now checks
@@ -371,9 +438,12 @@ device or iOS simulator.
 - The matching `verifyUsabilityIos` gate links the Compose framework and
   discovers every active `iosSimulatorArm64Test` task, so the iOS CI matrix
   cannot silently omit a newly migrated shared module.
-- After the final active portfolio namespace move and route/content extraction,
+- Active modules now declare the Voyager navigator dependency once per module;
+  duplicate declarations were removed without changing the retained Voyager
+  navigation contract.
+- After the final active data namespace moves and route/content extraction,
   local `verifyUsability` and `verifyUsabilityIos` both pass. The Android
-  release artifact remains 25,988,184 bytes and the strict architecture gate
+  release artifact is 25,969,812 bytes and the strict architecture gate
   reports zero violations, including `large_screen_route_files=0`.
 - The iOS shared-test matrix now includes the `main` navigation contract so
   typed destination coverage stays cross-platform with the Android smoke path.
@@ -396,7 +466,7 @@ device or iOS simulator.
   migrated module, and `tools/export_kover_coverage.py` converts measured line
   and branch counters into the canonical coverage properties without filling
   missing values. The latest local strict coverage gate passes for the
-  migrated production scope: overall 88.239%, data 87.311%, domain 92.835%,
+  migrated production scope: overall 88.306%, data 87.392%, domain 92.835%,
   and reducer/state contracts 92.308%; Money 95.614%, auth 96.774%, session
   refresh 100%, and cache migration 100%. Generated DTO/model accessors,
   legacy compatibility packages, and the not-yet-migrated social transport
@@ -420,6 +490,27 @@ device or iOS simulator.
 - Dashboard list-row mapping now lives in an immutable, unit-tested UI mapper;
   the Compose screen only remembers the mapped rows and renders them, keeping
   category/label/formatting decisions out of recomposition.
+- Asset-list presentation now follows the same split: `AssetContent` owns
+  search, selection, dialogs, and navigation callbacks, while
+  `AssetListContent` owns filtered category rendering and
+  `AssetEditNavigation` owns the domain-to-edit-screen adapter. The existing
+  add, detail, delete, share, and edit flows are unchanged and the feature
+  compiles/tests on Android host and the iOS simulator.
+- Dashboard card, skeleton, and list-item composables now live in a secondary
+  component file, leaving the primary dashboard component file below the
+  300-line presentation limit. Friend-request rendering and the social
+  grant-access asset row were extracted the same way; Android host tests still
+  pass and the interaction callbacks remain unchanged.
+- Share-asset presentation now keeps recipient cards and shared loading/error
+  states in `ShareRecipientsContent` and `ShareAssetComponents`; the route
+  retains selection sheets, preselection, share/unshare callbacks, and the
+  existing backend contract. The extracted files compile and pass Android host
+  and iOS simulator verification.
+- A group-detail response with a successful envelope but no data now maps to
+  `AppError.NotFound` instead of an untyped exception. The data-boundary
+  contract has focused tests for both empty and populated envelopes, so a
+  deleted group renders the existing not-found/error state rather than being
+  reported as an outage.
 - Dashboard presentation is now split into a 233-line route/content file and a
   separate reusable card/component file; navigation and backend contracts are
   unchanged.
@@ -509,13 +600,18 @@ the configured runner; this workspace currently has no attached emulator.
   can pass.
 - The iOS workspace now has a shared XCTest target and an `xccov` exporter.
   Android Kover and iOS XCTest exports are wired into the self-hosted jobs.
-  The simulator smoke test validates the native test host; the shared
-  `ComposeApp` Kotlin/Native APIs are exercised by Gradle simulator tests.
-  The framework is built outside Xcode's LLVM coverage instrumentation, so
-  first-party iOS line coverage still measures 0.000%.
-  The exporter excludes Firebase/Pods instead of presenting third-party
-  coverage as application coverage; cross-platform coverage parity remains
-  pending until Kotlin/Native coverage is instrumented.
+  The simulator smoke test validates the native test host and launches the
+  production app, waiting for its first window on every XCTest run. The shared
+  `ComposeApp` Kotlin/Native APIs are also exercised by Gradle simulator tests.
+  The native Swift host is now instrumented by XCTest (the local smoke run
+  reports measurable coverage for `Wealthvault_final.app`), while the ComposeApp
+  Kotlin/Native framework is built outside Xcode's LLVM coverage
+  instrumentation. The exporter excludes Firebase/Pods instead of presenting
+  third-party coverage as application coverage; cross-platform coverage parity
+  remains pending until Kotlin/Native coverage is instrumented.
+- The fixed-runner preflight and end-to-end command sequence is documented in
+  `docs/performance-runbook.md`; it fails on missing devices or missing
+  measured keys instead of accepting placeholders.
 - CI invokes the measured coverage gate in strict mode for every pull request.
   Full performance aggregation remains strict when manually requested with
   `run_performance`, but is intentionally not a pull-request prerequisite
@@ -527,18 +623,24 @@ the configured runner; this workspace currently has no attached emulator.
   logout. The local workspace currently has no connected emulator, so this is
   kept as a runner check rather than reported as a local UI run.
 - iOS startup now emits an `AppStartup` signpost that XCTest/Instruments can
-  measure; the CI job builds the CocoaPods workspace, while simulator metric
-  collection and export to the performance properties file remain runner work.
+  measure. The production app has a test-only UIKit scroll probe with a
+  matching `WealthVaultScroll` animation signpost, and the explicit
+  performance workflow selects the five-iteration scrolling test. The current
+  simulator result reports both signposts as durations in seconds, not the
+  native hitch-time-ratio (`ms/s`) field required by the budget; the exporter
+  therefore fails closed until a fixed runner/device supplies that measured
+  ratio instead of inventing one.
 - Compatibility source archives under `functional/api` and `functional/data-*`
   are still retained for rollback/source compatibility, but active compile
   inputs now live under `base/*` and `data/*`. The archives can be physically
   deleted only after downstream consumers and external integrations are
   confirmed to be gone.
-- Some extracted social and financial-list content/component files remain
-  larger than the target 300-line presentation limit. Their route files are now
-  small and independently wired, behavior is covered, and the remaining
-  content-level extraction is maintainability work rather than a
-  runtime-usability blocker.
+- Financial-list building/land reference sheets and the social group form are
+  now split into same-package components; active presentation content and
+  screen-model files are at or below the 300-line maintainability target.
+  Building request mapping is also a pure data-boundary function, while the
+  remaining larger files are data repository aggregations rather than UI
+  routes.
 
 The next acceptance step is to collect the remaining real five-run
 Android/iOS runtime exports and enable Kotlin/Native coverage instrumentation.

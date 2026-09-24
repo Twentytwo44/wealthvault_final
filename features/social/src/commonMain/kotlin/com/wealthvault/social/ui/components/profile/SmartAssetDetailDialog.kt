@@ -101,7 +101,8 @@ fun SmartAssetDetailDialog(
             else -> "รายละเอียดทรัพย์สิน"
         }
 
-        when (val itemData = detailData!!) {
+        detailData?.let { detail ->
+            when (val itemData = detail) {
             is BankAccountData -> {
                 DetailDialog(
                     subtitle = subtitleText, title = itemData.name, updatedAt = formatThaiDate(itemData.updatedAt), themeType = themeType,
@@ -233,6 +234,7 @@ fun SmartAssetDetailDialog(
             }
 
 
+            }
         }
 
     }else {

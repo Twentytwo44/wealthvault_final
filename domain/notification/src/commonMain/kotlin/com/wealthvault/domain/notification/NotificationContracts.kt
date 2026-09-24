@@ -7,6 +7,13 @@ import com.wealthvault.core.cache.CachedRepository
 import com.wealthvault.core.model.NotificationItem
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Source-compatible alias for callers that historically imported the device
+ * mutation result from the notification context. The shared contract now
+ * lives in core:model so auth and notification remain independent.
+ */
+typealias DeviceMutationResult = com.wealthvault.core.model.DeviceMutationResult
+
 /** Stable read model for notification presentation. */
 data class NotificationSnapshot(
     val value: List<NotificationItem>,
@@ -23,12 +30,6 @@ data class DeviceInfo(
     val isActive: Boolean? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
-)
-
-/** Transport-neutral result for device registration mutations. */
-data class DeviceMutationResult(
-    val message: String? = null,
-    val success: Boolean? = null,
 )
 
 /** Domain contract; transport and persistence remain in the feature data package. */

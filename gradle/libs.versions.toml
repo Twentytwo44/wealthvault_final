@@ -30,6 +30,7 @@ sqlDelight = "2.3.2"
 benchmark = "1.4.1"
 uiautomator = "2.3.0"
 profileInstaller = "1.4.1"
+baselineProfile = "1.5.0"
 startupRuntime = "1.2.0"
 errorProneAnnotations = "2.36.0"
 kover = "0.9.9"
@@ -114,6 +115,7 @@ mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+baselineProfile = { id = "androidx.baselineprofile", version.ref = "baselineProfile" }
 
 wealth-vault-lib = { id = "com.wealthvault.build_logic.library"}
 wealth-vault-compose = { id = "com.wealthvault.build_logic.compose"}

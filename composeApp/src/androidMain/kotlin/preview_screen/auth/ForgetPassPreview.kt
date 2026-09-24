@@ -1,4 +1,4 @@
-package preview_screen.auth
+package com.wealthvault.app.preview.auth
 
 // สังเกตว่า package ของคุณมีทั้ง fogetpassword และ forgetpassword ระวังพิมพ์ผิดตอนสร้างไฟล์จริงนะครับ
 import androidx.compose.runtime.Composable

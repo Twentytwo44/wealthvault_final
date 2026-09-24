@@ -145,6 +145,7 @@ def main() -> None:
     tests = load_tests(args.input)
     cold_runs: list[float] = []
     warm_runs: list[float] = []
+    cached_dashboard_runs: list[float] = []
     frame_overrun_runs: list[float] = []
     scrolling_frame_overrun_runs: list[float] = []
     cold_heap_runs: list[float] = []
@@ -165,6 +166,8 @@ def main() -> None:
             warm_runs.extend(startup)
             warm_heap_runs.extend(metric_runs(test, ("memoryHeapSizeMaxKb",)))
             warm_rss_anon_runs.extend(metric_runs(test, ("memoryRssAnonMaxKb",)))
+        if "cached" in name and "dashboard" in name:
+            cached_dashboard_runs.extend(startup)
         test_frame_overruns = metric_runs(test, ("frameOverrunMs",))
         frame_overrun_runs.extend(test_frame_overruns)
         if "scroll" in name or "jank" in name:
@@ -174,13 +177,20 @@ def main() -> None:
         raise SystemExit("Cold startup samples are missing from Macrobenchmark JSON")
     if not warm_runs:
         raise SystemExit("Warm startup samples are missing from Macrobenchmark JSON")
-    sample_count = min(len(cold_runs), len(warm_runs))
+    if not cached_dashboard_runs:
+        raise SystemExit("Cached dashboard samples are missing from Macrobenchmark JSON")
+    sample_count = min(
+        len(cold_runs),
+        len(warm_runs),
+        len(cached_dashboard_runs),
+    )
 
     measured: dict[str, str] = {
         "schema_version": "1",
         "sample_count": str(sample_count),
         "cold_start_p95_ms": f"{percentile(cold_runs, 95):.3f}",
         "warm_start_p95_ms": f"{percentile(warm_runs, 95):.3f}",
+        "cached_dashboard_ttc_ms": f"{percentile(cached_dashboard_runs, 95):.3f}",
     }
     if frame_overrun_runs:
         startup_overrun_percent = (

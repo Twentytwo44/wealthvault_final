@@ -1,4 +1,4 @@
-package preview_screen.auth // แก้ package ให้ตรงกับไฟล์
+package com.wealthvault.app.preview.auth
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -13,4 +13,3 @@ fun IntroScreenPreview() {
 
 
 }
-

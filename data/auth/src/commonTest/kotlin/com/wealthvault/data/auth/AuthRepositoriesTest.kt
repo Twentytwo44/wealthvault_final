@@ -155,11 +155,11 @@ class AuthRepositoriesTest {
         assertIs<com.wealthvault.core.architecture.AppResult.Failure>(
             koin.get<PasswordResetRepository>().reset(PasswordResetRequest("reset", "bad")),
         )
-        fakes.deviceMutation = com.wealthvault.domain.notification.DeviceMutationResult(message = null)
+        fakes.deviceMutation = com.wealthvault.core.model.DeviceMutationResult(message = null)
         assertIs<com.wealthvault.core.architecture.AppResult.Failure>(
             koin.get<PushDeviceRepository>().register(DeviceRegistration("fcm", "android", "Pixel")),
         )
-        fakes.unregister = com.wealthvault.domain.notification.DeviceMutationResult(message = "")
+        fakes.unregister = com.wealthvault.core.model.DeviceMutationResult(message = "")
         assertIs<com.wealthvault.core.architecture.AppResult.Failure>(
             koin.get<DeviceRegistrationRepository>().unregister("fcm"),
         )
@@ -218,7 +218,7 @@ class AuthRepositoriesTest {
         assertIs<com.wealthvault.core.architecture.AppResult.Failure>(
             koin.get<LineLinkRepository>().link("line-id-token"),
         )
-        fakes.unregister = com.wealthvault.domain.notification.DeviceMutationResult(message = null)
+        fakes.unregister = com.wealthvault.core.model.DeviceMutationResult(message = null)
         assertIs<com.wealthvault.core.architecture.AppResult.Failure>(
             koin.get<DeviceRegistrationRepository>().unregister("fcm"),
         )
@@ -248,8 +248,8 @@ class AuthRepositoriesTest {
         var forget: PasswordActionResult = PasswordActionResult(true)
         var otp: com.wealthvault.domain.auth.OtpVerificationResult = com.wealthvault.domain.auth.OtpVerificationResult(true, "reset")
         var reset: PasswordActionResult = PasswordActionResult(true)
-        var deviceMutation: com.wealthvault.domain.notification.DeviceMutationResult = com.wealthvault.domain.notification.DeviceMutationResult("registered", true)
-        var unregister: com.wealthvault.domain.notification.DeviceMutationResult = com.wealthvault.domain.notification.DeviceMutationResult("unregistered", true)
+        var deviceMutation: com.wealthvault.core.model.DeviceMutationResult = com.wealthvault.core.model.DeviceMutationResult("registered", true)
+        var unregister: com.wealthvault.core.model.DeviceMutationResult = com.wealthvault.core.model.DeviceMutationResult("unregistered", true)
         var link: ProviderLinkResult = ProviderLinkResult(success = true)
         var savedUserId: String? = null
         var registeredUserId: String? = null
