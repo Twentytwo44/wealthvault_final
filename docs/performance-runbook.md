@@ -24,7 +24,9 @@ with a guessed value to get past the collector.
 ./gradlew verifyUsability :benchmarks:assembleBenchmarkBenchmark --no-daemon
 adb devices
 ./gradlew :androidApp:connectedDebugAndroidTest --no-daemon
-./gradlew :benchmarks:connectedBenchmarkAndroidTest --no-daemon
+./gradlew :benchmarks:connectedBenchmarkBenchmarkAndroidTest \
+  -PbenchmarkSigning=true \
+  --no-daemon
 ```
 
 Copy the generated AndroidX `benchmarkData.json` (including a prefixed

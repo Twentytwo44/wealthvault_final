@@ -21,7 +21,6 @@ class KmpTestConventionPlugin: Plugin<Project> {
                         dependencies {
                             implementation(versionCatalogLibrary("kotlin-test"))
                             implementation(versionCatalogLibrary("coroutines-test"))
-                            implementation(versionCatalogLibrary("turbine"))
                         }
                     }
 
@@ -30,6 +29,12 @@ class KmpTestConventionPlugin: Plugin<Project> {
                             implementation(versionCatalogLibrary("androidx-runner"))
                             implementation(versionCatalogLibrary("androidx-core"))
                             implementation(versionCatalogLibrary("androidx-testExt-junit"))
+                        }
+                    }
+
+                    getByName("androidHostTest") {
+                        dependencies {
+                            implementation(versionCatalogLibrary("kotlin-test"))
                         }
                     }
                 }

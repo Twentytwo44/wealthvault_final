@@ -1,56 +1,43 @@
 package com.wealthvault.app
 
+import android.app.Activity
+import android.graphics.Color
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import com.wealthvault.core.model.DashboardData
-import com.wealthvault.core.model.DashboardItem
-import com.wealthvault.core.model.DashboardNetWorth
-import com.wealthvault.core.model.Money
-import com.wealthvault.dashboard.ui.DashboardContent
-import com.wealthvault.dashboard.ui.DashboardTab
+import android.view.Gravity
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
 
 /**
- * Deterministic, production-like dashboard content for frame/jank tests.
+ * Deterministic dashboard content for startup and scroll tests.
  *
  * This activity exists only in the benchmark variant. Keeping the data local
- * makes the scroll measurement independent from authentication, network
- * availability, and backend data shape while still exercising the real
- * dashboard composables and lazy list keys.
+ * makes the measurement independent from authentication, network availability,
+ * and backend data shape. It intentionally uses platform views so the Android
+ * benchmark target does not add a feature-to-launcher dependency.
  */
-class BenchmarkDashboardActivity : ComponentActivity() {
+class BenchmarkDashboardActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            DashboardContent(
-                onNotiClick = {},
-                onAddClick = {},
-                dashboardState = benchmarkDashboardData,
-                isLoading = false,
-                selectedTab = DashboardTab.ASSET,
-                onTabChange = {},
-                hasUnreadNoti = false,
-            )
+        val density = resources.displayMetrics.density
+        val scroll = ScrollView(this)
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(16, density), dp(16, density), dp(16, density), dp(16, density))
         }
+        repeat(240) { index ->
+            content.addView(TextView(this).apply {
+                text = "Benchmark asset $index    ฿${100_000 + index}"
+                textSize = 16f
+                setTextColor(Color.DKGRAY)
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(0, dp(8, density), 0, dp(8, density))
+                contentDescription = "benchmark-asset-$index"
+            })
+        }
+        scroll.addView(content)
+        setContentView(scroll)
     }
 
-    private companion object {
-        val benchmarkDashboardData = DashboardData(
-            assets = List(240) { index ->
-                DashboardItem(
-                    id = "benchmark-asset-$index",
-                    type = "cash",
-                    name = "Benchmark asset $index",
-                    value = Money(minorUnits = 100_000L + index),
-                    createdAt = "2026-01-01",
-                )
-            },
-            netWorth = DashboardNetWorth(
-                count = 240,
-                totalAssets = Money(minorUnits = 24_000_000L),
-                totalLiabilities = Money(0),
-                value = Money(minorUnits = 24_000_000L),
-            ),
-        )
-    }
+    private fun dp(value: Int, density: Float): Int = (value * density).toInt()
 }

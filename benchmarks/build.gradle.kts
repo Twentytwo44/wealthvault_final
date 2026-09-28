@@ -26,7 +26,6 @@ android {
     }
 
     targetProjectPath = ":androidApp"
-
     // Macrobenchmark must run in its own instrumentation process. Without
     // self-instrumenting, the runner is hosted by the target application and
     // the benchmark's intentional force-stop also kills the test process.
@@ -35,7 +34,10 @@ android {
     buildTypes {
         create("benchmark") {
             isDebuggable = false
-            isMinifyEnabled = true
+            // R8 belongs to the target application's release/benchmark
+            // variant. The instrumentation APK itself is not shipped and
+            // minifying it makes AGP generate a debuggable+minified variant.
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
             matchingFallbacks += listOf("release")
             // The benchmark APK is installed on the measurement device. Keep

@@ -44,14 +44,16 @@ class SessionRefreshCoordinator(
                 // Complete and clear while holding the same lock used for
                 // selection. A later request can retry after a failed flight,
                 // while callers that already joined still receive its result.
+                // The owner is the only code path that can replace this field,
+                // so the selected flight is necessarily the active one here.
                 selection.flight.result.complete(result)
-                if (activeFlight === selection.flight) activeFlight = null
+                activeFlight = null
             }
             result
         } catch (error: Throwable) {
             mutex.withLock {
                 selection.flight.result.completeExceptionally(error)
-                if (activeFlight === selection.flight) activeFlight = null
+                activeFlight = null
             }
             throw error
         }

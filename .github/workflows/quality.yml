@@ -95,7 +95,11 @@ jobs:
         run: ./gradlew :androidApp:connectedDebugAndroidTest --no-daemon
       - name: Run Android Macrobenchmark on the configured emulator
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
-        run: ./gradlew :benchmarks:connectedBenchmarkAndroidTest --no-daemon
+        run: >-
+          ./gradlew
+          :benchmarks:connectedBenchmarkBenchmarkAndroidTest
+          -PbenchmarkSigning=true
+          --no-daemon
       - name: Export measured Android benchmark properties
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_performance == true }}
         shell: bash

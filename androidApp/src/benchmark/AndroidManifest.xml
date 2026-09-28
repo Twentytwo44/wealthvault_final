@@ -3,7 +3,8 @@
     <application>
         <!--
             Deterministic dashboard route used only by Macrobenchmark. It is
-            deliberately kept out of the production source set and APK.
+            added to the signed measurement APK only when benchmarkSigning is
+            explicitly enabled.
         -->
         <activity
             android:name="com.wealthvault.app.BenchmarkDashboardActivity"

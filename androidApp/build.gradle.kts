@@ -43,6 +43,10 @@ android {
         releaseKeyAlias,
         releaseKeyPassword,
     ).all { !it.isNullOrBlank() }
+    val benchmarkSigning = providers.gradleProperty("benchmarkSigning")
+        .map(String::toBoolean)
+        .orElse(false)
+        .get()
 
     signingConfigs {
         if (hasReleaseSigning) {
@@ -79,8 +83,25 @@ android {
             )
             if (hasReleaseSigning) {
                 signingConfig = signingConfigs.getByName("release")
+            } else if (benchmarkSigning) {
+                // Macrobenchmark installs the optimized release variant. A
+                // debug key is sufficient for this local/CI measurement APK;
+                // production signing remains opt-in and never enters source.
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
+    }
+
+    if (benchmarkSigning) {
+        // AGP 9's com.android.test variant is paired with the target release
+        // variant. Opt-in benchmark runs therefore overlay the deterministic
+        // route onto release only for that signed measurement build; ordinary
+        // release artifacts keep the route out of the production APK.
+        // AGP 9's built-in Kotlin compiler has its own source directory set;
+        // registering it explicitly keeps the benchmark-only Kotlin activity
+        // in the signed measurement APK.
+        sourceSets["release"].kotlin.directories.add(file("src/benchmark/kotlin").path)
+        sourceSets["release"].manifest.srcFile(file("src/benchmark/AndroidManifest.xml"))
     }
 
     compileOptions {
